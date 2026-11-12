@@ -150,7 +150,7 @@ body::after { content: ""; position: fixed; inset: 0; z-index: -1; pointer-event
 .phone .scr { position: relative; aspect-ratio: 1080 / 2236; border-radius: 9.6% / 4.65%; overflow: hidden; background: #000; isolation: isolate; }
 .phone .scr img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; transition: opacity .5s var(--out), transform .6s var(--out); }
 .phone .scr img.next { opacity: 0; transform: scale(1.03); }
-.phone .scr::after { content: ""; position: absolute; z-index: 2; inset: -50%; pointer-events: none; background: linear-gradient(115deg, transparent 40%, rgba(255, 255, 255, .14) 50%, transparent 60%); transform: translateX(-60%); transition: transform 1.2s var(--out); }
+.phone .scr::after { content: ""; position: absolute; z-index: 6; inset: -50%; pointer-events: none; background: linear-gradient(115deg, transparent 40%, rgba(255, 255, 255, .14) 50%, transparent 60%); transform: translateX(-60%); transition: transform 1.2s var(--out); }
 .phone.tilt:hover .scr::after { transform: translateX(60%); }
 .phone .zoom { position: absolute; inset: 0; z-index: 4; border: 0; background: none; border-radius: inherit; cursor: zoom-in; }
 
@@ -199,7 +199,7 @@ section { position: relative; }
 .figure { position: sticky; top: 90px; }
 .figure .phone { width: min(100%, calc((100vh - 140px) * .496)); margin-inline: auto; }
 .cap { margin-top: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-.cap span { font-size: 12.5px; color: var(--t3); }
+.cap > span { font-size: 12.5px; color: var(--t3); }
 .vars { position: relative; display: inline-flex; padding: 3px; border-radius: 99px; background: var(--s1); border: 1px solid var(--line); }
 .vars button { position: relative; z-index: 1; border: 0; background: none; padding: 6px 12px; border-radius: 99px; font-size: 12px; font-weight: 700; color: var(--t3); transition: color .3s; }
 .vars button[aria-pressed="true"] { color: var(--gold2); }
@@ -293,24 +293,40 @@ footer { padding: 30px 0 60px; text-align: center; font-size: 13px; color: var(-
 .season { --bg: #05061a; --s1: #0d1030; --s2: #13163b; --t1: #f6f1e6; --t2: #bdb8cf; --t3: #9a96b3;
   --gold: #e9b65a; --gold2: #ffd98e; --gold3: #b07a2a; --gold-soft: rgba(233, 182, 90, .14); --gold-line: rgba(233, 182, 90, .38);
   --line: rgba(255, 217, 142, .09); --line2: rgba(255, 217, 142, .16);
-  color: var(--t1); background: radial-gradient(70% 40% at 50% 0%, #241d5e, transparent 75%), radial-gradient(50% 30% at 100% 60%, rgba(80, 60, 160, .25), transparent 70%), linear-gradient(#05061a, #0a0c2c 55%, #05061a); overflow: clip; }
+  color: var(--t1); border-top-color: transparent; isolation: isolate; }
+.season + .chapter { border-top-color: transparent; }
 :root[data-theme="light"] .season { --bg: #f7f0e1; --s1: #fffaf0; --s2: #fcf5e8; --t1: #22180c; --t2: #5e5240; --t3: #75684f;
-  --gold: #b07a2a; --gold2: #8a5a14; --gold3: #9a6a20; --gold-soft: rgba(176, 122, 42, .12); --gold-line: rgba(176, 122, 42, .34); --line: rgba(80, 50, 10, .1); --line2: rgba(80, 50, 10, .18);
-  background: radial-gradient(70% 40% at 50% 0%, rgba(233, 182, 90, .3), transparent 75%), linear-gradient(#f7f0e1, #f3e6cd 55%, #f7f0e1); }
+  --gold: #b07a2a; --gold2: #8a5a14; --gold3: #9a6a20; --gold-soft: rgba(176, 122, 42, .12); --gold-line: rgba(176, 122, 42, .34); --line: rgba(80, 50, 10, .1); --line2: rgba(80, 50, 10, .18); }
+/* the night sky of the month, fading in from the page above and back out below, so no edge shows */
+.sbg { position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(70% 34% at 50% 9%, #2a2268, transparent 75%), radial-gradient(50% 30% at 100% 60%, rgba(80, 60, 160, .25), transparent 70%), linear-gradient(#0a0c2c, #0a0c2c);
+  -webkit-mask: linear-gradient(transparent, #000 300px, #000 calc(100% - 300px), transparent); mask: linear-gradient(transparent, #000 300px, #000 calc(100% - 300px), transparent); }
+:root[data-theme="light"] .sbg { background: radial-gradient(70% 34% at 50% 9%, rgba(233, 182, 90, .34), transparent 75%), radial-gradient(50% 30% at 0% 60%, rgba(214, 160, 150, .2), transparent 70%), linear-gradient(#f5e8cf, #f5e8cf); }
 /* crescents and stars, as the app's own Ramaḍān pattern */
-.season::before { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .5; background: var(--gold2);
+.sbg::before { content: ""; position: absolute; inset: 0; opacity: .5; background: var(--gold2);
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M24 8a9 9 0 1 0 6 15.5A7.5 7.5 0 1 1 24 8z' fill='%23000' fill-opacity='.14'/%3E%3Cpath d='M9 27l.9 2.1 2.1.9-2.1.9L9 33l-.9-2.1-2.1-.9 2.1-.9z' fill='%23000' fill-opacity='.2'/%3E%3C/svg%3E") 0 0 / 46px 46px;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M24 8a9 9 0 1 0 6 15.5A7.5 7.5 0 1 1 24 8z' fill='%23000' fill-opacity='.14'/%3E%3Cpath d='M9 27l.9 2.1 2.1.9-2.1.9L9 33l-.9-2.1-2.1-.9 2.1-.9z' fill='%23000' fill-opacity='.2'/%3E%3C/svg%3E") 0 0 / 46px 46px; }
 .season > .wrap { position: relative; }
-.lanterns { position: absolute; inset: 0 0 auto; height: 260px; display: flex; justify-content: space-around; pointer-events: none; }
-.lantern { position: relative; width: clamp(34px, 5vw, 54px); transform-origin: 50% 0; animation: sway 6s ease-in-out infinite; }
-.lantern:nth-child(2) { animation-delay: -1.5s; } .lantern:nth-child(3) { animation-delay: -3s; } .lantern:nth-child(4) { animation-delay: -4.2s; } .lantern:nth-child(5) { animation-delay: -.8s; }
-.lantern svg { display: block; width: 100%; overflow: visible; filter: drop-shadow(0 0 18px rgba(255, 200, 110, .55)); }
-.lantern .fl { animation: flick 2.4s ease-in-out infinite alternate; transform-origin: 50% 80%; }
-@keyframes sway { 0%, 100% { transform: rotate(2.5deg); } 50% { transform: rotate(-2.5deg); } }
-@keyframes flick { 0% { opacity: .75; transform: scaleY(.92); } 100% { opacity: 1; transform: scaleY(1.06); } }
-:root[data-theme="light"] .lantern svg { filter: drop-shadow(0 6px 10px rgba(120, 80, 20, .3)); }
-.season .opener { padding-top: clamp(120px, 14vw, 170px); }
+/* lanterns hang from above the section; their chains fade in with the sky */
+.lanterns { position: absolute; inset: 0 0 auto; height: 420px; display: flex; justify-content: space-around; align-items: flex-start; pointer-events: none;
+  -webkit-mask: linear-gradient(transparent, #000 110px); mask: linear-gradient(transparent, #000 110px); }
+.lantern { position: relative; width: clamp(40px, 5.4vw, 64px); transform-origin: 50% 0; animation: sway 7s ease-in-out infinite; }
+.lantern:nth-child(2) { animation-duration: 8.4s; animation-delay: -2s; } .lantern:nth-child(3) { animation-duration: 6.2s; animation-delay: -3.4s; }
+.lantern:nth-child(4) { animation-duration: 7.8s; animation-delay: -1.1s; } .lantern:nth-child(5) { animation-duration: 6.8s; animation-delay: -4.6s; }
+.fanous { display: block; width: 100%; height: auto; overflow: visible; }
+.fanous .tassel { animation: sway 7s ease-in-out -1.2s infinite reverse; }
+.fanous .fl { animation: flick 1.9s ease-in-out infinite alternate; }
+.fanous .halo { animation: halo 4.5s ease-in-out infinite alternate; }
+.fanous .glint { animation: glint 6s ease-in-out infinite; }
+@keyframes sway { 0%, 100% { transform: rotate(2.6deg); } 50% { transform: rotate(-2.6deg); } }
+@keyframes flick { 0% { opacity: .7; } 40% { opacity: 1; } 70% { opacity: .82; } 100% { opacity: .95; } }
+@keyframes halo { from { opacity: .7; } to { opacity: 1; } }
+@keyframes glint { 0%, 100% { opacity: .15; } 50% { opacity: .5; } }
+.lantern .fanous { filter: drop-shadow(0 0 16px rgba(255, 190, 90, .5)); }
+:root[data-theme="light"] .lantern .fanous { filter: drop-shadow(0 10px 12px rgba(90, 60, 20, .28)); }
+.fanous .ln-d { display: none; }
+:root[data-theme="light"] .fanous .ln-d { display: inline; } :root[data-theme="light"] .fanous .ln-n { display: none; }
+.season .opener { padding-top: clamp(240px, 25vw, 340px); }
 .season .bignum { -webkit-text-stroke-color: var(--gold-line); }
 /* the whole app in the month's colours, fanned out */
 .fan { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(12px, 2.4vw, 30px); margin: clamp(20px, 4vw, 40px) 0 0; }
@@ -322,6 +338,82 @@ footer { padding: 30px 0 60px; text-align: center; font-size: 13px; color: var(-
 .fan figcaption { margin-top: 14px; text-align: center; font: 700 12px/1.3 var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--t3); }
 .fan-note { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 44px; }
 .fan-note span { padding: 9px 14px; border-radius: 99px; border: 1px solid var(--gold-line); background: var(--gold-soft); font-size: 13px; font-weight: 700; color: var(--gold2); }
+
+/* ---------- the walkthrough ---------- */
+@property --ox { syntax: '<percentage>'; inherits: true; initial-value: 50%; }
+@property --oy { syntax: '<percentage>'; inherits: true; initial-value: 50%; }
+.phone { transition: transform .7s var(--out), box-shadow .7s var(--out), --ox .9s var(--out), --oy .9s var(--out); }
+.zm { position: absolute; inset: 0; z-index: 5; pointer-events: none; transform-origin: var(--ox) var(--oy); transition: transform 1s var(--out); }
+.zm .hs { pointer-events: auto; }
+.touring .zm { transform: scale(1.7); }
+.spot { position: absolute; inset: 0; z-index: 3; pointer-events: none; opacity: 0; transition: opacity .6s var(--out);
+  background: radial-gradient(circle at var(--ox) var(--oy), transparent 0 13%, rgba(4, 5, 10, .5) 30%, rgba(4, 5, 10, .62)); }
+.touring .spot { opacity: 1; }
+.touring .hs { transform: scale(.62); opacity: .35; }
+.touring .hs.on { transform: scale(.78); opacity: 1; }
+.touring .hs::before { display: none; }
+.phone.touring { box-shadow: var(--shadow), 0 0 0 1px var(--gold-line), 0 30px 80px -30px color-mix(in srgb, var(--gold) 45%, transparent); }
+/* the button that starts it */
+.walk { position: relative; display: inline-flex; align-items: center; gap: 10px; height: 40px; padding: 0 14px 0 5px; border-radius: 99px; border: 1px solid var(--gold-line); background: var(--gold-soft); color: var(--t1); font: 700 13px/1 var(--sans); overflow: hidden; isolation: isolate; transition: transform .35s var(--out), background .35s, border-color .35s; }
+.walk::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(110deg, transparent 30%, color-mix(in srgb, var(--gold2) 30%, transparent) 50%, transparent 70%); transform: translateX(-120%); transition: transform .9s var(--out); }
+.walk:hover { transform: translateY(-2px); background: color-mix(in srgb, var(--gold) 20%, var(--s1)); }
+.walk:hover::after { transform: translateX(120%); }
+.walk .wi { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(180deg, #f1d59e, #d9b26f); color: #1a1206; box-shadow: 0 6px 14px -6px rgba(217, 178, 111, .9); transition: transform .45s var(--spring); }
+.walk:hover .wi { transform: scale(1.1); }
+.walk .wi svg { width: 13px; height: 13px; margin-left: 2px; }
+.walk small { font-size: 11.5px; font-weight: 700; color: var(--t3); padding-left: 10px; border-left: 1px solid var(--line2); }
+.walk .wd { width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; background: var(--gold-soft); color: var(--gold2); }
+.walk .wd svg { width: 11px; height: 11px; }
+.walk.hint .wi { animation: beckon 2.2s var(--out) 3; }
+@keyframes beckon { 0%, 100% { box-shadow: 0 6px 14px -6px rgba(217, 178, 111, .9), 0 0 0 0 rgba(241, 213, 158, .55); } 60% { box-shadow: 0 6px 14px -6px rgba(217, 178, 111, .9), 0 0 0 10px rgba(241, 213, 158, 0); } }
+.touring .walk .wi { background: var(--s2); color: var(--gold2); }
+.btn.tour .wi { width: 26px; height: 26px; margin-left: -10px; border-radius: 50%; display: grid; place-items: center; background: var(--gold-soft); color: var(--gold2); border: 1px solid var(--gold-line); }
+.btn.tour .wi svg { width: 11px; height: 11px; margin-left: 2px; }
+/* the card that reads each step */
+.tcard { position: absolute; z-index: 8; padding: 13px 14px 12px; border-radius: 18px; color: #f5f0e7; background: rgba(12, 13, 20, .8); -webkit-backdrop-filter: blur(16px) saturate(1.4); backdrop-filter: blur(16px) saturate(1.4); border: 1px solid rgba(241, 213, 158, .28); box-shadow: 0 24px 50px -20px rgba(0, 0, 0, .9);
+  opacity: 0; transform: translateY(10px) scale(.97); transition: opacity .45s var(--out), transform .55s var(--spring), top .7s var(--out); }
+.tcard.up { transform-origin: top; }
+.tcard.on { opacity: 1; transform: none; }
+.tc-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.tc-n { font: 700 10.5px/1 var(--sans); letter-spacing: .18em; text-transform: uppercase; color: #f1d59e; }
+.tc-ctl { display: flex; gap: 2px; margin-right: -6px; }
+.tc-ctl button, .tc-end button { border: 0; background: none; color: #f5f0e7; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; transition: background .25s; }
+.tc-ctl button:hover { background: rgba(255, 255, 255, .12); }
+.tc-ctl svg { width: 14px; height: 14px; }
+.tc-ctl .pp .i-play, .tcard.paused .pp .i-pause { display: none; }
+.tcard.paused .pp .i-play { display: block; }
+.tc-t { display: block; margin-top: 8px; font: 700 15px/1.3 var(--sans); transition: opacity .18s; }
+.tc-p { margin: 4px 0 0; font-size: 13px; line-height: 1.5; color: #d9d3c7; transition: opacity .18s; }
+.tc-p b { color: #f1d59e; }
+.tcard.swap .tc-t, .tcard.swap .tc-p { opacity: 0; }
+.tc-bar { display: flex; gap: 4px; margin-top: 11px; }
+.tc-bar i { position: relative; flex: 1; height: 3px; border-radius: 3px; background: rgba(255, 255, 255, .16); overflow: hidden; }
+.tc-bar i::after { content: ""; position: absolute; inset: 0; background: #f1d59e; transform: scaleX(0); transform-origin: left; }
+.tc-bar i.f::after, .tc-bar i.hold::after { transform: none; }
+.tc-bar i.cur::after { animation: fill var(--d, 4s) linear forwards; }
+@keyframes fill { to { transform: none; } }
+.tc-end { display: none; gap: 8px; margin-top: 12px; }
+.tcard.end .tc-end { display: flex; }
+.tcard.end .tc-ctl button:not([data-a="end"]) { visibility: hidden; }
+.tc-end button { width: auto; height: 34px; padding: 0 14px; border-radius: 99px; font: 700 12.5px/1 var(--sans); display: inline-flex; gap: 6px; align-items: center; border: 1px solid rgba(241, 213, 158, .3); }
+.tc-end .tc-go { background: linear-gradient(180deg, #f1d59e, #d9b26f); color: #1a1206; border-color: transparent; }
+.tc-end svg { width: 13px; height: 13px; }
+/* the chapter's measure, under its introduction */
+.meta { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 18px; font: 700 11.5px/1 var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--t3); }
+.meta span { display: inline-flex; align-items: center; gap: 16px; }
+.meta span + span::before { content: ""; width: 4px; height: 4px; border-radius: 50%; background: var(--gold-line); margin-left: -10px; }
+/* the chapter rail on wide screens: a line of points, the current one lit, its name on hover */
+.crail { position: fixed; z-index: 40; right: 18px; top: 50%; display: flex; flex-direction: column; gap: 4px; transform: translate(30px, -50%); opacity: 0; transition: opacity .5s, transform .6s var(--out); pointer-events: none; }
+.crail.on { opacity: 1; transform: translate(0, -50%); pointer-events: auto; }
+.crail a { position: relative; display: flex; align-items: center; justify-content: flex-end; height: 22px; width: 22px; }
+.crail i { width: 6px; height: 6px; border-radius: 50%; background: var(--line2); transition: all .45s var(--spring); }
+.crail a.past i { background: var(--gold-line); }
+.crail a.on i { height: 18px; border-radius: 4px; background: var(--gold2); box-shadow: 0 0 12px var(--gold); }
+.crail span { position: absolute; right: 26px; white-space: nowrap; padding: 6px 11px; border-radius: 9px; background: var(--s1); border: 1px solid var(--line2); color: var(--t1); font: 700 12px/1 var(--sans); opacity: 0; transform: translateX(6px); transition: opacity .25s, transform .35s var(--out); pointer-events: none; box-shadow: 0 10px 24px -12px rgba(0, 0, 0, .6); }
+.crail span b { color: var(--gold2); margin-right: 8px; font-weight: 700; }
+.crail a:hover span, .crail a:focus-visible span { opacity: 1; transform: none; }
+.crail a:hover i { background: var(--gold2); }
+@media (max-width: 1279px) { .crail { display: none; } }
 
 /* the mobile dock */
 .dock { display: none; }
@@ -346,8 +438,8 @@ footer { padding: 30px 0 60px; text-align: center; font-size: 13px; color: var(-
   .toc a.wide .th { width: 96px; }
   .duo { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 14px; }
   .duo figure:nth-child(even) { transform: translateY(-16px); }
-  .lanterns { height: 170px; }
-  .season .opener { padding-top: 110px; }
+  .lanterns { height: 300px; }
+  .season .opener { padding-top: 250px; }
   /* the fan becomes a rail you swipe */
   .fan { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 46vw; overflow-x: auto; scroll-snap-type: x mandatory; padding: 10px var(--g) 20px; margin-inline: calc(-1 * var(--g)); scrollbar-width: none; }
   .fan::-webkit-scrollbar { display: none; }
@@ -357,6 +449,11 @@ footer { padding: 30px 0 60px; text-align: center; font-size: 13px; color: var(-
   .lb .pv { left: 20px; } .lb .nx { right: 20px; }
   .lb .lt { bottom: max(20px, env(safe-area-inset-bottom)); }
   .lb .phone { width: min(80vw, calc((100svh - 200px) * .496)); }
+  /* the walkthrough card sits above the dock, the screen pinned above it */
+  .tcard { position: fixed; left: 12px; right: 12px; bottom: max(84px, calc(env(safe-area-inset-bottom) + 76px)); z-index: 70; }
+  .walk { height: 38px; }
+  .cap { gap: 8px; }
+  .meta { font-size: 10.5px; }
   .cover { padding: 80px 0 60px; min-height: auto; }
   .cover .wrap { grid-template-columns: minmax(0, 1fr); }
   .mast { margin-top: 16px; }
@@ -378,7 +475,7 @@ footer { padding: 30px 0 60px; text-align: center; font-size: 13px; color: var(-
   .figure { position: sticky; top: 52px; z-index: 6; padding: 14px 0 18px; margin: 0 calc(-1 * var(--g)); background: linear-gradient(var(--bg) 82%, transparent); display: grid; justify-items: center; }
   .figure .phone { width: min(46vw, 230px, calc((100svh - 220px) * .3)); min-width: 150px; }
   .cap { width: 100%; padding: 0 var(--g); justify-content: center; margin-top: 12px; }
-  .cap span { display: none; }
+  .cap > span { display: none; }
   .text h3 { font-size: 30px; margin-top: 8px; }
   .text h3 + p { font-size: 17px; }
   .text .lede::first-letter { font-size: 58px; }
@@ -409,6 +506,7 @@ footer { padding: 30px 0 60px; text-align: center; font-size: 13px; color: var(-
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
   .rv, .figure.rv { opacity: 1; transform: none; filter: none; } .h2 .w > span { transform: none; }
+  .touring .zm { transform: none; }
 }
 </style>
 </head>
@@ -444,7 +542,7 @@ footer { padding: 30px 0 60px; text-align: center; font-size: 13px; color: var(-
         </div>
         <div class="cta">
           <a class="btn pri" href="#contents">Begin the guide <span class="arr" aria-hidden="true">→</span></a>
-          <a class="btn" href="#ch-today">Jump to Today</a>
+          <a class="btn tour" id="tourAll" href="#ch-today"><span class="wi" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.4-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg></span>Take the guided tour</a>
         </div>
       </div>
       <div class="stage rv" id="stage" aria-hidden="true">
@@ -483,6 +581,7 @@ footer { padding: 30px 0 60px; text-align: center; font-size: 13px; color: var(-
   <footer>Adhkār · The Guide · Edition 11.7 · Every screen shown is from the app itself.</footer>
 </main>
 
+<nav class="crail" id="crail" aria-label="Chapters"></nav>
 <nav class="dock" id="dock" aria-label="Chapter navigation">
   <a href="#" id="dprev" aria-label="Previous chapter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></a>
   <a class="mid" href="#contents"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Contents</a>
@@ -624,10 +723,11 @@ var CH = [
     fan: [['ramadan/today', 'Today'], ['ramadan/adhkar', 'Adhkār'], ['ramadan/tracker', 'Tracker'], ['ramadan/salah', 'Ṣalāh']],
     fanNote: ['Switches on by itself', 'Dark and light', 'Every tab', 'Back to normal after the month'],
     spreads: [
-      { base: 'ramadan/today', h: 'Today, in Ramaḍān', p: 'From the first day of the month, Today greets you with "Ramaḍān Mubārak", hangs lanterns across the top and leads with your fast.', drop: true,
+      { base: 'ramadan/today', h: 'Today, in Ramaḍān', p: 'From the first day of the month, Today greets you with "Ramaḍān Mubārak" and leads with your fast, on a card hung with lanterns.', drop: true,
         steps: [
-          ['The greeting and the lanterns', '"Ramaḍān Mubārak" and the day of the month take the place of the usual greeting, with lanterns hanging above.', 50, 6],
-          ['The day of the month', 'The ring fills as the month goes on: day 22 of 29 here.', 86, 16],
+          ['The greeting', '"Ramaḍān Mubārak" and the day of the month take the place of the usual greeting.', 26, 4],
+          ['The lanterns', 'Three lanterns hang from the card’s top edge and sway gently: lit and glowing by night, stained glass in the sun by day.', 62, 15],
+          ['The day of the month', 'The ring fills as the month goes on: day 22 of 29 here.', 86, 17],
           ['Ifṭār, counting down', 'The time until ifṭār, live, the bar filling through the day. After Maghrib it counts down to the end of suhūr instead.', 24, 24.5],
           ['Your fast today', 'Fasting, not fasting, or on a break. Tap the card to open the Ramaḍān page.', 81, 25],
           ['The sky in the month’s colours', 'The prayer card turns night indigo, with the Hijri date: 22 Ramaḍān 1448 AH.', 50, 44],
@@ -751,7 +851,7 @@ var pad = function (i) { return (i < 9 ? '0' : '') + (i + 1); };
 var words = function (t) { return t.split(' ').map(function (w, i) { return '<span class="w"><span style="--i:' + i + '">' + esc(w) + '</span></span>'; }).join(' '); };
 /* a phone: data-base is the dark English screen; the theme and language toggles choose among its versions */
 function phone(base, alt, extra, tilt, fixed) {
-  return '<div class="phone' + (tilt ? ' tilt' : '') + '"' + (fixed ? '' : ' data-base="' + base + '"') + ' data-shot="' + base + '"><div class="scr"><img src="shots/' + base + '.webp" alt="' + esc(alt) + '" loading="lazy" decoding="async">' + (extra || '') + '</div><button class="zoom" type="button" aria-label="Enlarge: ' + esc(alt) + '"></button></div>';
+  return '<div class="phone' + (tilt ? ' tilt' : '') + '"' + (fixed ? '' : ' data-base="' + base + '"') + ' data-shot="' + base + '"><div class="scr"><div class="zm"><img src="shots/' + base + '.webp" alt="' + esc(alt) + '" loading="lazy" decoding="async">' + (extra || '') + '<i class="spot" aria-hidden="true"></i></div></div><button class="zoom" type="button" aria-label="Enlarge: ' + esc(alt) + '"></button></div>';
 }
 function hotspots(steps) { return steps.map(function (st, i) { return '<button class="hs" type="button" style="left:' + st[2] + '%;top:' + st[3] + '%" data-x="' + st[2] + '" data-i="' + i + '" data-tip="' + esc(st[0]) + '" aria-label="Step ' + (i + 1) + ': ' + esc(st[0]) + '">' + (i + 1) + '</button>'; }).join(''); }
 function stepList(steps, extraSteps) {
@@ -759,8 +859,92 @@ function stepList(steps, extraSteps) {
 }
 function gestCard(g) { return '<div class="g rv"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + g[0] + '"/></svg></div><b>' + esc(g[1]) + '</b><p>' + esc(g[2]) + '</p><div class="anim" aria-hidden="true"><i></i></div></div>'; }
 var arrows = '<div class="nav"><button type="button" data-d="-1" aria-label="Scroll back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><button type="button" data-d="1" aria-label="Scroll on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button></div>';
-/* a hanging lantern, as on Today in Ramaḍān */
-var lanternSvg = '<svg viewBox="0 0 60 150" aria-hidden="true"><path d="M30 0v46" stroke="#e9b65a" stroke-width="1.2" opacity=".55"/><g stroke="#e9b65a" stroke-width="1.6"><path d="M22 52h16l-3-6H25z" fill="#b07a2a"/><path d="M18 58h24l4 10v38l-4 10H18l-4-10V68z" fill="rgba(255,190,90,.14)"/><path d="M14 68h32M14 106h32M24 58v58M36 58v58" fill="none"/><path d="M20 116h20l-4 8H24z" fill="#b07a2a"/><path d="M30 124v10" fill="none"/><circle cx="30" cy="138" r="3" fill="#e9b65a"/></g><ellipse class="fl" cx="30" cy="88" rx="6" ry="11" fill="#ffd98e"/></svg>';
+/* A Ramaḍān lantern (fanous), drawn once with two finishes: lit brass and glowing glass by night, stained glass
+     catching daylight by day. The theme shows one or the other. It hangs on a chain of links; the body sways from
+     the chain and the tassel follows a moment later. id keeps its gradients apart from the other lanterns'. */
+  function lantern(id, len) {
+    var L = Math.round(len),
+      g = function (n) {
+        return id + n;
+      },
+      u = function (n) {
+        return 'url(#' + g(n) + ')';
+      },
+      chain = '',
+      y;
+    for (y = 0; y < L - 2; y += 6)
+      chain +=
+        (y / 6) % 2
+          ? '<path d="M30 ' + y + 'v6" stroke="#a8823e" stroke-width="1.6" stroke-linecap="round"/>'
+          : '<ellipse cx="30" cy="' + (y + 3) + '" rx="1.9" ry="3.2" fill="none" stroke="#d9b26f" stroke-width="1"/>';
+    var star = function (cx, cy, h) {
+      var D = h * 1.4142,
+        k = D - h,
+        p = [[D, 0], [h, k], [h, h], [k, h], [0, D], [-k, h], [-h, h], [-h, k], [-D, 0], [-h, -k], [-h, -h], [-k, -h], [0, -D], [k, -h], [h, -h], [h, -k]];
+      return 'M' + p.map(function (q) { return (cx + q[0]).toFixed(1) + ' ' + (cy + q[1]).toFixed(1); }).join('L') + 'Z';
+    };
+    var body = 'M16 40h28l5 12v32l-5 12H16l-5-12V52z';
+    return (
+      '<svg class="fanous" viewBox="0 0 60 ' + (L + 142) + '" aria-hidden="true"><defs>' +
+      '<linearGradient id="' + g('b') + '" x1="0" x2="1"><stop offset="0" stop-color="#8a6420"/><stop offset=".45" stop-color="#f1d59e"/><stop offset="1" stop-color="#7a5418"/></linearGradient>' +
+      '<radialGradient id="' + g('n') + '" cx=".5" cy=".55" r=".65"><stop offset="0" stop-color="#fff6d6"/><stop offset=".35" stop-color="#ffc766"/><stop offset=".8" stop-color="#d9771c"/><stop offset="1" stop-color="#8a3d0c"/></radialGradient>' +
+      '<radialGradient id="' + g('h') + '"><stop offset="0" stop-color="#ffcf73" stop-opacity=".55"/><stop offset="1" stop-color="#ffcf73" stop-opacity="0"/></radialGradient>' +
+      '<linearGradient id="' + g('d') + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3fa59a"/><stop offset="1" stop-color="#1d5d63"/></linearGradient>' +
+      '<linearGradient id="' + g('r') + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d9606a"/><stop offset="1" stop-color="#8a2a3a"/></linearGradient>' +
+      '<linearGradient id="' + g('a') + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe2a0"/><stop offset="1" stop-color="#e9a53c"/></linearGradient>' +
+      '</defs>' +
+      chain +
+      '<g transform="translate(0 ' + L + ')">' +
+      /* night: the light spilling round it */
+      '<circle class="ln-n halo" cx="30" cy="68" r="46" fill="' + u('h') + '"/>' +
+      /* ring, crescent finial, spire, dome */
+      '<circle cx="30" cy="2.5" r="2.4" fill="none" stroke="#d9b26f" stroke-width="1.2"/>' +
+      '<path d="M30.8 6.2a4.2 4.2 0 1 0 2.9 6.6 3.4 3.4 0 1 1-2.9-6.6z" fill="#f1d59e"/>' +
+      '<path d="M28.6 13.5h2.8l1.4 6h-5.6z" fill="' + u('b') + '"/>' +
+      '<path d="M15 36c0-8 7-12 15-17 8 5 15 9 15 17z" fill="' + u('b') + '"/>' +
+      '<path d="M19 33.5c1.8-4 5.8-6.8 11-10 5.2 3.2 9.2 6 11 10" fill="none" stroke="#5a3d10" stroke-width=".7" opacity=".6"/>' +
+      '<g fill="#3a2608" opacity=".55"><circle cx="24" cy="31" r=".9"/><circle cx="30" cy="27" r=".9"/><circle cx="36" cy="31" r=".9"/><circle cx="30" cy="32.5" r=".9"/></g>' +
+      '<rect x="13" y="36" width="34" height="4.4" rx="1.4" fill="' + u('b') + '"/>' +
+      /* the glass: lit by night, stained by day */
+      '<path class="ln-n" d="' + body + '" fill="' + u('n') + '"/>' +
+      '<g class="ln-d"><path d="M11 52l5-12h6v56h-6l-5-12z" fill="' + u('d') + '" opacity=".88"/><path d="M22 40h16v56H22z" fill="' + u('a') + '" opacity=".9"/><path d="M38 40h6l5 12v32l-5 12h-6z" fill="' + u('r') + '" opacity=".88"/>' +
+      '<path d="M24 44l4 0-6 44h-2z" fill="#fff" opacity=".35" class="glint"/></g>' +
+      /* the flame, and the pierced arch and star in front of it */
+      '<g class="ln-n fl"><ellipse cx="30" cy="72" rx="4.2" ry="8" fill="#fff3c4"/><ellipse cx="30" cy="74" rx="2.2" ry="4.6" fill="#fff"/></g>' +
+      '<g fill="none" stroke="' + u('b') + '" stroke-width="1.5" stroke-linejoin="round"><path d="' + body + '"/><path d="M22 40v56M38 40v56M11 52h38M11 84h38"/>' +
+      '<path d="M25 84V61c0-4 2.4-6.4 5-8 2.6 1.6 5 4 5 8v23" stroke-width="1.1"/><path d="' + star(30, 68, 3.1) + '" stroke-width=".9"/>' +
+      '<path d="M14 84V60c0-2.6 2-4.3 4-5.4M46 84V60c0-2.6-2-4.3-4-5.4" stroke-width=".9" opacity=".8"/></g>' +
+      '<g fill="#d9b26f"><circle cx="16.5" cy="46" r=".9"/><circle cx="43.5" cy="46" r=".9"/><circle cx="16.5" cy="90" r=".9"/><circle cx="43.5" cy="90" r=".9"/></g>' +
+      /* collar, base, drop */
+      '<rect x="13" y="95.6" width="34" height="4.4" rx="1.4" fill="' + u('b') + '"/>' +
+      '<path d="M17 100h26l-6 9H23z" fill="' + u('b') + '"/>' +
+      '<path d="M25.5 109h9l-3 6h-3z" fill="#a8823e"/>' +
+      /* the tassel, swinging a little behind the body */
+      '<g class="tassel" style="transform-origin:30px ' + (L + 115) + 'px"><path d="M30 115v6" stroke="#d9b26f" stroke-width="1"/><circle cx="30" cy="123" r="2.6" fill="#f1d59e"/>' +
+      '<path d="M27.3 125h5.4l2.6 15h-10.6z" fill="#b8434e"/><path d="M27.4 128h5.2" stroke="#f1d59e" stroke-width="1"/><path d="M28 130v9M30 130v10M32 130v9" stroke="#7a2232" stroke-width=".6"/></g>' +
+      '</g></svg>'
+    );
+  }
+
+var ico = {
+  play: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.4-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>',
+  pause: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6.5" y="5" width="3.6" height="14" rx="1.2"/><rect x="13.9" y="5" width="3.6" height="14" rx="1.2"/></svg>',
+  prev: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>',
+  next: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>',
+  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'
+};
+function walkBtn(n) { return '<button class="walk" type="button"><span class="wi">' + ico.play + '</span><span class="wl">Walk me through</span><small>' + n + ' steps</small></button>'; }
+/* how much a chapter holds, so a reader knows what they are starting */
+function meta(c) {
+  var steps = 0, words = c.dek.split(' ').length, screens = (c.spreads || []).length + (c.strip || []).length;
+  (c.spreads || []).forEach(function (s) { s.steps.concat(s.after || []).forEach(function (st) { steps++; words += (st[0] + ' ' + st[1]).split(' ').length; }); });
+  var bits = [];
+  if (screens) bits.push(screens + (screens > 1 ? ' screens' : ' screen'));
+  if (steps) bits.push(steps + ' steps');
+  bits.push('about ' + Math.max(1, Math.round(words / 180)) + ' min');
+  return '<div class="meta">' + bits.map(function (b) { return '<span>' + b + '</span>'; }).join('') + '</div>';
+}
 
 $('#toc').innerHTML = CH.map(function (c, i) {
   return '<a class="rv" href="#ch-' + c.id + '"><span class="th"><img src="shots/' + c.thumb + '.webp" alt="" loading="lazy" decoding="async"></span><span><span class="n">' + pad(i) + '</span><span class="t">' + esc(c.title) + '</span><span class="s">' + esc(c.kicker) + '</span></span></a>';
@@ -768,15 +952,15 @@ $('#toc').innerHTML = CH.map(function (c, i) {
 
 $('#chapters').innerHTML = CH.map(function (c, ci) {
   var n = pad(ci), h = '<section class="chapter' + (c.season ? ' season' : '') + '" id="ch-' + c.id + '" data-n="' + n + '">';
-  if (c.season) h += '<div class="lanterns" aria-hidden="true">' + [100, 135, 85, 150, 115].map(function (l) { return '<div class="lantern" style="margin-top:' + (l - 150) + 'px">' + lanternSvg + '</div>'; }).join('') + '</div>';
-  h += '<div class="wrap"><div class="opener rv"><div class="bignum" aria-hidden="true">' + n + '</div><div><div class="kicker">' + esc(c.kicker) + '</div><h2 class="h2">' + words(c.title) + '</h2><p class="dek">' + esc(c.dek) + '</p></div></div>';
+  if (c.season) h += '<div class="sbg" aria-hidden="true"></div><div class="lanterns" aria-hidden="true">' + [70, 150, 40, 190, 100].map(function (l, i) { return '<div class="lantern">' + lantern('gl' + i, l) + '</div>'; }).join('') + '</div>';
+  h += '<div class="wrap"><div class="opener rv"><div class="bignum" aria-hidden="true">' + n + '</div><div><div class="kicker">' + esc(c.kicker) + '</div><h2 class="h2">' + words(c.title) + '</h2><p class="dek">' + esc(c.dek) + '</p>' + meta(c) + '</div></div>';
   if (c.fan) h += '<div class="fan rv">' + c.fan.map(function (x) { return '<figure>' + phone(x[0], 'In Ramaḍān: ' + x[1], '', false, true) + '<figcaption>' + esc(x[1]) + '</figcaption></figure>'; }).join('') + '</div><div class="fan-note rv">' + c.fanNote.map(function (t) { return '<span>' + esc(t) + '</span>'; }).join('') + '</div>';
   if (c.trio) h += '<div class="duo">' + [['dark/today', 'Dark'], ['light/today', 'Light'], ['ar/today', 'العربية'], ['ramadan/today', 'Ramaḍān']].map(function (x) { return '<figure class="rv">' + phone(x[0], 'Today: ' + x[1], '', true, true) + '<figcaption>' + x[1] + '</figcaption></figure>'; }).join('') + '</div>';
   (c.spreads || []).forEach(function (s) {
     var base = s.base || (s.dir || 'dark') + '/' + s.shot, v = variants(base);
     h += '<div class="spread' + (s.flip ? ' flip' : '') + '">';
     h += '<div class="figure rv">' + phone(base, c.title + ': ' + s.h, hotspots(s.steps), true) +
-      '<div class="cap"><span>' + esc(s.h) + '</span>' + (v.ar ? '<div class="seg vars" role="group" aria-label="Show this screen in"><i class="pill" aria-hidden="true"></i><button type="button" data-l="en" aria-pressed="true">English</button><button type="button" data-l="ar" lang="ar" aria-pressed="false">العربية</button></div>' : '') + '</div></div>';
+      '<div class="cap">' + (s.steps.length > 1 ? walkBtn(s.steps.length) : '<span>' + esc(s.h) + '</span>') + (v.ar ? '<div class="seg vars" role="group" aria-label="Show this screen in"><i class="pill" aria-hidden="true"></i><button type="button" data-l="en" aria-pressed="true">English</button><button type="button" data-l="ar" lang="ar" aria-pressed="false">العربية</button></div>' : '') + '</div></div>';
     h += '<div class="text rv"><h3>' + esc(s.h) + '</h3><p' + (s.drop ? ' class="lede"' : '') + '>' + esc(s.p) + '</p>' + stepList(s.steps, s.after) + '</div></div>';
   });
   if (c.widgets) h += '<div class="spread flip"><div class="figure rv"><div class="widgets"><img src="shots/extra/widgets.webp" alt="The prayer widget and two tracker widgets on a home screen" loading="lazy" decoding="async">' +
@@ -803,11 +987,116 @@ $$('.spread').forEach(function (sp) {
   spots.forEach(function (s) { s.addEventListener('click', function (e) { e.stopPropagation(); var i = +s.dataset.i; sp._on(i); if (items[i] && mobile.matches) items[i].scrollIntoView({ behavior: 'smooth', block: 'center' }); }); });
   sp._on(0);
 });
+/* ---------- the walkthrough: the screen zooms to each marker in turn, a spotlight follows, and a card reads the step ----------
+   It keeps its own pace (longer steps stay longer), pauses when you touch a marker, stops when you scroll away, remembers
+   the screens you have walked through, and at the end offers the next screen so the whole guide can be toured in one go. */
+var walked = {}; try { walked = JSON.parse(localStorage.getItem('adhkar-guide-walked') || '{}'); } catch (e) {}
+var still = matchMedia('(prefers-reduced-motion: reduce)').matches, T = null;
+var tourable = $$('.spread').filter(function (sp) { return $('.walk', sp); });
+function spreadKey(sp) { return $('.phone', sp).dataset.base; }
+function markWalked(sp) {
+  var w = $('.walk', sp), l = $('.wl', w); w.classList.add('done'); l.dataset.was = 'Walk through again'; if (!sp.classList.contains('touring')) l.textContent = 'Walk through again';
+  if (!$('.wd', w)) w.insertAdjacentHTML('beforeend', '<span class="wd" aria-label="walked through">' + ico.check + '</span>');
+}
+tourable.forEach(function (sp) { if (walked[spreadKey(sp)]) markWalked(sp); });
+function placeCard() {
+  if (!T || mobile.matches) { if (T) T.card.style.cssText = ''; return; }
+  var ph = T.ph, c = T.card, w = ph.offsetWidth, h = ph.offsetHeight;
+  c.style.width = Math.round(w * .9) + 'px'; c.style.left = Math.round(ph.offsetLeft + w * .05) + 'px';
+  c.style.top = Math.round(T.up ? ph.offsetTop + h * .045 : ph.offsetTop + h * .955 - c.offsetHeight) + 'px';
+}
+function stopTour(finished) {
+  if (!T) return;
+  var t = T; T = null; clearTimeout(t.timer);
+  t.ph.classList.remove('touring'); t.fig.classList.remove('touring'); t.sp.classList.remove('touring');
+  var wl = $('.walk .wl', t.sp); if (wl.dataset.was) wl.textContent = wl.dataset.was;
+  t.card.classList.remove('on'); setTimeout(function () { t.card.remove(); }, 400);
+  if (finished) { walked[spreadKey(t.sp)] = 1; try { localStorage.setItem('adhkar-guide-walked', JSON.stringify(walked)); } catch (e) {} markWalked(t.sp); }
+}
+function tourGo(i) {
+  if (!T) return;
+  var t = T, li = t.items[i], hs = t.spots[i];
+  clearTimeout(t.timer); t.i = i;
+  t.ph.style.setProperty('--ox', hs.style.left); t.ph.style.setProperty('--oy', hs.style.top);
+  t.sp._on(i); t.up = parseFloat(hs.style.top) > 58;
+  var b = $('b', li).textContent, p = $('p', li).textContent, ms = Math.min(9000, Math.max(3600, 2200 + p.length * 42));
+  t.card.classList.toggle('up', t.up); t.card.classList.add('swap');
+  t.ended = false;
+  setTimeout(function () {
+    if (T !== t || t.ended) return;
+    $('.tc-n', t.card).textContent = 'Step ' + (i + 1) + ' of ' + t.n;
+    $('.tc-t', t.card).textContent = b; $('.tc-p', t.card).textContent = p;
+    $$('.tc-bar i', t.card).forEach(function (seg, j) { seg.className = j < i ? 'f' : j === i ? 'cur' : ''; seg.style.setProperty('--d', ms + 'ms'); });
+    t.card.classList.toggle('paused', !t.playing); t.card.classList.remove('swap'); placeCard();
+  }, 180);
+  if (t.playing) t.timer = setTimeout(function () { if (i + 1 < t.n) tourGo(i + 1); else tourEnd(); }, ms + 180);
+}
+function tourEnd() {
+  var t = T, next = tourable[tourable.indexOf(t.sp) + 1];
+  clearTimeout(t.timer); t.playing = false; t.ended = true; t.card.classList.add('end', 'paused');
+  $('.tc-n', t.card).textContent = 'All ' + t.n + ' steps';
+  $('.tc-t', t.card).textContent = 'That is this screen.';
+  $('.tc-p', t.card).innerHTML = next ? 'Next: <b>' + esc($('h3', next).textContent) + '</b>' : 'You have reached the last screen in the guide.';
+  $$('.tc-bar i', t.card).forEach(function (seg) { seg.className = 'f'; });
+  $('.tc-go', t.card).hidden = !next; t.next = next;
+  walked[spreadKey(t.sp)] = 1; try { localStorage.setItem('adhkar-guide-walked', JSON.stringify(walked)); } catch (e) {} markWalked(t.sp);
+  placeCard();
+}
+function startTour(sp) {
+  stopTour();
+  var fig = $('.figure', sp), ph = $('.phone', fig), spots = $$('.hs', ph), items = $$('.steps li', sp).slice(0, spots.length);
+  var card = document.createElement('div');
+  card.className = 'tcard'; card.setAttribute('role', 'group'); card.setAttribute('aria-label', 'Walkthrough: ' + $('h3', sp).textContent);
+  card.innerHTML = '<div class="tc-top"><span class="tc-n" aria-live="polite"></span><div class="tc-ctl"><button type="button" data-a="prev" aria-label="Previous step">' + ico.prev + '</button><button type="button" data-a="play" class="pp" aria-label="Pause or play"><span class="i-pause">' + ico.pause + '</span><span class="i-play">' + ico.play + '</span></button><button type="button" data-a="next" aria-label="Next step">' + ico.next + '</button><button type="button" data-a="end" aria-label="End the walkthrough">' + ico.x + '</button></div></div>' +
+    '<b class="tc-t"></b><p class="tc-p"></p><div class="tc-bar">' + spots.map(function () { return '<i></i>'; }).join('') + '</div><div class="tc-end"><button type="button" class="tc-re" data-a="replay">Replay</button><button type="button" class="tc-go" data-a="go">Next screen ' + ico.next + '</button></div>';
+  fig.appendChild(card);
+  T = { sp: sp, fig: fig, ph: ph, spots: spots, items: items, card: card, n: spots.length, i: 0, playing: true, up: false };
+  ph.classList.add('touring'); fig.classList.add('touring'); sp.classList.add('touring');
+  var wl = $('.walk .wl', sp); wl.dataset.was = wl.textContent; wl.textContent = 'Stop the walkthrough'; $('.walk', sp).classList.remove('hint');
+  card.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b || !T) return; var a = b.dataset.a;
+    if (a === 'end') stopTour(false);
+    else if (a === 'prev') { T.playing = false; tourGo(Math.max(0, T.i - 1)); }
+    else if (a === 'next') { T.playing = false; if (T.i + 1 < T.n) tourGo(T.i + 1); else tourEnd(); }
+    else if (a === 'play') { T.playing = !T.playing; T.card.classList.toggle('paused', !T.playing); if (T.playing) tourGo(T.i); else { clearTimeout(T.timer); $$('.tc-bar i', T.card).forEach(function (s) { s.classList.remove('cur'); }); $$('.tc-bar i', T.card)[T.i].classList.add('hold'); } }
+    else if (a === 'replay') { card.classList.remove('end'); T.playing = true; tourGo(0); }
+    else if (a === 'go') { var nx = T.next; stopTour(true); var y = nx.getBoundingClientRect().top + scrollY - (mobile.matches ? 60 : 90); scrollTo({ top: y, behavior: still ? 'auto' : 'smooth' }); setTimeout(function () { startTour(nx); }, still ? 50 : 750); }
+  });
+  requestAnimationFrame(function () { card.classList.add('on'); tourGo(0); });
+}
+tourable.forEach(function (sp) {
+  $('.walk', sp).addEventListener('click', function () { if (T && T.sp === sp) stopTour(false); else startTour(sp); });
+  /* touching a marker during a walkthrough takes you to that step and holds there */
+  $$('.hs', sp).forEach(function (hs) { hs.addEventListener('click', function () { if (T && T.sp === sp) { T.playing = false; tourGo(+hs.dataset.i); } }); });
+});
+document.addEventListener('keydown', function (e) {
+  if (!T || lb.classList.contains('on')) return;
+  if (e.key === 'Escape') stopTour(false);
+  else if (e.key === 'ArrowRight') { T.playing = false; if (T.i + 1 < T.n) tourGo(T.i + 1); else tourEnd(); }
+  else if (e.key === 'ArrowLeft') { T.playing = false; tourGo(Math.max(0, T.i - 1)); }
+});
+addEventListener('resize', placeCard);
+if ('IntersectionObserver' in window) {
+  /* a walkthrough ends quietly when its screen leaves view; a walk button glows once, the first time its screen arrives */
+  var tourIO = new IntersectionObserver(function (es) {
+    es.forEach(function (x) {
+      if (!x.isIntersecting && T && T.sp === x.target) stopTour(false);
+      if (x.isIntersecting && !x.target._hinted) { x.target._hinted = 1; var w = $('.walk', x.target); if (!w.classList.contains('done')) w.classList.add('hint'); }
+    });
+  }, { threshold: 0.12 });
+  tourable.forEach(function (sp) { tourIO.observe(sp); });
+}
+/* the cover's guided tour starts at the first screen */
+$('#tourAll').addEventListener('click', function (e) {
+  e.preventDefault(); var sp = tourable[0], y = sp.getBoundingClientRect().top + scrollY - (mobile.matches ? 60 : 90);
+  scrollTo({ top: y, behavior: still ? 'auto' : 'smooth' }); setTimeout(function () { startTour(sp); }, still ? 50 : 900);
+});
+
 /* on a phone, the step in the middle of the screen is the one lit, as you scroll */
 if ('IntersectionObserver' in window) {
   var stepIO = new IntersectionObserver(function (es) {
     if (!mobile.matches) return;
-    es.forEach(function (x) { if (x.isIntersecting) { var li = x.target, sp = li.closest('.spread'); if (sp && sp._on) sp._on(+li.dataset.i); } });
+    es.forEach(function (x) { if (x.isIntersecting) { var li = x.target, sp = li.closest('.spread'); if (sp && sp._on && !(T && T.sp === sp)) sp._on(+li.dataset.i); } });
   }, { rootMargin: '-55% 0px -40% 0px' });
   $$('.steps li').forEach(function (li) { stepIO.observe(li); });
 }
@@ -935,13 +1224,21 @@ if (fine) {
   stage.addEventListener('pointerleave', function () { $('.p1', stage).style.transform = ''; });
 }
 
+/* ---------- the chapter rail on wide screens ---------- */
+$('#crail').innerHTML = CH.map(function (c, i) { return '<a href="#ch-' + c.id + '"><i></i><span><b>' + pad(i) + '</b>' + esc(c.title) + '</span></a>'; }).join('');
+var rail = $$('#crail a');
+
 /* ---------- the top bar and the mobile dock follow the reading ---------- */
-var bar = $('#bar'), prog = $('#prog'), dock = $('#dock'), chaps = $$('section.chapter'), ticking = false;
+var pend = $$('.rv'), bar = $('#bar'), prog = $('#prog'), dock = $('#dock'), chaps = $$('section.chapter'), ticking = false;
 function onScroll() {
   ticking = false;
   var y = scrollY, h = document.documentElement.scrollHeight - innerHeight;
   bar.classList.toggle('on', y > 40); dock.classList.toggle('on', y > innerHeight * .9); prog.style.transform = 'scaleX(' + (h > 0 ? y / h : 0) + ')';
+  /* never leave something hidden that the reader has already reached, however fast they scrolled or jumped */
+  for (var i = pend.length - 1; i >= 0; i--) if (pend[i].classList.contains('in') || pend[i].getBoundingClientRect().top < innerHeight) { pend[i].classList.add('in'); pend.splice(i, 1); }
   var idx = -1; chaps.forEach(function (c, i) { if (c.getBoundingClientRect().top < innerHeight * .4) idx = i; });
+  rail.forEach(function (a, i) { a.classList.toggle('on', i === idx); a.classList.toggle('past', i < idx); }); $('#crail').classList.toggle('on', y > innerHeight * .9);
+  if (T) placeCard();
   if (idx >= 0) { var c = chaps[idx]; $('#chap b').textContent = c.dataset.n; $('#chap span').textContent = $('.h2', c).textContent; }
   $('#dprev').href = idx > 0 ? '#' + chaps[idx - 1].id : '#top'; $('#dnext').href = idx < chaps.length - 1 ? '#' + chaps[idx + 1].id : '#end';
 }

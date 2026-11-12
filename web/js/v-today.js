@@ -369,26 +369,154 @@
     );
   }
 
-  function lanterns() {
-    var one = function (x, len, sc) {
+  /* A Ramaḍān lantern (fanous), drawn once with two finishes: lit brass and glowing glass by night, stained glass
+     catching daylight by day. The theme shows one or the other. It hangs on a chain of links; the body sways from
+     the chain and the tassel follows a moment later. id keeps its gradients apart from the other lanterns'. */
+  function lantern(id, len) {
+    var L = Math.round(len),
+      g = function (n) {
+        return id + n;
+      },
+      u = function (n) {
+        return 'url(#' + g(n) + ')';
+      },
+      chain = '',
+      y;
+    for (y = 0; y < L - 2; y += 6)
+      chain +=
+        (y / 6) % 2
+          ? '<path d="M30 ' + y + 'v6" stroke="#a8823e" stroke-width="1.6" stroke-linecap="round"/>'
+          : '<ellipse cx="30" cy="' + (y + 3) + '" rx="1.9" ry="3.2" fill="none" stroke="#d9b26f" stroke-width="1"/>';
+    var star = function (cx, cy, h) {
+      var D = h * 1.4142,
+        k = D - h,
+        p = [
+          [D, 0],
+          [h, k],
+          [h, h],
+          [k, h],
+          [0, D],
+          [-k, h],
+          [-h, h],
+          [-h, k],
+          [-D, 0],
+          [-h, -k],
+          [-h, -h],
+          [-k, -h],
+          [0, -D],
+          [k, -h],
+          [h, -h],
+          [h, -k]
+        ];
       return (
-        '<svg width="' +
-        34 * sc +
-        '" height="' +
-        (len + 70 * sc) +
-        '" viewBox="0 0 34 ' +
-        (len + 70 * sc) / sc +
-        '" style="left:' +
-        x +
-        'px"><line x1="17" y1="0" x2="17" y2="' +
-        len / sc +
-        '" stroke="#c9a35c" stroke-width="1"/><g transform="translate(0 ' +
-        len / sc +
-        ')"><path d="M12 0h10l3 6H9z" fill="#c9933c"/><path d="M8 6h18l-2 30H10z" fill="#2a1c08" stroke="#e9b65a" stroke-width="1.2"/><path d="M12 10h10l-1 22h-8z" fill="#ffcf73" class="flame" opacity=".9"/><path d="M17 10v22M12.5 20h9" stroke="#c9933c" stroke-width=".8"/><path d="M10 36h14l-3 6h-8z" fill="#c9933c"/><circle cx="17" cy="45" r="1.8" fill="#e9b65a"/></g></svg>'
+        'M' +
+        p
+          .map(function (q) {
+            return (cx + q[0]).toFixed(1) + ' ' + (cy + q[1]).toFixed(1);
+          })
+          .join('L') +
+        'Z'
+      );
+    };
+    var body = 'M16 40h28l5 12v32l-5 12H16l-5-12V52z';
+    return (
+      '<svg class="fanous" viewBox="0 0 60 ' +
+      (L + 142) +
+      '" aria-hidden="true"><defs>' +
+      '<linearGradient id="' +
+      g('b') +
+      '" x1="0" x2="1"><stop offset="0" stop-color="#8a6420"/><stop offset=".45" stop-color="#f1d59e"/><stop offset="1" stop-color="#7a5418"/></linearGradient>' +
+      '<radialGradient id="' +
+      g('n') +
+      '" cx=".5" cy=".55" r=".65"><stop offset="0" stop-color="#fff6d6"/><stop offset=".35" stop-color="#ffc766"/><stop offset=".8" stop-color="#d9771c"/><stop offset="1" stop-color="#8a3d0c"/></radialGradient>' +
+      '<radialGradient id="' +
+      g('h') +
+      '"><stop offset="0" stop-color="#ffcf73" stop-opacity=".55"/><stop offset="1" stop-color="#ffcf73" stop-opacity="0"/></radialGradient>' +
+      '<linearGradient id="' +
+      g('d') +
+      '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3fa59a"/><stop offset="1" stop-color="#1d5d63"/></linearGradient>' +
+      '<linearGradient id="' +
+      g('r') +
+      '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d9606a"/><stop offset="1" stop-color="#8a2a3a"/></linearGradient>' +
+      '<linearGradient id="' +
+      g('a') +
+      '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe2a0"/><stop offset="1" stop-color="#e9a53c"/></linearGradient>' +
+      '</defs>' +
+      chain +
+      '<g transform="translate(0 ' +
+      L +
+      ')">' +
+      /* night: the light spilling round it */
+      '<circle class="ln-n halo" cx="30" cy="68" r="46" fill="' +
+      u('h') +
+      '"/>' +
+      /* ring, crescent finial, spire, dome */
+      '<circle cx="30" cy="2.5" r="2.4" fill="none" stroke="#d9b26f" stroke-width="1.2"/>' +
+      '<path d="M30.8 6.2a4.2 4.2 0 1 0 2.9 6.6 3.4 3.4 0 1 1-2.9-6.6z" fill="#f1d59e"/>' +
+      '<path d="M28.6 13.5h2.8l1.4 6h-5.6z" fill="' +
+      u('b') +
+      '"/>' +
+      '<path d="M15 36c0-8 7-12 15-17 8 5 15 9 15 17z" fill="' +
+      u('b') +
+      '"/>' +
+      '<path d="M19 33.5c1.8-4 5.8-6.8 11-10 5.2 3.2 9.2 6 11 10" fill="none" stroke="#5a3d10" stroke-width=".7" opacity=".6"/>' +
+      '<g fill="#3a2608" opacity=".55"><circle cx="24" cy="31" r=".9"/><circle cx="30" cy="27" r=".9"/><circle cx="36" cy="31" r=".9"/><circle cx="30" cy="32.5" r=".9"/></g>' +
+      '<rect x="13" y="36" width="34" height="4.4" rx="1.4" fill="' +
+      u('b') +
+      '"/>' +
+      /* the glass: lit by night, stained by day */
+      '<path class="ln-n" d="' +
+      body +
+      '" fill="' +
+      u('n') +
+      '"/>' +
+      '<g class="ln-d"><path d="M11 52l5-12h6v56h-6l-5-12z" fill="' +
+      u('d') +
+      '" opacity=".88"/><path d="M22 40h16v56H22z" fill="' +
+      u('a') +
+      '" opacity=".9"/><path d="M38 40h6l5 12v32l-5 12h-6z" fill="' +
+      u('r') +
+      '" opacity=".88"/>' +
+      '<path d="M24 44l4 0-6 44h-2z" fill="#fff" opacity=".35" class="glint"/></g>' +
+      /* the flame, and the pierced arch and star in front of it */
+      '<g class="ln-n fl"><ellipse cx="30" cy="72" rx="4.2" ry="8" fill="#fff3c4"/><ellipse cx="30" cy="74" rx="2.2" ry="4.6" fill="#fff"/></g>' +
+      '<g fill="none" stroke="' +
+      u('b') +
+      '" stroke-width="1.5" stroke-linejoin="round"><path d="' +
+      body +
+      '"/><path d="M22 40v56M38 40v56M11 52h38M11 84h38"/>' +
+      '<path d="M25 84V61c0-4 2.4-6.4 5-8 2.6 1.6 5 4 5 8v23" stroke-width="1.1"/><path d="' +
+      star(30, 68, 3.1) +
+      '" stroke-width=".9"/>' +
+      '<path d="M14 84V60c0-2.6 2-4.3 4-5.4M46 84V60c0-2.6-2-4.3-4-5.4" stroke-width=".9" opacity=".8"/></g>' +
+      '<g fill="#d9b26f"><circle cx="16.5" cy="46" r=".9"/><circle cx="43.5" cy="46" r=".9"/><circle cx="16.5" cy="90" r=".9"/><circle cx="43.5" cy="90" r=".9"/></g>' +
+      /* collar, base, drop */
+      '<rect x="13" y="95.6" width="34" height="4.4" rx="1.4" fill="' +
+      u('b') +
+      '"/>' +
+      '<path d="M17 100h26l-6 9H23z" fill="' +
+      u('b') +
+      '"/>' +
+      '<path d="M25.5 109h9l-3 6h-3z" fill="#a8823e"/>' +
+      /* the tassel, swinging a little behind the body */
+      '<g class="tassel" style="transform-origin:30px ' +
+      (L + 115) +
+      'px"><path d="M30 115v6" stroke="#d9b26f" stroke-width="1"/><circle cx="30" cy="123" r="2.6" fill="#f1d59e"/>' +
+      '<path d="M27.3 125h5.4l2.6 15h-10.6z" fill="#b8434e"/><path d="M27.4 128h5.2" stroke="#f1d59e" stroke-width="1"/><path d="M28 130v9M30 130v10M32 130v9" stroke="#7a2232" stroke-width=".6"/></g>' +
+      '</g></svg>'
+    );
+  }
+  /* they hang from the top edge of the Ramaḍān card, in the space between the greeting and the day ring */
+  A.lanterns = lanterns;
+  function lanterns() {
+    var one = function (i, x, len, w) {
+      return lantern('tl' + i, len).replace(
+        '<svg class="fanous"',
+        '<svg class="fanous" style="left:' + x + 'px;width:' + w + 'px"'
       );
     };
     return (
-      '<div class="lanterns" aria-hidden="true">' + one(10, 30, 0.9) + one(58, 62, 1.1) + one(108, 18, 0.8) + '</div>'
+      '<div class="lanterns" aria-hidden="true">' + one(0, 0, 4, 20) + one(1, 32, 22, 24) + one(2, 68, 0, 18) + '</div>'
     );
   }
 
@@ -402,7 +530,6 @@
     var name = (S.profile.name || '').split(' ')[0];
     var rm = A.ramadanInfo ? A.ramadanInfo() : { on: false };
     var h =
-      (rm.on ? lanterns() : '') +
       '<header class="top"><div class="tt"><div class="eyebrow">' +
       (rm.on ? 'Ramaḍān Mubārak · day ' + rm.day : 'As-salāmu ʿalaykum') +
       '</div><h1>' +
