@@ -1,0 +1,619 @@
+/* Offline city list for manual location: name|country|ISO|lat|lng|IANA tz */
+window.CITIES = `Makkah|Saudi Arabia|SA|21.4225|39.8262|Asia/Riyadh
+Madinah|Saudi Arabia|SA|24.4672|39.6111|Asia/Riyadh
+Riyadh|Saudi Arabia|SA|24.7136|46.6753|Asia/Riyadh
+Jeddah|Saudi Arabia|SA|21.4858|39.1925|Asia/Riyadh
+Dammam|Saudi Arabia|SA|26.4207|50.0888|Asia/Riyadh
+Taif|Saudi Arabia|SA|21.2703|40.4158|Asia/Riyadh
+Dubai|United Arab Emirates|AE|25.2048|55.2708|Asia/Dubai
+Abu Dhabi|United Arab Emirates|AE|24.4539|54.3773|Asia/Dubai
+Sharjah|United Arab Emirates|AE|25.3463|55.4209|Asia/Dubai
+Doha|Qatar|QA|25.2854|51.5310|Asia/Qatar
+Kuwait City|Kuwait|KW|29.3759|47.9774|Asia/Kuwait
+Manama|Bahrain|BH|26.2285|50.5860|Asia/Bahrain
+Muscat|Oman|OM|23.5880|58.3829|Asia/Muscat
+Sanaa|Yemen|YE|15.3694|44.1910|Asia/Aden
+Aden|Yemen|YE|12.7855|45.0187|Asia/Aden
+Amman|Jordan|JO|31.9454|35.9284|Asia/Amman
+Jerusalem|Palestine|PS|31.7683|35.2137|Asia/Jerusalem
+Gaza|Palestine|PS|31.5017|34.4668|Asia/Gaza
+Beirut|Lebanon|LB|33.8938|35.5018|Asia/Beirut
+Damascus|Syria|SY|33.5138|36.2765|Asia/Damascus
+Aleppo|Syria|SY|36.2021|37.1343|Asia/Damascus
+Baghdad|Iraq|IQ|33.3152|44.3661|Asia/Baghdad
+Basra|Iraq|IQ|30.5085|47.7804|Asia/Baghdad
+Erbil|Iraq|IQ|36.1911|44.0092|Asia/Baghdad
+Cairo|Egypt|EG|30.0444|31.2357|Africa/Cairo
+Alexandria|Egypt|EG|31.2001|29.9187|Africa/Cairo
+Khartoum|Sudan|SD|15.5007|32.5599|Africa/Khartoum
+Tripoli|Libya|LY|32.8872|13.1913|Africa/Tripoli
+Tunis|Tunisia|TN|36.8065|10.1815|Africa/Tunis
+Algiers|Algeria|DZ|36.7538|3.0588|Africa/Algiers
+Casablanca|Morocco|MA|33.5731|-7.5898|Africa/Casablanca
+Rabat|Morocco|MA|34.0209|-6.8416|Africa/Casablanca
+Marrakesh|Morocco|MA|31.6295|-7.9811|Africa/Casablanca
+Fez|Morocco|MA|34.0181|-5.0078|Africa/Casablanca
+Nouakchott|Mauritania|MR|18.0735|-15.9582|Africa/Nouakchott
+Dakar|Senegal|SN|14.7167|-17.4677|Africa/Dakar
+Bamako|Mali|ML|12.6392|-8.0029|Africa/Bamako
+Lagos|Nigeria|NG|6.5244|3.3792|Africa/Lagos
+Abuja|Nigeria|NG|9.0765|7.3986|Africa/Lagos
+Kano|Nigeria|NG|12.0022|8.5920|Africa/Lagos
+Accra|Ghana|GH|5.6037|-0.1870|Africa/Accra
+Niamey|Niger|NE|13.5116|2.1254|Africa/Niamey
+N'Djamena|Chad|TD|12.1348|15.0557|Africa/Ndjamena
+Addis Ababa|Ethiopia|ET|9.0300|38.7400|Africa/Addis_Ababa
+Mogadishu|Somalia|SO|2.0469|45.3182|Africa/Mogadishu
+Hargeisa|Somaliland|SO|9.5600|44.0650|Africa/Mogadishu
+Djibouti|Djibouti|DJ|11.5721|43.1456|Africa/Djibouti
+Nairobi|Kenya|KE|-1.2921|36.8219|Africa/Nairobi
+Mombasa|Kenya|KE|-4.0435|39.6682|Africa/Nairobi
+Dar es Salaam|Tanzania|TZ|-6.7924|39.2083|Africa/Dar_es_Salaam
+Zanzibar|Tanzania|TZ|-6.1659|39.2026|Africa/Dar_es_Salaam
+Kampala|Uganda|UG|0.3476|32.5825|Africa/Kampala
+Johannesburg|South Africa|ZA|-26.2041|28.0473|Africa/Johannesburg
+Cape Town|South Africa|ZA|-33.9249|18.4241|Africa/Johannesburg
+Durban|South Africa|ZA|-29.8587|31.0218|Africa/Johannesburg
+Istanbul|Türkiye|TR|41.0082|28.9784|Europe/Istanbul
+Ankara|Türkiye|TR|39.9334|32.8597|Europe/Istanbul
+Izmir|Türkiye|TR|38.4237|27.1428|Europe/Istanbul
+Bursa|Türkiye|TR|40.1885|29.0610|Europe/Istanbul
+Konya|Türkiye|TR|37.8746|32.4932|Europe/Istanbul
+Baku|Azerbaijan|AZ|40.4093|49.8671|Asia/Baku
+Tehran|Iran|IR|35.6892|51.3890|Asia/Tehran
+Mashhad|Iran|IR|36.2605|59.6168|Asia/Tehran
+Kabul|Afghanistan|AF|34.5553|69.2075|Asia/Kabul
+Karachi|Pakistan|PK|24.8607|67.0011|Asia/Karachi
+Lahore|Pakistan|PK|31.5204|74.3587|Asia/Karachi
+Islamabad|Pakistan|PK|33.6844|73.0479|Asia/Karachi
+Peshawar|Pakistan|PK|34.0151|71.5249|Asia/Karachi
+Quetta|Pakistan|PK|30.1798|66.9750|Asia/Karachi
+Faisalabad|Pakistan|PK|31.4504|73.1350|Asia/Karachi
+Delhi|India|IN|28.7041|77.1025|Asia/Kolkata
+Mumbai|India|IN|19.0760|72.8777|Asia/Kolkata
+Hyderabad|India|IN|17.3850|78.4867|Asia/Kolkata
+Bengaluru|India|IN|12.9716|77.5946|Asia/Kolkata
+Chennai|India|IN|13.0827|80.2707|Asia/Kolkata
+Kolkata|India|IN|22.5726|88.3639|Asia/Kolkata
+Lucknow|India|IN|26.8467|80.9462|Asia/Kolkata
+Srinagar|India|IN|34.0837|74.7973|Asia/Kolkata
+Kozhikode|India|IN|11.2588|75.7804|Asia/Kolkata
+Dhaka|Bangladesh|BD|23.8103|90.4125|Asia/Dhaka
+Chittagong|Bangladesh|BD|22.3569|91.7832|Asia/Dhaka
+Sylhet|Bangladesh|BD|24.8949|91.8687|Asia/Dhaka
+Colombo|Sri Lanka|LK|6.9271|79.8612|Asia/Colombo
+Malé|Maldives|MV|4.1755|73.5093|Indian/Maldives
+Kathmandu|Nepal|NP|27.7172|85.3240|Asia/Kathmandu
+Tashkent|Uzbekistan|UZ|41.2995|69.2401|Asia/Tashkent
+Samarkand|Uzbekistan|UZ|39.6270|66.9750|Asia/Samarkand
+Bukhara|Uzbekistan|UZ|39.7747|64.4286|Asia/Samarkand
+Almaty|Kazakhstan|KZ|43.2220|76.8512|Asia/Almaty
+Astana|Kazakhstan|KZ|51.1694|71.4491|Asia/Almaty
+Bishkek|Kyrgyzstan|KG|42.8746|74.5698|Asia/Bishkek
+Dushanbe|Tajikistan|TJ|38.5598|68.7870|Asia/Dushanbe
+Ashgabat|Turkmenistan|TM|37.9601|58.3261|Asia/Ashgabat
+Kuala Lumpur|Malaysia|MY|3.1390|101.6869|Asia/Kuala_Lumpur
+Penang|Malaysia|MY|5.4141|100.3288|Asia/Kuala_Lumpur
+Johor Bahru|Malaysia|MY|1.4927|103.7414|Asia/Kuala_Lumpur
+Kota Kinabalu|Malaysia|MY|5.9804|116.0735|Asia/Kuching
+Singapore|Singapore|SG|1.3521|103.8198|Asia/Singapore
+Bandar Seri Begawan|Brunei|BN|4.9031|114.9398|Asia/Brunei
+Jakarta|Indonesia|ID|-6.2088|106.8456|Asia/Jakarta
+Surabaya|Indonesia|ID|-7.2575|112.7521|Asia/Jakarta
+Bandung|Indonesia|ID|-6.9175|107.6191|Asia/Jakarta
+Medan|Indonesia|ID|3.5952|98.6722|Asia/Jakarta
+Banda Aceh|Indonesia|ID|5.5483|95.3238|Asia/Jakarta
+Yogyakarta|Indonesia|ID|-7.7956|110.3695|Asia/Jakarta
+Makassar|Indonesia|ID|-5.1477|119.4327|Asia/Makassar
+Bangkok|Thailand|TH|13.7563|100.5018|Asia/Bangkok
+Pattani|Thailand|TH|6.8696|101.2501|Asia/Bangkok
+Manila|Philippines|PH|14.5995|120.9842|Asia/Manila
+Marawi|Philippines|PH|8.0034|124.2839|Asia/Manila
+Beijing|China|CN|39.9042|116.4074|Asia/Shanghai
+Shanghai|China|CN|31.2304|121.4737|Asia/Shanghai
+Ürümqi|China|CN|43.8256|87.6168|Asia/Urumqi
+Hong Kong|China|HK|22.3193|114.1694|Asia/Hong_Kong
+Seoul|South Korea|KR|37.5665|126.9780|Asia/Seoul
+Tokyo|Japan|JP|35.6762|139.6503|Asia/Tokyo
+Osaka|Japan|JP|34.6937|135.5023|Asia/Tokyo
+Sydney|Australia|AU|-33.8688|151.2093|Australia/Sydney
+Melbourne|Australia|AU|-37.8136|144.9631|Australia/Melbourne
+Brisbane|Australia|AU|-27.4698|153.0251|Australia/Brisbane
+Perth|Australia|AU|-31.9505|115.8605|Australia/Perth
+Adelaide|Australia|AU|-34.9285|138.6007|Australia/Adelaide
+Auckland|New Zealand|NZ|-36.8485|174.7633|Pacific/Auckland
+London|United Kingdom|GB|51.5074|-0.1278|Europe/London
+Birmingham|United Kingdom|GB|52.4862|-1.8904|Europe/London
+Manchester|United Kingdom|GB|53.4808|-2.2426|Europe/London
+Bradford|United Kingdom|GB|53.7960|-1.7594|Europe/London
+Leicester|United Kingdom|GB|52.6369|-1.1398|Europe/London
+Glasgow|United Kingdom|GB|55.8642|-4.2518|Europe/London
+Edinburgh|United Kingdom|GB|55.9533|-3.1883|Europe/London
+Cardiff|United Kingdom|GB|51.4816|-3.1791|Europe/London
+Dublin|Ireland|IE|53.3498|-6.2603|Europe/Dublin
+Paris|France|FR|48.8566|2.3522|Europe/Paris
+Marseille|France|FR|43.2965|5.3698|Europe/Paris
+Lyon|France|FR|45.7640|4.8357|Europe/Paris
+Brussels|Belgium|BE|50.8503|4.3517|Europe/Brussels
+Amsterdam|Netherlands|NL|52.3676|4.9041|Europe/Amsterdam
+Rotterdam|Netherlands|NL|51.9244|4.4777|Europe/Amsterdam
+Berlin|Germany|DE|52.5200|13.4050|Europe/Berlin
+Hamburg|Germany|DE|53.5511|9.9937|Europe/Berlin
+Munich|Germany|DE|48.1351|11.5820|Europe/Berlin
+Cologne|Germany|DE|50.9375|6.9603|Europe/Berlin
+Frankfurt|Germany|DE|50.1109|8.6821|Europe/Berlin
+Vienna|Austria|AT|48.2082|16.3738|Europe/Vienna
+Zurich|Switzerland|CH|47.3769|8.5417|Europe/Zurich
+Geneva|Switzerland|CH|46.2044|6.1432|Europe/Zurich
+Madrid|Spain|ES|40.4168|-3.7038|Europe/Madrid
+Barcelona|Spain|ES|41.3874|2.1686|Europe/Madrid
+Granada|Spain|ES|37.1773|-3.5986|Europe/Madrid
+Córdoba|Spain|ES|37.8882|-4.7794|Europe/Madrid
+Lisbon|Portugal|PT|38.7223|-9.1393|Europe/Lisbon
+Rome|Italy|IT|41.9028|12.4964|Europe/Rome
+Milan|Italy|IT|45.4642|9.1900|Europe/Rome
+Copenhagen|Denmark|DK|55.6761|12.5683|Europe/Copenhagen
+Oslo|Norway|NO|59.9139|10.7522|Europe/Oslo
+Stockholm|Sweden|SE|59.3293|18.0686|Europe/Stockholm
+Malmö|Sweden|SE|55.6050|13.0038|Europe/Stockholm
+Helsinki|Finland|FI|60.1699|24.9384|Europe/Helsinki
+Reykjavík|Iceland|IS|64.1466|-21.9426|Atlantic/Reykjavik
+Warsaw|Poland|PL|52.2297|21.0122|Europe/Warsaw
+Prague|Czechia|CZ|50.0755|14.4378|Europe/Prague
+Budapest|Hungary|HU|47.4979|19.0402|Europe/Budapest
+Athens|Greece|GR|37.9838|23.7275|Europe/Athens
+Sofia|Bulgaria|BG|42.6977|23.3219|Europe/Sofia
+Bucharest|Romania|RO|44.4268|26.1025|Europe/Bucharest
+Sarajevo|Bosnia and Herzegovina|BA|43.8563|18.4131|Europe/Sarajevo
+Tirana|Albania|AL|41.3275|19.8187|Europe/Tirane
+Pristina|Kosovo|XK|42.6629|21.1655|Europe/Belgrade
+Skopje|North Macedonia|MK|41.9981|21.4254|Europe/Skopje
+Moscow|Russia|RU|55.7558|37.6173|Europe/Moscow
+Kazan|Russia|RU|55.7887|49.1221|Europe/Moscow
+Grozny|Russia|RU|43.3178|45.6949|Europe/Moscow
+Makhachkala|Russia|RU|42.9849|47.5047|Europe/Moscow
+Ufa|Russia|RU|54.7388|55.9721|Asia/Yekaterinburg
+New York|United States|US|40.7128|-74.0060|America/New_York
+Washington|United States|US|38.9072|-77.0369|America/New_York
+Boston|United States|US|42.3601|-71.0589|America/New_York
+Philadelphia|United States|US|39.9526|-75.1652|America/New_York
+Atlanta|United States|US|33.7490|-84.3880|America/New_York
+Miami|United States|US|25.7617|-80.1918|America/New_York
+Detroit|United States|US|42.3314|-83.0458|America/Detroit
+Dearborn|United States|US|42.3223|-83.1763|America/Detroit
+Chicago|United States|US|41.8781|-87.6298|America/Chicago
+Houston|United States|US|29.7604|-95.3698|America/Chicago
+Dallas|United States|US|32.7767|-96.7970|America/Chicago
+Minneapolis|United States|US|44.9778|-93.2650|America/Chicago
+Denver|United States|US|39.7392|-104.9903|America/Denver
+Phoenix|United States|US|33.4484|-112.0740|America/Phoenix
+Los Angeles|United States|US|34.0522|-118.2437|America/Los_Angeles
+San Francisco|United States|US|37.7749|-122.4194|America/Los_Angeles
+Seattle|United States|US|47.6062|-122.3321|America/Los_Angeles
+Toronto|Canada|CA|43.6532|-79.3832|America/Toronto
+Mississauga|Canada|CA|43.5890|-79.6441|America/Toronto
+Ottawa|Canada|CA|45.4215|-75.6972|America/Toronto
+Montreal|Canada|CA|45.5017|-73.5673|America/Toronto
+Calgary|Canada|CA|51.0447|-114.0719|America/Edmonton
+Edmonton|Canada|CA|53.5461|-113.4938|America/Edmonton
+Vancouver|Canada|CA|49.2827|-123.1207|America/Vancouver
+Mexico City|Mexico|MX|19.4326|-99.1332|America/Mexico_City
+São Paulo|Brazil|BR|-23.5505|-46.6333|America/Sao_Paulo
+Rio de Janeiro|Brazil|BR|-22.9068|-43.1729|America/Sao_Paulo
+Buenos Aires|Argentina|AR|-34.6037|-58.3816|America/Argentina/Buenos_Aires
+Santiago|Chile|CL|-33.4489|-70.6693|America/Santiago
+Bogotá|Colombia|CO|4.7110|-74.0721|America/Bogota
+Lima|Peru|PE|-12.0464|-77.0428|America/Lima
+Port of Spain|Trinidad and Tobago|TT|10.6549|-61.5019|America/Port_of_Spain
+Georgetown|Guyana|GY|6.8013|-58.1551|America/Guyana
+Abha|Saudi Arabia|SA|18.2164|42.5053|Asia/Riyadh
+Tabuk|Saudi Arabia|SA|28.3835|36.5662|Asia/Riyadh
+Buraidah|Saudi Arabia|SA|26.3260|43.9750|Asia/Riyadh
+Al Khobar|Saudi Arabia|SA|26.2172|50.1971|Asia/Riyadh
+Hail|Saudi Arabia|SA|27.5114|41.7208|Asia/Riyadh
+Jazan|Saudi Arabia|SA|16.8892|42.5511|Asia/Riyadh
+Najran|Saudi Arabia|SA|17.5656|44.2289|Asia/Riyadh
+Yanbu|Saudi Arabia|SA|24.0895|38.0618|Asia/Riyadh
+Al Ain|United Arab Emirates|AE|24.2075|55.7447|Asia/Dubai
+Ajman|United Arab Emirates|AE|25.4052|55.5136|Asia/Dubai
+Ras Al Khaimah|United Arab Emirates|AE|25.8007|55.9762|Asia/Dubai
+Fujairah|United Arab Emirates|AE|25.1288|56.3265|Asia/Dubai
+Salalah|Oman|OM|17.0151|54.0924|Asia/Muscat
+Sohar|Oman|OM|24.3643|56.7468|Asia/Muscat
+Taiz|Yemen|YE|13.5795|44.0209|Asia/Aden
+Mukalla|Yemen|YE|14.5425|49.1242|Asia/Aden
+Irbid|Jordan|JO|32.5556|35.8500|Asia/Amman
+Zarqa|Jordan|JO|32.0728|36.0880|Asia/Amman
+Hebron|Palestine|PS|31.5326|35.0998|Asia/Hebron
+Nablus|Palestine|PS|32.2211|35.2544|Asia/Hebron
+Ramallah|Palestine|PS|31.9038|35.2034|Asia/Hebron
+Sidon|Lebanon|LB|33.5571|35.3729|Asia/Beirut
+Tripoli|Lebanon|LB|34.4367|35.8497|Asia/Beirut
+Homs|Syria|SY|34.7324|36.7137|Asia/Damascus
+Latakia|Syria|SY|35.5317|35.7900|Asia/Damascus
+Mosul|Iraq|IQ|36.3489|43.1577|Asia/Baghdad
+Najaf|Iraq|IQ|32.0259|44.3462|Asia/Baghdad
+Karbala|Iraq|IQ|32.6160|44.0249|Asia/Baghdad
+Sulaymaniyah|Iraq|IQ|35.5613|45.4302|Asia/Baghdad
+Kirkuk|Iraq|IQ|35.4681|44.3922|Asia/Baghdad
+Isfahan|Iran|IR|32.6546|51.6680|Asia/Tehran
+Shiraz|Iran|IR|29.5918|52.5837|Asia/Tehran
+Tabriz|Iran|IR|38.0800|46.2919|Asia/Tehran
+Qom|Iran|IR|34.6416|50.8746|Asia/Tehran
+Ahvaz|Iran|IR|31.3183|48.6706|Asia/Tehran
+Zahedan|Iran|IR|29.4963|60.8629|Asia/Tehran
+Herat|Afghanistan|AF|34.3529|62.2040|Asia/Kabul
+Kandahar|Afghanistan|AF|31.6289|65.7372|Asia/Kabul
+Mazar-i-Sharif|Afghanistan|AF|36.7090|67.1109|Asia/Kabul
+Jalalabad|Afghanistan|AF|34.4265|70.4515|Asia/Kabul
+Antalya|Türkiye|TR|36.8969|30.7133|Europe/Istanbul
+Adana|Türkiye|TR|37.0000|35.3213|Europe/Istanbul
+Gaziantep|Türkiye|TR|37.0662|37.3833|Europe/Istanbul
+Diyarbakır|Türkiye|TR|37.9144|40.2306|Europe/Istanbul
+Kayseri|Türkiye|TR|38.7312|35.4787|Europe/Istanbul
+Trabzon|Türkiye|TR|41.0027|39.7168|Europe/Istanbul
+Şanlıurfa|Türkiye|TR|37.1591|38.7969|Europe/Istanbul
+Erzurum|Türkiye|TR|39.9043|41.2679|Europe/Istanbul
+Samsun|Türkiye|TR|41.2867|36.3300|Europe/Istanbul
+Giza|Egypt|EG|30.0131|31.2089|Africa/Cairo
+Luxor|Egypt|EG|25.6872|32.6396|Africa/Cairo
+Aswan|Egypt|EG|24.0889|32.8998|Africa/Cairo
+Port Said|Egypt|EG|31.2653|32.3019|Africa/Cairo
+Mansoura|Egypt|EG|31.0409|31.3785|Africa/Cairo
+Tanta|Egypt|EG|30.7865|31.0004|Africa/Cairo
+Asyut|Egypt|EG|27.1783|31.1859|Africa/Cairo
+Hurghada|Egypt|EG|27.2579|33.8116|Africa/Cairo
+Omdurman|Sudan|SD|15.6445|32.4777|Africa/Khartoum
+Port Sudan|Sudan|SD|19.6158|37.2164|Africa/Khartoum
+Benghazi|Libya|LY|32.1167|20.0667|Africa/Tripoli
+Misrata|Libya|LY|32.3754|15.0925|Africa/Tripoli
+Sfax|Tunisia|TN|34.7406|10.7603|Africa/Tunis
+Sousse|Tunisia|TN|35.8256|10.6084|Africa/Tunis
+Kairouan|Tunisia|TN|35.6781|10.0963|Africa/Tunis
+Oran|Algeria|DZ|35.6971|-0.6308|Africa/Algiers
+Constantine|Algeria|DZ|36.3650|6.6147|Africa/Algiers
+Annaba|Algeria|DZ|36.9000|7.7667|Africa/Algiers
+Blida|Algeria|DZ|36.4700|2.8277|Africa/Algiers
+Sétif|Algeria|DZ|36.1898|5.4108|Africa/Algiers
+Tlemcen|Algeria|DZ|34.8783|-1.3150|Africa/Algiers
+Ghardaïa|Algeria|DZ|32.4909|3.6735|Africa/Algiers
+Tangier|Morocco|MA|35.7595|-5.8340|Africa/Casablanca
+Agadir|Morocco|MA|30.4278|-9.5981|Africa/Casablanca
+Meknes|Morocco|MA|33.8935|-5.5473|Africa/Casablanca
+Oujda|Morocco|MA|34.6814|-1.9086|Africa/Casablanca
+Tetouan|Morocco|MA|35.5785|-5.3684|Africa/Casablanca
+Conakry|Guinea|GN|9.6412|-13.5784|Africa/Conakry
+Freetown|Sierra Leone|SL|8.4657|-13.2317|Africa/Freetown
+Banjul|Gambia|GM|13.4549|-16.5790|Africa/Banjul
+Bissau|Guinea-Bissau|GW|11.8817|-15.6178|Africa/Bissau
+Ouagadougou|Burkina Faso|BF|12.3714|-1.5197|Africa/Ouagadougou
+Abidjan|Côte d’Ivoire|CI|5.3600|-4.0083|Africa/Abidjan
+Lomé|Togo|TG|6.1256|1.2254|Africa/Lome
+Cotonou|Benin|BJ|6.3703|2.3912|Africa/Porto-Novo
+Monrovia|Liberia|LR|6.3156|-10.8074|Africa/Monrovia
+Touba|Senegal|SN|14.8500|-15.8833|Africa/Dakar
+Timbuktu|Mali|ML|16.7666|-3.0026|Africa/Bamako
+Ibadan|Nigeria|NG|7.3775|3.9470|Africa/Lagos
+Sokoto|Nigeria|NG|13.0059|5.2476|Africa/Lagos
+Kaduna|Nigeria|NG|10.5105|7.4165|Africa/Lagos
+Maiduguri|Nigeria|NG|11.8311|13.1510|Africa/Lagos
+Zaria|Nigeria|NG|11.0855|7.7199|Africa/Lagos
+Ilorin|Nigeria|NG|8.4966|4.5421|Africa/Lagos
+Zinder|Niger|NE|13.8069|8.9881|Africa/Niamey
+Yaoundé|Cameroon|CM|3.8480|11.5021|Africa/Douala
+Douala|Cameroon|CM|4.0511|9.7679|Africa/Douala
+Garoua|Cameroon|CM|9.3014|13.3977|Africa/Douala
+Bangui|Central African Republic|CF|4.3947|18.5582|Africa/Bangui
+Kinshasa|DR Congo|CD|-4.4419|15.2663|Africa/Kinshasa
+Brazzaville|Congo|CG|-4.2634|15.2429|Africa/Brazzaville
+Libreville|Gabon|GA|0.4162|9.4673|Africa/Libreville
+Malabo|Equatorial Guinea|GQ|3.7504|8.7371|Africa/Malabo
+Luanda|Angola|AO|-8.8390|13.2894|Africa/Luanda
+Asmara|Eritrea|ER|15.3229|38.9251|Africa/Asmara
+Dire Dawa|Ethiopia|ET|9.6009|41.8501|Africa/Addis_Ababa
+Harar|Ethiopia|ET|9.3126|42.1227|Africa/Addis_Ababa
+Kismayo|Somalia|SO|-0.3582|42.5454|Africa/Mogadishu
+Garowe|Somalia|SO|8.4054|48.4845|Africa/Mogadishu
+Lamu|Kenya|KE|-2.2717|40.9020|Africa/Nairobi
+Kigali|Rwanda|RW|-1.9441|30.0619|Africa/Kigali
+Bujumbura|Burundi|BI|-3.3614|29.3599|Africa/Bujumbura
+Juba|South Sudan|SS|4.8594|31.5713|Africa/Juba
+Arusha|Tanzania|TZ|-3.3869|36.6830|Africa/Dar_es_Salaam
+Mwanza|Tanzania|TZ|-2.5164|32.9175|Africa/Dar_es_Salaam
+Dodoma|Tanzania|TZ|-6.1630|35.7516|Africa/Dar_es_Salaam
+Lusaka|Zambia|ZM|-15.3875|28.3228|Africa/Lusaka
+Harare|Zimbabwe|ZW|-17.8252|31.0335|Africa/Harare
+Maputo|Mozambique|MZ|-25.9692|32.5732|Africa/Maputo
+Lilongwe|Malawi|MW|-13.9626|33.7741|Africa/Blantyre
+Blantyre|Malawi|MW|-15.7667|35.0168|Africa/Blantyre
+Antananarivo|Madagascar|MG|-18.8792|47.5079|Indian/Antananarivo
+Moroni|Comoros|KM|-11.7172|43.2473|Indian/Comoro
+Port Louis|Mauritius|MU|-20.1609|57.5012|Indian/Mauritius
+Pretoria|South Africa|ZA|-25.7479|28.2293|Africa/Johannesburg
+Gqeberha|South Africa|ZA|-33.9608|25.6022|Africa/Johannesburg
+Windhoek|Namibia|NA|-22.5609|17.0658|Africa/Windhoek
+Gaborone|Botswana|BW|-24.6282|25.9231|Africa/Gaborone
+Rawalpindi|Pakistan|PK|33.5651|73.0169|Asia/Karachi
+Multan|Pakistan|PK|30.1575|71.5249|Asia/Karachi
+Hyderabad|Pakistan|PK|25.3960|68.3578|Asia/Karachi
+Gujranwala|Pakistan|PK|32.1877|74.1945|Asia/Karachi
+Sialkot|Pakistan|PK|32.4945|74.5229|Asia/Karachi
+Sukkur|Pakistan|PK|27.7052|68.8574|Asia/Karachi
+Abbottabad|Pakistan|PK|34.1688|73.2215|Asia/Karachi
+Muzaffarabad|Pakistan|PK|34.3700|73.4711|Asia/Karachi
+Bahawalpur|Pakistan|PK|29.3956|71.6836|Asia/Karachi
+Gilgit|Pakistan|PK|35.9208|74.3080|Asia/Karachi
+Mardan|Pakistan|PK|34.1986|72.0404|Asia/Karachi
+Ahmedabad|India|IN|23.0225|72.5714|Asia/Kolkata
+Pune|India|IN|18.5204|73.8567|Asia/Kolkata
+Jaipur|India|IN|26.9124|75.7873|Asia/Kolkata
+Bhopal|India|IN|23.2599|77.4126|Asia/Kolkata
+Aligarh|India|IN|27.8974|78.0880|Asia/Kolkata
+Patna|India|IN|25.5941|85.1376|Asia/Kolkata
+Kanpur|India|IN|26.4499|80.3319|Asia/Kolkata
+Surat|India|IN|21.1702|72.8311|Asia/Kolkata
+Nagpur|India|IN|21.1458|79.0882|Asia/Kolkata
+Malappuram|India|IN|11.0510|76.0711|Asia/Kolkata
+Kochi|India|IN|9.9312|76.2673|Asia/Kolkata
+Thiruvananthapuram|India|IN|8.5241|76.9366|Asia/Kolkata
+Mangaluru|India|IN|12.9141|74.8560|Asia/Kolkata
+Bhatkal|India|IN|13.9850|74.5550|Asia/Kolkata
+Moradabad|India|IN|28.8386|78.7733|Asia/Kolkata
+Deoband|India|IN|29.6956|77.6800|Asia/Kolkata
+Varanasi|India|IN|25.3176|82.9739|Asia/Kolkata
+Guwahati|India|IN|26.1445|91.7362|Asia/Kolkata
+Jammu|India|IN|32.7266|74.8570|Asia/Kolkata
+Leh|India|IN|34.1526|77.5771|Asia/Kolkata
+Khulna|Bangladesh|BD|22.8456|89.5403|Asia/Dhaka
+Rajshahi|Bangladesh|BD|24.3745|88.6042|Asia/Dhaka
+Comilla|Bangladesh|BD|23.4607|91.1809|Asia/Dhaka
+Mymensingh|Bangladesh|BD|24.7471|90.4203|Asia/Dhaka
+Rangpur|Bangladesh|BD|25.7439|89.2752|Asia/Dhaka
+Barisal|Bangladesh|BD|22.7010|90.3535|Asia/Dhaka
+Cox’s Bazar|Bangladesh|BD|21.4272|92.0058|Asia/Dhaka
+Kandy|Sri Lanka|LK|7.2906|80.6337|Asia/Colombo
+Batticaloa|Sri Lanka|LK|7.7310|81.6747|Asia/Colombo
+Thimphu|Bhutan|BT|27.4728|89.6390|Asia/Thimphu
+Yangon|Myanmar|MM|16.8409|96.1735|Asia/Yangon
+Sittwe|Myanmar|MM|20.1462|92.8983|Asia/Yangon
+Namangan|Uzbekistan|UZ|40.9983|71.6726|Asia/Tashkent
+Andijan|Uzbekistan|UZ|40.7821|72.3442|Asia/Tashkent
+Fergana|Uzbekistan|UZ|40.3842|71.7843|Asia/Tashkent
+Khiva|Uzbekistan|UZ|41.3783|60.3639|Asia/Samarkand
+Nukus|Uzbekistan|UZ|42.4600|59.6100|Asia/Samarkand
+Osh|Kyrgyzstan|KG|40.5283|72.7985|Asia/Bishkek
+Khujand|Tajikistan|TJ|40.2826|69.6220|Asia/Dushanbe
+Shymkent|Kazakhstan|KZ|42.3417|69.5901|Asia/Almaty
+Turkistan|Kazakhstan|KZ|43.2973|68.2517|Asia/Almaty
+Mary|Turkmenistan|TM|37.5936|61.8303|Asia/Ashgabat
+Ulaanbaatar|Mongolia|MN|47.8864|106.9057|Asia/Ulaanbaatar
+Tbilisi|Georgia|GE|41.7151|44.8271|Asia/Tbilisi
+Yerevan|Armenia|AM|40.1792|44.4991|Asia/Yerevan
+Ganja|Azerbaijan|AZ|40.6828|46.3606|Asia/Baku
+Nakhchivan|Azerbaijan|AZ|39.2089|45.4122|Asia/Baku
+Saint Petersburg|Russia|RU|59.9311|30.3609|Europe/Moscow
+Nizhny Novgorod|Russia|RU|56.2965|43.9361|Europe/Moscow
+Derbent|Russia|RU|42.0577|48.2887|Europe/Moscow
+Nalchik|Russia|RU|43.4853|43.6071|Europe/Moscow
+Vladikavkaz|Russia|RU|43.0241|44.6820|Europe/Moscow
+Cherkessk|Russia|RU|44.2233|42.0578|Europe/Moscow
+Nazran|Russia|RU|43.2257|44.7645|Europe/Moscow
+Astrakhan|Russia|RU|46.3497|48.0408|Europe/Astrakhan
+Samara|Russia|RU|53.1959|50.1002|Europe/Samara
+Yekaterinburg|Russia|RU|56.8389|60.6057|Asia/Yekaterinburg
+Chelyabinsk|Russia|RU|55.1644|61.4368|Asia/Yekaterinburg
+Tyumen|Russia|RU|57.1530|65.5343|Asia/Yekaterinburg
+Novosibirsk|Russia|RU|55.0084|82.9357|Asia/Novosibirsk
+Lanzhou|China|CN|36.0611|103.8343|Asia/Shanghai
+Xi’an|China|CN|34.3416|108.9398|Asia/Shanghai
+Yinchuan|China|CN|38.4872|106.2309|Asia/Shanghai
+Linxia|China|CN|35.6000|103.2100|Asia/Shanghai
+Kashgar|China|CN|39.4704|75.9898|Asia/Urumqi
+Guangzhou|China|CN|23.1291|113.2644|Asia/Shanghai
+Taipei|Taiwan|TW|25.0330|121.5654|Asia/Taipei
+Busan|South Korea|KR|35.1796|129.0756|Asia/Seoul
+Nagoya|Japan|JP|35.1815|136.9066|Asia/Tokyo
+Kota Bharu|Malaysia|MY|6.1254|102.2381|Asia/Kuala_Lumpur
+Kuala Terengganu|Malaysia|MY|5.3296|103.1370|Asia/Kuala_Lumpur
+Ipoh|Malaysia|MY|4.5975|101.0901|Asia/Kuala_Lumpur
+Melaka|Malaysia|MY|2.1896|102.2501|Asia/Kuala_Lumpur
+Shah Alam|Malaysia|MY|3.0733|101.5185|Asia/Kuala_Lumpur
+Alor Setar|Malaysia|MY|6.1248|100.3678|Asia/Kuala_Lumpur
+Kuching|Malaysia|MY|1.5535|110.3593|Asia/Kuching
+Semarang|Indonesia|ID|-6.9667|110.4167|Asia/Jakarta
+Palembang|Indonesia|ID|-2.9761|104.7754|Asia/Jakarta
+Padang|Indonesia|ID|-0.9471|100.4172|Asia/Jakarta
+Pekanbaru|Indonesia|ID|0.5071|101.4478|Asia/Jakarta
+Malang|Indonesia|ID|-7.9666|112.6326|Asia/Jakarta
+Pontianak|Indonesia|ID|-0.0263|109.3425|Asia/Pontianak
+Balikpapan|Indonesia|ID|-1.2379|116.8529|Asia/Makassar
+Banjarmasin|Indonesia|ID|-3.3186|114.5944|Asia/Makassar
+Mataram|Indonesia|ID|-8.5833|116.1167|Asia/Makassar
+Denpasar|Indonesia|ID|-8.6705|115.2126|Asia/Makassar
+Manado|Indonesia|ID|1.4748|124.8421|Asia/Makassar
+Jayapura|Indonesia|ID|-2.5337|140.7181|Asia/Jayapura
+Hanoi|Vietnam|VN|21.0278|105.8342|Asia/Ho_Chi_Minh
+Ho Chi Minh City|Vietnam|VN|10.8231|106.6297|Asia/Ho_Chi_Minh
+Phnom Penh|Cambodia|KH|11.5564|104.9282|Asia/Phnom_Penh
+Vientiane|Laos|LA|17.9757|102.6331|Asia/Vientiane
+Hat Yai|Thailand|TH|7.0086|100.4747|Asia/Bangkok
+Yala|Thailand|TH|6.5410|101.2806|Asia/Bangkok
+Narathiwat|Thailand|TH|6.4255|101.8253|Asia/Bangkok
+Zamboanga|Philippines|PH|6.9214|122.0790|Asia/Manila
+Cotabato|Philippines|PH|7.2236|124.2464|Asia/Manila
+Davao|Philippines|PH|7.1907|125.4553|Asia/Manila
+Dili|Timor-Leste|TL|-8.5569|125.5603|Asia/Dili
+Canberra|Australia|AU|-35.2809|149.1300|Australia/Sydney
+Darwin|Australia|AU|-12.4634|130.8456|Australia/Darwin
+Hobart|Australia|AU|-42.8821|147.3272|Australia/Hobart
+Gold Coast|Australia|AU|-28.0167|153.4000|Australia/Brisbane
+Wellington|New Zealand|NZ|-41.2865|174.7762|Pacific/Auckland
+Christchurch|New Zealand|NZ|-43.5321|172.6362|Pacific/Auckland
+Suva|Fiji|FJ|-18.1416|178.4419|Pacific/Fiji
+Port Moresby|Papua New Guinea|PG|-9.4438|147.1803|Pacific/Port_Moresby
+Luton|United Kingdom|GB|51.8787|-0.4200|Europe/London
+Blackburn|United Kingdom|GB|53.7480|-2.4820|Europe/London
+Sheffield|United Kingdom|GB|53.3811|-1.4701|Europe/London
+Leeds|United Kingdom|GB|53.8008|-1.5491|Europe/London
+Liverpool|United Kingdom|GB|53.4084|-2.9916|Europe/London
+Nottingham|United Kingdom|GB|52.9548|-1.1581|Europe/London
+Bristol|United Kingdom|GB|51.4545|-2.5879|Europe/London
+Belfast|United Kingdom|GB|54.5973|-5.9301|Europe/London
+Dewsbury|United Kingdom|GB|53.6910|-1.6330|Europe/London
+Preston|United Kingdom|GB|53.7632|-2.7031|Europe/London
+Oldham|United Kingdom|GB|53.5409|-2.1114|Europe/London
+Slough|United Kingdom|GB|51.5105|-0.5950|Europe/London
+Coventry|United Kingdom|GB|52.4068|-1.5197|Europe/London
+Aberdeen|United Kingdom|GB|57.1497|-2.0943|Europe/London
+Dundee|United Kingdom|GB|56.4620|-2.9707|Europe/London
+Cork|Ireland|IE|51.8985|-8.4756|Europe/Dublin
+Lille|France|FR|50.6292|3.0573|Europe/Paris
+Toulouse|France|FR|43.6047|1.4442|Europe/Paris
+Nice|France|FR|43.7102|7.2620|Europe/Paris
+Strasbourg|France|FR|48.5734|7.7521|Europe/Paris
+Bordeaux|France|FR|44.8378|-0.5792|Europe/Paris
+Nantes|France|FR|47.2184|-1.5536|Europe/Paris
+Montpellier|France|FR|43.6108|3.8767|Europe/Paris
+Saint-Denis|France|FR|48.9362|2.3574|Europe/Paris
+Antwerp|Belgium|BE|51.2194|4.4025|Europe/Brussels
+Liège|Belgium|BE|50.6326|5.5797|Europe/Brussels
+Ghent|Belgium|BE|51.0543|3.7174|Europe/Brussels
+Luxembourg|Luxembourg|LU|49.6116|6.1319|Europe/Luxembourg
+The Hague|Netherlands|NL|52.0705|4.3007|Europe/Amsterdam
+Utrecht|Netherlands|NL|52.0907|5.1214|Europe/Amsterdam
+Stuttgart|Germany|DE|48.7758|9.1829|Europe/Berlin
+Düsseldorf|Germany|DE|51.2277|6.7735|Europe/Berlin
+Dortmund|Germany|DE|51.5136|7.4653|Europe/Berlin
+Duisburg|Germany|DE|51.4344|6.7623|Europe/Berlin
+Essen|Germany|DE|51.4556|7.0116|Europe/Berlin
+Hanover|Germany|DE|52.3759|9.7320|Europe/Berlin
+Bremen|Germany|DE|53.0793|8.8017|Europe/Berlin
+Leipzig|Germany|DE|51.3397|12.3731|Europe/Berlin
+Dresden|Germany|DE|51.0504|13.7373|Europe/Berlin
+Nuremberg|Germany|DE|49.4521|11.0767|Europe/Berlin
+Mannheim|Germany|DE|49.4875|8.4660|Europe/Berlin
+Graz|Austria|AT|47.0707|15.4395|Europe/Vienna
+Linz|Austria|AT|48.3069|14.2858|Europe/Vienna
+Bern|Switzerland|CH|46.9480|7.4474|Europe/Zurich
+Basel|Switzerland|CH|47.5596|7.5886|Europe/Zurich
+Naples|Italy|IT|40.8518|14.2681|Europe/Rome
+Turin|Italy|IT|45.0703|7.6869|Europe/Rome
+Bologna|Italy|IT|44.4949|11.3426|Europe/Rome
+Palermo|Italy|IT|38.1157|13.3615|Europe/Rome
+Florence|Italy|IT|43.7696|11.2558|Europe/Rome
+Seville|Spain|ES|37.3891|-5.9845|Europe/Madrid
+Valencia|Spain|ES|39.4699|-0.3763|Europe/Madrid
+Málaga|Spain|ES|36.7213|-4.4214|Europe/Madrid
+Bilbao|Spain|ES|43.2630|-2.9350|Europe/Madrid
+Palma|Spain|ES|39.5696|2.6502|Europe/Madrid
+Ceuta|Spain|ES|35.8894|-5.3213|Africa/Ceuta
+Melilla|Spain|ES|35.2923|-2.9381|Africa/Ceuta
+Porto|Portugal|PT|41.1579|-8.6291|Europe/Lisbon
+Valletta|Malta|MT|35.8989|14.5146|Europe/Malta
+Nicosia|Cyprus|CY|35.1856|33.3823|Asia/Nicosia
+Gothenburg|Sweden|SE|57.7089|11.9746|Europe/Stockholm
+Uppsala|Sweden|SE|59.8586|17.6389|Europe/Stockholm
+Bergen|Norway|NO|60.3913|5.3221|Europe/Oslo
+Trondheim|Norway|NO|63.4305|10.3951|Europe/Oslo
+Tromsø|Norway|NO|69.6492|18.9553|Europe/Oslo
+Aarhus|Denmark|DK|56.1629|10.2039|Europe/Copenhagen
+Odense|Denmark|DK|55.4038|10.4024|Europe/Copenhagen
+Turku|Finland|FI|60.4518|22.2666|Europe/Helsinki
+Oulu|Finland|FI|65.0121|25.4651|Europe/Helsinki
+Tallinn|Estonia|EE|59.4370|24.7536|Europe/Tallinn
+Riga|Latvia|LV|56.9496|24.1052|Europe/Riga
+Vilnius|Lithuania|LT|54.6872|25.2797|Europe/Vilnius
+Minsk|Belarus|BY|53.9006|27.5590|Europe/Minsk
+Kyiv|Ukraine|UA|50.4501|30.5234|Europe/Kyiv
+Odesa|Ukraine|UA|46.4825|30.7233|Europe/Kyiv
+Simferopol|Ukraine|UA|44.9521|34.1024|Europe/Simferopol
+Chișinău|Moldova|MD|47.0105|28.8638|Europe/Chisinau
+Belgrade|Serbia|RS|44.7866|20.4489|Europe/Belgrade
+Novi Pazar|Serbia|RS|43.1367|20.5122|Europe/Belgrade
+Zagreb|Croatia|HR|45.8150|15.9819|Europe/Zagreb
+Ljubljana|Slovenia|SI|46.0569|14.5058|Europe/Ljubljana
+Podgorica|Montenegro|ME|42.4304|19.2594|Europe/Podgorica
+Mostar|Bosnia and Herzegovina|BA|43.3438|17.8078|Europe/Sarajevo
+Tuzla|Bosnia and Herzegovina|BA|44.5384|18.6763|Europe/Sarajevo
+Zenica|Bosnia and Herzegovina|BA|44.2034|17.9077|Europe/Sarajevo
+Banja Luka|Bosnia and Herzegovina|BA|44.7722|17.1910|Europe/Sarajevo
+Prizren|Kosovo|XK|42.2139|20.7397|Europe/Belgrade
+Durrës|Albania|AL|41.3246|19.4565|Europe/Tirane
+Shkodër|Albania|AL|42.0683|19.5126|Europe/Tirane
+Tetovo|North Macedonia|MK|42.0106|20.9715|Europe/Skopje
+Thessaloniki|Greece|GR|40.6401|22.9444|Europe/Athens
+Komotini|Greece|GR|41.1224|25.4066|Europe/Athens
+Plovdiv|Bulgaria|BG|42.1354|24.7453|Europe/Sofia
+Kardzhali|Bulgaria|BG|41.6500|25.3667|Europe/Sofia
+Constanța|Romania|RO|44.1598|28.6348|Europe/Bucharest
+Bratislava|Slovakia|SK|48.1486|17.1077|Europe/Bratislava
+Jersey City|United States|US|40.7178|-74.0431|America/New_York
+Paterson|United States|US|40.9168|-74.1718|America/New_York
+Baltimore|United States|US|39.2904|-76.6122|America/New_York
+Charlotte|United States|US|35.2271|-80.8431|America/New_York
+Orlando|United States|US|28.5383|-81.3792|America/New_York
+Tampa|United States|US|27.9506|-82.4572|America/New_York
+Columbus|United States|US|39.9612|-82.9988|America/New_York
+Cleveland|United States|US|41.4993|-81.6944|America/New_York
+Pittsburgh|United States|US|40.4406|-79.9959|America/New_York
+Buffalo|United States|US|42.8864|-78.8784|America/New_York
+Raleigh|United States|US|35.7796|-78.6382|America/New_York
+Richmond|United States|US|37.5407|-77.4360|America/New_York
+Fairfax|United States|US|38.8462|-77.3064|America/New_York
+Indianapolis|United States|US|39.7684|-86.1581|America/Indiana/Indianapolis
+Nashville|United States|US|36.1627|-86.7816|America/Chicago
+Memphis|United States|US|35.1495|-90.0490|America/Chicago
+New Orleans|United States|US|29.9511|-90.0715|America/Chicago
+Austin|United States|US|30.2672|-97.7431|America/Chicago
+San Antonio|United States|US|29.4241|-98.4936|America/Chicago
+Oklahoma City|United States|US|35.4676|-97.5164|America/Chicago
+Kansas City|United States|US|39.0997|-94.5786|America/Chicago
+St. Louis|United States|US|38.6270|-90.1994|America/Chicago
+Milwaukee|United States|US|43.0389|-87.9065|America/Chicago
+Salt Lake City|United States|US|40.7608|-111.8910|America/Denver
+Las Vegas|United States|US|36.1699|-115.1398|America/Los_Angeles
+San Diego|United States|US|32.7157|-117.1611|America/Los_Angeles
+Sacramento|United States|US|38.5816|-121.4944|America/Los_Angeles
+San Jose|United States|US|37.3382|-121.8863|America/Los_Angeles
+Portland|United States|US|45.5152|-122.6784|America/Los_Angeles
+Anchorage|United States|US|61.2181|-149.9003|America/Anchorage
+Honolulu|United States|US|21.3069|-157.8583|Pacific/Honolulu
+Winnipeg|Canada|CA|49.8951|-97.1384|America/Winnipeg
+Regina|Canada|CA|50.4452|-104.6189|America/Regina
+Saskatoon|Canada|CA|52.1332|-106.6700|America/Regina
+Halifax|Canada|CA|44.6488|-63.5752|America/Halifax
+Quebec City|Canada|CA|46.8139|-71.2080|America/Toronto
+Hamilton|Canada|CA|43.2557|-79.8711|America/Toronto
+London (Ontario)|Canada|CA|42.9849|-81.2453|America/Toronto
+Windsor|Canada|CA|42.3149|-83.0364|America/Toronto
+Brampton|Canada|CA|43.7315|-79.7624|America/Toronto
+Surrey|Canada|CA|49.1913|-122.8490|America/Vancouver
+St. John’s|Canada|CA|47.5615|-52.7126|America/St_Johns
+Guadalajara|Mexico|MX|20.6597|-103.3496|America/Mexico_City
+Monterrey|Mexico|MX|25.6866|-100.3161|America/Monterrey
+Tijuana|Mexico|MX|32.5149|-117.0382|America/Tijuana
+Havana|Cuba|CU|23.1136|-82.3666|America/Havana
+Santo Domingo|Dominican Republic|DO|18.4861|-69.9312|America/Santo_Domingo
+San Juan|Puerto Rico|PR|18.4655|-66.1057|America/Puerto_Rico
+Kingston|Jamaica|JM|17.9714|-76.7936|America/Jamaica
+Paramaribo|Suriname|SR|5.8520|-55.2038|America/Paramaribo
+Caracas|Venezuela|VE|10.4806|-66.9036|America/Caracas
+Quito|Ecuador|EC|-0.1807|-78.4678|America/Guayaquil
+La Paz|Bolivia|BO|-16.4897|-68.1193|America/La_Paz
+Asunción|Paraguay|PY|-25.2637|-57.5759|America/Asuncion
+Montevideo|Uruguay|UY|-34.9011|-56.1645|America/Montevideo
+Panama City|Panama|PA|8.9824|-79.5199|America/Panama
+San José|Costa Rica|CR|9.9281|-84.0907|America/Costa_Rica
+Guatemala City|Guatemala|GT|14.6349|-90.5069|America/Guatemala
+Brasília|Brazil|BR|-15.7975|-47.8919|America/Sao_Paulo
+Curitiba|Brazil|BR|-25.4284|-49.2733|America/Sao_Paulo
+Foz do Iguaçu|Brazil|BR|-25.5163|-54.5854|America/Sao_Paulo
+Salvador|Brazil|BR|-12.9777|-38.5016|America/Bahia
+Manaus|Brazil|BR|-3.1190|-60.0217|America/Manaus
+Medellín|Colombia|CO|6.2442|-75.5812|America/Bogota
+Maicao|Colombia|CO|11.3779|-72.2390|America/Bogota
+Córdoba|Argentina|AR|-31.4201|-64.1888|America/Argentina/Cordoba
+Rosario|Argentina|AR|-32.9442|-60.6505|America/Argentina/Cordoba`.split('\n').map(function (l) {
+  var a = l.split('|');
+  return { name: a[0], country: a[1], cc: a[2], lat: +a[3], lng: +a[4], tz: a[5] };
+});

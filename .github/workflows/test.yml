@@ -1,0 +1,33 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install the Node tools
+        run: cd tools/.node && npm ci
+      - name: Formatting
+        run: tools/.node/node_modules/.bin/prettier --check "web/js/*.js" "web/*.css" "tools/*.js"
+      - name: Build the content
+        run: |
+          python tools/build_content.py
+          python tools/build_hadith.py
+      - name: Content tests
+        run: node tools/test.js
+      - name: Interface tests
+        run: node tools/smoke.js

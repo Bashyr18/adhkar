@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut android:shortcutId="morning" android:enabled="true" android:icon="@drawable/ic_sc_morning" android:shortcutShortLabel="@string/sc_morning">
+        <intent android:action="android.intent.action.VIEW" android:targetPackage="com.adhkar.app" android:targetClass="com.adhkar.app.MainActivity" android:data="adhkar://route/c/morning" />
+    </shortcut>
+    <shortcut android:shortcutId="evening" android:enabled="true" android:icon="@drawable/ic_sc_evening" android:shortcutShortLabel="@string/sc_evening">
+        <intent android:action="android.intent.action.VIEW" android:targetPackage="com.adhkar.app" android:targetClass="com.adhkar.app.MainActivity" android:data="adhkar://route/c/evening" />
+    </shortcut>
+    <shortcut android:shortcutId="tasbih" android:enabled="true" android:icon="@drawable/ic_sc_tasbih" android:shortcutShortLabel="@string/sc_tasbih">
+        <intent android:action="android.intent.action.VIEW" android:targetPackage="com.adhkar.app" android:targetClass="com.adhkar.app.MainActivity" android:data="adhkar://route/tracker" />
+    </shortcut>
+    <shortcut android:shortcutId="qibla" android:enabled="true" android:icon="@drawable/ic_sc_qibla" android:shortcutShortLabel="@string/sc_qibla">
+        <intent android:action="android.intent.action.VIEW" android:targetPackage="com.adhkar.app" android:targetClass="com.adhkar.app.MainActivity" android:data="adhkar://route/qibla" />
+    </shortcut>
+</shortcuts>

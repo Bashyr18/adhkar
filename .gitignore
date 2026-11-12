@@ -1,0 +1,18 @@
+# build output
+build/
+dist/
+*.idsig
+
+# the signing key is private and must never be committed
+keystore/
+
+# installed tools (package.json and package-lock.json are kept)
+tools/.node/node_modules/
+tools/.bin/
+
+# local editor and session files
+.claude/
+*.log
+
+# internal working documents, kept on the maintainer's machine
+docs/AUDIT-*.md
