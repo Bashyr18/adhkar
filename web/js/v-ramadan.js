@@ -109,7 +109,9 @@
       exc = A.isExcused(k),
       now = Date.now();
     var h =
-      '<a class="card col h-gold glowcard rm-hero" href="#/ramadan"><div class="spread"><div><div class="eyebrow" style="color:var(--goldh)">Ramaḍān · day ' +
+      '<a class="card col h-gold glowcard rm-hero" href="#/ramadan">' +
+      (A.lanterns ? A.lanterns() : '') +
+      '<div class="spread"><div><div class="eyebrow" style="color:var(--goldh)">Ramaḍān · day ' +
       info.day +
       ' of ' +
       info.len +

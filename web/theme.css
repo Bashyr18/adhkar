@@ -94,9 +94,59 @@ body::before {
   background: radial-gradient(120% 80% at 50% -20%, var(--page-glow, transparent), transparent 70%);
   transition: background 0.8s var(--ease);
 }
+/* the page's geometry: an exact star-and-cross tessellation (the same one as the user guide). A light crosses it once
+   as a page opens, like gold leaf catching the sun, and it glints wherever you touch it. */
 .pattern {
-  background: var(--page);
+  background: color-mix(in srgb, var(--page) calc(var(--pat-o) * var(--pat-k, 1.7) * 100%), transparent);
   transition: background 0.8s;
+}
+.pattern::before,
+.pattern::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.pattern::after {
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    color-mix(in srgb, var(--page) 70%, transparent) 50%,
+    transparent 65%
+  );
+  transform: translateX(-100%);
+  animation: patleaf 3.4s var(--ease) 0.25s 1 both;
+}
+@keyframes patleaf {
+  to {
+    transform: translateX(100%);
+  }
+}
+.pattern::before {
+  opacity: 0;
+  background: radial-gradient(
+    140px circle at var(--tx, 50%) var(--ty, 50%),
+    color-mix(in srgb, var(--page) 90%, transparent),
+    transparent 70%
+  );
+}
+.pattern.glint::before {
+  animation: patglint 1.2s ease-out;
+}
+@keyframes patglint {
+  25% {
+    opacity: 1;
+  }
+}
+.calm .pattern::before,
+.calm .pattern::after {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pattern::before,
+  .pattern::after {
+    display: none;
+  }
 }
 .nav a[aria-current] {
   color: var(--page);
@@ -703,6 +753,7 @@ body::before {
   transform: scale(0.92);
 }
 .rm-hero {
+  position: relative;
   background: linear-gradient(160deg, color-mix(in srgb, var(--goldh) 16%, var(--s1)), var(--s1b) 70%);
 }
 .rm-hero .bar i {
@@ -746,7 +797,7 @@ body::before {
   --page-glow: rgba(176, 122, 42, 0.14);
 }
 :root[data-season='ramadan'] .pattern {
-  opacity: calc(var(--pat-o) * 1.4);
+  --pat-k: 1.4;
   -webkit-mask:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M24 8a9 9 0 1 0 6 15.5A7.5 7.5 0 1 1 24 8z' fill='%23000'/%3E%3Cpath d='M9 27l.9 2.1 2.1.9-2.1.9L9 33l-.9-2.1-2.1-.9 2.1-.9z' fill='%23000'/%3E%3C/svg%3E")
       0 0/38px 38px repeat,
@@ -765,31 +816,79 @@ body::before {
   background: linear-gradient(180deg, #ffd98e, #e9b65a 55%, #b07a2a);
 }
 
-/* hanging lanterns over Today */
+/* lanterns hanging from the Ramaḍān card; the card's words stay in front of their light */
+.rm-hero > :not(.lanterns) {
+  position: relative;
+  z-index: 1;
+}
 .lanterns {
   position: absolute;
-  top: calc(var(--sat) - 6px);
-  right: 104px;
-  width: 150px;
-  height: 150px;
+  top: -1px;
+  right: 92px;
+  width: 90px;
+  height: 80px;
   pointer-events: none;
   z-index: 0;
 }
+/* each lantern swings from its chain; the tassel follows a beat behind, the flame flickers and its light breathes */
 .lanterns svg {
   position: absolute;
   top: 0;
+  height: auto;
   overflow: visible;
   transform-origin: 50% 0;
-  animation: sway 6s ease-in-out infinite;
-  filter: drop-shadow(0 6px 14px rgba(255, 190, 90, 0.45));
+  animation: sway 7s ease-in-out infinite;
+  filter: drop-shadow(0 0 9px rgba(255, 190, 90, 0.45));
 }
 .lanterns svg:nth-child(2) {
-  animation-duration: 7.5s;
+  animation-duration: 8.4s;
   animation-delay: -2s;
 }
 .lanterns svg:nth-child(3) {
-  animation-duration: 5.2s;
-  animation-delay: -1s;
+  animation-duration: 6.2s;
+  animation-delay: -3.4s;
+}
+.fanous .tassel {
+  animation: sway 7s ease-in-out -1.2s infinite reverse;
+}
+.fanous .fl {
+  animation: flicker 1.9s ease-in-out infinite;
+}
+.fanous .halo {
+  animation: lhalo 4.5s ease-in-out infinite alternate;
+}
+.fanous .glint {
+  animation: lglint 6s ease-in-out infinite;
+}
+@keyframes lhalo {
+  from {
+    opacity: 0.7;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes lglint {
+  0%,
+  100% {
+    opacity: 0.15;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+/* by night the glass is lit; by day it is stained glass in the sun */
+.fanous .ln-d {
+  display: none;
+}
+:root[data-theme='light'] .fanous .ln-d {
+  display: inline;
+}
+:root[data-theme='light'] .fanous .ln-n {
+  display: none;
+}
+:root[data-theme='light'] .lanterns svg {
+  filter: drop-shadow(0 6px 7px rgba(90, 60, 20, 0.3));
 }
 @keyframes sway {
   0%,
@@ -799,9 +898,6 @@ body::before {
   50% {
     transform: rotate(3deg);
   }
-}
-.lanterns .flame {
-  animation: flicker 2.4s ease-in-out infinite;
 }
 @keyframes flicker {
   0%,
@@ -4909,7 +5005,11 @@ html[dir='rtl'] body .tx-t {
 .rest .feature .fnow i,
 .rest .glowcard,
 .rest .lanterns svg,
-.rest .lanterns .flame,
+.rest .fanous .tassel,
+.rest .fanous .fl,
+.rest .fanous .halo,
+.rest .fanous .glint,
+.rest .pattern::after,
 .rest .ans-now .badge {
   animation-play-state: paused;
 }

@@ -1440,6 +1440,22 @@
     );
     swipeTabs();
     document.addEventListener('pointerdown', A.wake, { passive: true, capture: true });
+    /* the page's geometry glints where it is touched */
+    document.addEventListener(
+      'pointerdown',
+      function (e) {
+        var p = S.prefs.motion && document.querySelector('#app > .pattern');
+        if (!p) return;
+        var r = p.getBoundingClientRect();
+        if (e.clientY < r.top || e.clientY > r.bottom) return;
+        p.style.setProperty('--tx', e.clientX - r.left + 'px');
+        p.style.setProperty('--ty', e.clientY - r.top + 'px');
+        p.classList.remove('glint');
+        void p.offsetWidth;
+        p.classList.add('glint');
+      },
+      { passive: true }
+    );
     document.addEventListener('keydown', function (e) {
       if (e.key !== 'Enter' && e.key !== ' ') return;
       var t = e.target;
