@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/root" android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:background="@drawable/widget_bg_dhikr" android:paddingLeft="18dp" android:paddingRight="18dp" android:paddingTop="14dp" android:paddingBottom="14dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+        <TextView android:id="@+id/label" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:textColor="#FFF1D59E" android:textSize="10sp" android:letterSpacing="0.14" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" android:text="DHIKR OF THE DAY" />
+        <TextView android:id="@+id/src" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#80F5F0E7" android:textSize="10sp" android:maxLines="1" android:text="" />
+    </LinearLayout>
+    <TextView android:id="@+id/ar" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginTop="6dp" android:gravity="center_vertical|end"
+        android:textDirection="rtl" android:textColor="#FFF5F0E7" android:textSize="21sp" android:lineSpacingMultiplier="1.25" android:maxLines="4" android:ellipsize="end" android:text="" />
+    <TextView android:id="@+id/en" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:textColor="#B3F5F0E7" android:textSize="12sp" android:lineSpacingMultiplier="1.15" android:maxLines="3" android:ellipsize="end" android:text="" />
+</LinearLayout>

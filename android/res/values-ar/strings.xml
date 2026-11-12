@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">الأذكار</string>
+    <string name="w_prayer">مواقيت الصلاة</string>
+    <string name="w_tasbih">عدّاد الذكر</string>
+    <string name="w_adhkar">أذكار الآن</string>
+    <string name="w_adhkar_d">أذكار الصباح أو المساء أو النوم، أيّها حان وقته، مع تقدّمك</string>
+    <string name="w_dhikr">ذكر اليوم</string>
+    <string name="w_dhikr_d">ذكر يومي، وأوقات إجابة الدعاء</string>
+    <string name="w_prayer_d">الصلاة القادمة مع عدّ تنازلي</string>
+    <string name="w_tasbih_d">ذكرك اليوم والأعداد التي حدّدتها السنة</string>
+    <string name="tile">العدّاد</string>
+    <string name="sc_morning">أذكار الصباح</string>
+    <string name="sc_evening">أذكار المساء</string>
+    <string name="sc_tasbih">العدّاد</string>
+    <string name="sc_qibla">القبلة</string>
+</resources>

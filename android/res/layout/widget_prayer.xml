@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/widget_bg"
+    android:paddingLeft="18dp"
+    android:paddingRight="18dp"
+    android:paddingTop="14dp"
+    android:paddingBottom="12dp">
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+        <TextView android:id="@+id/hijri" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:textAlignment="viewStart" android:layout_marginEnd="10dp"
+            android:textColor="#FFF1D59E" android:textSize="11sp" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" android:text="" />
+        <TextView android:id="@+id/place" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:textColor="#99F5F0E7" android:textSize="11sp" android:textStyle="bold" android:maxLines="1" android:text="" />
+    </LinearLayout>
+
+    <TextView android:id="@+id/label" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="6dp"
+        android:textColor="#99F5F0E7" android:textSize="10sp" android:letterSpacing="0.16" android:textStyle="bold" android:text="NEXT PRAYER" />
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="bottom">
+        <TextView android:id="@+id/name" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:textColor="#FFF5F0E7" android:textSize="30sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:text="Maghrib" />
+        <TextView android:id="@+id/at" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:layout_marginStart="10dp" android:layout_marginEnd="8dp" android:textAlignment="viewStart"
+            android:textColor="#CCF5F0E7" android:textSize="13sp" android:textStyle="bold" android:maxLines="1" android:paddingBottom="3dp" android:text="" />
+        <Chronometer android:id="@+id/countdown" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:textColor="#FFF1D59E" android:textSize="14sp" android:textStyle="bold" android:paddingBottom="3dp" />
+    </LinearLayout>
+
+    <LinearLayout android:id="@+id/row" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
+        android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="6dp">
+        <LinearLayout android:id="@+id/c0" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center_horizontal" android:paddingTop="5dp" android:paddingBottom="5dp" android:background="@drawable/widget_cell">
+            <TextView android:id="@+id/n0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="10sp" android:textStyle="bold" android:textColor="#99F5F0E7" />
+            <TextView android:id="@+id/t0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="14sp" android:textStyle="bold" android:textColor="#FFF5F0E7" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/c1" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center_horizontal" android:paddingTop="5dp" android:paddingBottom="5dp" android:background="@drawable/widget_cell">
+            <TextView android:id="@+id/n1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="10sp" android:textStyle="bold" android:textColor="#99F5F0E7" />
+            <TextView android:id="@+id/t1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="14sp" android:textStyle="bold" android:textColor="#FFF5F0E7" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/c2" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center_horizontal" android:paddingTop="5dp" android:paddingBottom="5dp" android:background="@drawable/widget_cell">
+            <TextView android:id="@+id/n2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="10sp" android:textStyle="bold" android:textColor="#99F5F0E7" />
+            <TextView android:id="@+id/t2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="14sp" android:textStyle="bold" android:textColor="#FFF5F0E7" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/c3" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center_horizontal" android:paddingTop="5dp" android:paddingBottom="5dp" android:background="@drawable/widget_cell">
+            <TextView android:id="@+id/n3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="10sp" android:textStyle="bold" android:textColor="#99F5F0E7" />
+            <TextView android:id="@+id/t3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="14sp" android:textStyle="bold" android:textColor="#FFF5F0E7" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/c4" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center_horizontal" android:paddingTop="5dp" android:paddingBottom="5dp" android:background="@drawable/widget_cell">
+            <TextView android:id="@+id/n4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="10sp" android:textStyle="bold" android:textColor="#99F5F0E7" />
+            <TextView android:id="@+id/t4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="14sp" android:textStyle="bold" android:textColor="#FFF5F0E7" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <ProgressBar android:id="@+id/prog" style="@android:style/Widget.ProgressBar.Horizontal" android:layout_width="match_parent" android:layout_height="4dp" android:layout_marginBottom="6dp" android:max="1000" android:progress="0" android:progressDrawable="@drawable/widget_progress" />
+    <TextView android:id="@+id/status" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:textColor="#99F5F0E7" android:textSize="10.5sp" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" android:text="" />
+</LinearLayout>

@@ -1,0 +1,7 @@
+# keep Unix line endings everywhere (the formatter check and build.sh expect them)
+* text=auto eol=lf
+*.webp binary
+*.woff2 binary
+*.png binary
+*.ogg binary
+*.wav binary

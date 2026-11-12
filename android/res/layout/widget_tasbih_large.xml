@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/root" android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:gravity="center_horizontal" android:background="@drawable/widget_tsb_bg" android:padding="12dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+        <ImageView android:id="@+id/reset" android:layout_width="32dp" android:layout_height="32dp" android:padding="7dp" android:background="@drawable/widget_cell" android:src="@drawable/ic_reset" android:contentDescription="Reset" />
+        <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/ar" android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center" android:textColor="#FFF1D59E" android:textSize="17sp" android:maxLines="1" android:ellipsize="end" android:text="" />
+            <TextView android:id="@+id/tr" android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center" android:textColor="#80F5F0E7" android:textSize="10sp" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" android:text="" />
+        </LinearLayout>
+        <ImageView android:id="@+id/open" android:layout_width="32dp" android:layout_height="32dp" android:padding="7dp" android:background="@drawable/widget_cell" android:src="@drawable/ic_open" android:contentDescription="Open" />
+    </LinearLayout>
+    <FrameLayout android:id="@+id/face" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginTop="4dp" android:background="@drawable/widget_cell">
+        <ProgressBar android:id="@+id/tprog" style="@android:style/Widget.ProgressBar.Horizontal" android:layout_width="100dp" android:layout_height="100dp" android:layout_gravity="center" android:max="1000" android:progress="0" android:progressDrawable="@drawable/widget_ring" />
+        <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/count" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFF5F0E7" android:textSize="34sp" android:fontFamily="sans-serif-medium" android:includeFontPadding="false" android:text="0" />
+            <TextView android:id="@+id/of" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:textColor="#99F5F0E7" android:textSize="10.5sp" android:textStyle="bold" android:maxLines="1" android:text="" />
+        </LinearLayout>
+    </FrameLayout>
+    <TextView android:id="@+id/today" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:gravity="center" android:textColor="#99F5F0E7" android:textSize="11sp" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" android:text="" />
+    <TextView android:id="@+id/round" android:visibility="gone" android:layout_width="match_parent" android:layout_height="34dp" android:layout_marginTop="6dp" android:gravity="center" android:paddingLeft="10dp" android:paddingRight="10dp" android:background="@drawable/widget_chip" android:textColor="#FFF5F0E7" android:textSize="12sp" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" android:text="" />
+</LinearLayout>

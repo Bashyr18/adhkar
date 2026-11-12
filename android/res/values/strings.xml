@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Adhkār</string>
+    <string name="w_prayer">Prayer times</string>
+    <string name="w_tasbih">Dhikr tracker</string>
+    <string name="w_adhkar">Adhkār now</string>
+    <string name="w_adhkar_d">Morning, evening or sleep adhkār, whichever is due, with your progress</string>
+    <string name="w_dhikr">Dhikr of the day</string>
+    <string name="w_dhikr_d">A daily remembrance, and the times when duʿāʾ is answered</string>
+    <string name="w_prayer_d">Next prayer with a live countdown</string>
+    <string name="w_tasbih_d">Your dhikr today and the numbers the Sunnah sets</string>
+    <string name="tile">Tracker</string>
+    <string name="sc_morning">Morning adhkār</string>
+    <string name="sc_evening">Evening adhkār</string>
+    <string name="sc_tasbih">Tracker</string>
+    <string name="sc_qibla">Qibla</string>
+</resources>
