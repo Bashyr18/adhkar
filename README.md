@@ -9,7 +9,7 @@ A free Android app for daily remembrance, built as ṣadaqah jāriyah.
 
 No ads, no account, no tracking. Everything stays on the phone; the internet is used only for recitations you choose to download.
 
-**[Read the illustrated user guide](docs/guide/index.html)**: every page and feature, step by step, in dark and light, English and Arabic.
+**[Read the illustrated user guide](https://bashyr18.github.io/adhkar/guide/)**: every page and feature, step by step, in dark and light, English and Arabic.
 
 ## Principles
 
@@ -34,7 +34,7 @@ Read these before changing anything. They are why the app is shaped the way it i
 | `web/js/data.js`, `web/js/hadith.js` | **Generated** religious text. Never edit these; edit the build scripts. |
 | `android/` | The native shell: a locked-down WebView, the bridge, reminders, widgets, the quick settings tile. No libraries. |
 | `tools/` | Content builders, fetchers, tests, packers. |
-| `docs/` | The audit and its progress log. |
+| `docs/` | The illustrated user guide, published with GitHub Pages. |
 | `store/` | Play Store listing and privacy policy. |
 
 `web/js/prayer.js` is mirrored in `android/src/com/adhkar/app/PrayerCalc.java` (reminders and widgets use the Java one). The tests compare the two to the minute; change both together.
