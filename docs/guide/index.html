@@ -48,7 +48,7 @@
 /* ---------- base ---------- */
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; scroll-padding-top: 70px; }
-body { margin: 0; background: var(--bg); color: var(--t1); font: 500 16px/1.65 var(--sans); -webkit-font-smoothing: antialiased; overflow-x: clip; transition: background .6s var(--out), color .6s var(--out); }
+body { margin: 0; background: var(--bg); color: var(--t1); font: 500 16px/1.65 var(--sans); -webkit-font-smoothing: antialiased; overflow-x: clip; }
 img { display: block; max-width: 100%; }
 a { color: var(--gold2); text-decoration: none; }
 button { font: inherit; color: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
@@ -90,9 +90,10 @@ body::after { content: ""; position: fixed; inset: 0; z-index: -1; pointer-event
 .seg { position: relative; display: inline-flex; padding: 3px; border-radius: 99px; background: color-mix(in srgb, var(--s1) 85%, transparent); border: 1px solid var(--line2); }
 .seg button { position: relative; z-index: 1; height: 30px; min-width: 40px; padding: 0 12px; border: 0; border-radius: 99px; background: none; font: 700 12.5px/1 var(--sans); color: var(--t3); transition: color .3s; }
 .seg button[lang="ar"] { font: 400 17px/1 var(--ar); padding-top: 3px; }
-.seg button[aria-pressed="true"] { color: var(--on-gold); }
+.seg button { transition: color .3s, background .35s var(--out), box-shadow .35s; }
+.seg button[aria-pressed="true"] { color: #1a1206; background: linear-gradient(180deg, #f1d59e, #d9b26f); box-shadow: 0 6px 16px -8px rgba(217, 178, 111, .9); }
+.seg .pill { display: none; }
 .seg .pill { position: absolute; top: 3px; bottom: 3px; left: 3px; border-radius: 99px; background: linear-gradient(180deg, var(--gold2), var(--gold)); box-shadow: 0 6px 16px -8px var(--gold); transition: left .5s var(--spring), width .5s var(--spring); }
-:root[data-theme="light"] .seg button[aria-pressed="true"] { color: #fff; }
 .seg-l { display: inline-flex; align-items: center; gap: 8px; font: 700 11px/1 var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--t3); }
 .tbtn.ico { width: 38px; padding: 0; justify-content: center; }
 .tbtn .sun, .tbtn .moon { position: absolute; transition: transform .7s var(--spring), opacity .4s; }
@@ -143,11 +144,11 @@ body::after { content: ""; position: fixed; inset: 0; z-index: -1; pointer-event
 
 /* ---------- the phone: the frame wraps the screenshot, so nothing is ever cropped ---------- */
 /* a slim bezel and the real screen inside it: no fake notch over the app */
-.phone { position: relative; border-radius: 11.5% / 5.6%; padding: 2.4%; background: var(--frame); box-shadow: var(--shadow), inset 0 0 0 1.5px rgba(255, 255, 255, .09), inset 0 0 0 4px rgba(0, 0, 0, .5); transform-style: preserve-3d; transition: transform .7s var(--out), box-shadow .7s var(--out); }
+.phone { position: relative; display: flow-root; border-radius: 11.5% / 5.6%; padding: 0; background: var(--frame); box-shadow: var(--shadow), inset 0 0 0 1.5px rgba(255, 255, 255, .09), inset 0 0 0 4px rgba(0, 0, 0, .5); transform-style: preserve-3d; transition: transform .7s var(--out), box-shadow .7s var(--out); }
 .phone::before, .phone::after { content: ""; position: absolute; width: 1.3%; border-radius: 3px; background: linear-gradient(90deg, #1a1b22, #3a3c48); }
 .phone::before { right: -1%; top: 19%; height: 7%; }
 .phone::after { right: -1%; top: 29%; height: 11%; }
-.phone .scr { position: relative; aspect-ratio: 1080 / 2236; border-radius: 9.6% / 4.65%; overflow: hidden; background: #000; isolation: isolate; }
+.phone .scr { position: relative; margin: 2.4%; aspect-ratio: 1080 / 2236; border-radius: 9.6% / 4.65%; overflow: hidden; background: #000; isolation: isolate; }
 .phone .scr img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; transition: opacity .5s var(--out), transform .6s var(--out); }
 .phone .scr img.next { opacity: 0; transform: scale(1.03); }
 .phone .scr::after { content: ""; position: absolute; z-index: 6; inset: -50%; pointer-events: none; background: linear-gradient(115deg, transparent 40%, rgba(255, 255, 255, .14) 50%, transparent 60%); transform: translateX(-60%); transition: transform 1.2s var(--out); }
@@ -201,9 +202,6 @@ section { position: relative; }
 .cap { margin-top: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .cap > span { font-size: 12.5px; color: var(--t3); }
 .vars { position: relative; display: inline-flex; padding: 3px; border-radius: 99px; background: var(--s1); border: 1px solid var(--line); }
-.vars button { position: relative; z-index: 1; border: 0; background: none; padding: 6px 12px; border-radius: 99px; font-size: 12px; font-weight: 700; color: var(--t3); transition: color .3s; }
-.vars button[aria-pressed="true"] { color: var(--gold2); }
-.vars .pill { position: absolute; top: 3px; bottom: 3px; border-radius: 99px; background: var(--gold-soft); border: 1px solid var(--gold-line); transition: left .45s var(--spring), width .45s var(--spring); }
 .text h3 { margin: 0; font: 400 clamp(30px, 3.6vw, 44px)/1.08 var(--serif); }
 .text h3 + p { font: 400 19px/1.6 var(--serif); color: var(--t2); margin: 14px 0 0; }
 .text .lede::first-letter { float: left; font: 400 76px/.78 var(--serif); color: var(--gold2); margin: 8px 12px 0 0; }
@@ -347,11 +345,14 @@ footer { padding: 30px 0 60px; text-align: center; font-size: 13px; color: var(-
 .zm .hs { pointer-events: auto; }
 .touring .zm { transform: scale(1.7); }
 .spot { position: absolute; inset: 0; z-index: 3; pointer-events: none; opacity: 0; transition: opacity .6s var(--out);
-  background: radial-gradient(circle at var(--ox) var(--oy), transparent 0 13%, rgba(4, 5, 10, .5) 30%, rgba(4, 5, 10, .62)); }
+  background: radial-gradient(circle at var(--ox) var(--oy), transparent 0 10%, rgba(4, 5, 10, .28) 17%, rgba(4, 5, 10, .58) 32%, rgba(4, 5, 10, .66)); }
 .touring .spot { opacity: 1; }
-.touring .hs { transform: scale(.62); opacity: .35; }
-.touring .hs.on { transform: scale(.78); opacity: 1; }
-.touring .hs::before { display: none; }
+.touring .hs { transform: scale(.4); opacity: 0; pointer-events: none; }
+.touring .hs.on { opacity: 1; pointer-events: auto; width: 96px; height: 96px; margin: -48px 0 0 -48px; transform: scale(.56); color: transparent; background: rgba(241, 213, 158, .06);
+  box-shadow: 0 0 0 3px #f1d59e, 0 0 0 5px rgba(26, 18, 6, .5), 0 0 0 10px rgba(241, 213, 158, .14), 0 0 34px 6px rgba(241, 213, 158, .45); transition: transform .6s var(--spring), opacity .4s, width .5s var(--out), height .5s var(--out), margin .5s var(--out), left .9s var(--out), top .9s var(--out); }
+.touring .hs.on::after { inset: -6px; animation-duration: 2s; }
+.touring .hs.on::before { content: attr(data-k); display: grid; place-items: center; position: absolute; left: auto; right: -6px; top: -6px; bottom: auto; width: 32px; height: 32px; padding: 0; border-radius: 50%; transform: none; opacity: 1;
+  background: linear-gradient(180deg, #f1d59e, #d9b26f); color: #1a1206; font: 800 16px/1 var(--sans); box-shadow: 0 0 0 2px rgba(26, 18, 6, .5), 0 4px 10px -3px rgba(0, 0, 0, .6); white-space: normal; }
 .phone.touring { box-shadow: var(--shadow), 0 0 0 1px var(--gold-line), 0 30px 80px -30px color-mix(in srgb, var(--gold) 45%, transparent); }
 /* the button that starts it */
 .walk { position: relative; display: inline-flex; align-items: center; gap: 10px; height: 40px; padding: 0 14px 0 5px; border-radius: 99px; border: 1px solid var(--gold-line); background: var(--gold-soft); color: var(--t1); font: 700 13px/1 var(--sans); overflow: hidden; isolation: isolate; transition: transform .35s var(--out), background .35s, border-color .35s; }
@@ -361,7 +362,7 @@ footer { padding: 30px 0 60px; text-align: center; font-size: 13px; color: var(-
 .walk .wi { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(180deg, #f1d59e, #d9b26f); color: #1a1206; box-shadow: 0 6px 14px -6px rgba(217, 178, 111, .9); transition: transform .45s var(--spring); }
 .walk:hover .wi { transform: scale(1.1); }
 .walk .wi svg { width: 13px; height: 13px; margin-left: 2px; }
-.walk small { font-size: 11.5px; font-weight: 700; color: var(--t3); padding-left: 10px; border-left: 1px solid var(--line2); }
+.walk small { font-size: 11.5px; font-weight: 700; color: var(--t2); padding-left: 10px; border-left: 1px solid var(--line2); }
 .walk .wd { width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; background: var(--gold-soft); color: var(--gold2); }
 .walk .wd svg { width: 11px; height: 11px; }
 .walk.hint .wi { animation: beckon 2.2s var(--out) 3; }
@@ -853,7 +854,7 @@ var words = function (t) { return t.split(' ').map(function (w, i) { return '<sp
 function phone(base, alt, extra, tilt, fixed) {
   return '<div class="phone' + (tilt ? ' tilt' : '') + '"' + (fixed ? '' : ' data-base="' + base + '"') + ' data-shot="' + base + '"><div class="scr"><div class="zm"><img src="shots/' + base + '.webp" alt="' + esc(alt) + '" loading="lazy" decoding="async">' + (extra || '') + '<i class="spot" aria-hidden="true"></i></div></div><button class="zoom" type="button" aria-label="Enlarge: ' + esc(alt) + '"></button></div>';
 }
-function hotspots(steps) { return steps.map(function (st, i) { return '<button class="hs" type="button" style="left:' + st[2] + '%;top:' + st[3] + '%" data-x="' + st[2] + '" data-i="' + i + '" data-tip="' + esc(st[0]) + '" aria-label="Step ' + (i + 1) + ': ' + esc(st[0]) + '">' + (i + 1) + '</button>'; }).join(''); }
+function hotspots(steps) { return steps.map(function (st, i) { return '<button class="hs" type="button" style="left:' + st[2] + '%;top:' + st[3] + '%" data-x="' + st[2] + '" data-i="' + i + '" data-k="' + (i + 1) + '" data-tip="' + esc(st[0]) + '" aria-label="Step ' + (i + 1) + ': ' + esc(st[0]) + '">' + (i + 1) + '</button>'; }).join(''); }
 function stepList(steps, extraSteps) {
   return '<ol class="steps">' + steps.concat(extraSteps || []).map(function (st, i) { return '<li data-i="' + i + '" tabindex="0"><span class="k">' + (i + 1) + '</span><div><b>' + esc(st[0]) + '</b><p>' + esc(st[1]) + '</p></div></li>'; }).join('') + '</ol>';
 }
