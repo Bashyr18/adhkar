@@ -9,6 +9,8 @@ A free Android app for daily remembrance, built as ṣadaqah jāriyah.
 
 No ads, no account, no tracking. Everything stays on the phone; the internet is used only for recitations you choose to download.
 
+**[Download the app](https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar.apk)** for Android 8 or later, or see [all releases](https://github.com/Bashyr18/adhkar/releases).
+
 **[Read the illustrated user guide](https://bashyr18.github.io/adhkar/guide/)**: every page and feature, step by step, in dark and light, English and Arabic.
 
 ## Principles
