@@ -730,7 +730,10 @@ ok(/Ramaḍān Mubārak/.test(rt), 'Ramaḍān greeting in Ramaḍān');
     doc.querySelectorAll('#app div[data-a]:not([role="button"])').forEach((e) => bad.push(h + ' ' + e.className));
   });
   ok(!bad.length, 'every tappable element is a button or says it is one ' + bad.join(' | '));
-  ok(!doc.getElementById('app').hasAttribute('tabindex'), 'the page is not one focusable block (TalkBack would read it as a single item)');
+  ok(
+    !doc.getElementById('app').hasAttribute('tabindex'),
+    'the page is not one focusable block (TalkBack would read it as a single item)'
+  );
   visit(env, '#/tracker');
   const pb = doc.querySelector('.trk-pace .pace');
   env.w.A.acts['pace-tap'](pb);
