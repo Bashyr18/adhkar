@@ -59,7 +59,16 @@ Every version is listed on the [releases page](https://github.com/Bashyr18/adhka
 
 ### Windows
 
-**Coming soon.** A Windows app is planned, with the same features, made for a large screen, a keyboard and a mouse. It will appear on the [releases page](https://github.com/Bashyr18/adhkar/releases) when it is ready.
+**Coming soon.** A Windows app is planned: the same app and the same record, laid out for a large screen, a keyboard, a mouse and a printer. It will appear on the [releases page](https://github.com/Bashyr18/adhkar/releases) when it is ready.
+
+- **A rail and a command palette** (Ctrl K) to reach any remembrance, hadith or page.
+- **The keyboard:** Space taps the counting circle, so counting on the fingers works the same way.
+- **Wide layouts** designed for the screen, not a stretched phone.
+- **Print and PDF:** the morning and evening adhkār as a booklet, and the month's prayer timetable.
+- **Reminders and the next prayer** from the tray, with the adhān takbīr.
+- **With your phone:** pair once over home Wi-Fi to keep both in step; no account, no cloud.
+
+Read [the plan](docs/windows-plan.md).
 
 ## The illustrated guide
 
