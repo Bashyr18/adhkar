@@ -119,13 +119,17 @@
       dark = document.documentElement.dataset.theme === 'dark';
     rail.setAttribute('aria-label', 'Adhkār');
     rail.innerHTML =
-      '<div class="rl-top"><a class="rl-brand" href="#/" aria-label="Adhkār">' +
+      '<div class="rl-sky" style="--sky:' +
+      sky(Date.now()) +
+      '"><div class="rl-top"><a class="rl-brand" href="#/" aria-label="Adhkār">' +
       MARK +
       '<span class="rl-word"><b>Adhkār</b><small lang="ar" dir="rtl">أذكار</small></span></a><button class="rl-fold" data-desk="fold" title="' +
       esc(L(mini ? 'Widen the rail' : 'Narrow the rail', mini ? 'وسّع الشريط' : 'ضيّق الشريط')) +
       '">' +
       ic('fold', 18) +
       '</button></div>' +
+      dates() +
+      '</div>' +
       '<button class="rl-search" data-desk="palette" title="' +
       esc(L('Search or jump', 'ابحث أو انتقل')) +
       '">' +
@@ -237,6 +241,8 @@
       B.titleBar(document.documentElement.dataset.theme || 'dark');
     } catch (e) {}
     wide();
+    placeDayBand();
+    sessionPane();
   }
   /* a wide window, filled: the tab pages lay their cards out in two balanced columns */
   var COLS = { today: 1, profile: 1, salah: 1, tracker: 1, journal: 1, deeds: 1, insights: 1 };
@@ -365,6 +371,7 @@
     c.classList.remove('kpress');
     c.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
     c.click();
+    setTimeout(sessionPane, 250);
   });
   function zoom(d) {
     var z = info().zoom || 1;
@@ -754,6 +761,13 @@
   setInterval(function () {
     paintNext();
     nextToHost();
+    var sk = $('.rl-sky');
+    if (sk) sk.style.setProperty('--sky', sky(Date.now()));
+    var band = $('.dk-day');
+    if (band && A.route().name === 'today') {
+      band.outerHTML = dayBand();
+      declutter($('.dk-day'));
+    }
   }, 60000);
   setInterval(schedule, 30 * 60000);
   /* the takbīr, when a prayer's reminder rings */
@@ -1287,10 +1301,268 @@
     void sh;
   };
 
+  /* ================= the sky of the day: Adhkār's own motif, made for a wide screen ================= */
+  /* the colour of the sky at a moment, from the day's own times: night, dawn, day, afternoon, dusk */
+  var SKY = {
+    night: ['#0b1030', '#1b1a52'],
+    dawn: ['#2b2f6e', '#e39466'],
+    day: ['#3b7bc6', '#a6cdef'],
+    after: ['#d49a5c', '#6a5aa0'],
+    dusk: ['#45306b', '#141842']
+  };
+  function phase(ms) {
+    var t = S.loc && A.pday(A.keyAt(ms));
+    if (!t) return 'night';
+    if (ms < t.fajr || ms >= t.isha) return 'night';
+    if (ms < t.sunrise) return 'dawn';
+    if (ms < t.asr) return 'day';
+    if (ms < t.maghrib) return 'after';
+    return 'dusk';
+  }
+  function sky(ms) {
+    var c = SKY[phase(ms)];
+    return 'linear-gradient(135deg,' + c[0] + ',' + c[1] + ')';
+  }
+  function dates() {
+    var k = A.today();
+    return (
+      '<div class="rl-dates"><b>' +
+      esc(A.hijriText ? A.hijriText(k) : '') +
+      '</b><small>' +
+      esc(A.fmtDate(k)) +
+      '</small></div>'
+    );
+  }
+
+  /* the day band: the whole day from Fajr to the next Fajr at a glance, its prayers and the times of its
+     remembrance laid on the sky, with now marked. Only a wide screen can show a day this way. */
+  function dayBand() {
+    if (!S.loc) return '';
+    var k = A.today(),
+      t = A.pday(k),
+      now = Date.now(),
+      N = S.notif || {};
+    if (!t || !isFinite(t.fajr) || !isFinite(t.nextFajr)) return '';
+    var a = t.fajr,
+      b = t.nextFajr,
+      span = b - a;
+    if (now < a) {
+      /* before Fajr, the band is yesterday's night */
+      var y = A.pday(A.shift(k, -1));
+      if (y && isFinite(y.fajr)) {
+        t = y;
+        k = A.shift(k, -1);
+        a = t.fajr;
+        b = t.nextFajr;
+        span = b - a;
+      }
+    }
+    var x = function (ms) {
+      return Math.max(0, Math.min(100, ((ms - a) / span) * 100));
+    };
+    var done = A.dayDone(k),
+      ms = N.morning && N.morning.from === 'sunrise' ? t.sunrise : t.fajr,
+      es = N.evening && N.evening.from === 'maghrib' ? t.maghrib : t.asr;
+    /* the sky behind, its stops at the day's own times */
+    var stops = [
+      [a, SKY.dawn[0]],
+      [t.sunrise, SKY.dawn[1]],
+      [(t.sunrise + t.dhuhr) / 2, SKY.day[0]],
+      [t.dhuhr, SKY.day[1]],
+      [t.asr, SKY.day[0]],
+      [t.maghrib, SKY.after[0]],
+      [(t.maghrib + t.isha) / 2, SKY.dusk[0]],
+      [t.isha, SKY.night[1]],
+      [b, SKY.night[0]]
+    ]
+      .map(function (q) {
+        return q[1] + ' ' + x(q[0]).toFixed(2) + '%';
+      })
+      .join(',');
+    var win = function (cls, from, to, label, ar, href, isDone) {
+      if (!isFinite(from) || !isFinite(to) || to <= from) return '';
+      return (
+        '<a class="db-w ' +
+        cls +
+        (isDone ? ' done' : '') +
+        (now >= from && now < to ? ' now' : '') +
+        '" href="' +
+        href +
+        '" style="inset-inline-start:' +
+        x(from).toFixed(2) +
+        '%;width:' +
+        (x(to) - x(from)).toFixed(2) +
+        '%" title="' +
+        esc(L(label, ar) + ' · ' + A.fmtTxt(from) + ' → ' + A.fmtTxt(to)) +
+        '"><span>' +
+        (isDone ? A.icon('check', 'xs') : '') +
+        esc(L(label, ar)) +
+        '</span></a>'
+      );
+    };
+    var marks = ['fajr', 'sunrise', 'dhuhr', 'asr', 'maghrib', 'isha']
+      .map(function (p) {
+        var prayed = p !== 'sunrise' && S.prayed[k] && S.prayed[k][p];
+        return (
+          '<a class="db-p' +
+          (p === 'sunrise' ? ' sun' : '') +
+          (prayed ? ' prayed' : '') +
+          '" href="#/salah" style="inset-inline-start:' +
+          x(t[p]).toFixed(2) +
+          '%"><i></i><b>' +
+          esc(pname(p)) +
+          '</b><small>' +
+          esc(A.fmtTxt(t[p])) +
+          '</small></a>'
+        );
+      })
+      .join('');
+    var inDay = now >= a && now < b;
+    return (
+      '<section class="dk-day" aria-label="' +
+      esc(L('The day', 'اليوم')) +
+      '"><div class="db-sky" style="background:linear-gradient(' +
+      /* the sky runs the way the page reads: Fajr at the start in either language */
+      (document.documentElement.dir === 'rtl' ? '270deg' : '90deg') +
+      ',' +
+      stops +
+      ')">' +
+      marks +
+      (inDay
+        ? '<span class="db-now" style="inset-inline-start:' +
+          x(now).toFixed(2) +
+          '%"><em>' +
+          esc(L('Now', 'الآن')) +
+          '</em></span>'
+        : '') +
+      '</div><div class="db-wins">' +
+      win('m', ms, es, 'Morning adhkār', 'أذكار الصباح', '#/c/morning', done.morning) +
+      win('d', t.duhaStart, t.duhaEnd, 'Ḍuḥā', 'الضحى', '#/duha', !!S.duha[k]) +
+      win('e', es, t.isha + 90 * 60000, 'Evening adhkār', 'أذكار المساء', '#/c/evening', done.evening) +
+      win('n', t.lastThird, b, 'The last third', 'الثلث الأخير', '#/night', false) +
+      '</div></section>'
+    );
+  }
+  /* prayers close together (Maghrib and ʿIshāʾ, an hour apart) would print over each other: a label that would
+     touch its neighbour drops to a second row, its time kept in the tooltip */
+  function declutter(band) {
+    if (!band) return;
+    var marks = $$('.db-p', band),
+      rtl = document.documentElement.dir === 'rtl',
+      prev = null;
+    marks.forEach(function (m) {
+      m.classList.remove('low');
+      m.title = $('b', m).textContent + ' · ' + $('small', m).textContent;
+    });
+    marks.forEach(function (m) {
+      var r = $('b', m).getBoundingClientRect(),
+        sm = $('small', m).getBoundingClientRect(),
+        a = Math.min(r.left, sm.left),
+        b = Math.max(r.right, sm.right);
+      var hits = prev && (rtl ? b + 8 > prev[0] : a < prev[1] + 8);
+      if (hits) m.classList.add('low');
+      else prev = [a, b];
+    });
+  }
+  function placeDayBand() {
+    var v = $('#app > .view.dk-wide');
+    if (!v || A.route().name !== 'today' || $('.dk-day', v)) return;
+    var html = dayBand();
+    if (!html) return;
+    var top = $('.top', v);
+    if (top) top.insertAdjacentHTML('afterend', html);
+    declutter($('.dk-day', v));
+  }
+
+  /* the reader's session, all of it beside the page: where you are, what is done, any one a click away */
+  function sessionPane() {
+    var rd = $('.reader'),
+      r = A.route();
+    if (!rd || r.name !== 'r' || innerWidth < 1280) {
+      if (rd) rd.classList.remove('dk-sess');
+      return;
+    }
+    var cid = r.a[0],
+      idx = +r.a[1] || 0,
+      prayer = r.a[2],
+      c = A.col(cid);
+    if (!c) return;
+    var items = A.items(cid, prayer),
+      ck = A.colKey(cid, prayer),
+      day = A.today(),
+      n = 0;
+    var rows = items
+      .map(function (it, i) {
+        var got = A.cnt(day, ck, it.id),
+          tgt = it.target || 1,
+          full = it.kind === 'open' ? got > 0 : got >= tgt;
+        if (full) n++;
+        return (
+          '<a class="ss-i' +
+          (i === idx ? ' on' : '') +
+          (full ? ' done' : '') +
+          '" href="#/r/' +
+          cid +
+          '/' +
+          i +
+          (prayer ? '/' + prayer : '') +
+          '"><span class="ss-n">' +
+          (full ? A.icon('check', 'xs') : A.fmtN(i + 1)) +
+          '</span><span class="grow"><b>' +
+          esc(it.title) +
+          '</b>' +
+          (tgt > 1 ? '<small>' + A.fmtN(Math.min(got, tgt)) + ' / ' + A.fmtN(tgt) + '</small>' : '') +
+          '</span></a>'
+        );
+      })
+      .join('');
+    var pane = $('.dk-ss', rd);
+    if (!pane) {
+      pane = document.createElement('aside');
+      pane.className = 'dk-ss';
+      rd.appendChild(pane);
+    }
+    pane.innerHTML =
+      '<div class="ss-h"><small>' +
+      esc(L('This session', 'هذه الجلسة')) +
+      '</small><b>' +
+      esc(c.title) +
+      '</b><div class="ss-bar"><i style="width:' +
+      Math.round((100 * n) / Math.max(1, items.length)) +
+      '%"></i></div><small>' +
+      A.fmtN(n) +
+      ' / ' +
+      A.fmtN(items.length) +
+      ' ' +
+      esc(L('complete', 'مكتملة')) +
+      '</small></div><nav class="ss-list">' +
+      rows +
+      '</nav>';
+    rd.classList.add('dk-sess');
+    var on = $('.ss-i.on', pane);
+    if (on && !pane._seen) on.scrollIntoView({ block: 'center' });
+    pane._seen = true;
+  }
+  /* the reader opens over the page and changes without a new screen: watch it, and the address */
+  var rdWatch = new MutationObserver(function () {
+    clearTimeout(rdWatch._t);
+    rdWatch._t = setTimeout(sessionPane, 60);
+  });
+  addEventListener('hashchange', function () {
+    setTimeout(sessionPane, 120);
+  });
+  document.addEventListener('click', function () {
+    setTimeout(sessionPane, 250);
+  });
+  addEventListener('resize', function () {
+    sessionPane();
+  });
+
   /* ================= start ================= */
   function start() {
     var app = $('#app');
     if (app) screens.observe(app, { childList: true });
+    rdWatch.observe(document.body, { childList: true });
     after();
     schedule();
     nextToHost();

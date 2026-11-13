@@ -67,7 +67,9 @@ Every version is listed on the [releases page](https://github.com/Bashyr18/adhka
 
 What a computer adds:
 
-- **A rail and Ctrl K** to reach any remembrance, hadith, page or setting.
+- **The whole day at a glance:** Today opens with the day from Fajr to the next Fajr as a sky, each prayer marked, the times of the morning and evening adhkār, Ḍuḥā and the last third laid on it, and now marked. Click any part to open it.
+- **The reader with its session beside it:** every remembrance of the session in a list with its count, the one you are on marked, any one a click away.
+- **A rail with the sky of the hour** and today's Hijri and calendar dates, and **Ctrl K** to reach any remembrance, hadith, page or setting.
 - **The keyboard:** Space taps the counting circle and holding it pauses, so counting on the fingers works as on the phone. ← and → move through the reader; F1 lists every shortcut.
 - **Layouts made for the screen:** Today, Ṣalāh, the Tracker and You in two columns, and the reader at a comfortable width.
 - **Print and PDF:** the morning and evening adhkār as a booklet with every source, and the month's prayer timetable, on A4.
