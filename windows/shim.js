@@ -71,6 +71,7 @@
     'notificationState',
     'exportFile',
     'importFile',
+    'printPage',
     'openSettings'
   ];
   var B = {};

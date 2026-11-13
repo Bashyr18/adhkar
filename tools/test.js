@@ -194,13 +194,36 @@ const BANNED = [
 ];
 const shown = fs
   .readdirSync(path.join(ROOT, 'web/js'))
-  .filter((f) => f !== 'cities.js')
+  .filter((f) => f !== 'cities.js' && f !== 'kahf.js') /* generated: verbatim sources keep their own punctuation */
   .map((f) => [f, fs.readFileSync(path.join(ROOT, 'web/js', f), 'utf8')]);
 shown.forEach(([f, src]) => {
   const text = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
   BANNED.forEach(([re, why]) => ok(!re.test(text), 'banned wording in ' + f + ': ' + why));
   ok(!/['"`][^'"`\n]*—[^'"`\n]*['"`]/.test(text), 'em dash in displayed text in ' + f);
 });
+
+/* Sūrat al-Kahf: the mushaf pages and the verses, exactly as the sources give them */
+{
+  const sandbox = {};
+  new Function('window', fs.readFileSync(path.join(ROOT, 'web/js/kahf.js'), 'utf8'))(sandbox);
+  const K = sandbox.KAHF;
+  ok(K && K.verses.length === 110, 'al-Kahf has 110 verses');
+  ok(K.verses.every((v, i) => v.n === i + 1), 'al-Kahf verses run 1 to 110 in order');
+  ok(K.verses.every((v) => v.ar && v.en && !/[<>]/.test(v.en)), 'every verse of al-Kahf has its Arabic and a clean translation');
+  ok(K.pages.map((p) => p.p).join() === '293,294,295,296,297,298,299,300,301,302,303,304', 'al-Kahf is on Madani pages 293 to 304');
+  K.pages.forEach((p) => {
+    const ls = p.lines.map((l) => l.l), first = p.p === 293 ? 12 : 1;
+    ok(ls.join() === Array.from({ length: 16 - first }, (_, i) => first + i).join(), 'page ' + p.p + ' has every line from ' + first + ' to 15');
+  });
+  const ends = {}, words = {};
+  K.pages.forEach((p) => p.lines.forEach((l) => l.w.forEach((w) => {
+    if (w[2]) ends[w[1]] = (ends[w[1]] || 0) + 1;
+    else words[w[1]] = (words[w[1]] || 0) + 1;
+  })));
+  ok(K.verses.every((v) => ends[v.n] === 1), 'every verse of al-Kahf ends with exactly one verse mark');
+  ok(K.verses.every((v) => words[v.n] === v.ar.split(/\s+/).filter((x) => !/^[\u06D6-\u06ED\u0660-\u0669۝]+$/.test(x)).length), 'each verse has one mushaf glyph per word of its text');
+  ok(K.bismillah.indexOf('بِسْمِ') === 0, 'the bismillah comes from al-Fātiḥah 1:1');
+}
 
 console.log(pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

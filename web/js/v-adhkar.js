@@ -61,7 +61,7 @@
         ];
     var disc = dawn ? ['#ffffff', '#fff3c9', '#ffd889'] : ['#ffeede', '#ffae86', '#e2654f'];
     var s =
-      '<svg class="scene" viewBox="0 0 180 200" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><defs>' +
+      '<svg class="scene" viewBox="0 0 180 ' + (HZ + 10) + '" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><defs>' +
       '<linearGradient id="' +
       g +
       's" x1="0" y1="0" x2="0" y2="1">' +
@@ -276,14 +276,14 @@
             id +
             '">' +
             scene(id, dawn) +
-            '<div class="top2"><div class="arT">' +
-            c.ar +
-            '</div><span class="fpct">' +
+            '<div class="top2">' +
+            (A.sessionNow() === id && !p.complete ? '<span class="fnow"><i></i>Now</span>' : '<span></span>') +
+            '<span class="fpct">' +
             (p.complete ? ic('check', 'xs') : Math.round(p.frac * 100) + '%') +
             '</span></div>' +
-            '<div class="fbody">' +
-            (A.sessionNow() === id && !p.complete ? '<span class="fnow"><i></i>Now</span>' : '') +
-            '<div class="t">' +
+            '<div class="fbody"><div class="arT" lang="ar">' +
+            c.ar +
+            '</div><div class="t">' +
             c.title +
             '</div><div class="s">' +
             (p.complete

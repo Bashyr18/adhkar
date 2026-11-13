@@ -264,6 +264,8 @@
         B.titleBar(document.documentElement.dataset.theme || 'dark');
       } catch (e) {}
       if (rail.parentNode && document.documentElement.classList.contains('has-rail')) drawRail();
+      /* the pill follows the theme at once */
+      setTimeout(nextToHost, 60);
     }
   };
 
@@ -636,7 +638,8 @@
     maghrib: ['Maghrib', 'المغرب'],
     isha: ['ʿIshāʾ', 'العشاء']
   };
-  function pname(k) {
+  function pname(k, at) {
+    if (k === 'dhuhr' && at && A.dow(A.keyAt(at)) === 5) return A.T(A.pName('dhuhr', A.keyAt(at)));
     var n = PN[k] || [k, k];
     return L(n[0], n[1]);
   }
@@ -654,7 +657,7 @@
       '<span class="grow"><small>' +
       esc(L('Next', 'القادمة')) +
       '</small><b>' +
-      esc(pname(n.next.k)) +
+      esc(pname(n.next.k, n.next.at)) +
       '</b></span><span class="rl-nx-t">' +
       A.fmtT(n.next.at) +
       '</span></a>';
@@ -663,8 +666,89 @@
     var n = A.now();
     if (!n.next || !n.next.at) return;
     try {
-      B.deskNext(pname(n.next.k), n.next.at, A.fmtTxt(n.next.at));
+      B.deskNext(pname(n.next.k, n.next.at), n.next.at, A.fmtTxt(n.next.at));
     } catch (e) {}
+    if (B.deskPill && A.paintPill) {
+      var info = pillInfo(n),
+        sig = JSON.stringify(info) + document.documentElement.dataset.theme;
+      /* repaint only when something on it changes (the countdown ticks in the Windows app) */
+      if (sig === Desk._pillSig) return;
+      Desk._pillSig = sig;
+      A.paintPill(info).then(function (o) {
+        try {
+          B.deskPill(JSON.stringify(o));
+        } catch (e) {}
+      });
+    }
+  }
+  /* the pill's lines, in the app's language: the next prayer, the Friday hour, the adhkār of the day, a planned fast */
+  var PAR = { fajr: 'الفجر', sunrise: 'الشروق', dhuhr: 'الظهر', asr: 'العصر', maghrib: 'المغرب', isha: 'العشاء' };
+  function pillInfo(n) {
+    var k = A.today(),
+      nk = n.next.k,
+      sess = A.sessionNow && A.sessionNow(),
+      o = {
+        lang: A.ar() ? 'ar' : 'en',
+        kicker: nk === 'sunrise' ? L('FAJR ENDS', 'ينتهي الفجر') : L('NEXT PRAYER', 'الصلاة القادمة'),
+        name: pname(nk, n.next.at),
+        nameAr: nk === 'dhuhr' && A.dow(A.keyAt(n.next.at)) === 5 ? 'الجمعة' : PAR[nk] || '',
+        time: L('at ', '') + A.fmtTxt(n.next.at),
+        at: n.next.at,
+        icon: nk === 'sunrise' ? 'sunrise' : 'mosque',
+        ring: null,
+        rows: []
+      };
+    var pp = pillPrefs();
+    o.place = pp.place;
+    o.size = pp.size;
+    o.hover = !!pp.hover;
+    var f = A.jumuah && pp.friday ? A.jumuah() : { on: false };
+    if (f.on) {
+      var live = f.now === 'last' || f.now === 'minbar',
+        w = f.now === 'minbar' ? f.minbar : f.last;
+      o.friday = {
+        live: live,
+        until: live ? w.to : 0,
+        kicker: L('THE HOUR OF RESPONSE', 'ساعة الإجابة'),
+        title: L('Make duʿāʾ', 'ادعُ الله')
+      };
+      o.untilLabel = f.now === 'last' ? L('until Maghrib', 'حتى المغرب') : L('until the prayer ends', 'حتى تنقضي الصلاة');
+      o.rows.push({
+        icon: 'mosque',
+        title: L('Yawm al-Jumuʿah', 'يوم الجمعة'),
+        sub: f.rec.kahf ? L('Al-Kahf read', 'قُرئت الكهف') : L('Read Sūrat al-Kahf', 'اقرأ سورة الكهف'),
+        right: live ? L('Now', 'الآن') : L('Last hour ', 'آخر ساعة ') + A.fmtTxt(f.last.from),
+        live: live,
+        route: f.rec.kahf ? 'jumuah' : 'kahf'
+      });
+    }
+    (pp.adhkar ? ['morning', 'evening'] : []).forEach(function (id) {
+      var p = A.progress(k, id);
+      if (sess === id && !p.complete) o.ring = +p.frac.toFixed(3);
+      o.rows.push({
+        icon: id === 'morning' ? 'sunrise' : 'moon',
+        title: L(id === 'morning' ? 'Morning adhkār' : 'Evening adhkār', id === 'morning' ? 'أذكار الصباح' : 'أذكار المساء'),
+        sub: p.complete
+          ? L('Complete · mā shāʾ Allāh', 'اكتملت · ما شاء الله')
+          : (sess === id ? L('Now · ', 'الآن · ') : '') + A.fmtN(p.done) + ' / ' + A.fmtN(p.total),
+        right: p.complete ? '' : L(p.started ? 'Continue' : 'Begin', p.started ? 'تابع' : 'ابدأ'),
+        chip: true,
+        done: !!p.complete,
+        frac: p.complete ? 1 : +p.frac.toFixed(3),
+        route: 'c/' + id
+      });
+    });
+    var tm = A.shift(k, 1);
+    if (pp.fast && S.fastPlan && S.fastPlan[tm])
+      o.rows.push({
+        icon: 'fast',
+        title: L('Tomorrow you plan to fast', 'غدًا تنوي الصيام'),
+        sub: L('Intention tonight, suhūr before Fajr', 'النية الليلة، والسحور قبل الفجر'),
+        route: 'calendar'
+      });
+    else if (pp.fast && S.fastPlan && S.fastPlan[k] && !S.fasts[k])
+      o.rows.push({ icon: 'fast', title: L('Today you planned to fast', 'نويت صيام اليوم'), sub: L('Log it in the calendar', 'سجّله في التقويم'), route: 'calendar' });
+    return o;
   }
   function at(t, hm) {
     var p = String(hm || '').split(':'),
@@ -677,7 +761,7 @@
     var N = S.notif,
       out = [],
       now = Date.now();
-    if (!N || !N.enabled || !S.loc) {
+    if (!N || !S.loc) {
       try {
         B.deskSchedule('[]');
       } catch (e) {}
@@ -686,6 +770,33 @@
     [A.today(), A.shift(A.today(), 1)].forEach(function (key) {
       var t = A.pday(key);
       if (!t) return;
+      var plan = S.fastPlan && S.fastPlan[A.shift(key, 1)];
+      if (plan && isFinite(t.maghrib))
+        out.push({
+          t: t.maghrib,
+          title: L('Tomorrow you plan to fast', 'غدًا تنوي الصيام'),
+          body: L('Make your intention tonight, and eat suhūr before Fajr', 'انوِ الليلة، وتسحّر قبل الفجر'),
+          route: 'calendar'
+        });
+      if (!N.enabled) return;
+      if (A.dow(key) === 5 && N.friday && N.friday.on) {
+        var fr = (S.jumuah && S.jumuah.days && S.jumuah.days[key]) || {};
+        if (!fr.kahf && isFinite(t.sunrise))
+          out.push({
+            t: t.sunrise + 120 * 60000,
+            title: L('Yawm al-Jumuʿah', 'يوم الجمعة'),
+            body: L('Read Sūrat al-Kahf and send abundant ṣalawāt', 'اقرأ سورة الكهف وأكثر من الصلاة على النبي ﷺ'),
+            route: 'kahf'
+          });
+        if (isFinite(t.maghrib))
+          out.push({
+            t: t.maghrib - 60 * 60000,
+            title: L('The hour of response', 'ساعة الإجابة'),
+            body: L('The last hour before Maghrib on Friday. Make duʿāʾ.', 'آخر ساعة قبل مغرب الجمعة، فادعُ الله.'),
+            route: 'jumuah',
+            hour: true
+          });
+      }
       A.PRAYERS.forEach(function (p) {
         if (!N.prayers || !N.prayers[p] || !isFinite(t[p])) return;
         out.push({
@@ -749,6 +860,18 @@
     } catch (e) {}
   }
   Desk.schedule = schedule;
+  /* the pill was dragged away from the top or the corner: it is free now */
+  /* the Windows app asks for a fresh pill when its countdown runs out (the page may be resting while hidden) */
+  Desk.pillNow = function () {
+    Desk._pillSig = '';
+    nextToHost();
+  };
+  Desk.pillFree = function () {
+    pillPrefs().place = 'free';
+    A.save();
+    Desk._pillSig = '';
+    if (A.route().raw === 'desk/pc') A.rerender();
+  };
   var sync0 = A.N.sync;
   A.N.sync = function () {
     if (sync0) sync0.apply(this, arguments);
@@ -852,6 +975,110 @@
       '"><i></i></button></label>'
     );
   }
+  /* the pill, made yours: where it sits, its size, whether it opens under the pointer, and what it shows */
+  function pillPrefs() {
+    var p = (S.prefs.pill = S.prefs.pill || {});
+    if (!p.place) p.place = 'top';
+    if (!p.size) p.size = 'compact';
+    ['hover', 'friday', 'adhkar', 'fast'].forEach(function (k) {
+      if (p[k] == null) p[k] = true;
+    });
+    return p;
+  }
+  function pillOptions() {
+    var p = pillPrefs();
+    var seg = function (key, opts) {
+      return (
+        '<div class="dk-zoom dk-pill-seg">' +
+        opts
+          .map(function (o) {
+            return (
+              '<button class="dk-z' +
+              (p[key] === o[0] ? ' on' : '') +
+              '" data-pill-opt="' +
+              key +
+              '" data-v="' +
+              o[0] +
+              '">' +
+              esc(o[1]) +
+              '</button>'
+            );
+          })
+          .join('') +
+        '</div>'
+      );
+    };
+    var sw = function (key, title, sub) {
+      return (
+        '<label class="set dk-set"><div class="grow"><div class="t">' +
+        esc(title) +
+        '</div>' +
+        (sub ? '<div class="s">' + esc(sub) + '</div>' : '') +
+        '</div><button type="button" class="dk-sw' +
+        (p[key] ? ' on' : '') +
+        '" role="switch" aria-checked="' +
+        !!p[key] +
+        '" data-pill="' +
+        key +
+        '" aria-label="' +
+        esc(title) +
+        '"><i></i></button></label>'
+      );
+    };
+    return (
+      '<div class="dk-row dk-pill-row"><div class="grow"><b>' +
+      esc(L('Where it sits', 'مكانها')) +
+      '</b><small>' +
+      esc(L('At the top, like a notch; in the corner; or wherever you drop it', 'في الأعلى كالنتوء، أو في الزاوية، أو حيث تضعها')) +
+      '</small></div>' +
+      seg('place', [
+        ['top', L('Top', 'الأعلى')],
+        ['corner', L('Corner', 'الزاوية')],
+        ['free', L('Free', 'حرّة')]
+      ]) +
+      '</div><div class="dk-row dk-pill-row"><div class="grow"><b>' +
+      esc(L('Size', 'الحجم')) +
+      '</b></div>' +
+      seg('size', [
+        ['compact', L('Compact', 'صغيرة')],
+        ['regular', L('Comfortable', 'مريحة')]
+      ]) +
+      '</div>' +
+      sw('hover', L('Open when the pointer rests on it', 'تنفتح حين يستقر المؤشر عليها'), '') +
+      sw('friday', L('Show the Friday hours', 'إظهار ساعات الجمعة'), '') +
+      sw('adhkar', L('Show the morning and evening adhkār', 'إظهار أذكار الصباح والمساء'), '') +
+      sw('fast', L('Show a fast you planned', 'إظهار صيام نويته'), '')
+    );
+  }
+  /* the recitations, kept on this computer: download them once, and they play offline in the reader and in Learn */
+  function recitations() {
+    if (!A.audio || !A.audio.ok() || A.audio.web) return '';
+    var miss = A.audio.missing(),
+      used = A.audio.usage();
+    return (
+      '<section class="card dk-card"><h3>' +
+      esc(L('Recitations', 'التلاوات')) +
+      '</h3><div class="dk-row"><div class="grow"><b>' +
+      esc(miss.length ? L('Download every recitation', 'نزّل كل التلاوات') : L('Every recitation is on this computer', 'كل التلاوات على هذا الحاسوب')) +
+      '</b><small>' +
+      esc(
+        miss.length
+          ? A.plural(miss.length, 'recording') + ' · ' + A.audio.mb(A.audio.bytes(miss)) + ' · ' + L('then they play offline', 'ثم تعمل دون اتصال')
+          : L('They play offline, in the reader and in Learn mode', 'تعمل دون اتصال في القارئ ووضع التعلّم')
+      ) +
+      '</small><div class="au-dl" data-au-all style="margin-top:10px"><i></i></div><small data-au-all-t></small></div>' +
+      (miss.length ? '<button class="btn pri sm" data-a="au-get-all">' + ic('download', 18) + '<span>' + esc(L('Download', 'نزّل')) + '</span></button>' : A.icon('check', 's')) +
+      '</div><div class="dk-row"><div class="grow"><b>' +
+      esc(L('Space used', 'المساحة المستخدمة')) +
+      '</b><small>' +
+      esc(used ? (used / 1048576).toFixed(1) + ' MB' : L('None yet', 'لا شيء بعد')) +
+      '</small></div>' +
+      (used ? '<button class="btn ghost sm" data-a="au-clear">' + esc(L('Remove', 'إزالة')) + '</button>' : '') +
+      '</div><p class="dk-note">' +
+      esc(L('Ḥiṣn al-Muslim recordings, and the Qurʾān by Mishary al-ʿAfāsī. Sūrat al-Kahf downloads when you first press Listen.', 'تسجيلات حصن المسلم، والقرآن بصوت مشاري العفاسي. تُنزّل سورة الكهف عند أول ضغطة على استمع.')) +
+      '</p></section>'
+    );
+  }
   function pcPage() {
     var I = info(),
       backups = (I.backups || []).slice(0, 30);
@@ -868,8 +1095,8 @@
           '</b><small>' +
           esc(
             L(
-              'In Start and on your desktop, for you only. No administrator needed.',
-              'في قائمة ابدأ وعلى سطح المكتب، لك وحدك. دون صلاحيات المسؤول.'
+              'You are running Adhkār from the file you downloaded. Install keeps it in your own folder and adds it to Start and your desktop, so it opens like any app and can start with Windows. For you only, no administrator needed; your record is the same either way.',
+              'أنت تشغّل أذكار من الملف الذي نزّلته. التثبيت يحفظه في مجلدك ويضيفه إلى قائمة ابدأ وسطح المكتب، فيُفتح كأي تطبيق ويمكن أن يبدأ مع ويندوز. لك وحدك ودون صلاحيات المسؤول، وسجلك هو نفسه في الحالتين.'
             )
           ) +
           '</small></div><button class="btn pri sm" data-dk="install">' +
@@ -882,6 +1109,13 @@
           '</small></div>' +
           A.icon('check', 's') +
           '</div>') +
+      '<div class="dk-row"><div class="grow"><b>' +
+      esc(L('Adhkār on your phone', 'أذكار على هاتفك')) +
+      '</b><small>' +
+      esc(L('The Android app, free from the same page. Open this on your phone, or download it here and send it across.', 'تطبيق أندرويد، مجانًا من الصفحة نفسها. افتح الرابط على هاتفك، أو نزّله هنا وأرسله إليه.')) +
+      '</small></div><a class="btn ghost sm" data-a="ext" href="https://github.com/Bashyr18/adhkar/releases/latest">' +
+      esc(L('Get it', 'احصل عليه')) +
+      '</a></div>' +
       toggle(
         'startup',
         I.startup,
@@ -896,15 +1130,16 @@
       ) +
       '</section>' +
       '<section class="card dk-card"><h3>' +
-      esc(L('The next prayer', 'الصلاة القادمة')) +
+      esc(L('The pill', 'الكبسولة')) +
       '</h3>' +
       toggle(
         'next',
         I.next,
-        L('A small window with the next prayer', 'نافذة صغيرة بالصلاة القادمة'),
-        L('Move it anywhere; double-click to open Adhkār', 'حرّكها حيث شئت، وانقر مرتين لفتح أذكار')
+        L('A floating pill that keeps the day in view', 'كبسولة عائمة تُبقي يومك أمامك'),
+        L('The next prayer, the Friday hour, your adhkār and a planned fast. Click to open it, drag it anywhere', 'الصلاة القادمة وساعة الجمعة وأذكارك وصيام نويته. انقر لفتحها واسحبها حيث شئت')
       ) +
       toggle('nextTop', I.nextTop, L('Keep it on top of other windows', 'إبقاؤها فوق النوافذ الأخرى'), '') +
+      pillOptions() +
       '<div class="dk-row"><div class="grow"><b>' +
       esc(L('Reminders', 'التذكيرات')) +
       '</b><small>' +
@@ -982,12 +1217,29 @@
       '<span>' +
       esc(L('Open the data folder', 'افتح مجلد البيانات')) +
       '</span></button></div></section>' +
+      recitations() +
       '</div></div>';
     return {
       title: L('This computer', 'هذا الحاسوب'),
       html: html,
       mount: function (el) {
+        /* #app stays across redraws: listen once, or each redraw adds a handler and one click acts several times */
+        if (el._dkPc) return;
+        el._dkPc = true;
         el.addEventListener('click', function (e) {
+          if (A.route().raw !== 'desk/pc') return;
+          var po = e.target.closest('[data-pill-opt]'),
+            ps = e.target.closest('[data-pill]');
+          if (po || ps) {
+            var pp = pillPrefs();
+            if (po) pp[po.dataset.pillOpt] = po.dataset.v;
+            else pp[ps.dataset.pill] = !pp[ps.dataset.pill];
+            A.save();
+            Desk._pillSig = '';
+            nextToHost();
+            A.rerender();
+            return;
+          }
           var s = e.target.closest('[data-dk-set]');
           if (s) {
             var on = !s.classList.contains('on');
@@ -1028,104 +1280,8 @@
     };
   }
 
-  /* ---------- Print and PDF ---------- */
   function sheetsFor(what) {
-    if (what === 'times') return timetable(month);
-    var ids = what === 'both' ? ['morning', 'evening'] : [what];
-    return ids.map(booklet).join('');
-  }
-  function booklet(cid) {
-    var c = A.col(cid),
-      items = A.items(cid);
-    var rows = items
-      .map(function (it, i) {
-        var refs = (it.refs || [])
-          .map(function (r) {
-            return r.l;
-          })
-          .join(' · ');
-        return (
-          '<article class="pp-it"><div class="pp-ih"><span class="pp-n">' +
-          (i + 1) +
-          '</span><b>' +
-          esc(it.title) +
-          '</b>' +
-          (it.target > 1 ? '<span class="pp-x">×' + it.target + '</span>' : '') +
-          '</div><p class="pp-ar" lang="ar" dir="rtl">' +
-          esc(it.ar) +
-          '</p>' +
-          (it.tr ? '<p class="pp-tr">' + esc(it.tr) + '</p>' : '') +
-          (it.en ? '<p class="pp-en"><span>' + esc(T('Translation')) + '</span>' + esc(it.en) + '</p>' : '') +
-          (refs ? '<p class="pp-ref">' + esc(refs) + '</p>' : '') +
-          '</article>'
-        );
-      })
-      .join('');
-    return (
-      '<table class="pp-flow"><thead><tr><td><div class="pp-sp"></div></td></tr></thead><tfoot><tr><td><div class="pp-sp"></div></td></tr></tfoot><tbody><tr><td><div class="pp-sheet"><header class="pp-h"><div><small>Adhkār</small><h2>' +
-      esc(c.title) +
-      '</h2></div><p lang="ar" dir="rtl">' +
-      esc(c.ar || '') +
-      '</p></header>' +
-      rows +
-      '<footer class="pp-f">' +
-      esc('Arabic from Ḥiṣn al-Muslim; translations from sunnah.com and The Clear Quran. Free, from the Adhkār app.') +
-      '</footer></div></td></tr></tbody></table>'
-    );
-  }
-  function timetable(off) {
-    var now = new Date(),
-      first = new Date(now.getFullYear(), now.getMonth() + off, 1),
-      days = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
-    if (!S.loc)
-      return (
-        '<div class="pp-page"><p>' +
-        esc(L('Choose your place first, under Ṣalāh.', 'اختر مكانك أولًا من الصلاة.')) +
-        '</p></div>'
-      );
-    var cols = ['fajr', 'sunrise', 'dhuhr', 'asr', 'maghrib', 'isha'],
-      today = A.today();
-    var body = '';
-    for (var d = 1; d <= days; d++) {
-      var dt = new Date(first.getFullYear(), first.getMonth(), d),
-        key = A.keyAt(dt.getTime()),
-        t = A.pday(key),
-        h = A.hijri(key),
-        fri = dt.getDay() === 5;
-      body +=
-        '<tr class="' +
-        (fri ? 'fri' : '') +
-        (key === today ? ' now' : '') +
-        '"><td class="d"><b>' +
-        d +
-        '</b> ' +
-        esc(dt.toLocaleDateString('en-GB', { weekday: 'short' })) +
-        '</td><td class="hj">' +
-        h.d +
-        '</td>' +
-        cols
-          .map(function (k) {
-            return '<td>' + (t && isFinite(t[k]) ? esc(A.fmtTxt(t[k])) : '') + '</td>';
-          })
-          .join('') +
-        '</tr>';
-    }
-    var place = (S.loc && (S.loc.name || S.loc.city)) || '';
-    return (
-      '<div class="pp-page pp-tt"><header class="pp-h"><div><small>Adhkār · ' +
-      esc(place) +
-      '</small><h2>' +
-      esc(first.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })) +
-      '</h2></div><p>' +
-      esc(A.hijriText ? A.hijriText(A.keyAt(first.getTime())) : '') +
-      '</p></header><table class="pp-times"><thead><tr><th>Day</th><th>Hijri</th><th>Fajr</th><th>Sunrise</th><th>Dhuhr</th><th>ʿAṣr</th><th>Maghrib</th><th>ʿIshāʾ</th></tr></thead><tbody>' +
-      body +
-      '</tbody></table><footer class="pp-f">' +
-      esc(
-        'Calculated for ' + place + '. Times may differ from your masjid by a few minutes. Free, from the Adhkār app.'
-      ) +
-      '</footer></div>'
-    );
+    return A.print.sheets(what, month);
   }
   function printPage() {
     var opts = [
@@ -1213,7 +1369,10 @@
             if (b) b.style.zoom = Math.min(0.9, ($('#dk-preview').clientWidth - 54) / 794).toFixed(3);
           });
         }
+        if (el._dkPrint) return;
+        el._dkPrint = true;
         el.addEventListener('click', function (e) {
+          if (A.route().raw !== 'desk/print') return;
           var w = e.target.closest('[data-what]');
           if (w) {
             printWhat = w.dataset.what;
@@ -1232,38 +1391,9 @@
       }
     };
   }
-  /* the paper lives in its own block that only print shows; the app stays on screen while Windows prints it */
+  /* the paper goes to Windows' own print dialog (it always closes back to the app), or straight to a PDF */
   function doPrint(pdf) {
-    var paper = document.getElementById('dk-paper');
-    if (!paper) {
-      paper = document.createElement('div');
-      paper.id = 'dk-paper';
-      document.body.appendChild(paper);
-    }
-    paper.innerHTML = sheetsFor(printWhat);
-    var name =
-      printWhat === 'times'
-        ? 'Prayer timetable ' +
-          new Date(new Date().getFullYear(), new Date().getMonth() + month, 1).toLocaleDateString('en-GB', {
-            month: 'long',
-            year: 'numeric'
-          })
-        : printWhat === 'both'
-          ? 'Morning and evening adhkar'
-          : printWhat === 'morning'
-            ? 'Morning adhkar'
-            : 'Evening adhkar';
-    document.documentElement.classList.add('printing');
-    setTimeout(function () {
-      if (pdf) B.savePdf(name);
-      else {
-        var t = document.title;
-        document.title = name;
-        window.print();
-        document.title = t;
-        document.documentElement.classList.remove('printing');
-      }
-    }, 60);
+    A.print.go(printWhat, month, pdf);
   }
   Desk.onPdf = function (path) {
     document.documentElement.classList.remove('printing');
@@ -1451,7 +1581,7 @@
       rtl = document.documentElement.dir === 'rtl',
       prev = null;
     marks.forEach(function (m) {
-      m.classList.remove('low');
+      m.classList.remove('low', 'tuck');
       m.title = $('b', m).textContent + ' · ' + $('small', m).textContent;
     });
     marks.forEach(function (m) {
@@ -1459,7 +1589,10 @@
         sm = $('small', m).getBoundingClientRect(),
         a = Math.min(r.left, sm.left),
         b = Math.max(r.right, sm.right);
-      var hits = prev && (rtl ? b + 8 > prev[0] : a < prev[1] + 8);
+      var hits = prev && (rtl ? b + 8 > prev[0] : a < prev[1] + 8),
+        tick = m.getBoundingClientRect().left;
+      /* a mark whose line would run past the end of the label before it starts beneath that label */
+      if (prev && (rtl ? tick > prev[0] - 12 : tick < prev[1] + 12)) m.classList.add('tuck');
       if (hits) m.classList.add('low');
       else prev = [a, b];
     });

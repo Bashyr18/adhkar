@@ -29,7 +29,7 @@ No ads, no account, no tracking.
 - [What it does](#what-it-does)
 - [Install](#install): [Android](#android) · [Windows](#windows)
 - [The illustrated guide](#the-illustrated-guide)
-- [A tour of the app](#a-tour-of-the-app): [Today](#today) · [Adhkār](#adhkār-and-the-reader) · [Counting](#counting-on-your-fingers) · [Tracker](#the-tracker) · [Ṣalāh](#ṣalāh) · [Duʿāʾ](#duʿāʾ) · [Ramaḍān](#ramaḍān) · [You and settings](#you-and-settings) · [Widgets](#on-your-home-screen) · [Themes and Arabic](#themes-and-arabic)
+- [A tour of the app](#a-tour-of-the-app): [Today](#today) · [Adhkār](#adhkār-and-the-reader) · [Counting](#counting-on-your-fingers) · [Tracker](#the-tracker) · [Ṣalāh](#ṣalāh) · [Duʿāʾ](#duʿāʾ) · [Ramaḍān](#ramaḍān) · [Jumuʿah](#jumuʿah) · [You and settings](#you-and-settings) · [Widgets](#on-your-home-screen) · [Themes and Arabic](#themes-and-arabic)
 - [Gestures](#gestures)
 - [Privacy and sources](#privacy-and-sources)
 - [For developers](#for-developers)
@@ -42,6 +42,7 @@ No ads, no account, no tracking.
 | **Remembrance** | Morning and evening adhkār, after ṣalāh, sleep, waking, the night, the adhān, worry and distress, and everyday duʿāʾs. |
 | **Prayer** | Prayer times calculated on the phone, the qibla, Ḍuḥā, qiyām, make-up prayers, iqāmah times, silence during ṣalāh, and a step-by-step guide to the prayer. |
 | **Practice** | A Tracker with the numbers the Sunnah sets, counting on the fingers with a guided pace, a duʿāʾ journal, and a quiz that brings back what you miss. |
+| **Jumuʿah** | A Friday mode from Thursday Maghrib to Friday Maghrib: its Sunnahs with their evidence, the two hours of response with an alert, and Sūrat al-Kahf on its Madani pages with recitation. |
 | **On the phone** | Home-screen widgets, reminders at the minute, and the whole app in English or Arabic. |
 
 Every Arabic text comes from a verified source, word for word. Translations are labelled "Translation", and every hadith carries its grade.
@@ -73,7 +74,9 @@ What a computer adds:
 - **The keyboard:** Space taps the counting circle and holding it pauses, so counting on the fingers works as on the phone. ← and → move through the reader; F1 lists every shortcut.
 - **Layouts made for the screen:** Today, Ṣalāh, the Tracker and You in two columns, and the reader at a comfortable width.
 - **Print and PDF:** the morning and evening adhkār as a booklet with every source, and the month's prayer timetable, on A4.
-- **Reminders from the tray**, with the takbīr of the adhān, and a small **next-prayer window** you can keep on top.
+- **Reminders from the tray**, with the takbīr of the adhān.
+- **The pill:** a small capsule at the top of the screen, like a notch, that keeps the next prayer counting down while you work, even with Adhkār minimised. Rest the pointer on it to open the day: the Friday hours, the morning and evening adhkār, a fast you planned. Put it at the top, in a corner or anywhere, and choose its size and what it shows.
+- **Learn the prayer as a spread:** the posture large on one side, its words and evidence beside it.
 - **Backups:** one a day for 30 days, restorable, and a backup file dropped on the window comes in.
 
 <p align="center"><img src="docs/readme/desk-print.webp" width="380" alt="Print and PDF">&nbsp;<img src="docs/readme/desk-reader.webp" width="380" alt="The reader on a computer"></p>
@@ -200,6 +203,24 @@ For the whole month the app changes with it, by itself.
 4. **Tarāwīḥ**, a **khatm** of the Qurʾān by juzʾ, and **the last ten nights**.
 5. Before the month, a countdown by the Umm al-Qurā calendar.
 
+### Jumuʿah
+
+<p align="center">
+<img src="docs/guide/shots/friday/today.webp" width="230" alt="Today on Friday">&nbsp;
+<img src="docs/guide/shots/friday/jumuah.webp" width="230" alt="The Jumuʿah page">&nbsp;
+<img src="docs/guide/shots/friday/kahf.webp" width="230" alt="Sūrat al-Kahf on its Madani page">
+</p>
+
+From Maghrib on Thursday to Maghrib on Friday the app wears an emerald night with gold arches.
+
+1. **Today leads with the day:** what comes next (the khuṭbah, the last hour, Fajr), al-Kahf and ṣalawāt.
+2. **The two hours of response:** from when the imam sits until the prayer ends (Muslim 853), and the last hour before Maghrib (Abū Dāwūd 1048). When the last hour begins, a card can appear over other apps.
+3. **The prayer:** Jumuʿah in place of Ẓuhr for a brother; for a sister, who is not required to attend, Jumuʿah with the imam or Ẓuhr at home.
+4. **The Sunnahs of the day,** each with its narration and grade: ghusl, siwāk and perfume, going early, listening in silence, abundant ṣalawāt, al-Kahf.
+5. **Sūrat al-Kahf** on pages 293 to 304 of the Madinah Muṣḥaf, in the King Fahd Complex's page fonts, line for line; or verse by verse with The Clear Quran. Recited by Mishary al-ʿAfāsī, the reciting verse lit and the page turning with it.
+
+A day that has not come can't be logged as fasted: tap it in the calendar to **plan the fast**, with a reminder at Maghrib the evening before. And under You, **Print and PDF** puts the adhkār booklet and the timetable on paper from the phone too.
+
 ### You and settings
 
 <table><tr>
@@ -247,7 +268,7 @@ For the whole month the app changes with it, by itself.
 
 - **Private:** no account, no analytics. Everything stays on your phone.
 - **Offline:** prayer times are calculated on the phone. The internet is used only for recitations you choose to download.
-- **Sources:** Arabic adhkār from Ḥiṣn al-Muslim; translations verbatim from sunnah.com and The Clear Quran; every hadith with its grade from sunnah.com. Details are in [Content](#content) and [NOTICE.md](NOTICE.md).
+- **Sources:** Arabic adhkār from Ḥiṣn al-Muslim; translations verbatim from sunnah.com and The Clear Quran; every hadith with its grade from sunnah.com. Sūrat al-Kahf's text, page layout and page fonts from the Quran.com API and the King Fahd Complex (QCF v2); its recitation from everyayah.com. Details are in [Content](#content) and [NOTICE.md](NOTICE.md).
 
 ---
 

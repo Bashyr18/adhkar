@@ -148,6 +148,8 @@ const views = [
   'profile',
   'insights',
   'calendar',
+  'print',
+  'jumuah',
   'answered',
   'deeds',
   'ramadan',
@@ -977,6 +979,63 @@ ok(/Ramaḍān Mubārak/.test(rt), 'Ramaḍān greeting in Ramaḍān');
     D.items['z-quls'].en.split(String.fromCharCode(10)).filter((l) => /^In the Name of Allah/.test(l)).length === 3,
     'each of the three Quls opens with its basmalah in the translation'
   );
+}
+
+/* Jumuʿah: from Maghrib on Thursday to Maghrib on Friday, with its prayer, its hours and al-Kahf on its pages */
+{
+  const fri = boot('2026-11-13T10:00:00Z', settled),
+    A = fri.w.A,
+    f = A.jumuah(),
+    root = fri.w.document.documentElement;
+  ok(f.on && f.phase === 'day' && f.key === '2026-11-13', 'Friday morning is Jumuʿah, by day');
+  const today = visit(fri, '#/');
+  ok(root.hasAttribute('data-friday') && /fr-hero/.test(today), 'Friday dresses the app and leads Today with its card');
+  ok(!/seek the hour of response before Maghrib/.test(today),'the Friday occasion line steps aside for the card');
+  ok(/Jumuʿah/.test(visit(fri, '#/salah')) && !/>Dhuhr</.test(visit(fri, '#/salah')), 'on Friday the Dhuhr row is Jumuʿah for a brother');
+  const jp = visit(fri, '#/jumuah');
+  ok(/Ṣalāt al-Jumuʿah/.test(jp) && /fr-hr mb/.test(jp) && /fr-hr ls/.test(jp), 'the Jumuʿah page shows the prayer and the two hours');
+  ok(!/If you attend the masjid/.test(jp), 'a brother sees every Sunnah of attending as his');
+  const kh = visit(fri, '#/kahf');
+  ok((kh.match(/class="kf-page"/g) || []).length === 12, 'al-Kahf opens on its twelve Madani pages');
+  ok(new Set((kh.match(/kf-w end" data-v="(\d+)"/g) || []).map((x) => x.match(/\d+/)[0])).size === 110, 'every verse end of al-Kahf is on the pages');
+  A.S.profile.gender = 'f';
+  const sp = visit(fri, '#/jumuah');
+  ok(/Jumuʿah or Ẓuhr/.test(sp) && /If you attend the masjid/.test(sp), 'a sister sees Jumuʿah or Ẓuhr, and the Sunnahs of attending as optional');
+  ok(/Jumuʿah or Ẓuhr/.test(visit(fri, '#/salah')), 'a sister’s Ṣalāh list names Jumuʿah or Ẓuhr');
+  A.S.excused.on = true;
+  ok(/On a break from ṣalāh/.test(visit(fri, '#/jumuah')) && !/data-a="fr-prayed"/.test(visit(fri, '#/jumuah')), 'on a break, the Friday prayer is not asked of her');
+  A.S.excused.on = false;
+  A.S.profile.gender = '';
+  ok(!fri.errors.length, 'Friday pages open cleanly ' + fri.errors.join(' | '));
+
+  const last = boot('2026-11-13T15:40:00Z', settled);
+  ok(last.w.A.jumuah().now === 'last', 'the last hour before Maghrib is lit as the hour of response');
+  const thu = boot('2026-11-12T18:00:00Z', settled);
+  ok(thu.w.A.jumuah().on && thu.w.A.jumuah().phase === 'night' && thu.w.A.jumuah().key === '2026-11-13', 'Thursday after Maghrib is the night of Jumuʿah');
+  const wed = boot('2026-11-11T12:00:00Z', settled);
+  visit(wed, '#/');
+  ok(!wed.w.A.jumuah().on && !wed.w.document.documentElement.hasAttribute('data-friday'), 'a Wednesday is an ordinary day');
+  const after = boot('2026-11-13T17:30:00Z', settled);
+  ok(!after.w.A.jumuah().on, 'Jumuʿah ends at Maghrib on Friday');
+}
+
+/* fasting looks only backwards: a day that has not come can be planned, never logged */
+{
+  const env = boot('2026-11-13T10:00:00Z', settled),
+    A = env.w.A,
+    d = env.w.document;
+  visit(env, '#/calendar');
+  const btn = d.createElement('button');
+  btn.dataset.k = '2026-11-16';
+  A.acts['cal-day'](btn);
+  const sh = [...d.querySelectorAll('.sheet')].pop();
+  ok(sh && /Plan a fast/.test(sh.innerHTML) && !sh.querySelector('[data-fast]'), 'a future day offers a plan, not a log');
+  sh.querySelector('[data-plan="sunnah"]').click();
+  ok(A.S.fastPlan['2026-11-16'] === 'sunnah' && !A.S.fasts['2026-11-16'], 'planning a fast does not count it as fasted');
+  ok(/class="[^"]*plan[^"]*"[^>]*data-k|data-k="2026-11-16" class="[^"]*plan/.test(visit(env, '#/calendar')), 'a planned day is marked on the calendar');
+  const eve = boot('2026-11-15T18:00:00Z', JSON.parse(JSON.stringify(A.S)));
+  ok(eve.w.A.occasion('2026-11-15', true).some((o) => o.t === 'Tomorrow you plan to fast'), 'the evening before shows the planned fast');
+  ok(!env.errors.length, 'fast planning runs cleanly ' + env.errors.join(' | '));
 }
 
 /* Arabic mode reaches the reader, which sits outside the page */

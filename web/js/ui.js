@@ -836,9 +836,9 @@
         '<div class="next"><div class="lbl" data-sky-lbl>' +
         (n.next.k === 'sunrise' ? 'Fajr ends' : 'Next prayer') +
         '</div><div class="nm"><b>' +
-        esc(n.next.k === 'sunrise' ? 'Sunrise' : P.NAMES[n.next.k]) +
+        esc(n.next.k === 'sunrise' ? 'Sunrise' : A.pName(n.next.k, A.keyAt(n.next.at))) +
         '</b><span class="ar">' +
-        P.AR[n.next.k] +
+        A.pAr(n.next.k, A.keyAt(n.next.at)) +
         '</span></div>';
       h +=
         '<div class="cd"><span data-sky-cd>in <b>' +
@@ -855,7 +855,7 @@
             '<div class="' +
             (c ? 'cur' : '') +
             '">' +
-            (k === 'sunrise' ? 'Shurūq' : P.NAMES[k]) +
+            (k === 'sunrise' ? 'Shurūq' : A.pName(k, n.key, true)) +
             '<b>' +
             A.fmtT(n.t[k], 'bare') +
             '</b></div>'

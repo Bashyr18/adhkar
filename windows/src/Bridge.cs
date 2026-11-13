@@ -170,6 +170,7 @@ namespace Adhkar {
         public void deskSchedule(string json) { f.Schedule(json); }
         /* the next prayer, for the small window and the tray */
         public void deskNext(string label, double at, string time) { f.BeginInvoke(new Action(() => f.SetNext(label, at, time))); }
+        public void deskPill(string json) { f.BeginInvoke(new Action(() => f.SetPill(json))); }
         public void openFolder(string which) {
             var p = which == "backups" ? Store.BackupDir : which == "documents" ? Shell.Documents() : Store.Root;
             Directory.CreateDirectory(p); Shell.Open(p);
@@ -177,6 +178,12 @@ namespace Adhkar {
         public string backup(string name) { return Store.ReadBackup(name); }
         public void install() { f.BeginInvoke(new Action(() => { var ok = Shell.Install(); f.Post("window.Desk&&Desk.onInstalled&&Desk.onInstalled(" + (ok ? "true" : "false") + ")"); })); }
         public void quit() { f.BeginInvoke(new Action(() => f.Quit())); }
+        /* Windows' own print dialog (not the browser's preview, which had no way back) */
+        public void printPage(string name) {
+            f.BeginInvoke(new Action(() => {
+                try { f.Web.CoreWebView2.ShowPrintUI(Microsoft.Web.WebView2.Core.CoreWebView2PrintDialogKind.System); } catch { }
+            }));
+        }
         /* the page on screen, straight to a PDF in Documents\Adhkar */
         public void savePdf(string name) {
             f.BeginInvoke(new Action(async () => {

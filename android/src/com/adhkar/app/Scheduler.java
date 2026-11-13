@@ -78,22 +78,34 @@ final class Scheduler {
     static List<Ev> events(Context c, JSONObject cfg, PrayerCalc.Opts o, int off) {
         List<Ev> out = new ArrayList<>();
         JSONObject n = cfg.optJSONObject("notif");
-        if (n == null || !n.optBoolean("enabled", false)) return out;
         long now = System.currentTimeMillis();
         PrayerCalc.Day d = PrayerCalc.dayAt(now, off, o);
         String key = PrayerCalc.key(d), place = Store.locName(cfg);
+        org.json.JSONArray plan = cfg.optJSONArray("fastPlan");
+        if (plan != null) {
+            PrayerCalc.Day tm = PrayerCalc.dayAt(now, off + 1, o);
+            String tk = PrayerCalc.key(tm);
+            for (int i = 0; i < plan.length(); i++)
+                if (tk.equals(plan.optString(i)))
+                    out.add(new Ev("fp-" + key, d.maghrib, CH_SUNNAH, L.t("Tomorrow you plan to fast", "غدًا تنوي الصيام"),
+                            L.t("Make your intention tonight, and eat suhūr before Fajr at " + Store.fmtTime(cfg, o, tm.fajr) + ".", "انوِ الليلة، وتسحّر قبل الفجر " + Store.fmtTime(cfg, o, tm.fajr) + "."), "#/calendar", null, null, false));
+        }
+        if (n == null || !n.optBoolean("enabled", false)) return out;
         JSONObject today = cfg.optJSONObject("today");
         boolean smart = n.optBoolean("smart", true) && today != null && key.equals(today.optString("key"));
         JSONObject pr = cfg.optBoolean("excused", false) ? null : n.optJSONObject("prayers"); // paused during a break from ṣalāh
         int pre = n.optInt("pre", 0);
         String atTime = n.optBoolean("adhan", true) ? CH_ADHAN : CH_PRAYER;
+        Calendar dw0 = Calendar.getInstance(PrayerCalc.zone(o)); dw0.setTimeInMillis(d.dhuhr);
+        boolean fri0 = dw0.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY, sis = "f".equals(cfg.optString("gender"));
         for (String k : PrayerCalc.PRAYERS) {
             long at = d.get(k);
+            String nm = fri0 && k.equals("dhuhr") ? (sis ? L.t("Jumuʿah or Ẓuhr", "الجمعة أو الظهر") : L.t("Jumuʿah", "الجمعة")) : Store.name(k);
             if (pr != null && pr.optBoolean(k, false)) {
-                out.add(new Ev("p-" + k + "-" + key, at, atTime, Store.name(k) + " · " + Store.fmtTime(cfg, o, at),
-                        L.t("It is time for " + Store.name(k) + (place.isEmpty() ? "" : " in " + place) + ". Then the adhkār after the prayer.", "حان وقت " + Store.name(k) + (place.isEmpty() ? "" : " في " + place) + "، ثم أذكار بعد الصلاة."),
+                out.add(new Ev("p-" + k + "-" + key, at, atTime, nm + " · " + Store.fmtTime(cfg, o, at),
+                        L.t("It is time for " + nm + (place.isEmpty() ? "" : " in " + place) + ". Then the adhkār after the prayer.", "حان وقت " + nm + (place.isEmpty() ? "" : " في " + place) + "، ثم أذكار بعد الصلاة."),
                         "#/salah", L.t("After-prayer adhkār", "أذكار بعد الصلاة"), "#/r/salah/0/" + k, false));
-                if (pre > 0) out.add(new Ev("q-" + k + "-" + key, at - pre * MIN, CH_PRAYER, L.t(Store.name(k) + " in " + pre + " minutes", Store.name(k) + " بعد " + L.n(pre) + " دقيقة"),
+                if (pre > 0) out.add(new Ev("q-" + k + "-" + key, at - pre * MIN, CH_PRAYER, L.t(nm + " in " + pre + " minutes", nm + " بعد " + L.n(pre) + " دقيقة"),
                         Store.fmtTime(cfg, o, at) + L.t(" · a moment to make wuḍūʾ", " · وقت للوضوء"), "#/salah", null, null, false));
             }
         }
@@ -151,10 +163,12 @@ final class Scheduler {
         JSONObject fr = n.optJSONObject("friday");
         Calendar dow = Calendar.getInstance(PrayerCalc.zone(o)); dow.setTimeInMillis(d.dhuhr);
         boolean friday = dow.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY;
-        if (fr != null && fr.optBoolean("on") && friday)
-            out.add(new Ev("fk-" + key, d.sunrise + 120 * MIN, CH_SUNNAH, L.t("Jumuʿah", "الجمعة"), L.t("Read Sūrat al-Kahf and send abundant ṣalawāt upon the Prophet ﷺ.", "اقرأ سورة الكهف وأكثر من الصلاة على النبي ﷺ."), "#/tracker", null, null, false));
+        JSONObject ju = cfg.optJSONObject("jumuah");
+        boolean kahfRead = ju != null && key.equals(ju.optString("kahf"));
+        if (fr != null && fr.optBoolean("on") && friday && !kahfRead)
+            out.add(new Ev("fk-" + key, d.sunrise + 120 * MIN, CH_SUNNAH, L.t("Yawm al-Jumuʿah", "يوم الجمعة"), L.t("Read Sūrat al-Kahf and send abundant ṣalawāt upon the Prophet ﷺ.", "اقرأ سورة الكهف وأكثر من الصلاة على النبي ﷺ."), "#/kahf", L.t("Read al-Kahf", "اقرأ الكهف"), "#/kahf", false));
         if (friday && ((fr != null && fr.optBoolean("on")) || jFri))
-            out.add(new Ev("fh-" + key, d.maghrib - 60 * MIN, CH_SUNNAH, L.t("The hour of response", "ساعة الإجابة"), L.t("The last hour before Maghrib on Friday. Make duʿāʾ.", "آخر ساعة قبل مغرب الجمعة، فادعُ الله.") + (jFri ? yours : ""), jFri ? "#/journal" : "#/", null, null, false));
+            out.add(new Ev("fh-" + key, d.maghrib - 60 * MIN, CH_SUNNAH, L.t("The hour of response", "ساعة الإجابة"), L.t("The last hour before Maghrib on Friday, until " + Store.fmtTime(cfg, o, d.maghrib) + ". Make duʿāʾ.", "آخر ساعة قبل مغرب الجمعة، حتى " + Store.fmtTime(cfg, o, d.maghrib) + "، فادعُ الله.") + (jFri ? yours : ""), jFri ? "#/journal" : "#/jumuah", L.t("Your duʿāʾ list", "قائمة دعائك"), "#/journal", false));
         return out;
     }
 
@@ -232,7 +246,12 @@ final class Scheduler {
         long now = System.currentTimeMillis(), last = Store.prefs(c).getLong("lastFired", now - 2 * MIN);
         List<Ev> evs = new ArrayList<>();
         for (int off = -1; off <= 1; off++) evs.addAll(events(c, cfg, o, off));
-        for (Ev e : evs) if (e.at > last && e.at <= now + 5000 && now - e.at < 15 * MIN) post(c, e);
+        for (Ev e : evs) if (e.at > last && e.at <= now + 5000 && now - e.at < 15 * MIN) {
+            post(c, e);
+            JSONObject ju = cfg.optJSONObject("jumuah");
+            if (e.id.startsWith("fh-") && ju != null && ju.optBoolean("overlay", true) && !MainActivity.visible && !Store.prefs(c).getBoolean("dndOurs", false))
+                Overlay.hour(c, e.text, e.route);
+        }
         Store.prefs(c).edit().putLong("lastFired", now + 5000).apply();
         long next = Long.MAX_VALUE;
         for (Ev e : evs) if (e.at > now + 5000 && e.at < next) next = e.at;

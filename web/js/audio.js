@@ -431,7 +431,7 @@
   AU.getAll = function (done) {
     var list = AU.missing();
     if (!list.length) {
-      A.toast('Every recitation is on your phone', 'check');
+      A.toast(window.ADHKAR_DESKTOP ? 'Every recitation is on this computer' : 'Every recitation is on your phone', 'check');
       if (done) done(true);
       return;
     }
@@ -446,7 +446,7 @@
   A.acts['au-get-all'] = function () {
     var list = AU.missing();
     if (!list.length) {
-      A.toast('Every recitation is on your phone', 'check');
+      A.toast(window.ADHKAR_DESKTOP ? 'Every recitation is on this computer' : 'Every recitation is on your phone', 'check');
       return;
     }
     A.confirm(

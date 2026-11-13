@@ -593,6 +593,18 @@ public class MainActivity extends Activity implements SensorEventListener {
             } catch (Exception ignored) { }
             return o.toString();
         }
+        @JavascriptInterface public void printPage(String name) {
+            ui.post(() -> {
+                try {
+                    android.print.PrintManager pm = getSystemService(android.print.PrintManager.class);
+                    if (pm == null || web == null) return;
+                    String job = name == null || name.isEmpty() ? "Adhkar" : name;
+                    pm.print(job, web.createPrintDocumentAdapter(job), new android.print.PrintAttributes.Builder()
+                            .setMediaSize(android.print.PrintAttributes.MediaSize.ISO_A4)
+                            .setMinMargins(android.print.PrintAttributes.Margins.NO_MARGINS).build());
+                } catch (Exception e) { toast(L.t("Printing is not available", "الطباعة غير متاحة")); }
+            });
+        }
         @JavascriptInterface public void exportFile(String name, String text) {
             pendingExport = text;
             Intent i = new Intent(Intent.ACTION_CREATE_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE).setType("application/json").putExtra(Intent.EXTRA_TITLE, name);

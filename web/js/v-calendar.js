@@ -136,7 +136,7 @@
         '" class="' +
         (d === t ? 'today ' : '') +
         (oc.length ? 'occ h-' + oc[0].h + ' ' : '') +
-        (S.fasts[d] ? 'fast' : '') +
+        (S.fasts[d] ? 'fast' : S.fastPlan && S.fastPlan[d] && d >= t ? 'plan' : '') +
         '" aria-label="' +
         esc(
           hh.d +
@@ -145,7 +145,7 @@
             ', ' +
             A.fmtDate(d) +
             (oc.length ? ', ' + oc[0].t : '') +
-            (S.fasts[d] ? ', fasted' : '')
+            (S.fasts[d] ? ', fasted' : S.fastPlan && S.fastPlan[d] && d >= t ? ', planned fast' : '')
         ) +
         '"><b>' +
         hh.d +
@@ -157,7 +157,7 @@
         '</button>';
     });
     h +=
-      '</div><div class="legend"><span><i style="background:color-mix(in srgb,var(--sand) 40%,var(--s2))"></i>Sunnah days</span><span><i style="background:color-mix(in srgb,var(--rose) 40%,var(--s2))"></i>ʿĪd</span><span><i style="background:var(--goldh);border-radius:50%"></i>Fasted</span><span><i style="background:var(--jade);border-radius:50%"></i>Remembrance</span></div></div>';
+      '</div><div class="legend"><span><i style="background:color-mix(in srgb,var(--sand) 40%,var(--s2))"></i>Sunnah days</span><span><i style="background:color-mix(in srgb,var(--rose) 40%,var(--s2))"></i>ʿĪd</span><span><i style="background:var(--goldh);border-radius:50%"></i>Fasted</span><span><i style="border:1.5px dashed var(--goldh);border-radius:50%;background:none"></i>Planned</span><span><i style="background:var(--jade);border-radius:50%"></i>Remembrance</span></div></div>';
     var up = upcoming(t);
     h +=
       '<a class="card coll press h-gold" href="#/ramadan"><div class="badge">' +
@@ -267,11 +267,32 @@
         }).join('') +
         '</dl>';
     body += '<div class="divider"></div>';
+    var future = d > A.today(),
+      plan = (S.fastPlan = S.fastPlan || {})[d];
     if (noFast)
       body +=
         '<div class="rd-note">' +
         ic('info', 's') +
         '<div>Fasting is not permitted on the days of ʿĪd and Tashrīq.</div></div>';
+    else if (future)
+      body +=
+        '<div class="eyebrow">Plan a fast</div><p class="muted small" style="margin:6px 0 12px">This day has not come yet, so it cannot be logged. Plan it, and you will be reminded at Maghrib the evening before, to make your intention and prepare for suhūr.</p><div class="col" style="gap:8px">' +
+        FAST_TYPES.filter(function (x) {
+          /* a Ramaḍān fast is planned only for a day of Ramaḍān, and any other only outside it */
+          return (x[0] === 'ramadan') === !!(A.isRamadan && A.isRamadan(d));
+        }).map(function (x) {
+          return (
+            '<button type="button" class="opt" data-plan="' +
+            x[0] +
+            '" aria-pressed="' +
+            (plan === x[0]) +
+            '"><span class="rad"></span><div class="grow"><div class="t">' +
+            x[1] +
+            '</div></div></button>'
+          );
+        }).join('') +
+        (plan ? '<button type="button" class="btn ghost" data-plan="">Remove the plan</button>' : '') +
+        '</div>';
     else
       body +=
         '<div class="eyebrow">Fasting</div><div class="col" style="gap:8px">' +
@@ -291,8 +312,27 @@
     A.sheet(hh.d + ' ' + hh.name + ' ' + hh.y, body, {
       mount: function (sh, o) {
         sh.addEventListener('click', function (e) {
+          var pl = e.target.closest('[data-plan]');
+          if (pl) {
+            if (pl.dataset.plan) S.fastPlan[d] = pl.dataset.plan;
+            else delete S.fastPlan[d];
+            A.save();
+            A.N.haptic('tick');
+            o.close();
+            A.rerender();
+            if (pl.dataset.plan)
+              A.toast(
+                S.notif.enabled || window.ADHKAR_DESKTOP
+                  ? 'Planned. A reminder comes at Maghrib the evening before'
+                  : 'Planned. It shows on Today the evening before',
+                'fast'
+              );
+            return;
+          }
           var b = e.target.closest('[data-fast]');
           if (!b) return;
+          if (d > A.today()) return;
+          if (b.dataset.fast) delete S.fastPlan[d];
           if (b.dataset.fast) S.fasts[d] = b.dataset.fast;
           else delete S.fasts[d];
           A.save();

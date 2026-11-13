@@ -27,6 +27,7 @@ jobs:
         run: |
           python tools/build_content.py
           python tools/build_hadith.py
+          python tools/build_kahf.py
       - name: Content tests
         run: node tools/test.js
       - name: Interface tests
@@ -54,6 +55,7 @@ jobs:
         run: |
           python tools/build_content.py
           python tools/build_hadith.py
+          python tools/build_kahf.py
       - name: Build the Windows app
         run: python -I tools/build_windows.py
       - uses: actions/upload-artifact@v4

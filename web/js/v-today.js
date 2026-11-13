@@ -528,10 +528,17 @@
       sug = A.suggest(n),
       occ = A.occasion(k, !!(n.t && n.now >= n.t.maghrib && n.now < n.t.nextFajr && n.key === k));
     var name = (S.profile.name || '').split(' ')[0];
-    var rm = A.ramadanInfo ? A.ramadanInfo() : { on: false };
+    var rm = A.ramadanInfo ? A.ramadanInfo() : { on: false },
+      fr = !rm.on && A.jumuah ? A.jumuah() : { on: false };
     var h =
       '<header class="top"><div class="tt"><div class="eyebrow">' +
-      (rm.on ? 'Ramaḍān Mubārak · day ' + rm.day : 'As-salāmu ʿalaykum') +
+      (rm.on
+        ? 'Ramaḍān Mubārak · day ' + rm.day
+        : fr.on
+          ? fr.phase === 'night'
+            ? 'The night of Jumuʿah'
+            : 'Yawm al-Jumuʿah'
+          : 'As-salāmu ʿalaykum') +
       '</div><h1>' +
       (name ? esc(name) : 'Welcome <em>back</em>') +
       '</h1></div><div class="acts"><a class="ib ghost" href="#/search" aria-label="Search">' +
@@ -542,6 +549,7 @@
       A.avatar(42) +
       '</a></div></header>';
     if (rm.on) h += A.ramadanCard();
+    else if (fr.on) h += A.fridayCard();
     h += A.skyHTML(n);
     var nx = sug ? null : upNext(n);
     if (nx)
@@ -646,6 +654,7 @@
         var nn = A.now();
         A.skyTick(el, nn);
         if (A.ramadanTick) A.ramadanTick(el);
+        if (A.fridayTick) A.fridayTick(el);
         if (n.t && nn.next.at !== n.next.at) A.rerender();
       }
     };

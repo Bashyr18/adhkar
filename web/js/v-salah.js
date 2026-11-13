@@ -120,7 +120,7 @@
               '" data-d="' +
               key +
               '" aria-label="Mark ' +
-              P.NAMES[k] +
+              A.pName(k, key) +
               ' prayed" aria-pressed="' +
               !!pr[k] +
               '">' +
@@ -135,9 +135,9 @@
           '">' +
           chk +
           '<div class="grow"><div class="nm">' +
-          (k === 'sunrise' ? 'Sunrise' : P.NAMES[k]) +
+          (k === 'sunrise' ? 'Sunrise' : A.pName(k, key)) +
           '</div><div class="arn ar">' +
-          P.AR[k] +
+          A.pAr(k, key) +
           '</div>' +
           (isP && S.iqama.on ? '<div class="iqm">Iqāmah ' + A.fmtT(t[k] + S.iqama[k] * 60000) + '</div>' : '') +
           (trv && A.SHORT[k] ? '<div class="iqm trv">2 rakʿahs</div>' : '') +
@@ -282,7 +282,7 @@
     el.classList.toggle('on', on);
     el.setAttribute('aria-pressed', on);
     if (on && d === A.today() && !A.progress(d, 'salah', k).complete)
-      A.toast('Next: the adhkār after ' + P.NAMES[k], 'mosque');
+      A.toast('Next: the adhkār after ' + A.pName(k, d), 'mosque');
   };
   A.acts.bell = function (el) {
     var k = el.dataset.k;

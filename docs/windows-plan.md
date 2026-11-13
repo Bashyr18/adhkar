@@ -1,6 +1,6 @@
 # Adhkār for Windows: the plan
 
-Status: **built in 12.0**; 12.1 adds Adhkār's own desktop features (the day band, the sky rail, the session pane). Phone sync follows. This is the plan the Windows edition was built from. It follows the
+Status: **built in 12.0**; 12.1 adds Adhkār's own desktop features (the day band, the sky rail, the session pane). 13.0 adds the pill at the top of the screen, Windows' own print dialog, and Learn the prayer as a spread. Phone sync follows. This is the plan the Windows edition was built from. It follows the
 house method for desktop editions, whose reference implementation is Miftāḥ for Windows.
 
 The aim is not the phone app in a window. It is the same app, the same record and the same content
