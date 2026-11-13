@@ -115,10 +115,14 @@
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
 }
+/* Nothing may make the page wider than the phone. A phone's WebView ignores overflow-x: hidden on the body alone and
+   widens the whole page instead, which pushes the fixed bar off centre and lets every page slide sideways. clip on
+   both, unlike hidden, also leaves position: sticky working. */
 html {
   background: var(--bg);
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  overflow-x: clip;
 }
 body {
   margin: 0;
@@ -127,7 +131,7 @@ body {
   color: var(--t1);
   font: 500 15px/1.5 var(--f-ui);
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+  overflow-x: clip;
   overscroll-behavior-y: none;
   text-rendering: optimizeLegibility;
 }

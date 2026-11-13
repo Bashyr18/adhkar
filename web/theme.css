@@ -99,6 +99,8 @@ body::before {
 .pattern {
   background: color-mix(in srgb, var(--page) calc(var(--pat-o) * var(--pat-k, 1.7) * 100%), transparent);
   transition: background 0.8s;
+  /* the light that crosses it travels past the edge; clipped here, it can never widen the page */
+  overflow: hidden;
 }
 .pattern::before,
 .pattern::after {
