@@ -19,7 +19,14 @@ using Microsoft.Web.WebView2.WinForms;
 namespace Adhkar {
     static class Program {
         public const string Host = "adhkar.example", Origin = "https://adhkar.example";
-        public const string PipeName = "Adhkar.Desktop.v1";
+        /* one Adhkār per person; a copy run on its own data folder (ADHKAR_DATA, for testing) is a separate app, so it
+           never brings forward, or hands its arguments to, the copy you are using */
+        public static readonly string PipeName = "Adhkar.Desktop.v1" + Instance();
+        static string Instance() {
+            var d = Environment.GetEnvironmentVariable("ADHKAR_DATA");
+            if (string.IsNullOrEmpty(d)) return "";
+            unchecked { int h = 17; foreach (var ch in d.ToLowerInvariant()) h = h * 31 + ch; return "." + ((uint)h).ToString("x8"); }
+        }
         public static string Version = "12.0";
         static Mutex single;
 
@@ -31,7 +38,7 @@ namespace Adhkar {
             Store.Init();
             var v = Assembly.GetExecutingAssembly().GetName().Version; Version = v.Major + "." + v.Minor;
             if (Array.IndexOf(args, "--uninstall") >= 0) { Shell.Uninstall(); return 0; }
-            bool first; single = new Mutex(true, "Local\\Adhkar.Desktop.v1", out first);
+            bool first; single = new Mutex(true, "Local\\" + PipeName, out first);
             if (!first) { Hand(args); return 0; }
             try { Unpack(); }
             catch (Exception e) { MessageBox.Show("Adhkār could not start.\n\n" + e.Message, "Adhkār", MessageBoxButtons.OK, MessageBoxIcon.Error); return 1; }
