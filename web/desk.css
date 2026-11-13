@@ -1,0 +1,1022 @@
+/* Adhkār on a computer: every desktop style, scoped under html.is-desk (set by windows/shim.js). Nothing here
+   applies on a phone or in a browser. The rules: nothing touches an edge, nothing is zoomed up, panels never
+   overlap the rail, and the space is used by columns that align, never by stretching one phone column. */
+
+html.is-desk {
+  --rail: 252px;
+  --dk-gut: clamp(28px, 3vw, 52px);
+}
+html.is-desk.rail-mini {
+  --rail: 80px;
+}
+html.is-desk .nav,
+html.is-desk .navfade,
+html.is-desk .statusscrim {
+  display: none !important;
+}
+html.is-desk body {
+  overflow-x: clip;
+}
+
+/* ---------- the rail ---------- */
+#rail {
+  display: none;
+}
+html.has-rail #rail {
+  position: fixed;
+  inset-block: 0;
+  inset-inline-start: 0;
+  z-index: 70;
+  width: var(--rail);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px 14px 14px;
+  background: color-mix(in srgb, var(--s1) 70%, var(--bg));
+  border-inline-end: 1px solid var(--line);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+}
+#rail::-webkit-scrollbar {
+  display: none;
+}
+#rail .grow {
+  flex: 1;
+  min-width: 0;
+}
+.rl-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 4px 10px;
+}
+.rl-brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  flex: 1;
+  min-width: 0;
+  color: var(--t1);
+  text-decoration: none;
+}
+.rl-brand svg {
+  flex: none;
+  border-radius: 10px;
+  box-shadow: 0 0 0 1px var(--line2);
+}
+.rl-word {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+.rl-word b {
+  font-size: 17px;
+  font-weight: 700;
+}
+.rl-word small {
+  font-family: var(--f-ar, 'Amiri', serif);
+  font-size: 15px;
+  color: var(--t3);
+}
+.rl-fold {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--t3);
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    transform 0.35s;
+}
+.rl-fold:hover {
+  background: var(--s2);
+  color: var(--t1);
+}
+html.rail-mini .rl-fold {
+  transform: scaleX(-1);
+}
+[dir='rtl'] .rl-fold svg {
+  transform: scaleX(-1);
+}
+.rl-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 42px;
+  padding: 0 10px 0 12px;
+  margin-bottom: 8px;
+  border-radius: 12px;
+  border: 1px solid var(--line2);
+  background: var(--bg);
+  color: var(--t3);
+  font: inherit;
+  font-size: 13.5px;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    color 0.2s;
+}
+.rl-search span {
+  flex: 1;
+  text-align: start;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rl-search:hover {
+  border-color: color-mix(in srgb, var(--page) 45%, transparent);
+  color: var(--t1);
+}
+#rail kbd,
+.dk-pal kbd,
+.dk-keys kbd,
+.dk-note kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 6px;
+  border: 1px solid var(--line2);
+  border-bottom-width: 2px;
+  background: var(--s2);
+  color: var(--t2);
+  font: 600 11px/1 var(--f-ui, inherit);
+  white-space: nowrap;
+}
+.rl-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.rl-i {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 42px;
+  padding: 0 12px;
+  border-radius: 12px;
+  color: var(--t2);
+  text-decoration: none;
+  font-size: 14.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+.rl-i .ic,
+.rl-i svg {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+.rl-i:hover {
+  background: var(--s2);
+  color: var(--t1);
+}
+.rl-i.on {
+  background: color-mix(in srgb, var(--page) 14%, transparent);
+  color: var(--page);
+}
+.rl-i.on::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: -14px;
+  top: 10px;
+  bottom: 10px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--page);
+}
+.rl-sec {
+  margin: 16px 12px 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--t3);
+  white-space: nowrap;
+}
+.rl-next:empty {
+  display: none;
+}
+.rl-nx {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  margin-bottom: 8px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--t1);
+  text-decoration: none;
+}
+.rl-nx svg {
+  color: var(--page);
+  flex: none;
+}
+.rl-nx .grow {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+.rl-nx small {
+  font-size: 11px;
+  color: var(--t3);
+}
+.rl-nx b {
+  font-size: 15px;
+}
+.rl-nx-t {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--t2);
+  font-variant-numeric: tabular-nums;
+}
+.rl-foot {
+  display: flex;
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+.rl-tool {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  border: 0;
+  border-radius: 11px;
+  background: none;
+  color: var(--t2);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+.rl-tool:hover {
+  background: var(--s2);
+  color: var(--t1);
+}
+/* a narrow rail: icons only, their names on hover */
+html.rail-mini .rl-word,
+html.rail-mini .rl-search span,
+html.rail-mini .rl-search kbd,
+html.rail-mini .rl-i span,
+html.rail-mini .rl-sec,
+html.rail-mini .rl-tool span,
+html.rail-mini .rl-nx .grow,
+html.rail-mini .rl-nx-t {
+  display: none;
+}
+html.rail-mini .rl-top {
+  flex-direction: column;
+}
+html.rail-mini .rl-search,
+html.rail-mini .rl-i,
+html.rail-mini .rl-nx {
+  justify-content: center;
+  padding: 0;
+}
+html.rail-mini .rl-nx {
+  height: 44px;
+}
+html.rail-mini .rl-foot {
+  flex-direction: column;
+}
+@media (max-width: 1150px) {
+  html.is-desk:not(.rail-mini) {
+    --rail: 80px;
+  }
+  html.is-desk .rl-word,
+  html.is-desk .rl-search span,
+  html.is-desk .rl-search kbd,
+  html.is-desk .rl-i span,
+  html.is-desk .rl-sec,
+  html.is-desk .rl-tool span,
+  html.is-desk .rl-nx .grow,
+  html.is-desk .rl-nx-t,
+  html.is-desk .rl-fold {
+    display: none;
+  }
+  html.is-desk .rl-search,
+  html.is-desk .rl-i,
+  html.is-desk .rl-nx {
+    justify-content: center;
+    padding: 0;
+  }
+  html.is-desk .rl-foot {
+    flex-direction: column;
+  }
+}
+
+/* ---------- the page beside the rail ---------- */
+html.has-rail #app {
+  max-width: none;
+  margin: 0;
+  margin-inline-start: var(--rail);
+  padding: 30px var(--dk-gut) 56px;
+}
+html.has-rail #app > .view {
+  max-width: 880px;
+  margin-inline: auto;
+}
+html.has-rail #app > .pattern {
+  inset-inline-start: 0;
+}
+/* the tab pages: their cards dealt into two balanced columns, the header across both */
+html.has-rail #app > .view.dk-wide {
+  max-width: 1240px;
+  display: block;
+  column-count: 2;
+  column-gap: 26px;
+}
+html.has-rail .view.dk-wide > * {
+  break-inside: avoid;
+  margin-bottom: var(--gap, 14px);
+}
+html.has-rail .view.dk-wide > .top,
+html.has-rail .view.dk-wide > .dk-head {
+  column-span: all;
+  margin-bottom: 22px;
+}
+html.has-rail .view.dk-wide > .sec {
+  break-after: avoid;
+}
+@media (max-width: 1000px) {
+  html.has-rail #app > .view.dk-wide {
+    column-count: 1;
+    max-width: 760px;
+  }
+}
+
+/* sheets: a centred dialog on a computer, not a panel from the bottom */
+html.is-desk .sheet {
+  inset: 0;
+  margin: auto;
+  width: min(620px, calc(100vw - 64px));
+  max-width: none;
+  height: fit-content;
+  max-height: min(82vh, 760px);
+  border: 1px solid var(--line2);
+  border-radius: 22px;
+  padding-bottom: 6px;
+  box-shadow:
+    0 40px 90px -30px rgba(0, 0, 0, 0.75),
+    0 0 0 1px rgba(255, 255, 255, 0.02);
+  animation: dkSheetIn 0.26s var(--out);
+}
+html.is-desk .sheet.out {
+  animation: dkSheetOut 0.18s var(--ease) forwards;
+}
+html.is-desk .sheet .grab {
+  display: none;
+}
+@keyframes dkSheetIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+}
+@keyframes dkSheetOut {
+  to {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+}
+/* the reader, and anything else that fills the window, starts after the rail */
+html.has-rail .reader {
+  inset-inline-start: var(--rail);
+}
+html.has-rail .reader .rd-body,
+html.has-rail .reader .rd-top,
+html.has-rail .reader .rd-dock {
+  width: 100%;
+  max-width: 960px;
+  margin-inline: auto;
+}
+html.has-rail .toast {
+  margin-inline-start: calc(var(--rail) / 2);
+}
+/* the counting circle pressed by the Space bar */
+html.is-desk .pace.kpress {
+  transform: scale(0.97);
+}
+html.is-desk.dropping body::after {
+  content: '';
+  position: fixed;
+  inset: 12px;
+  z-index: 200;
+  border: 2px dashed var(--page);
+  border-radius: 24px;
+  pointer-events: none;
+}
+
+/* ---------- Ctrl K ---------- */
+.dk-pal {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  justify-content: center;
+  padding-top: 12vh;
+  opacity: 0;
+  transition: opacity 0.16s;
+}
+.dk-pal.on {
+  opacity: 1;
+}
+.dk-pal-bg {
+  position: absolute;
+  inset: 0;
+  background: rgba(3, 4, 8, 0.55);
+  backdrop-filter: blur(3px);
+}
+.dk-pal-box {
+  position: relative;
+  width: min(680px, calc(100vw - 64px));
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  border-radius: 20px;
+  border: 1px solid var(--line2);
+  background: var(--s1);
+  box-shadow: 0 40px 90px -30px rgba(0, 0, 0, 0.8);
+  overflow: hidden;
+  transform: translateY(-8px);
+  transition: transform 0.2s var(--out);
+}
+.dk-pal.on .dk-pal-box {
+  transform: none;
+}
+.dk-pal-in {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 62px;
+  padding: 0 18px;
+  border-bottom: 1px solid var(--line);
+  color: var(--t3);
+}
+.dk-pal-in input {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  border: 0;
+  outline: 0;
+  background: none;
+  color: var(--t1);
+  font: inherit;
+  font-size: 17px;
+}
+.dk-pal-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+.dk-pal-g {
+  margin: 10px 12px 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--t3);
+}
+.dk-pal-i {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 12px;
+  background: none;
+  color: var(--t1);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.dk-pal-i.on,
+.dk-pal-i:hover {
+  background: color-mix(in srgb, var(--page) 12%, transparent);
+}
+.dk-pal-ic {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--s2);
+  color: var(--page);
+}
+.dk-pal-ic svg {
+  width: 18px;
+  height: 18px;
+}
+.dk-pal-i .grow {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.dk-pal-i b {
+  font-size: 14.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dk-pal-i small {
+  font-size: 12px;
+  color: var(--t3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dk-pal-none {
+  padding: 24px;
+  text-align: center;
+  color: var(--t3);
+}
+.dk-pal-foot {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--t3);
+}
+.dk-pal-foot span {
+  margin-inline-end: 12px;
+}
+
+/* ---------- the keyboard sheet ---------- */
+.dk-keys h4 {
+  margin: 14px 0 6px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--t3);
+}
+.dk-k {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line);
+}
+.dk-k > span {
+  width: 190px;
+  flex: none;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex-wrap: wrap;
+  color: var(--t3);
+}
+.dk-k b {
+  font-weight: 500;
+  color: var(--t1);
+}
+
+/* ---------- the computer's own pages ---------- */
+.dk-page .dk-sub {
+  margin: 6px 0 0;
+  color: var(--t3);
+  font-size: 14px;
+}
+html.has-rail #app > .view.dk-page {
+  max-width: 1180px;
+}
+.dk-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+@media (max-width: 1000px) {
+  .dk-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.dk-card {
+  padding: 20px 22px;
+}
+.dk-card h3 {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 12px;
+  font-size: 15px;
+}
+.dk-card h3 small {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--t3);
+}
+.dk-row,
+.dk-set {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+}
+.dk-card h3 + .dk-row,
+.dk-card h3 + .dk-set {
+  border-top: 0;
+}
+.dk-row .grow,
+.dk-set .grow {
+  flex: 1;
+  min-width: 0;
+}
+.dk-row b {
+  display: block;
+  font-size: 14.5px;
+}
+.dk-row small,
+.dk-set .s {
+  display: block;
+  margin-top: 2px;
+  font-size: 12.5px;
+  color: var(--t3);
+}
+.dk-set .t {
+  font-size: 14.5px;
+  font-weight: 600;
+}
+.dk-sw {
+  position: relative;
+  flex: none;
+  width: 44px;
+  height: 26px;
+  border: 0;
+  border-radius: 99px;
+  background: var(--s3, var(--line2));
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.dk-sw i {
+  position: absolute;
+  top: 3px;
+  inset-inline-start: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  transition: transform 0.22s var(--out);
+}
+.dk-sw.on {
+  background: var(--page);
+}
+.dk-sw.on i {
+  transform: translateX(18px);
+}
+[dir='rtl'] .dk-sw.on i {
+  transform: translateX(-18px);
+}
+.dk-zoom {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.dk-z,
+.dk-pk {
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 11px;
+  border: 1px solid var(--line2);
+  background: var(--bg);
+  color: var(--t2);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    color 0.2s,
+    background 0.2s;
+}
+.dk-z:hover,
+.dk-pk:hover {
+  color: var(--t1);
+  border-color: color-mix(in srgb, var(--page) 40%, transparent);
+}
+.dk-z.on,
+.dk-pk.on {
+  color: var(--page);
+  border-color: var(--page);
+  background: color-mix(in srgb, var(--page) 10%, transparent);
+}
+.dk-note {
+  margin: 12px 0 0;
+  font-size: 12.5px;
+  color: var(--t3);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+.dk-blist {
+  max-height: 260px;
+  overflow-y: auto;
+  margin: 0 -6px;
+  padding: 0 6px;
+}
+.dk-b {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-top: 1px solid var(--line);
+  font-size: 14px;
+}
+.dk-b:first-child {
+  border-top: 0;
+}
+.dk-b svg {
+  color: var(--t3);
+  flex: none;
+}
+.dk-b .grow {
+  flex: 1;
+}
+.dk-row2 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+.dk-saved {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 0 12px;
+  text-align: center;
+}
+.dk-saved svg {
+  color: var(--page);
+}
+.dk-saved p {
+  margin: 6px 0 0;
+  font-weight: 700;
+  word-break: break-word;
+}
+.dk-saved small {
+  color: var(--t3);
+}
+
+/* ---------- Print and PDF: the choice beside the paper ---------- */
+.dk-pp {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+.dk-pp-side {
+  position: sticky;
+  top: 20px;
+}
+.dk-pp-side h3 + .dk-pick,
+.dk-pp-side h3 + .dk-zoom {
+  margin-bottom: 18px;
+}
+.dk-pick {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.dk-pk {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 46px;
+  text-align: start;
+}
+.dk-pk svg {
+  width: 18px;
+  height: 18px;
+}
+.dk-pp-go {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 6px;
+}
+.dk-pp-go .btn {
+  justify-content: center;
+}
+.dk-preview {
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--bg) 70%, #000);
+  border: 1px solid var(--line);
+  padding: 26px;
+  max-height: calc(100vh - 170px);
+  overflow: auto;
+}
+.dk-paper-wrap {
+  width: 210mm;
+  zoom: 0.62;
+  margin: 0 auto;
+  overflow: hidden;
+}
+.dk-paper-wrap .pp-flow,
+.dk-paper-wrap .pp-page {
+  background: #fff;
+  box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.6);
+  margin-bottom: 18px;
+}
+#dk-paper {
+  display: none;
+}
+
+/* ---------- the paper itself: A4, white to the edge, crisp ---------- */
+.pp-flow,
+.pp-page {
+  width: 210mm;
+  color: #1c1914;
+  background: #fff;
+  font-family: 'Quicksand', system-ui, sans-serif;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.pp-flow {
+  border-collapse: collapse;
+}
+.pp-flow td {
+  padding: 0 14mm;
+}
+.pp-sp {
+  height: 12mm;
+}
+.pp-page {
+  height: 297mm;
+  padding: 13mm 14mm;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.pp-h {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8mm;
+  padding-bottom: 4mm;
+  margin-bottom: 5mm;
+  border-bottom: 0.6mm solid #b8873a;
+}
+.pp-h small {
+  font-size: 9pt;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #8a6420;
+}
+.pp-h h2 {
+  margin: 1mm 0 0;
+  font-size: 20pt;
+  font-weight: 700;
+}
+.pp-h p {
+  margin: 0;
+  font-family: 'Amiri', serif;
+  font-size: 15pt;
+  color: #5f584c;
+}
+.pp-it {
+  break-inside: avoid;
+  padding: 4mm 0;
+  border-bottom: 0.25mm solid #e6dccb;
+}
+.pp-ih {
+  display: flex;
+  align-items: baseline;
+  gap: 3mm;
+  font-size: 11pt;
+}
+.pp-n {
+  color: #8a6420;
+  font-weight: 700;
+}
+.pp-x {
+  margin-inline-start: auto;
+  padding: 0.6mm 2.4mm;
+  border-radius: 99px;
+  border: 0.3mm solid #c39448;
+  color: #8a6420;
+  font-size: 9.5pt;
+  font-weight: 700;
+}
+.pp-ar {
+  margin: 2.5mm 0 0;
+  font-family: 'Amiri Quran', 'Amiri', serif;
+  font-size: 17pt;
+  line-height: 2;
+  text-align: right;
+}
+.pp-tr {
+  margin: 1.5mm 0 0;
+  font-size: 9.5pt;
+  font-style: italic;
+  color: #5f584c;
+  line-height: 1.55;
+}
+.pp-en {
+  margin: 1.5mm 0 0;
+  font-size: 10pt;
+  line-height: 1.55;
+}
+.pp-en span {
+  display: block;
+  font-size: 7.5pt;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #8a6420;
+}
+.pp-ref {
+  margin: 1.5mm 0 0;
+  font-size: 8.5pt;
+  color: #71695c;
+}
+.pp-f {
+  margin-top: 5mm;
+  font-size: 8pt;
+  color: #71695c;
+}
+.pp-times {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 9.5pt;
+  font-variant-numeric: tabular-nums;
+}
+.pp-times th {
+  padding: 1.6mm 1.4mm;
+  text-align: start;
+  font-size: 8pt;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8a6420;
+  border-bottom: 0.4mm solid #b8873a;
+}
+.pp-times td {
+  padding: 1.15mm 1.4mm;
+  border-bottom: 0.2mm solid #ece4d6;
+}
+.pp-times td.d {
+  white-space: nowrap;
+}
+.pp-times td.hj {
+  color: #8a6420;
+}
+.pp-times tr.fri td {
+  background: #f8f1e3;
+}
+.pp-times tr.now td {
+  font-weight: 700;
+}
+
+/* printing: only the paper, the app stays on screen */
+@page {
+  size: A4;
+  margin: 0;
+}
+@media print {
+  html,
+  body {
+    background: #fff !important;
+  }
+  body > *:not(#dk-paper) {
+    display: none !important;
+  }
+  #dk-paper {
+    display: block !important;
+  }
+  #dk-paper .pp-page {
+    break-after: page;
+  }
+  #dk-paper .pp-flow {
+    break-after: page;
+  }
+}

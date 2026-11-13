@@ -443,6 +443,8 @@ footer p { margin: 18px auto 0; max-width: 60ch; }
 .winsoon li { position: relative; padding-left: 18px; font-size: 14.5px; color: var(--t2); line-height: 1.5; }
 .winsoon li::before { content: ""; position: absolute; left: 0; top: .6em; width: 6px; height: 6px; border-radius: 50%; background: var(--gold); }
 .winsoon li b { color: var(--t1); }
+.winsoon .winshot { display: block; width: 100%; margin: 18px 0 4px; border-radius: 16px; border: 1px solid var(--line2); box-shadow: var(--shadow); }
+.winsoon .winnote { margin-top: 12px; font: 500 13px/1.5 var(--sans); color: var(--t3); }
 
 /* the mobile dock */
 .dock { display: none; }
@@ -557,7 +559,7 @@ footer p { margin: 18px auto 0; max-width: 60ch; }
     <a class="tbtn ico" href="https://github.com/Bashyr18/adhkar" rel="noopener" aria-label="Source on GitHub" data-tip="GitHub"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.6 9.6 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2z"/></svg></a>
     <a class="tbtn ico" href="https://www.linkedin.com/in/bashirbadmus/" rel="noopener" aria-label="The maker on LinkedIn" data-tip="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5.2 3.5a2.1 2.1 0 1 1 0 4.2 2.1 2.1 0 0 1 0-4.2zM3.4 9.2h3.6V20.5H3.4zM9.3 9.2h3.45v1.55h.05c.48-.9 1.65-1.85 3.4-1.85 3.63 0 4.3 2.39 4.3 5.5v6.1h-3.58v-5.4c0-1.29-.02-2.95-1.8-2.95-1.8 0-2.08 1.4-2.08 2.86v5.49H9.3z"/></svg></a>
     <a class="tbtn ico dl" href="https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar.apk" aria-label="Download for Android" data-tip="Android app"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7.2 9.4h9.6v7.4c0 .62-.5 1.12-1.12 1.12h-.9v2.42a1.18 1.18 0 0 1-2.36 0v-2.42h-.84v2.42a1.18 1.18 0 0 1-2.36 0v-2.42h-.9c-.62 0-1.12-.5-1.12-1.12zM4.8 9.3c.65 0 1.18.53 1.18 1.18v4.88a1.18 1.18 0 0 1-2.36 0v-4.88c0-.65.53-1.18 1.18-1.18zm14.4 0c.65 0 1.18.53 1.18 1.18v4.88a1.18 1.18 0 0 1-2.36 0v-4.88c0-.65.53-1.18 1.18-1.18zM15.3 4.2l1.1-1.6a.25.25 0 0 0-.41-.28l-1.13 1.65a6 6 0 0 0-5.72 0L8.01 2.32a.25.25 0 0 0-.41.28l1.1 1.6A4.9 4.9 0 0 0 7.2 8.6h9.6a4.9 4.9 0 0 0-1.5-4.4zM9.8 7a.6.6 0 1 1 0-1.2.6.6 0 0 1 0 1.2zm4.4 0a.6.6 0 1 1 0-1.2.6.6 0 0 1 0 1.2z"/></svg></a>
-    <a class="tbtn ico soon" href="https://github.com/Bashyr18/adhkar/blob/main/docs/windows-plan.md" rel="noopener" aria-label="Windows app, coming soon" data-tip="Windows: coming soon"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.4l7.4-1v7.1H3zm8.3-1.13L21 3v8.5h-9.7zM3 12.5h7.4v7.1L3 18.6zm8.3 0H21V21l-9.7-1.3z"/></svg></a>
+    <a class="tbtn ico dl" href="https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar-Windows.exe" aria-label="Download for Windows" data-tip="Windows app"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.4l7.4-1v7.1H3zm8.3-1.13L21 3v8.5h-9.7zM3 12.5h7.4v7.1L3 18.6zm8.3 0H21V21l-9.7-1.3z"/></svg></a>
   </nav>
   <button class="tbtn ico" id="theme" type="button" aria-label="Switch to light">
     <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 1 1 9.5 3.5a7 7 0 0 0 11 11z"/></svg>
@@ -571,7 +573,7 @@ footer p { margin: 18px auto 0; max-width: 60ch; }
     <svg class="orn" id="orn" viewBox="-100 -100 200 200" aria-hidden="true"></svg>
     <div class="wrap">
       <div class="rv">
-        <div class="issue"><span>The Guide</span><span>Edition 11.9</span><span>November 2026</span></div>
+        <div class="issue"><span>The Guide</span><span>Edition 12.0</span><span>November 2026</span></div>
         <h1 class="mast">Adh<em>kār</em><small>Remembrance for every moment</small></h1>
         <p class="dek">Every page of the app, every feature, and how to use it, step by step. Free, private, and made with care as ṣadaqah jāriyah.</p>
         <div class="ayah">
@@ -619,12 +621,12 @@ footer p { margin: 18px auto 0; max-width: 60ch; }
   <footer>
     <nav class="flinks" aria-label="The project">
       <a href="https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar.apk"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7.2 9.4h9.6v7.4c0 .62-.5 1.12-1.12 1.12h-.9v2.42a1.18 1.18 0 0 1-2.36 0v-2.42h-.84v2.42a1.18 1.18 0 0 1-2.36 0v-2.42h-.9c-.62 0-1.12-.5-1.12-1.12zM4.8 9.3c.65 0 1.18.53 1.18 1.18v4.88a1.18 1.18 0 0 1-2.36 0v-4.88c0-.65.53-1.18 1.18-1.18zm14.4 0c.65 0 1.18.53 1.18 1.18v4.88a1.18 1.18 0 0 1-2.36 0v-4.88c0-.65.53-1.18 1.18-1.18zM15.3 4.2l1.1-1.6a.25.25 0 0 0-.41-.28l-1.13 1.65a6 6 0 0 0-5.72 0L8.01 2.32a.25.25 0 0 0-.41.28l1.1 1.6A4.9 4.9 0 0 0 7.2 8.6h9.6a4.9 4.9 0 0 0-1.5-4.4zM9.8 7a.6.6 0 1 1 0-1.2.6.6 0 0 1 0 1.2zm4.4 0a.6.6 0 1 1 0-1.2.6.6 0 0 1 0 1.2z"/></svg>Android app</a>
-      <a href="https://github.com/Bashyr18/adhkar/blob/main/docs/windows-plan.md" class="soon"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.4l7.4-1v7.1H3zm8.3-1.13L21 3v8.5h-9.7zM3 12.5h7.4v7.1L3 18.6zm8.3 0H21V21l-9.7-1.3z"/></svg>Windows app <small>coming soon</small></a>
+      <a href="https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar-Windows.exe"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.4l7.4-1v7.1H3zm8.3-1.13L21 3v8.5h-9.7zM3 12.5h7.4v7.1L3 18.6zm8.3 0H21V21l-9.7-1.3z"/></svg>Windows app</a>
       <a href="https://github.com/Bashyr18/adhkar" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.6 9.6 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2z"/></svg>Source on GitHub</a>
       <a href="https://www.linkedin.com/in/bashirbadmus/" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5.2 3.5a2.1 2.1 0 1 1 0 4.2 2.1 2.1 0 0 1 0-4.2zM3.4 9.2h3.6V20.5H3.4zM9.3 9.2h3.45v1.55h.05c.48-.9 1.65-1.85 3.4-1.85 3.63 0 4.3 2.39 4.3 5.5v6.1h-3.58v-5.4c0-1.29-.02-2.95-1.8-2.95-1.8 0-2.08 1.4-2.08 2.86v5.49H9.3z"/></svg>The maker on LinkedIn</a>
       <a href="https://github.com/Bashyr18/adhkar/releases">Releases</a>
     </nav>
-    <p>Adhkār · The Guide · Edition 11.9 · Every screen shown is from the app itself. Free and open source under GPL-3.0.</p>
+    <p>Adhkār · The Guide · Edition 12.0 · Every screen shown is from the app itself. Free and open source under GPL-3.0.</p>
   </footer>
 </main>
 
@@ -870,7 +872,7 @@ var CH = [
     ] },
   { id: 'home', kicker: 'Beyond the app', title: 'Your home screen', dek: 'Four widgets, a quick settings tile, app shortcuts and a gentle floating reminder bring the day’s remembrance to where you already look.', thumb: 'extra/widgets',
     widgets: true,
-    extra: '<div class="strip rv winsoon"><h4>Coming to Windows</h4><p>The same app and the same record on the computer, laid out for a large screen, a keyboard and a printer.</p><ul><li><b>Ctrl K</b> to find any remembrance or page</li><li><b>Space</b> taps the counting circle</li><li><b>Print</b> the adhkār as a booklet, and the month&rsquo;s timetable</li><li><b>Reminders</b> from the tray, with the adhān takbīr</li><li><b>With your phone</b> over home Wi-Fi, no account</li></ul><a class="btn" href="https://github.com/Bashyr18/adhkar/blob/main/docs/windows-plan.md" rel="noopener">Read the plan <span class="arr" aria-hidden="true">→</span></a></div>' },
+    extra: '<div class="strip rv winsoon"><h4>Adhkār for Windows</h4><p>The same app and the same record on the computer, laid out for a large screen, a keyboard and a printer.</p><img class="winshot" src="../readme/desk-today.webp" alt="Adhkār for Windows: Today, beside the rail" loading="lazy" decoding="async"><ul><li><b>Ctrl K</b> finds any remembrance, hadith or page</li><li><b>Space</b> taps the counting circle; hold it to pause</li><li><b>Print</b> the adhkār as a booklet, and the month&rsquo;s timetable</li><li><b>Reminders</b> from the tray, with the adhān takbīr</li><li><b>The next prayer</b> in a small window of its own</li></ul><a class="btn pri" href="https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar-Windows.exe">Download for Windows <span class="arr" aria-hidden="true">→</span></a><p class="winnote">Windows may say it protected your PC: choose More info, then Run anyway.</p></div>' },
   { id: 'gestures', kicker: 'Moving around', title: 'Gestures', dek: 'Built to be used with one hand, often without looking.', thumb: 'dark/counting', allGestures: true }
 ];
 var GEST = [
