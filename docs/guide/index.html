@@ -269,11 +269,19 @@ footer p { margin: 18px auto 0; max-width: 60ch; }
 .flinks a { display: inline-flex; align-items: center; gap: 8px; color: var(--t2); font-weight: 700; padding: 6px 2px; border-bottom: 1px solid transparent; transition: color .3s, border-color .3s; }
 .flinks a:hover { color: var(--gold2); border-color: var(--gold-line); }
 .flinks svg { width: 16px; height: 16px; }
-/* the project's home, a quiet mark in the bar */
-.tbtn.gh { color: var(--t2); text-decoration: none; transition: color .3s, border-color .3s; }
-.tbtn.gh:hover { color: var(--gold2); border-color: var(--gold-line); }
-.tbtn.gh svg { width: 17px; height: 17px; }
-.tbtn.gh:hover svg { transform: rotate(-8deg) scale(1.08); }
+/* the project's places: quiet marks in the bar, each naming itself on hover */
+.links { display: flex; gap: 8px; }
+.links .tbtn { color: var(--t2); text-decoration: none; transition: color .3s, border-color .3s, transform .35s var(--out); }
+.links .tbtn:hover { color: var(--gold2); border-color: var(--gold-line); transform: translateY(-1px); }
+.links .tbtn svg { width: 17px; height: 17px; }
+.links .tbtn:hover svg { transform: scale(1.1); }
+.links .tbtn::after { content: attr(data-tip); position: absolute; top: calc(100% + 8px); left: 50%; transform: translate(-50%, -4px); white-space: nowrap; padding: 6px 10px; border-radius: 9px; background: var(--s1); border: 1px solid var(--line2); color: var(--t1); font: 700 11.5px/1 var(--sans); opacity: 0; pointer-events: none; transition: opacity .2s, transform .3s var(--out); box-shadow: 0 10px 24px -12px rgba(0, 0, 0, .6); }
+.links .tbtn:hover::after, .links .tbtn:focus-visible::after { opacity: 1; transform: translate(-50%, 0); }
+.links .tbtn { overflow: visible; }
+/* not built yet: a small dot says so */
+.links .soon { opacity: .75; }
+.links .soon::before { content: ""; position: absolute; top: 4px; right: 4px; width: 7px; height: 7px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 2px var(--bg); }
+.flinks .soon small { font-size: 11px; font-weight: 700; color: var(--gold2); margin-left: 2px; }
 
 /* lightbox: sized from the screen's proportions, so the whole screenshot shows */
 .lb { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; padding: max(20px, env(safe-area-inset-top)) 20px; background: rgba(4, 5, 8, .86); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); opacity: 0; pointer-events: none; transition: opacity .35s var(--out); }
@@ -441,8 +449,9 @@ footer p { margin: 18px auto 0; max-width: 60ch; }
   .bar { padding-block: 8px; }
   .bar .chap { font-size: 12.5px; }
   .tbtn span { display: none; } .tbtn { width: 38px; padding: 0; justify-content: center; }
+  .bar { gap: 8px; } .bar .chap { display: none; } .mark > svg + * , .mark { font-size: 0; } .mark svg { width: 24px; height: 24px; }
+  .links { gap: 5px; } .links .tbtn, .bar .tbtn.ico { width: 34px; height: 34px; } .links .tbtn svg { width: 15px; height: 15px; } .links .tbtn::after { display: none; }
   .seg-l > span { display: none; } .seg button { min-width: 36px; padding: 0 10px; height: 30px; }
-  .bar:not(.on) .chap { display: block; }
   .orn { left: -40%; top: 30%; width: 150vw; }
   .leaf { display: none; }
   .toc a.wide { grid-template-columns: 96px minmax(0, 1fr); align-items: center; }
@@ -529,10 +538,15 @@ footer p { margin: 18px auto 0; max-width: 60ch; }
     Adhkār
   </a>
   <div class="chap" id="chap"><b></b><span></span></div>
-  <a class="tbtn ico gh" href="https://github.com/Bashyr18/adhkar" rel="noopener" aria-label="Adhkār on GitHub" title="Source on GitHub"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.6 9.6 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2z"/></svg></a>
   <div class="seg-l"><span>Screens</span>
     <div class="seg" id="lang" role="group" aria-label="Language of the app screens"><i class="pill" aria-hidden="true"></i><button type="button" data-l="en" aria-pressed="true" aria-label="English">EN</button><button type="button" data-l="ar" lang="ar" aria-pressed="false" aria-label="العربية">ع</button></div>
   </div>
+  <nav class="links" aria-label="The project">
+    <a class="tbtn ico" href="https://github.com/Bashyr18/adhkar" rel="noopener" aria-label="Source on GitHub" data-tip="GitHub"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.6 9.6 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2z"/></svg></a>
+    <a class="tbtn ico" href="https://www.linkedin.com/in/bashirbadmus/" rel="noopener" aria-label="The maker on LinkedIn" data-tip="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5.2 3.5a2.1 2.1 0 1 1 0 4.2 2.1 2.1 0 0 1 0-4.2zM3.4 9.2h3.6V20.5H3.4zM9.3 9.2h3.45v1.55h.05c.48-.9 1.65-1.85 3.4-1.85 3.63 0 4.3 2.39 4.3 5.5v6.1h-3.58v-5.4c0-1.29-.02-2.95-1.8-2.95-1.8 0-2.08 1.4-2.08 2.86v5.49H9.3z"/></svg></a>
+    <a class="tbtn ico" href="https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar.apk" aria-label="Download for Android" data-tip="Android app"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7.2 9.4h9.6v7.4c0 .62-.5 1.12-1.12 1.12h-.9v2.42a1.18 1.18 0 0 1-2.36 0v-2.42h-.84v2.42a1.18 1.18 0 0 1-2.36 0v-2.42h-.9c-.62 0-1.12-.5-1.12-1.12zM4.8 9.3c.65 0 1.18.53 1.18 1.18v4.88a1.18 1.18 0 0 1-2.36 0v-4.88c0-.65.53-1.18 1.18-1.18zm14.4 0c.65 0 1.18.53 1.18 1.18v4.88a1.18 1.18 0 0 1-2.36 0v-4.88c0-.65.53-1.18 1.18-1.18zM15.3 4.2l1.1-1.6a.25.25 0 0 0-.41-.28l-1.13 1.65a6 6 0 0 0-5.72 0L8.01 2.32a.25.25 0 0 0-.41.28l1.1 1.6A4.9 4.9 0 0 0 7.2 8.6h9.6a4.9 4.9 0 0 0-1.5-4.4zM9.8 7a.6.6 0 1 1 0-1.2.6.6 0 0 1 0 1.2zm4.4 0a.6.6 0 1 1 0-1.2.6.6 0 0 1 0 1.2z"/></svg></a>
+    <a class="tbtn ico soon" href="https://github.com/Bashyr18/adhkar#windows" rel="noopener" aria-label="Windows app, coming soon" data-tip="Windows: coming soon"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.4l7.4-1v7.1H3zm8.3-1.13L21 3v8.5h-9.7zM3 12.5h7.4v7.1L3 18.6zm8.3 0H21V21l-9.7-1.3z"/></svg></a>
+  </nav>
   <button class="tbtn ico" id="theme" type="button" aria-label="Switch to light">
     <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 1 1 9.5 3.5a7 7 0 0 0 11 11z"/></svg>
     <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
@@ -592,8 +606,10 @@ footer p { margin: 18px auto 0; max-width: 60ch; }
   </section>
   <footer>
     <nav class="flinks" aria-label="The project">
-      <a href="https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar.apk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/></svg>Download the app</a>
+      <a href="https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar.apk"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7.2 9.4h9.6v7.4c0 .62-.5 1.12-1.12 1.12h-.9v2.42a1.18 1.18 0 0 1-2.36 0v-2.42h-.84v2.42a1.18 1.18 0 0 1-2.36 0v-2.42h-.9c-.62 0-1.12-.5-1.12-1.12zM4.8 9.3c.65 0 1.18.53 1.18 1.18v4.88a1.18 1.18 0 0 1-2.36 0v-4.88c0-.65.53-1.18 1.18-1.18zm14.4 0c.65 0 1.18.53 1.18 1.18v4.88a1.18 1.18 0 0 1-2.36 0v-4.88c0-.65.53-1.18 1.18-1.18zM15.3 4.2l1.1-1.6a.25.25 0 0 0-.41-.28l-1.13 1.65a6 6 0 0 0-5.72 0L8.01 2.32a.25.25 0 0 0-.41.28l1.1 1.6A4.9 4.9 0 0 0 7.2 8.6h9.6a4.9 4.9 0 0 0-1.5-4.4zM9.8 7a.6.6 0 1 1 0-1.2.6.6 0 0 1 0 1.2zm4.4 0a.6.6 0 1 1 0-1.2.6.6 0 0 1 0 1.2z"/></svg>Android app</a>
+      <a href="https://github.com/Bashyr18/adhkar#windows" class="soon"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.4l7.4-1v7.1H3zm8.3-1.13L21 3v8.5h-9.7zM3 12.5h7.4v7.1L3 18.6zm8.3 0H21V21l-9.7-1.3z"/></svg>Windows app <small>coming soon</small></a>
       <a href="https://github.com/Bashyr18/adhkar" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.6 9.6 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2z"/></svg>Source on GitHub</a>
+      <a href="https://www.linkedin.com/in/bashirbadmus/" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5.2 3.5a2.1 2.1 0 1 1 0 4.2 2.1 2.1 0 0 1 0-4.2zM3.4 9.2h3.6V20.5H3.4zM9.3 9.2h3.45v1.55h.05c.48-.9 1.65-1.85 3.4-1.85 3.63 0 4.3 2.39 4.3 5.5v6.1h-3.58v-5.4c0-1.29-.02-2.95-1.8-2.95-1.8 0-2.08 1.4-2.08 2.86v5.49H9.3z"/></svg>The maker on LinkedIn</a>
       <a href="https://github.com/Bashyr18/adhkar/releases">Releases</a>
     </nav>
     <p>Adhkār · The Guide · Edition 11.9 · Every screen shown is from the app itself. Free and open source under GPL-3.0.</p>
