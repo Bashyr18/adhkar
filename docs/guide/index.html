@@ -263,7 +263,17 @@ section { position: relative; }
 .pillars div { padding: 22px; border-radius: 22px; background: var(--s1); border: 1px solid var(--line); transition: transform .45s var(--out), border-color .45s; }
 .pillars div:hover { transform: translateY(-4px); border-color: var(--gold-line); }
 .pillars b { display: block; font-size: 15.5px; } .pillars span { display: block; margin-top: 6px; font-size: 13.5px; color: var(--t3); line-height: 1.55; }
-footer { padding: 30px 0 60px; text-align: center; font-size: 13px; color: var(--t3); }
+footer { padding: 30px var(--g) 60px; text-align: center; font-size: 13px; color: var(--t3); }
+footer p { margin: 18px auto 0; max-width: 60ch; }
+.flinks { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 22px; }
+.flinks a { display: inline-flex; align-items: center; gap: 8px; color: var(--t2); font-weight: 700; padding: 6px 2px; border-bottom: 1px solid transparent; transition: color .3s, border-color .3s; }
+.flinks a:hover { color: var(--gold2); border-color: var(--gold-line); }
+.flinks svg { width: 16px; height: 16px; }
+/* the project's home, a quiet mark in the bar */
+.tbtn.gh { color: var(--t2); text-decoration: none; transition: color .3s, border-color .3s; }
+.tbtn.gh:hover { color: var(--gold2); border-color: var(--gold-line); }
+.tbtn.gh svg { width: 17px; height: 17px; }
+.tbtn.gh:hover svg { transform: rotate(-8deg) scale(1.08); }
 
 /* lightbox: sized from the screen's proportions, so the whole screenshot shows */
 .lb { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; padding: max(20px, env(safe-area-inset-top)) 20px; background: rgba(4, 5, 8, .86); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); opacity: 0; pointer-events: none; transition: opacity .35s var(--out); }
@@ -519,6 +529,7 @@ footer { padding: 30px 0 60px; text-align: center; font-size: 13px; color: var(-
     Adhkār
   </a>
   <div class="chap" id="chap"><b></b><span></span></div>
+  <a class="tbtn ico gh" href="https://github.com/Bashyr18/adhkar" rel="noopener" aria-label="Adhkār on GitHub" title="Source on GitHub"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.6 9.6 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2z"/></svg></a>
   <div class="seg-l"><span>Screens</span>
     <div class="seg" id="lang" role="group" aria-label="Language of the app screens"><i class="pill" aria-hidden="true"></i><button type="button" data-l="en" aria-pressed="true" aria-label="English">EN</button><button type="button" data-l="ar" lang="ar" aria-pressed="false" aria-label="العربية">ع</button></div>
   </div>
@@ -579,7 +590,14 @@ footer { padding: 30px 0 60px; text-align: center; font-size: 13px; color: var(-
       </div>
     </div>
   </section>
-  <footer>Adhkār · The Guide · Edition 11.9 · Every screen shown is from the app itself.</footer>
+  <footer>
+    <nav class="flinks" aria-label="The project">
+      <a href="https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar.apk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/></svg>Download the app</a>
+      <a href="https://github.com/Bashyr18/adhkar" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.6 9.6 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2z"/></svg>Source on GitHub</a>
+      <a href="https://github.com/Bashyr18/adhkar/releases">Releases</a>
+    </nav>
+    <p>Adhkār · The Guide · Edition 11.9 · Every screen shown is from the app itself. Free and open source under GPL-3.0.</p>
+  </footer>
 </main>
 
 <nav class="crail" id="crail" aria-label="Chapters"></nav>
