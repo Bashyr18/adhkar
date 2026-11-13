@@ -550,6 +550,23 @@ html.is-desk.dropping body::after {
 .db-p.tuck i {
   top: 46px;
 }
+/* a crowded label, moved along its row past its neighbour; a short rule beneath ties it to its mark */
+.db-p.nudge b,
+.db-p.nudge small {
+  transform: translateX(var(--nx));
+}
+.db-p.nudge::after {
+  content: '';
+  position: absolute;
+  top: 52px;
+  inset-inline-start: 0;
+  width: calc(var(--nx) + 7px);
+  height: 1px;
+  background: rgba(255, 255, 255, 0.35);
+}
+[dir='rtl'] .db-p.nudge::after {
+  width: calc(-1 * var(--nx) + 7px);
+}
 .db-p.prayed i {
   width: 3px;
   margin-inline-start: -1px;

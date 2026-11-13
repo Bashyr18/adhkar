@@ -1580,8 +1580,10 @@
     var marks = $$('.db-p', band),
       rtl = document.documentElement.dir === 'rtl',
       prev = null;
+    var box = band.getBoundingClientRect();
     marks.forEach(function (m) {
-      m.classList.remove('low', 'tuck');
+      m.classList.remove('low', 'tuck', 'nudge');
+      m.style.removeProperty('--nx');
       m.title = $('b', m).textContent + ' · ' + $('small', m).textContent;
     });
     marks.forEach(function (m) {
@@ -1593,8 +1595,17 @@
         tick = m.getBoundingClientRect().left;
       /* a mark whose line would run past the end of the label before it starts beneath that label */
       if (prev && (rtl ? tick > prev[0] - 12 : tick < prev[1] + 12)) m.classList.add('tuck');
-      if (hits) m.classList.add('low');
-      else prev = [a, b];
+      if (hits) {
+        /* crowded: keep it on the same row, its name and time set just past the label before it; only if there is
+           no room for that does it take the lower row */
+        var dx = rtl ? prev[0] - 14 - b : prev[1] + 14 - a,
+          fits = rtl ? a + dx >= box.left + 8 : b + dx <= box.right - 8;
+        if (fits) {
+          m.classList.add('nudge');
+          m.style.setProperty('--nx', dx + 'px');
+          prev = [a + dx, b + dx];
+        } else m.classList.add('low');
+      } else prev = [a, b];
     });
   }
   function placeDayBand() {
