@@ -547,6 +547,9 @@ html.is-desk.dropping body::after {
 .db-p.low small {
   display: none;
 }
+.db-p.tuck i {
+  top: 46px;
+}
 .db-p.prayed i {
   width: 3px;
   margin-inline-start: -1px;
@@ -1176,174 +1179,124 @@ html.has-rail #app > .view.dk-page {
   box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.6);
   margin-bottom: 18px;
 }
-#dk-paper {
-  display: none;
-}
 
-/* ---------- the paper itself: A4, white to the edge, crisp ---------- */
-.pp-flow,
-.pp-page {
-  width: 210mm;
-  color: #1c1914;
-  background: #fff;
-  font-family: 'Quicksand', system-ui, sans-serif;
-  -webkit-print-color-adjust: exact;
-  print-color-adjust: exact;
-}
-.pp-flow {
-  border-collapse: collapse;
-}
-.pp-flow td {
-  padding: 0 14mm;
-}
-.pp-sp {
-  height: 12mm;
-}
-.pp-page {
-  height: 297mm;
-  padding: 13mm 14mm;
-  box-sizing: border-box;
+/* the narrow rail: the search is one square key, centred like the icons beneath it (the key-cap rule above is
+   stronger, so the narrow rail names the rail itself), and nothing spills while the rail folds */
+.rl-search {
   overflow: hidden;
 }
-.pp-h {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 8mm;
-  padding-bottom: 4mm;
-  margin-bottom: 5mm;
-  border-bottom: 0.6mm solid #b8873a;
+html.rail-mini #rail .rl-search kbd {
+  display: none;
 }
-.pp-h small {
-  font-size: 9pt;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #8a6420;
+html.rail-mini #rail .rl-search {
+  width: 44px;
+  height: 44px;
+  margin-inline: auto;
+  padding: 0;
+  justify-content: center;
+  border-radius: 14px;
 }
-.pp-h h2 {
-  margin: 1mm 0 0;
-  font-size: 20pt;
-  font-weight: 700;
+@media (max-width: 1150px) {
+  html.is-desk #rail .rl-search kbd {
+    display: none;
+  }
+  html.is-desk #rail .rl-search {
+    width: 44px;
+    height: 44px;
+    margin-inline: auto;
+    padding: 0;
+    justify-content: center;
+    border-radius: 14px;
+  }
 }
-.pp-h p {
-  margin: 0;
-  font-family: 'Amiri', serif;
-  font-size: 15pt;
-  color: #5f584c;
+/* the narrow rail has no sky behind its head, so its fold key takes the page's own ink */
+html.rail-mini #rail .rl-fold {
+  color: var(--t2);
+  background: var(--s2);
+  border: 1px solid var(--line2);
 }
-.pp-it {
-  break-inside: avoid;
-  padding: 4mm 0;
-  border-bottom: 0.25mm solid #e6dccb;
-}
-.pp-ih {
-  display: flex;
-  align-items: baseline;
-  gap: 3mm;
-  font-size: 11pt;
-}
-.pp-n {
-  color: #8a6420;
-  font-weight: 700;
-}
-.pp-x {
-  margin-inline-start: auto;
-  padding: 0.6mm 2.4mm;
-  border-radius: 99px;
-  border: 0.3mm solid #c39448;
-  color: #8a6420;
-  font-size: 9.5pt;
-  font-weight: 700;
-}
-.pp-ar {
-  margin: 2.5mm 0 0;
-  font-family: 'Amiri Quran', 'Amiri', serif;
-  font-size: 17pt;
-  line-height: 2;
-  text-align: right;
-}
-.pp-tr {
-  margin: 1.5mm 0 0;
-  font-size: 9.5pt;
-  font-style: italic;
-  color: #5f584c;
-  line-height: 1.55;
-}
-.pp-en {
-  margin: 1.5mm 0 0;
-  font-size: 10pt;
-  line-height: 1.55;
-}
-.pp-en span {
-  display: block;
-  font-size: 7.5pt;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #8a6420;
-}
-.pp-ref {
-  margin: 1.5mm 0 0;
-  font-size: 8.5pt;
-  color: #71695c;
-}
-.pp-f {
-  margin-top: 5mm;
-  font-size: 8pt;
-  color: #71695c;
-}
-.pp-times {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 9.5pt;
-  font-variant-numeric: tabular-nums;
-}
-.pp-times th {
-  padding: 1.6mm 1.4mm;
-  text-align: start;
-  font-size: 8pt;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #8a6420;
-  border-bottom: 0.4mm solid #b8873a;
-}
-.pp-times td {
-  padding: 1.15mm 1.4mm;
-  border-bottom: 0.2mm solid #ece4d6;
-}
-.pp-times td.d {
-  white-space: nowrap;
-}
-.pp-times td.hj {
-  color: #8a6420;
-}
-.pp-times tr.fri td {
-  background: #f8f1e3;
-}
-.pp-times tr.now td {
-  font-weight: 700;
+html.rail-mini #rail .rl-fold:hover {
+  color: var(--t1);
 }
 
-/* printing: only the paper, the app stays on screen */
-@page {
-  size: A4;
-  margin: 0;
+/* ---------- Learn the prayer, on a computer: beside the rail, the figure on one side and the step on the other.
+   The phone's single column (figure above, words below, a bar across the whole width) is re-laid as a spread:
+   the posture stands large in its own panel, the words read in a column of a comfortable measure, and the
+   step buttons sit under the words, never wider than they are. ---------- */
+html.has-rail .lp {
+  inset-inline-start: var(--rail);
 }
-@media print {
-  html,
-  body {
-    background: #fff !important;
+html.is-desk .lp {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.95fr) minmax(420px, 1.05fr);
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    'top top'
+    'prog prog'
+    'stage body'
+    'stage dock';
+  column-gap: clamp(28px, 3.4vw, 56px);
+  padding: 8px var(--dk-gut) 0;
+  background:
+    radial-gradient(60% 70% at 24% 55%, var(--gold-soft), transparent 70%),
+    var(--bg);
+}
+html.is-desk .lp-top {
+  grid-area: top;
+  padding: 10px 0 0;
+}
+html.is-desk .lp-prog {
+  grid-area: prog;
+  padding-inline: 0;
+  margin: 10px 0 6px;
+}
+html.is-desk .lp-stage {
+  grid-area: stage;
+  height: auto;
+  min-height: 0;
+  margin: 8px 0 28px;
+  border-radius: 28px;
+  background:
+    radial-gradient(70% 60% at 50% 62%, color-mix(in srgb, var(--gold) 14%, transparent), transparent 72%),
+    color-mix(in srgb, var(--s1) 70%, transparent);
+  border: 1px solid var(--line);
+}
+html.is-desk .lp-fig {
+  inset: 8% 6% 9% 6%;
+  width: 88%;
+  height: 83%;
+}
+html.is-desk .lp-halo {
+  bottom: 10%;
+}
+html.is-desk .lp-stage::after {
+  bottom: 8%;
+}
+html.is-desk .lp-body {
+  grid-area: body;
+  width: 100%;
+  max-width: 680px;
+  padding: 14px 4px 18px;
+}
+html.is-desk .lp-dock {
+  grid-area: dock;
+  width: 100%;
+  max-width: 680px;
+  padding: 14px 4px 22px;
+  border-top: 1px solid var(--line);
+  background: none;
+}
+html.is-desk .lp-next {
+  flex: 1;
+}
+/* a narrow window: the phone's column, still beside the rail */
+@media (max-width: 980px) {
+  html.is-desk .lp {
+    display: flex;
+    padding: 0;
   }
-  body > *:not(#dk-paper) {
-    display: none !important;
-  }
-  #dk-paper {
-    display: block !important;
-  }
-  #dk-paper .pp-page {
-    break-after: page;
-  }
-  #dk-paper .pp-flow {
-    break-after: page;
+  html.is-desk .lp-stage {
+    height: clamp(170px, 30vh, 280px);
+    margin: 4px 16px 0;
   }
 }

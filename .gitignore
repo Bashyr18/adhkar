@@ -16,3 +16,6 @@ tools/.bin/
 
 # internal working documents, kept on the maintainer's machine
 docs/AUDIT-*.md
+
+# python caches
+__pycache__/

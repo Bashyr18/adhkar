@@ -248,6 +248,21 @@
     'Try “sleep”, “forgive”, رب …': 'جرّب «النوم» أو «المغفرة» أو رب…',
     // greetings and Today
     'As-salāmu ʿalaykum': 'السلام عليكم',
+    'That day has not come yet': 'لم يأتِ ذلك اليوم بعد',
+    'Every recitation is on this computer': 'كل التلاوات على هذا الحاسوب',
+    'Adhkār booklets and the prayer timetable': 'كتيّبات الأذكار وجدول مواقيت الصلاة',
+    'Plan a fast': 'انوِ صيامًا',
+    'This day has not come yet, so it cannot be logged. Plan it, and you will be reminded at Maghrib the evening before, to make your intention and prepare for suhūr.': 'لم يأتِ هذا اليوم بعد، فلا يُسجَّل. خطِّط له، وسيأتيك تذكير عند مغرب الليلة السابقة لتنوي وتستعد للسحور.',
+    'Remove the plan': 'إزالة الخطة',
+    'Planned. A reminder comes at Maghrib the evening before': 'تمّت الخطة. يأتيك تذكير عند مغرب الليلة السابقة',
+    'Planned. It shows on Today the evening before': 'تمّت الخطة. تظهر في اليوم مساء الليلة السابقة',
+    Planned: 'مخطط',
+    'Tomorrow you plan to fast': 'غدًا تنوي الصيام',
+    'Make your intention tonight, and eat suhūr before Fajr.': 'انوِ الليلة، وتسحّر قبل الفجر.',
+    'Today you planned to fast': 'نويت صيام اليوم',
+    'May Allah accept it. Tap a day in the calendar to log it.': 'تقبّل الله. اضغط على اليوم في التقويم لتسجيله.',
+    'Yawm al-Jumuʿah': 'يوم الجمعة',
+    'The night of Jumuʿah': 'ليلة الجمعة',
     'good morning': 'صباح الخير',
     'good afternoon': 'طاب يومك',
     'good evening': 'مساء الخير',
@@ -1779,6 +1794,10 @@
   }
   A.T = function (s) {
     return A.ar() ? digits(T(s)) : s;
+  };
+  /* a feature module brings its own Arabic strings; an entry already here wins */
+  A.addAr = function (o) {
+    for (var k in o) if (o.hasOwnProperty(k) && D[k] == null) D[k] = o[k];
   };
   A.toAr = function (s) {
     var t = T(s);

@@ -141,7 +141,8 @@ namespace Adhkar {
             if (Array.IndexOf(startArgs, "--tray") >= 0) Hide();
             try { await Init(); }
             catch (Exception x) { MessageBox.Show(this, "Adhkār could not open its window.\n\n" + x.Message, "Adhkār", MessageBoxButtons.OK, MessageBoxIcon.Error); Quitting = true; Close(); }
-            if (Store.Flag("next")) ShowNext(true);
+            /* the pill is on unless you closed it: it stays on screen when Adhkār is minimised or in the tray */
+            if (!(Store.Get("next", true) is bool) || (bool)Store.Get("next", true)) ShowNext(true);
         }
 
         async Task Init() {
@@ -357,7 +358,7 @@ namespace Adhkar {
             m.Items.Add("Open Adhkār", null, delegate { Bring(); });
             m.Items.Add("Morning adhkār", null, delegate { Bring(); Route("c/morning"); });
             m.Items.Add("Evening adhkār", null, delegate { Bring(); Route("c/evening"); });
-            m.Items.Add("Next prayer window", null, delegate { ShowNext(next == null); });
+            m.Items.Add("The pill", null, delegate { ShowNext(next == null); });
             m.Items.Add(new ToolStripSeparator());
             m.Items.Add("Quit Adhkār", null, delegate { Quit(); });
             Tray.ContextMenuStrip = m;
@@ -367,7 +368,7 @@ namespace Adhkar {
         public void Quit() { Quitting = true; Close(); }
 
         /* ---------- reminders: the page works out the next two days; this clock rings them, window open or not ---------- */
-        class Event { public double t; public string title, body, route; public bool takbir; }
+        class Event { public double t; public string title, body, route; public bool takbir, hour; }
         List<Event> events = new List<Event>();
         readonly HashSet<string> rung = new HashSet<string>();
         string lastRoute;
@@ -378,6 +379,7 @@ namespace Adhkar {
                     var ev = new Event { t = Convert.ToDouble(o["t"]), title = o["title"] as string, body = o.ContainsKey("body") ? o["body"] as string : "" };
                     ev.route = o.ContainsKey("route") ? o["route"] as string : null;
                     ev.takbir = o.ContainsKey("takbir") && o["takbir"] is bool && (bool)o["takbir"];
+                    ev.hour = o.ContainsKey("hour") && o["hour"] is bool && (bool)o["hour"];
                     l.Add(ev);
                 }
             } catch { return; }
@@ -395,6 +397,8 @@ namespace Adhkar {
                 if (!was) { var t = new System.Windows.Forms.Timer { Interval = 15000 }; t.Tick += delegate { t.Stop(); t.Dispose(); Tray.Visible = Store.Flag("tray"); }; t.Start(); }
                 /* the human adhān's takbīr, played by the page, as on the phone; never a chime */
                 if (ev.takbir) Post("window.Desk&&Desk.takbir&&Desk.takbir()");
+                /* Friday's hour of response: the pill comes forward, open, on top of whatever you are working in */
+                if (ev.hour) { if (next == null) ShowNext(true); if (next != null) { next.TopMost = true; next.Alert(); } }
             }
             if (rung.Count > 200) rung.Clear();
         }
@@ -408,11 +412,14 @@ namespace Adhkar {
             if (next != null) next.Set(nextLabel, nextAt, nextTime);
             var tip = "Adhkār · " + nextLabel + " " + nextTime; Tray.Text = tip.Length > 63 ? tip.Substring(0, 63) : tip;
         }
+        string pill = "{}";
+        public void SetPill(string json) { pill = json ?? "{}"; if (next != null) next.SetInfo(pill); }
         public void ShowNext(bool on) {
             Store.Set("next", on);
             if (on && next == null) {
                 next = new NextForm(this, BackColor == Night, Store.Flag("nextTop"));
                 next.Set(nextLabel, nextAt, nextTime);
+                next.SetInfo(pill);
                 next.FormClosed += delegate { next = null; Store.Set("next", false); Post("window.Desk&&Desk.refresh&&Desk.refresh()"); };
                 next.Show();
             } else if (!on && next != null) next.Close();

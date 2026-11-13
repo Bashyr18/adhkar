@@ -1,0 +1,223 @@
+/* The paper: A4, white to the edge, crisp. Shared by the phone and the computer (js/print.js). */
+#paper {
+  display: none;
+}
+
+/* ---------- the paper itself: A4, white to the edge, crisp ---------- */
+.pp-flow,
+.pp-page {
+  width: 210mm;
+  color: #1c1914;
+  background: #fff;
+  font-family: 'Quicksand', system-ui, sans-serif;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.pp-flow {
+  border-collapse: collapse;
+}
+.pp-flow td {
+  padding: 0 14mm;
+}
+.pp-sp {
+  height: 12mm;
+}
+.pp-page {
+  height: 297mm;
+  padding: 13mm 14mm;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.pp-h {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8mm;
+  padding-bottom: 4mm;
+  margin-bottom: 5mm;
+  border-bottom: 0.6mm solid #b8873a;
+}
+.pp-h small {
+  font-size: 9pt;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #8a6420;
+}
+.pp-h h2 {
+  margin: 1mm 0 0;
+  font-size: 20pt;
+  font-weight: 700;
+}
+.pp-h p {
+  margin: 0;
+  font-family: 'Amiri', serif;
+  font-size: 15pt;
+  color: #5f584c;
+}
+.pp-it {
+  break-inside: avoid;
+  padding: 4mm 0;
+  border-bottom: 0.25mm solid #e6dccb;
+}
+.pp-ih {
+  display: flex;
+  align-items: baseline;
+  gap: 3mm;
+  font-size: 11pt;
+}
+.pp-n {
+  color: #8a6420;
+  font-weight: 700;
+}
+.pp-x {
+  margin-inline-start: auto;
+  padding: 0.6mm 2.4mm;
+  border-radius: 99px;
+  border: 0.3mm solid #c39448;
+  color: #8a6420;
+  font-size: 9.5pt;
+  font-weight: 700;
+}
+.pp-ar {
+  margin: 2.5mm 0 0;
+  font-family: 'Amiri Quran', 'Amiri', serif;
+  font-size: 17pt;
+  line-height: 2;
+  text-align: right;
+}
+.pp-tr {
+  margin: 1.5mm 0 0;
+  font-size: 9.5pt;
+  font-style: italic;
+  color: #5f584c;
+  line-height: 1.55;
+}
+.pp-en {
+  margin: 1.5mm 0 0;
+  font-size: 10pt;
+  line-height: 1.55;
+}
+.pp-en span {
+  display: block;
+  font-size: 7.5pt;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #8a6420;
+}
+.pp-ref {
+  margin: 1.5mm 0 0;
+  font-size: 8.5pt;
+  color: #71695c;
+}
+.pp-f {
+  margin-top: 5mm;
+  font-size: 8pt;
+  color: #71695c;
+}
+.pp-times {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 9.5pt;
+  font-variant-numeric: tabular-nums;
+}
+.pp-times th {
+  padding: 1.6mm 1.4mm;
+  text-align: start;
+  font-size: 8pt;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8a6420;
+  border-bottom: 0.4mm solid #b8873a;
+}
+.pp-times td {
+  padding: 1.15mm 1.4mm;
+  border-bottom: 0.2mm solid #ece4d6;
+}
+.pp-times td.d {
+  white-space: nowrap;
+}
+.pp-times td.hj {
+  color: #8a6420;
+}
+.pp-times tr.fri td {
+  background: #f8f1e3;
+}
+.pp-times tr.now td {
+  font-weight: 700;
+}
+
+/* printing: only the paper, the app stays on screen */
+@page {
+  size: A4;
+  margin: 0;
+}
+@media print {
+  html,
+  body {
+    background: #fff !important;
+  }
+  body > *:not(#paper) {
+    display: none !important;
+  }
+  #paper {
+    display: block !important;
+  }
+  #paper .pp-page {
+    break-after: page;
+  }
+  #paper .pp-flow {
+    break-after: page;
+  }
+}
+
+/* the phone's preview: the real A4 paper, scaled to the screen */
+.pr-seg {
+  margin-bottom: 10px;
+}
+.pr-seg button {
+  flex: 1 1 0;
+}
+.pr-prev {
+  position: relative;
+  overflow: hidden;
+  padding: 12px;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--bg) 70%, #000);
+  border: 1px solid var(--line);
+  margin-top: 6px;
+}
+:root[data-theme='light'] .pr-prev {
+  background: #e7e1d4;
+}
+.pr-wrap {
+  width: 210mm;
+  transform-origin: 0 0;
+}
+:root[dir='rtl'] .pr-wrap {
+  transform-origin: 100% 0;
+}
+.pr-wrap .pp-flow,
+.pr-wrap .pp-page {
+  margin-bottom: 18px;
+  box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.6);
+}
+.pr-go {
+  position: sticky;
+  bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 22px);
+  z-index: 2;
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  text-align: center;
+  margin: 14px 0 8px;
+  padding: 12px;
+  border-radius: 20px;
+  background: var(--glass);
+  border: 1px solid var(--line);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+.pr-go .btn {
+  width: 100%;
+}

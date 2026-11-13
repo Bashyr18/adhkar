@@ -157,6 +157,12 @@
     globe: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z',
     hands: 'M10 12V4.5a1.3 1.3 0 0 1 2.6 0V12z'
   };
+  /* an icon's stroke and fill paths, for drawing it on a canvas (the desktop pill) */
+  A.iconPaths = function (n) {
+    var d = IC[n] || IC.spark,
+      f = FILL[n];
+    return { d: d, f: f === 1 ? d : f || null };
+  };
   A.icon = function (n, cls) {
     var d = IC[n] || IC.spark,
       f = FILL[n],
@@ -215,7 +221,9 @@
         count: 'fingers',
         pace: 'steady',
         lang: null,
-        nudge: { on: true, every: 20, over: false }
+        nudge: { on: true, every: 20, over: false },
+        /* the desktop pill: where it sits, how big, what it shows */
+        pill: { place: 'top', size: 'compact', hover: true, friday: true, adhkar: true, fast: true }
       },
       notif: {
         enabled: false,
@@ -249,6 +257,7 @@
         pd: {}
       },
       fasts: {},
+      fastPlan: {},
       deeds: {},
       ramadan: { skip: {}, taraweeh: {}, khatm: { juz: {}, done: 0 } },
       excused: {
@@ -1328,6 +1337,22 @@
       hn = A.hijri(A.shift(key, 1)),
       dw = A.dow(key),
       out = [];
+    /* a fast you planned: the evening before, to prepare; on the day, to log it */
+    var plan = S.fastPlan || {};
+    if (evening && plan[A.shift(key, 1)] && !S.fasts[A.shift(key, 1)])
+      out.push({
+        h: 'sand',
+        ic: 'fast',
+        t: 'Tomorrow you plan to fast',
+        d: 'Make your intention tonight, and eat suhūr before Fajr.'
+      });
+    if (!evening && plan[key] && !S.fasts[key])
+      out.push({
+        h: 'sand',
+        ic: 'fast',
+        t: 'Today you planned to fast',
+        d: 'May Allah accept it. Tap a day in the calendar to log it.'
+      });
     /* after Maghrib the next Islamic day has begun, so tonight's notes come first */
     if (evening) {
       if (hn.m === 9 && hn.d === 1)
@@ -1358,7 +1383,7 @@
           t: 'Night ' + hn.d + ' of Ramaḍān',
           d: 'The last ten nights. Keep striving in prayer, Qurʾān and duʿāʾ.'
         });
-      if (dw === 4)
+      if (dw === 4 && !(A.jumuah && A.jumuah().on))
         out.push({
           h: 'jade',
           ic: 'mosque',
@@ -1401,7 +1426,7 @@
         t: 'ʿĀshūrāʾ',
         d: 'Fasting the 10th (with the 9th) expiates the year before (Muslim 1162).'
       });
-    if (dw === 5)
+    if (dw === 5 && !(A.jumuah && A.jumuah().on))
       out.push({
         h: 'jade',
         ic: 'mosque',
@@ -1499,6 +1524,7 @@
         'sync',
         JSON.stringify({
           name: S.profile.name,
+          gender: S.profile.gender || '',
           lang: A.ar && A.ar() ? 'ar' : 'en',
           excused: !!S.excused.on,
           imsak: S.prefs.imsak || 0,
@@ -1525,6 +1551,14 @@
           prog: prog,
           iqama: S.iqama,
           silence: S.silence,
+          jumuah: (function () {
+            var j = S.jumuah || {},
+              f = A.jumuah ? A.jumuah() : {};
+            return { overlay: j.overlay !== false, kahf: f.on && f.rec && f.rec.kahf ? f.key : '' };
+          })(),
+          fastPlan: Object.keys(S.fastPlan || {}).filter(function (k) {
+            return k > key;
+          }),
           cycle: (function () {
             if (S.profile.gender !== 'f' || !S.excused.remind) return null;
             var c = A.cycle();

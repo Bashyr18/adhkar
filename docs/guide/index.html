@@ -306,6 +306,62 @@ footer p { margin: 18px auto 0; max-width: 60ch; }
 .rail.fit { justify-content: center; -webkit-mask-image: none; mask-image: none; }
 .strip.fit .nav { display: none; }
 
+/* ---------- the Friday chapter wears Jumuʿah's emerald night and its arcade of arches ---------- */
+.fri { --bg: #04100e; --s1: #0a1b18; --s2: #0e241f; --t1: #f5f0e7; --t2: #b4c2bb; --t3: #93a39b;
+  --gold: #dcbb73; --gold2: #f3dca6; --gold-soft: rgba(220, 187, 115, .13); --gold-line: rgba(220, 187, 115, .36);
+  --line: rgba(214, 236, 222, .08); --line2: rgba(214, 236, 222, .15);
+  position: relative; color: var(--t1); border-top-color: transparent; isolation: isolate; }
+.fri + .chapter { border-top-color: transparent; }
+:root[data-theme="light"] .fri { --bg: #f0f2ea; --s1: #fbfcf7; --s2: #eaeee4; --t1: #15211c; --t2: #46564f; --t3: #5d6c65;
+  --gold: #9a7428; --gold2: #6d5212; --gold-soft: rgba(154, 116, 40, .12); --gold-line: rgba(154, 116, 40, .34); --line: rgba(28, 62, 48, .1); --line2: rgba(28, 62, 48, .18); }
+.fbg { position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(70% 34% at 50% 8%, rgba(60, 170, 130, .18), transparent 75%), linear-gradient(#061714, #061714);
+  -webkit-mask: linear-gradient(transparent, #000 300px, #000 calc(100% - 300px), transparent); mask: linear-gradient(transparent, #000 300px, #000 calc(100% - 300px), transparent); }
+:root[data-theme="light"] .fbg { background: radial-gradient(70% 34% at 50% 8%, rgba(31, 120, 90, .14), transparent 75%), linear-gradient(#eaf1e8, #eaf1e8); }
+.fbg::before { content: ""; position: absolute; inset: 0; opacity: .5; background: var(--gold2);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 64'%3E%3Cpath d='M4 64V32C4 18 13 9 24 3c11 6 20 15 20 29v32' fill='none' stroke='%23000' stroke-opacity='.22' stroke-width='1.1'/%3E%3C/svg%3E") 0 0/44px 59px repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 64'%3E%3Cpath d='M4 64V32C4 18 13 9 24 3c11 6 20 15 20 29v32' fill='none' stroke='%23000' stroke-opacity='.22' stroke-width='1.1'/%3E%3C/svg%3E") 0 0/44px 59px repeat; }
+.fri > .wrap { position: relative; }
+
+/* ---------- download: first in the cover, then a section of its own ---------- */
+.get-hero { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+.gh-btn { display: inline-flex; align-items: center; gap: 12px; min-height: 60px; padding: 0 24px 0 18px; border-radius: 18px; text-decoration: none; transition: transform .35s var(--out), box-shadow .35s var(--out), border-color .35s; }
+.gh-btn svg { width: 26px; height: 26px; flex: none; }
+.gh-btn span { display: grid; line-height: 1.15; text-align: start; }
+.gh-btn small { font-size: 11.5px; font-weight: 600; letter-spacing: .04em; opacity: .8; }
+.gh-btn b { font-size: 18px; font-weight: 700; }
+.gh-btn.and { background: linear-gradient(180deg, #f1d59e, #d9b26f); color: #1a1206; box-shadow: 0 16px 34px -14px rgba(217, 178, 111, .75); }
+.gh-btn.win { background: var(--s1); color: var(--t1); border: 1px solid var(--gold-line); }
+.gh-btn:hover { transform: translateY(-2px); }
+.gh-btn:active { transform: scale(.97); }
+.gh-note { margin: 12px 2px 0; font-size: 13px; color: var(--t3); }
+.gh-note a { color: var(--gold2); }
+.get { padding: clamp(80px, 11vw, 150px) 0; border-top: 1px solid var(--line); }
+.get h2 { font: 700 clamp(30px, 4.6vw, 48px)/1.1 var(--sans); letter-spacing: -.02em; margin: 14px 0 0; }
+.get-dek { max-width: 620px; margin: 16px 0 0; color: var(--t2); font-size: 17px; line-height: 1.6; }
+.get-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(16px, 2.4vw, 28px); margin-top: clamp(30px, 4vw, 50px); }
+.get-card { display: flex; flex-direction: column; gap: 18px; padding: clamp(22px, 3vw, 34px); border-radius: 28px; background: var(--s1); border: 1px solid var(--line2); }
+.gc-head { display: flex; align-items: center; gap: 16px; }
+.gc-head h3 { margin: 0; font-size: 21px; font-weight: 700; }
+.gc-head p { margin: 4px 0 0; font-size: 13.5px; color: var(--t3); }
+.gc-ic { width: 54px; height: 54px; flex: none; display: grid; place-items: center; border-radius: 16px; background: var(--gold-soft); border: 1px solid var(--gold-line); color: var(--gold2); }
+.gc-ic svg { width: 26px; height: 26px; }
+.gc-list { flex: 1; margin: 0; padding: 0; list-style: none; display: grid; align-content: start; gap: 10px; }
+.gc-list li { position: relative; padding-inline-start: 22px; color: var(--t2); line-height: 1.5; font-size: 15px; }
+.gc-list li::before { content: ""; position: absolute; inset-inline-start: 2px; top: .55em; width: 8px; height: 8px; border-radius: 2px; transform: rotate(45deg); background: var(--gold); }
+.gc-btn { align-self: flex-start; }
+.gc-steps { margin: 0; padding: 16px 0 0; border-top: 1px solid var(--line); list-style: none; counter-reset: s; display: grid; gap: 10px; }
+.gc-steps li { counter-increment: s; position: relative; padding-inline-start: 34px; font-size: 14px; line-height: 1.5; color: var(--t2); }
+.gc-steps li::before { content: counter(s); position: absolute; inset-inline-start: 0; top: -1px; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 700; background: var(--s2); border: 1px solid var(--line2); color: var(--gold2); }
+.gc-steps b { color: var(--t1); }
+.get-foot { margin-top: 26px; color: var(--t3); font-size: 14px; }
+.get-foot a { color: var(--gold2); }
+@media (max-width: 760px) {
+  .get-grid { grid-template-columns: minmax(0, 1fr); }
+  .get-hero .gh-btn { flex: 1 1 100%; justify-content: center; }
+  .gc-btn { align-self: stretch; justify-content: center; }
+}
+
 /* ---------- the Ramaḍān chapter wears the app's Ramaḍān season ---------- */
 .season { --bg: #05061a; --s1: #0d1030; --s2: #13163b; --t1: #f6f1e6; --t2: #bdb8cf; --t3: #9a96b3;
   --gold: #e9b65a; --gold2: #ffd98e; --gold3: #b07a2a; --gold-soft: rgba(233, 182, 90, .14); --gold-line: rgba(233, 182, 90, .38);
@@ -573,15 +629,20 @@ footer p { margin: 18px auto 0; max-width: 60ch; }
     <svg class="orn" id="orn" viewBox="-100 -100 200 200" aria-hidden="true"></svg>
     <div class="wrap">
       <div class="rv">
-        <div class="issue"><span>The Guide</span><span>Edition 12.1</span><span>November 2026</span></div>
+        <div class="issue"><span>The Guide</span><span>Edition 13.0</span><span>November 2026</span></div>
         <h1 class="mast">Adh<em>kār</em><small>Remembrance for every moment</small></h1>
         <p class="dek">Every page of the app, every feature, and how to use it, step by step. Free, private, and made with care as ṣadaqah jāriyah.</p>
         <div class="ayah">
           <div class="q" lang="ar">أَلَا بِذِكْرِ ٱللَّهِ تَطْمَئِنُّ ٱلْقُلُوبُ</div>
           <p>Unquestionably, by the remembrance of Allah hearts are assured. Ar-Raʿd 13:28</p>
         </div>
+        <div class="get-hero" aria-label="Download Adhkār">
+          <a class="gh-btn and" href="https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar.apk"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7.2 9.4h9.6v7.4c0 .62-.5 1.12-1.12 1.12h-.9v2.42a1.18 1.18 0 0 1-2.36 0v-2.42h-.84v2.42a1.18 1.18 0 0 1-2.36 0v-2.42h-.9c-.62 0-1.12-.5-1.12-1.12zM4.8 9.3c.65 0 1.18.53 1.18 1.18v4.88a1.18 1.18 0 0 1-2.36 0v-4.88c0-.65.53-1.18 1.18-1.18zm14.4 0c.65 0 1.18.53 1.18 1.18v4.88a1.18 1.18 0 0 1-2.36 0v-4.88c0-.65.53-1.18 1.18-1.18zM15.3 4.2l1.1-1.6a.25.25 0 0 0-.41-.28l-1.13 1.65a6 6 0 0 0-5.72 0L8.01 2.32a.25.25 0 0 0-.41.28l1.1 1.6A4.9 4.9 0 0 0 7.2 8.6h9.6a4.9 4.9 0 0 0-1.5-4.4zM9.8 7a.6.6 0 1 1 0-1.2.6.6 0 0 1 0 1.2zm4.4 0a.6.6 0 1 1 0-1.2.6.6 0 0 1 0 1.2z"/></svg><span><small>Download for</small><b>Android</b></span></a>
+          <a class="gh-btn win" href="https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar-Windows.exe"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.4l7.4-1v7.1H3zm8.3-1.13L21 3v8.5h-9.7zM3 12.5h7.4v7.1L3 18.6zm8.3 0H21V21l-9.7-1.3z"/></svg><span><small>Download for</small><b>Windows</b></span></a>
+        </div>
+        <p class="gh-note">Free, no ads, no account. Version 13.0 · <a href="#get">How to install</a></p>
         <div class="cta">
-          <a class="btn pri" href="#contents">Begin the guide <span class="arr" aria-hidden="true">→</span></a>
+          <a class="btn" href="#contents">Begin the guide <span class="arr" aria-hidden="true">→</span></a>
           <a class="btn tour" id="tourAll" href="#ch-today"><span class="wi" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.4-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg></span>Take the guided tour</a>
         </div>
       </div>
@@ -604,6 +665,29 @@ footer p { margin: 18px auto 0; max-width: 60ch; }
   </section>
 
   <div id="chapters"></div>
+
+  <section class="get" id="get">
+    <div class="wrap">
+      <div class="kicker rv">Get the app</div>
+      <h2 class="rv">On your phone and your computer</h2>
+      <p class="get-dek rv">The same remembrance, prayer times and Friday, on the phone in your hand and the computer you work at. Both are free, need no account, and keep everything on the device.</p>
+      <div class="get-grid">
+        <article class="get-card rv">
+          <div class="gc-head"><span class="gc-ic"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7.2 9.4h9.6v7.4c0 .62-.5 1.12-1.12 1.12h-.9v2.42a1.18 1.18 0 0 1-2.36 0v-2.42h-.84v2.42a1.18 1.18 0 0 1-2.36 0v-2.42h-.9c-.62 0-1.12-.5-1.12-1.12zM4.8 9.3c.65 0 1.18.53 1.18 1.18v4.88a1.18 1.18 0 0 1-2.36 0v-4.88c0-.65.53-1.18 1.18-1.18zm14.4 0c.65 0 1.18.53 1.18 1.18v4.88a1.18 1.18 0 0 1-2.36 0v-4.88c0-.65.53-1.18 1.18-1.18zM15.3 4.2l1.1-1.6a.25.25 0 0 0-.41-.28l-1.13 1.65a6 6 0 0 0-5.72 0L8.01 2.32a.25.25 0 0 0-.41.28l1.1 1.6A4.9 4.9 0 0 0 7.2 8.6h9.6a4.9 4.9 0 0 0-1.5-4.4zM9.8 7a.6.6 0 1 1 0-1.2.6.6 0 0 1 0 1.2zm4.4 0a.6.6 0 1 1 0-1.2.6.6 0 0 1 0 1.2z"/></svg></span><div><h3>Adhkār for Android</h3><p>Android 8 and newer · about 4 MB</p></div></div>
+          <ul class="gc-list"><li>Widgets, reminders and the Madinah takbīr</li><li>Sūrat al-Kahf on its Madani pages, with recitation</li><li>Print or save the adhkār and the timetable as PDF</li></ul>
+          <a class="btn pri gc-btn" href="https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar.apk">Download the APK <span class="arr" aria-hidden="true">→</span></a>
+          <ol class="gc-steps"><li><b>Download</b> the file above.</li><li><b>Open it</b> from your notifications or Downloads.</li><li>If asked, <b>allow installs</b> from your browser, then <b>Install</b>.</li></ol>
+        </article>
+        <article class="get-card rv">
+          <div class="gc-head"><span class="gc-ic"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.4l7.4-1v7.1H3zm8.3-1.13L21 3v8.5h-9.7zM3 12.5h7.4v7.1L3 18.6zm8.3 0H21V21l-9.7-1.3z"/></svg></span><div><h3>Adhkār for Windows</h3><p>Windows 10 and 11 · one file, about 4 MB</p></div></div>
+          <ul class="gc-list"><li>The pill at the top of your screen: the next prayer, the Friday hour, your adhkār</li><li>A desktop of its own: the day band, the session beside the reader, Ctrl K</li><li>Print and PDF on A4, white to the edge</li></ul>
+          <a class="btn pri gc-btn" href="https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar-Windows.exe">Download for Windows <span class="arr" aria-hidden="true">→</span></a>
+          <ol class="gc-steps"><li><b>Download</b> and open the file. Nothing to unpack.</li><li>If Windows says it protected your PC, choose <b>More info</b>, then <b>Run anyway</b>.</li><li>Under <b>This computer</b>, install it to the Start menu and choose where the pill sits.</li></ol>
+        </article>
+      </div>
+      <p class="get-foot rv">Every release, with its checksums and source, is on <a href="https://github.com/Bashyr18/adhkar/releases">GitHub</a>.</p>
+    </div>
+  </section>
 
   <section class="close" id="end">
     <div class="wrap">
@@ -815,7 +899,65 @@ var CH = [
           ['Change month', 'The arrows at the top right.', 90, 13],
           ['The month', 'Sunnah fasts, ʿĪd and your own fasts are marked; tap a day for its details.', 50, 43],
           ['Ramaḍān', 'Opens the Ramaḍān page from anywhere in the year.', 50, 74]
+        ] },
+      { base: 'dark/plan-fast', h: 'Planning a fast', p: 'A day that has not come cannot be marked as fasted. Tap it to plan the fast instead.',
+        steps: [
+          ['The day ahead', 'Its Hijri and Gregorian dates, and why it is special: a Monday Sunnah fast here.', 40, 14],
+          ['Plan, not log', 'Choose the kind of fast. The evening before, at Maghrib, a reminder comes to make your intention and prepare for suhūr; on the computer, the pill shows it too.', 50, 78]
+        ],
+        after: [['On the day', 'Today shows the fast you planned; log it in the calendar once it is done.']] },
+      { base: 'dark/print', flip: true, h: 'Print and PDF, on the phone', p: 'Under You, Print and PDF: the morning and evening adhkār as an A4 booklet with every source, or the month’s prayer timetable.',
+        steps: [
+          ['What to print', 'Morning, evening, both, or the timetable.', 50, 25],
+          ['The paper itself', 'Exactly what will print, white to the edge.', 50, 55],
+          ['Print or save', 'Opens your phone’s print service. Choose Save as PDF as the printer to keep a copy.', 50, 88]
         ] }
+    ] },
+  { id: 'friday', friday: true, kicker: 'The best day of the week', title: 'Jumuʿah', dek: 'From Maghrib on Thursday to Maghrib on Friday the app wears an emerald night with gold arches, and keeps the day with you: its Sunnahs with their evidence, the two hours of response, and Sūrat al-Kahf on its Madani pages.', thumb: 'friday/today',
+    fan: [['friday/today', 'Today'], ['friday/jumuah', 'The day'], ['friday/kahf', 'Al-Kahf'], ['friday/today-light', 'By day']],
+    fanNote: ['Thursday Maghrib to Friday Maghrib', 'Dark and light', 'Ramaḍān’s dress comes first in its month', 'Back to normal after Maghrib'],
+    spreads: [
+      { base: 'friday/today', h: 'Today, on Friday', p: 'The greeting becomes Yawm al-Jumuʿah, and a card under an arch and its lamp leads the day.', drop: true,
+        steps: [
+          ['The day', 'Yawm al-Jumuʿah in the greeting, and on the card in Arabic beneath the arch.', 28, 4],
+          ['What comes next', 'Before the khuṭbah, its time; after the prayer, when the last hour begins; at night, Fajr.', 30, 27],
+          ['Al-Kahf and ṣalawāt', 'Lit once done. Al-Kahf shows your page while you are part way.', 32, 39],
+          ['The Sunnahs', 'How many of the day’s Sunnahs you have kept. Tap the card for the Jumuʿah page.', 22, 43],
+          ['Jumuʿah in place of Ẓuhr', 'The prayer times name it for the day: Jumuʿah for a brother, Jumuʿah or Ẓuhr for a sister.', 43, 84]
+        ] },
+      { base: 'friday/hour', flip: true, h: 'The hour of response', p: 'When the last hour before Maghrib begins, the card counts it down. On a phone it can appear over other apps; on a computer the pill opens at the top of the screen.',
+        steps: [
+          ['Counting down', 'The time left in the hour, live.', 28, 26],
+          ['Ask now', 'The hour to seek, with your duʿāʾ list a tap away.', 40, 32]
+        ] },
+      { base: 'friday/jumuah', h: 'The Jumuʿah page', p: 'The day from Fajr to Maghrib, its two hours, the prayer and al-Kahf.',
+        steps: [
+          ['The day, drawn', 'Fajr to Maghrib, the two hours marked and the present moment on the line.', 50, 21],
+          ['At the minbar', 'From when the imam sits until the prayer ends (Muslim 853). Set your masjid’s khuṭbah time below.', 45, 31],
+          ['The last hour', 'After ʿAṣr, the hour before Maghrib (Abū Dāwūd 1048). Ibn al-Qayyim held these two the strongest.', 45, 41],
+          ['The prayer', 'Tick it once prayed. For a sister: not required, so Jumuʿah with the imam or Ẓuhr at home; on a break, not asked.', 50, 65],
+          ['Sūrat al-Kahf', 'Opens the reader where you left it.', 50, 78]
+        ] },
+      { base: 'friday/sunnahs', flip: true, h: 'The Sunnahs of the day', p: 'Each with the narration it rests on, a tap away, graded.',
+        steps: [
+          ['Tick as you go', 'They are kept for this Friday only.', 10, 18],
+          ['The evidence', 'The narration in Arabic and English, with its grade and reference.', 88, 18],
+          ['For the masjid', 'Ghusl, siwāk, going early and listening are shown to a sister as optional, for when she attends.', 40, 50]
+        ] },
+      { base: 'friday/kahf', h: 'Sūrat al-Kahf, on its Madani pages', p: 'Pages 293 to 304 of the Madinah Muṣḥaf, set in the King Fahd Complex’s own page fonts, line for line as printed. Swipe right to left to turn.',
+        steps: [
+          ['Mushaf or translation', 'The pages, or each verse with The Clear Quran beneath.', 75, 4],
+          ['The page and juzʾ', 'Where you are, kept for next time.', 22, 4],
+          ['Tap a verse', 'Its text and translation, and Listen from here.', 50, 52],
+          ['Listen', 'Mishary al-ʿAfāsī, verse by verse; the reciting verse is lit and the page turns with it. Downloaded once, then offline.', 10, 95],
+          ['I have read it', 'Marks al-Kahf for this Friday.', 80, 95]
+        ] },
+      { base: 'friday/kahf-tr', flip: true, h: 'Verse by verse', p: 'The Uthmani text of each verse, and its translation from The Clear Quran.',
+        steps: [
+          ['The verse number', 'In order from 1 to 110; Juzʾ 16 begins at verse 75.', 9, 14],
+          ['Translation', 'Labelled as a translation, never as the meaning.', 40, 39]
+        ],
+        after: [['Its reference', 'The virtue of reading al-Kahf on Jumuʿah is narrated by al-Ḥākim and al-Bayhaqī, graded ṣaḥīḥ by al-Albānī (Ṣaḥīḥ al-Jāmiʿ 6470); the first ten verses and the Dajjāl, by Muslim 809.']] }
     ] },
   { id: 'you', kicker: 'Your record', title: 'You', dek: 'Your progress, gently: streaks, sessions and insights, with nothing compared to anyone.', thumb: 'dark/profile',
     spreads: [
@@ -872,7 +1014,7 @@ var CH = [
     ] },
   { id: 'home', kicker: 'Beyond the app', title: 'Your home screen', dek: 'Four widgets, a quick settings tile, app shortcuts and a gentle floating reminder bring the day’s remembrance to where you already look.', thumb: 'extra/widgets',
     widgets: true,
-    extra: '<div class="strip rv winsoon"><h4>Adhkār for Windows</h4><p>The same app and the same record on the computer, laid out for a large screen, a keyboard and a printer.</p><img class="winshot" src="../readme/desk-today.webp" alt="Adhkār for Windows: Today, beside the rail" loading="lazy" decoding="async"><ul><li><b>The day</b> from Fajr to Fajr, its prayers and adhkār times, at a glance</li><li><b>The session</b> beside the reader, each remembrance a click away</li><li><b>Ctrl K</b> finds any remembrance, hadith or page</li><li><b>Space</b> taps the counting circle; hold it to pause</li><li><b>Print</b> the adhkār as a booklet, and the month&rsquo;s timetable</li><li><b>Reminders</b> from the tray, with the adhān takbīr</li><li><b>The next prayer</b> in a small window of its own</li></ul><a class="btn pri" href="https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar-Windows.exe">Download for Windows <span class="arr" aria-hidden="true">→</span></a><p class="winnote">Windows may say it protected your PC: choose More info, then Run anyway.</p></div>' },
+    extra: '<div class="strip rv winsoon"><h4>Adhkār for Windows</h4><p>The same app and the same record on the computer, laid out for a large screen, a keyboard and a printer.</p><img class="winshot" src="../readme/desk-today.webp" alt="Adhkār for Windows: Today, beside the rail" loading="lazy" decoding="async"><ul><li><b>The day</b> from Fajr to Fajr, its prayers and adhkār times, at a glance</li><li><b>The session</b> beside the reader, each remembrance a click away</li><li><b>Ctrl K</b> finds any remembrance, hadith or page</li><li><b>Space</b> taps the counting circle; hold it to pause</li><li><b>Print</b> the adhkār as a booklet, and the month&rsquo;s timetable</li><li><b>Reminders</b> from the tray, with the adhān takbīr</li><li><b>The pill</b> at the top of the screen: the next prayer, the Friday hour, your adhkār</li><li><b>Learn the prayer</b> as a spread: the posture beside its words</li></ul><a class="btn pri" href="https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar-Windows.exe">Download for Windows <span class="arr" aria-hidden="true">→</span></a><p class="winnote">Windows may say it protected your PC: choose More info, then Run anyway.</p></div>' },
   { id: 'gestures', kicker: 'Moving around', title: 'Gestures', dek: 'Built to be used with one hand, often without looking.', thumb: 'dark/counting', allGestures: true }
 ];
 var GEST = [
@@ -1001,7 +1143,8 @@ $('#toc').innerHTML = CH.map(function (c, i) {
 }).join('');
 
 $('#chapters').innerHTML = CH.map(function (c, ci) {
-  var n = pad(ci), h = '<section class="chapter' + (c.season ? ' season' : '') + '" id="ch-' + c.id + '" data-n="' + n + '">';
+  var n = pad(ci), h = '<section class="chapter' + (c.season ? ' season' : '') + (c.friday ? ' fri' : '') + '" id="ch-' + c.id + '" data-n="' + n + '">';
+  if (c.friday) h += '<div class="fbg" aria-hidden="true"></div>';
   if (c.season) h += '<div class="sbg" aria-hidden="true"></div><div class="lanterns" aria-hidden="true">' + [70, 150, 40, 190, 100].map(function (l, i) { return '<div class="lantern">' + lantern('gl' + i, l) + '</div>'; }).join('') + '</div>';
   h += '<div class="wrap"><div class="opener rv"><div class="bignum" aria-hidden="true">' + n + '</div><div><div class="kicker">' + esc(c.kicker) + '</div><h2 class="h2">' + words(c.title) + '</h2><p class="dek">' + esc(c.dek) + '</p>' + meta(c) + '</div></div>';
   if (c.fan) h += '<div class="fan rv">' + c.fan.map(function (x) { return '<figure>' + phone(x[0], 'In Ramaḍān: ' + x[1], '', false, true) + '<figcaption>' + esc(x[1]) + '</figcaption></figure>'; }).join('') + '</div><div class="fan-note rv">' + c.fanNote.map(function (t) { return '<span>' + esc(t) + '</span>'; }).join('') + '</div>';

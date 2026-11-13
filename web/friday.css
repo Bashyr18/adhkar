@@ -1,0 +1,779 @@
+/* the twelve Madani page fonts of al-Kahf (King Fahd Complex, QCF v2), declared like the app's other fonts */
+@font-face {
+  font-family: 'kf293';
+  src: url(fonts/mushaf/p293.woff2) format('woff2');
+  font-display: block;
+}
+@font-face {
+  font-family: 'kf294';
+  src: url(fonts/mushaf/p294.woff2) format('woff2');
+  font-display: block;
+}
+@font-face {
+  font-family: 'kf295';
+  src: url(fonts/mushaf/p295.woff2) format('woff2');
+  font-display: block;
+}
+@font-face {
+  font-family: 'kf296';
+  src: url(fonts/mushaf/p296.woff2) format('woff2');
+  font-display: block;
+}
+@font-face {
+  font-family: 'kf297';
+  src: url(fonts/mushaf/p297.woff2) format('woff2');
+  font-display: block;
+}
+@font-face {
+  font-family: 'kf298';
+  src: url(fonts/mushaf/p298.woff2) format('woff2');
+  font-display: block;
+}
+@font-face {
+  font-family: 'kf299';
+  src: url(fonts/mushaf/p299.woff2) format('woff2');
+  font-display: block;
+}
+@font-face {
+  font-family: 'kf300';
+  src: url(fonts/mushaf/p300.woff2) format('woff2');
+  font-display: block;
+}
+@font-face {
+  font-family: 'kf301';
+  src: url(fonts/mushaf/p301.woff2) format('woff2');
+  font-display: block;
+}
+@font-face {
+  font-family: 'kf302';
+  src: url(fonts/mushaf/p302.woff2) format('woff2');
+  font-display: block;
+}
+@font-face {
+  font-family: 'kf303';
+  src: url(fonts/mushaf/p303.woff2) format('woff2');
+  font-display: block;
+}
+@font-face {
+  font-family: 'kf304';
+  src: url(fonts/mushaf/p304.woff2) format('woff2');
+  font-display: block;
+}
+/* =====================================================================
+   Jumuʿah: from Maghrib on Thursday to Maghrib on Friday the app wears its own dress, an emerald night with
+   gold arches, quieter than Ramaḍān's lanterns. Ramaḍān's dress wins inside its month (data-season).
+   ===================================================================== */
+:root[data-friday][data-theme='dark'] {
+  --bg: #04100e;
+  --bg2: #061512;
+  --s1: #0a1b18;
+  --s1b: #081613;
+  --s2: #0e241f;
+  --s3: #143029;
+  --s4: #1c3d35;
+  --line: rgba(214, 236, 222, 0.07);
+  --line2: rgba(214, 236, 222, 0.13);
+  --glass: rgba(6, 20, 17, 0.84);
+  --gold: #dcbb73;
+  --gold2: #f3dca6;
+  --gold-soft: rgba(220, 187, 115, 0.13);
+  --gold-line: rgba(220, 187, 115, 0.36);
+  --page: #e7cf92;
+  --page-glow: rgba(120, 210, 170, 0.1);
+}
+:root[data-friday][data-theme='light'] {
+  --bg: #f0f2ea;
+  --bg2: #e8ebe1;
+  --s1: #fbfcf7;
+  --s1b: #f5f7f0;
+  --s2: #eaeee4;
+  --s3: #dfe5d8;
+  --line: rgba(28, 62, 48, 0.09);
+  --line2: rgba(28, 62, 48, 0.16);
+  --page: #1f5a48;
+  --page-glow: rgba(31, 90, 72, 0.1);
+}
+/* the page pattern becomes an arcade of pointed arches */
+:root[data-friday] .pattern {
+  --pat-k: 1.5;
+  -webkit-mask:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 64'%3E%3Cpath d='M4 64V32C4 18 13 9 24 3c11 6 20 15 20 29v32' fill='none' stroke='%23000' stroke-width='1.1'/%3E%3Cpath d='M11 64V34c0-10 6-17 13-21 7 4 13 11 13 21v30' fill='none' stroke='%23000' stroke-opacity='.5' stroke-width='.7'/%3E%3Cpath d='M24 0l1 1.6 1.8-.4-.4 1.8L28 4l-1.6 1 .4 1.8-1.8-.4L24 8l-1-1.6-1.8.4.4-1.8L20 4l1.6-1-.4-1.8 1.8.4z' fill='%23000'/%3E%3C/svg%3E")
+      0 0/44px 59px repeat,
+    linear-gradient(#000, transparent 88%);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+:root[data-friday][data-theme='dark'] .sky {
+  background: linear-gradient(170deg, #03120f, #0b2c25 60%, #1d3f34);
+}
+:root[data-friday] .nav .pill {
+  background: rgba(220, 187, 115, 0.14);
+  border-color: rgba(220, 187, 115, 0.42);
+}
+
+/* ---------- the card that leads Today ---------- */
+.fr-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 14px 12px;
+  padding: 18px 18px 16px;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(110% 90% at 88% 0%, rgba(120, 210, 170, 0.16), transparent 62%),
+    linear-gradient(160deg, #0d2a24, #081a16 78%);
+  border-color: rgba(220, 187, 115, 0.3);
+  color: #f5f0e7;
+}
+:root[data-theme='light'] .fr-hero {
+  background:
+    radial-gradient(110% 90% at 88% 0%, rgba(31, 120, 90, 0.14), transparent 62%),
+    linear-gradient(160deg, #f4f8f1, #e9f0e6 78%);
+  border-color: rgba(31, 90, 72, 0.22);
+  color: var(--t1);
+}
+.fr-arch {
+  position: absolute;
+  inset-inline-end: 14px;
+  top: 10px;
+  width: 74px;
+  height: 92px;
+  color: #e7cf92;
+  opacity: 0.9;
+  z-index: -1;
+}
+:root[data-theme='light'] .fr-arch {
+  color: #9a7428;
+  opacity: 0.75;
+}
+.fr-flame {
+  transform-origin: 60px 70px;
+  animation: flicker 2.1s ease-in-out infinite;
+}
+.fr-h {
+  grid-column: 1 / -1;
+  padding-inline-end: 84px;
+}
+.fr-h .eyebrow {
+  color: #e7cf92;
+}
+:root[data-theme='light'] .fr-h .eyebrow {
+  color: #1f5a48;
+}
+.fr-ar {
+  margin-top: 6px;
+  font: 400 26px/1.5 var(--f-quran, 'Amiri Quran', 'Amiri', serif);
+  color: #f3dca6;
+}
+:root[data-theme='light'] .fr-ar {
+  color: #7a5a16;
+}
+.fr-st {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 4px;
+}
+.fr-hero .muted {
+  color: rgba(245, 240, 231, 0.72);
+}
+:root[data-theme='light'] .fr-hero .muted {
+  color: var(--t2);
+}
+.fr-cd {
+  font: 700 var(--fs-num) / 1.1 var(--f-ui);
+  letter-spacing: -0.01em;
+}
+.fr-chips {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.fr-hero .chip {
+  background: rgba(245, 240, 231, 0.06);
+  border-color: rgba(245, 240, 231, 0.12);
+  color: rgba(245, 240, 231, 0.86);
+}
+.fr-hero .chip.on {
+  background: rgba(220, 187, 115, 0.16);
+  border-color: rgba(220, 187, 115, 0.45);
+  color: #f3dca6;
+}
+:root[data-theme='light'] .fr-hero .chip {
+  background: rgba(31, 90, 72, 0.06);
+  border-color: rgba(31, 90, 72, 0.14);
+  color: var(--t2);
+}
+:root[data-theme='light'] .fr-hero .chip.on {
+  background: rgba(154, 116, 40, 0.12);
+  border-color: rgba(154, 116, 40, 0.4);
+  color: #6d4f12;
+}
+
+/* ---------- the Jumuʿah page ---------- */
+.fr-top h1 em {
+  font: 400 0.82em/1 var(--f-ar, 'Amiri', serif);
+  font-style: normal;
+  color: var(--gold2);
+  margin-inline-start: 6px;
+}
+.fr-day {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+}
+.fr-line {
+  position: relative;
+  height: 10px;
+  border-radius: 99px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--dawn) 30%, var(--s2)), var(--s2) 40%, color-mix(in srgb, var(--dusk) 30%, var(--s2)));
+  margin-top: 6px;
+}
+:root[dir='rtl'] .fr-line {
+  background: linear-gradient(270deg, color-mix(in srgb, var(--dawn) 30%, var(--s2)), var(--s2) 40%, color-mix(in srgb, var(--dusk) 30%, var(--s2)));
+}
+.fr-win {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  min-width: 6px;
+  border-radius: 99px;
+  background: var(--gold-soft);
+  border: 1px solid var(--gold-line);
+}
+.fr-win.now {
+  background: var(--gold);
+  border-color: var(--gold2);
+  box-shadow: 0 0 0 4px var(--gold-soft);
+}
+.fr-now {
+  position: absolute;
+  top: -7px;
+  bottom: -7px;
+  width: 2px;
+  margin-inline-start: -1px;
+  border-radius: 2px;
+  background: var(--t1);
+}
+.fr-ends {
+  display: flex;
+  justify-content: space-between;
+  font: 700 11.5px/1 var(--f-ui);
+  color: var(--t3);
+}
+.fr-hours {
+  display: grid;
+  gap: 2px;
+  border-top: 1px solid var(--line);
+  padding-top: 6px;
+}
+.fr-hr {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+}
+.fr-hr + .fr-hr {
+  border-top: 1px solid var(--line);
+}
+.fr-hr > i {
+  width: 10px;
+  height: 10px;
+  flex: none;
+  border-radius: 3px;
+  background: var(--gold-soft);
+  border: 1px solid var(--gold-line);
+}
+.fr-hr.now > i {
+  background: var(--gold);
+}
+.fr-hr .t {
+  font: 700 14px/1.3 var(--f-ui);
+  color: var(--t1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.fr-hr .s {
+  font: 600 12px/1.4 var(--f-ui);
+  color: var(--t3);
+  margin-top: 2px;
+}
+.fr-tm {
+  text-align: end;
+  font: 700 14px/1.2 var(--f-ui);
+  color: var(--t1);
+  white-space: nowrap;
+}
+.fr-tm small {
+  display: block;
+  font-size: 11.5px;
+  color: var(--t3);
+  margin-top: 3px;
+}
+.fr-live {
+  font: 800 10px/1 var(--f-ui);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--on-gold);
+  background: var(--gold);
+  padding: 4px 7px;
+  border-radius: 99px;
+}
+.fr-why {
+  justify-self: start;
+}
+.fr-pray {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 10px 14px 18px;
+}
+:root[dir='rtl'] .fr-pray,
+:root[dir='rtl'] .fr-fajr {
+  padding: 14px 18px 14px 10px;
+}
+.fr-pray .t {
+  font: 700 15px/1.3 var(--f-ui);
+  color: var(--t1);
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.fr-pray .s {
+  font: 600 12.5px/1.45 var(--f-ui);
+  color: var(--t3);
+  margin-top: 3px;
+}
+.fr-pt {
+  font: 700 12.5px/1 var(--f-ui);
+  color: var(--t3);
+}
+.fr-pray.on .t {
+  color: var(--gold2);
+}
+.fr-pray.on .fr-tk {
+  background: var(--gold);
+  border-color: var(--gold);
+}
+.fr-pi {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  color: var(--gold2);
+}
+.fr-kahf {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 18px;
+}
+.fr-kahf-a {
+  flex: none;
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  font: 400 17px/1 var(--f-ar, 'Amiri', serif);
+  color: var(--gold2);
+  background: var(--gold-soft);
+  border: 1px solid var(--gold-line);
+  padding-bottom: 4px;
+}
+.fr-kahf .ttl {
+  font: 700 16px/1.3 var(--f-ui);
+  color: var(--t1);
+  margin-top: 4px;
+}
+.fr-kahf .sub {
+  font: 600 12.5px/1.4 var(--f-ui);
+  color: var(--t3);
+  margin-top: 2px;
+}
+.fr-ok {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--gold);
+  color: var(--on-gold);
+}
+.fr-s {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 10px 12px 16px;
+}
+:root[dir='rtl'] .fr-s {
+  padding: 12px 16px 12px 10px;
+}
+.fr-s + .fr-s {
+  border-top: 1px solid var(--line);
+}
+.fr-s .t {
+  font: 700 14.5px/1.3 var(--f-ui);
+  color: var(--t1);
+}
+.fr-s .s {
+  font: 600 12px/1.4 var(--f-ui);
+  color: var(--t3);
+  margin-top: 2px;
+}
+.fr-s.on .t {
+  color: var(--gold2);
+}
+.fr-tk {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  border: 1.5px solid var(--line2);
+  display: grid;
+  place-items: center;
+  color: var(--on-gold);
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    transform 0.2s var(--spring);
+  position: relative;
+}
+.fr-tk::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+}
+.fr-s.on .fr-tk {
+  background: var(--gold);
+  border-color: var(--gold);
+}
+.fr-tk:active {
+  transform: scale(0.9);
+}
+.fr-fajr {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 10px 14px 18px;
+  margin-top: 12px;
+  color: var(--gold2);
+}
+.fr-fajr .t {
+  font: 700 14px/1.3 var(--f-ui);
+  color: var(--t1);
+}
+.fr-fajr .s {
+  font: 600 12px/1.4 var(--f-ui);
+  color: var(--t3);
+  margin-top: 2px;
+}
+.fr-ref {
+  display: grid;
+  gap: 4px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--s2);
+  border: 1px solid var(--line);
+}
+.fr-ref b {
+  font: 700 14px/1.3 var(--f-ui);
+  color: var(--t1);
+}
+.fr-ref span {
+  font: 600 12.5px/1.45 var(--f-ui);
+  color: var(--t2);
+}
+.fr-note {
+  margin-top: 12px;
+  font: 600 13px/1.55 var(--f-ui);
+  color: var(--t2);
+}
+
+/* =====================================================================
+   Sūrat al-Kahf on its Madani pages. The page is paper in light and a lamp-lit night in dark; each line of the
+   page font is set to fill the page's width, as it is printed, and the page turns right to left.
+   ===================================================================== */
+.kf {
+  --paper: #fcf7e9;
+  --ink: #1d1a13;
+  --frame: #8a6420;
+  --mark: rgba(183, 143, 63, 0.24);
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  z-index: 5;
+}
+:root[data-theme='dark'] .kf {
+  --paper: #0e1916;
+  --ink: #eee6d1;
+  --frame: #b89a5a;
+  --mark: rgba(231, 207, 146, 0.2);
+}
+.kf-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: calc(env(safe-area-inset-top, 0px) + 10px) 14px 8px;
+}
+.kf-ttl {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+.kf-ttl b {
+  font: 700 15px/1.2 var(--f-ui);
+  color: var(--t1);
+}
+.kf-ttl small {
+  font: 600 12px/1.2 var(--f-ui);
+  color: var(--t3);
+}
+.kf-mode {
+  flex: none;
+}
+.kf-mode button {
+  min-height: 34px;
+  padding: 0 12px;
+}
+.kf-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+.kf-track {
+  flex: 1;
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+.kf-track::-webkit-scrollbar {
+  display: none;
+}
+.kf-page {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px 10px;
+  overflow-y: auto;
+}
+.kf-lines {
+  --kf: 20px;
+  width: min(100%, 560px);
+  padding: 18px 16px 14px;
+  border-radius: 14px;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow:
+    inset 0 0 0 1px var(--mark),
+    inset 0 0 0 5px var(--paper),
+    inset 0 0 0 6px var(--mark),
+    0 18px 40px -26px rgba(0, 0, 0, 0.6);
+  font-size: var(--kf);
+  direction: rtl;
+}
+.kf-l {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  white-space: nowrap;
+  line-height: 1.95;
+}
+.kf-w {
+  border-radius: 6px;
+  padding: 0 1px;
+  cursor: pointer;
+  transition: background 0.25s;
+}
+.kf-w.on {
+  background: var(--mark);
+}
+.kf-w.end {
+  color: var(--frame);
+}
+.kf-ban {
+  margin: 0 0 10px;
+  padding: 8px 0 10px;
+  text-align: center;
+  border-radius: 10px;
+  background:
+    linear-gradient(90deg, transparent, var(--mark) 12% 88%, transparent),
+    var(--paper);
+  border-block: 1px solid var(--frame);
+}
+.kf-ban span {
+  font: 400 calc(var(--kf) * 1.15) / 1.4 'Amiri', serif;
+  color: var(--ink);
+}
+.kf-bism {
+  text-align: center;
+  font: 400 calc(var(--kf) * 1.05) / 2 'Amiri Quran', 'Amiri', serif;
+  margin-bottom: 4px;
+}
+.kf-pn {
+  margin-top: 10px;
+  font: 700 12px/1 var(--f-ui);
+  color: var(--t3);
+}
+/* the verses, one by one, with the translation beneath */
+.kf-tr {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 16px 20px;
+}
+.kf-v {
+  position: relative;
+  padding: 16px 4px 18px;
+  border-bottom: 1px solid var(--line);
+  border-radius: 12px;
+  transition: background 0.3s;
+}
+.kf-v.on {
+  background: var(--gold-soft);
+}
+.kf-vn {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--gold-line);
+  font: 700 11.5px/1 var(--f-ui);
+  color: var(--gold2);
+}
+.kf-va {
+  margin-top: 10px;
+  font: 400 calc(var(--ar, 26px) * 0.95) / 2.05 'Amiri Quran', 'Amiri', serif;
+  color: var(--t1);
+  direction: rtl;
+  text-align: right;
+}
+.kf-ve {
+  margin-top: 10px;
+  font: 600 14px/1.65 var(--f-ui);
+  color: var(--t2);
+  direction: ltr;
+  text-align: left;
+}
+.kf-ve span {
+  display: block;
+  font: 800 10.5px/1 var(--f-ui);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--t3);
+  margin-bottom: 6px;
+}
+.kf-juz {
+  margin: 18px auto 4px;
+  width: max-content;
+  padding: 6px 14px;
+  border-radius: 99px;
+  font: 700 12px/1 var(--f-ui);
+  color: var(--gold2);
+  background: var(--gold-soft);
+  border: 1px solid var(--gold-line);
+}
+.kf-foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px calc(env(safe-area-inset-bottom, 0px) + 12px);
+  border-top: 1px solid var(--line);
+  background: var(--glass);
+}
+.kf-au {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.kf-au .t {
+  font: 700 12.5px/1.3 var(--f-ui);
+  color: var(--t2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.kf-au .au-dl {
+  height: 3px;
+  margin-top: 6px;
+  border-radius: 3px;
+  background: var(--s3);
+  overflow: hidden;
+}
+.kf-au .au-dl i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--gold);
+  transition: width 0.3s;
+}
+.kf-play {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--gold);
+  color: var(--on-gold);
+}
+.kf-done {
+  flex: none;
+}
+@media (min-width: 900px) {
+  .kf-lines {
+    width: min(100%, 620px);
+  }
+}
+:root.calm .fr-flame {
+  animation: none;
+}
+
+/* on a computer the reader sits beside the rail, and opens as a spread: two pages side by side, the first on the
+   right, as a printed mushaf lies open */
+html.has-rail .kf {
+  inset-inline-start: var(--rail);
+}
+@media (min-width: 1100px) {
+  html.is-desk .kf-page {
+    flex-basis: 50%;
+    padding: 10px 18px 12px;
+  }
+  html.is-desk .kf-lines {
+    width: min(100%, 540px);
+  }
+}
+
+/* a narrow phone: the reader's title keeps to one line beside the mode switch */
+.kf-ttl b,
+.kf-ttl small {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@media (max-width: 400px) {
+  .kf-top {
+    gap: 6px;
+    padding-inline: 8px 10px;
+  }
+  .kf-mode button {
+    padding: 0 10px;
+    font-size: 12px;
+  }
+}

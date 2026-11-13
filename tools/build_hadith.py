@@ -49,6 +49,14 @@ SPEC = {
     'bukhari:990': ('q1', ('The night prayer is offered', None)),
     'abudawud:1502': (('رَأَيْتُ رَسُولَ اللَّهِ', 'بِيَمِينِهِ'), ('I saw the Messenger of Allah', None)),
     'muslim:748': ('q1', ('The prayer of those who are penitent', None)),
+    # Friday: its virtue, its Sunnahs, its hour, and the first verses of al-Kahf
+    'abudawud:1047': (('إِنَّ مِنْ أَفْضَلِ أَيَّامِكُمْ', 'مَعْرُوضَةٌ عَلَىَّ', '+'), ('Among the most excellent of your days', 'will be submitted to me.', '+')),
+    'bukhari:880': (('الْغُسْلُ يَوْمَ الْجُمُعَةِ', 'إِنْ وَجَدَ'), ('The taking of a bath on Friday', 'if it is available.')),
+    'bukhari:881': (('مَنِ اغْتَسَلَ يَوْمَ الْجُمُعَةِ', 'يَسْتَمِعُونَ الذِّكْرَ'), ('Any person who takes a bath on Friday', None)),
+    'bukhari:891': (('كَانَ النَّبِيُّ', None), ('The Prophet (ﷺ) used to recite', None)),
+    'bukhari:934': (('إِذَا قُلْتَ لِصَاحِبِكَ', 'فَقَدْ لَغَوْتَ'), ('When the Imam is delivering the Khutba', None)),
+    'muslim:853': (('هِيَ مَا بَيْنَ', None), ('It is between the time', None)),
+    'muslim:809': (('مَنْ حَفِظَ', 'عُصِمَ مِنَ الدَّجَّالِ'), ('If anyone learns by heart', None)),
     # dress, ʿawrah, nifās, and making up fasts but not prayers
     'abudawud:4173': ('q1', ('If a woman uses perfume', None)),
     'bukhari:5885': (('لَعَنَ رَسُولُ اللَّهِ', 'بِالرِّجَالِ'), ("Allah's Messenger (ﷺ) cursed", None)),

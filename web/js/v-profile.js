@@ -150,6 +150,7 @@
         ['notifications', 'bell', 'rose', 'Reminders', S.notif.enabled ? 'On' : 'Off'],
         ['device', 'widget', 'teal', 'Widgets & device', 'Home-screen widgets, shortcuts, haptics'],
         ['data', 'shield', 'sand', 'Backup & data', 'Export, import, reset'],
+        ['print', 'book', 'dawn', 'Print and PDF', 'Adhkār booklets and the prayer timetable'],
         ['modesty', 'shield', 'rose', 'Dress & ʿawrah', 'From the Qurʾān and Sunnah'],
         ['about', 'info', 'indigo', 'About, sources & contact', 'References, privacy, feedback']
       ]
@@ -158,7 +159,7 @@
             '<a class="set h-' +
             r[2] +
             '" href="' +
-            (r[0] === 'modesty' ? '#/modesty' : '#/settings/' + r[0]) +
+            (r[0] === 'modesty' || r[0] === 'print' ? '#/' + r[0] : '#/settings/' + r[0]) +
             '"><span class="badge">' +
             ic(r[1], 's') +
             '</span><div class="grow"><div class="t">' +

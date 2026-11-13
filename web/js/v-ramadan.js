@@ -330,6 +330,10 @@
       A.toast('That day is marked as a break');
       return;
     }
+    if (d > A.today()) {
+      A.toast('That day has not come yet', 'clock');
+      return;
+    }
     if (S.fasts[d]) {
       delete S.fasts[d];
       r.skip[d] = 1;

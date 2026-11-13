@@ -16,6 +16,7 @@ rm -rf "$OUT"; mkdir -p "$OUT"/{gen,classes,dex,assets/www} "$DIST" "$KS_DIR"
 echo "[1/8] content"
 python tools/build_content.py >/dev/null
 python tools/build_hadith.py >/dev/null
+python tools/build_kahf.py >/dev/null
 node tools/test.js | tail -1
 node tools/smoke.js | tail -1
 node tools/bridge-check.js | tail -1   # every Android bridge method also exists in the Windows app
