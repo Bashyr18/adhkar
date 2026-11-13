@@ -71,19 +71,16 @@ Everything that matters right now.
 
 ### Adhkār and the reader
 
-<table><tr>
-<td width="240"><img src="docs/guide/shots/dark/adhkar.webp" width="230" alt="The Adhkār library"></td>
-<td width="240"><img src="docs/guide/shots/dark/reader.webp" width="230" alt="The reader"></td>
-<td>
+<p align="center">
+<img src="docs/guide/shots/dark/adhkar.webp" width="230" alt="The Adhkār library">&nbsp;
+<img src="docs/guide/shots/dark/reader.webp" width="230" alt="The reader">
+</p>
 
 1. **Morning and Evening** sit at the top and show which is due now.
 2. **Collections:** after ṣalāh, before sleep, the night, waking up and more.
 3. **Search** in English or Arabic, with or without ḥarakāt.
 4. **The reader** shows one remembrance at a time: the Arabic, then transliteration and translation.
 5. **Listen**, **save**, **share**, or tap the eye to **memorise** by hiding the words.
-
-</td>
-</tr></table>
 
 ### Counting on your fingers
 
@@ -122,19 +119,16 @@ Free remembrance, with the numbers the Sunnah sets.
 
 ### Ṣalāh
 
-<table><tr>
-<td width="240"><img src="docs/guide/shots/dark/salah.webp" width="230" alt="Prayer times"></td>
-<td width="240"><img src="docs/guide/shots/dark/learn-fajr.webp" width="230" alt="Learning the prayer"></td>
-<td>
+<p align="center">
+<img src="docs/guide/shots/dark/salah.webp" width="230" alt="Prayer times">&nbsp;
+<img src="docs/guide/shots/dark/learn-fajr.webp" width="230" alt="Learning the prayer">
+</p>
 
 1. **Times for any day**, with the Hijri date and a countdown to the next prayer.
 2. **Reminders:** each bell turns a prayer's reminder on or off, with the takbīr from Masjid an-Nabawī.
 3. **Learn the prayer**, step by step from Fajr to Witr. Each act is marked as a pillar, an obligation or a sunnah, with its evidence.
 4. **The qibla**, by compass or by the sun.
 5. Also here: the month's timetable, the night, Ḍuḥā and make-up prayers.
-
-</td>
-</tr></table>
 
 ### Duʿāʾ
 
@@ -152,10 +146,10 @@ Free remembrance, with the numbers the Sunnah sets.
 
 ### Ramaḍān
 
-<table><tr>
-<td width="240"><img src="docs/guide/shots/ramadan/today.webp" width="230" alt="Today in Ramaḍān"></td>
-<td width="240"><img src="docs/guide/shots/ramadan/month.webp" width="230" alt="The Ramaḍān page"></td>
-<td>
+<p align="center">
+<img src="docs/guide/shots/ramadan/today.webp" width="230" alt="Today in Ramaḍān">&nbsp;
+<img src="docs/guide/shots/ramadan/month.webp" width="230" alt="The Ramaḍān page">
+</p>
 
 For the whole month the app changes with it, by itself.
 
@@ -164,9 +158,6 @@ For the whole month the app changes with it, by itself.
 3. **Fasts** fill in day by day; tap a day to change it.
 4. **Tarāwīḥ**, a **khatm** of the Qurʾān by juzʾ, and **the last ten nights**.
 5. Before the month, a countdown by the Umm al-Qurā calendar.
-
-</td>
-</tr></table>
 
 ### You and settings
 
