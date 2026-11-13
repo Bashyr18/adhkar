@@ -323,7 +323,41 @@ footer p { margin: 18px auto 0; max-width: 60ch; }
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 64'%3E%3Cpath d='M4 64V32C4 18 13 9 24 3c11 6 20 15 20 29v32' fill='none' stroke='%23000' stroke-opacity='.22' stroke-width='1.1'/%3E%3C/svg%3E") 0 0/44px 59px repeat; }
 .fri > .wrap { position: relative; }
 
-/* ---------- download: first in the cover, then a section of its own ---------- */
+/* ---------- download: a panel in the cover, then a section of its own ---------- */
+.dlp { margin-top: 28px; max-width: 560px; padding: 16px; border-radius: 26px; background: color-mix(in srgb, var(--s1) 82%, transparent); border: 1px solid var(--gold-line); box-shadow: 0 30px 60px -36px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255, 255, 255, .05); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+.dlp-h { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 2px 6px 12px; }
+.dlp-k { font: 700 11.5px/1.2 var(--sans); letter-spacing: .24em; text-transform: uppercase; color: var(--gold2); }
+.dlp-v { font-size: 12.5px; font-weight: 600; color: var(--t3); }
+.dlp-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.dlp-card { position: relative; display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; gap: 12px 12px; align-items: center; padding: 16px; border-radius: 18px; text-decoration: none; color: var(--t1); background: var(--s2); border: 1px solid var(--line2); overflow: hidden; isolation: isolate; transition: transform .35s var(--out), border-color .35s, box-shadow .35s var(--out); }
+.dlp-card::before { content: ""; position: absolute; inset: 0; z-index: -1; opacity: 0; background: radial-gradient(120% 90% at 0% 0%, var(--gold-soft), transparent 70%); transition: opacity .35s; }
+.dlp-card:hover { transform: translateY(-2px); border-color: var(--gold-line); box-shadow: 0 18px 34px -20px rgba(217, 178, 111, .5); }
+.dlp-card:hover::before { opacity: 1; }
+.dlp-card:active { transform: scale(.98); }
+.dlp-card:focus-visible { outline: 2px solid var(--gold2); outline-offset: 3px; }
+.dlp-ic { width: 46px; height: 46px; display: grid; place-items: center; border-radius: 14px; background: var(--gold-soft); border: 1px solid var(--gold-line); color: var(--gold2); }
+.dlp-ic svg { width: 24px; height: 24px; }
+.dlp-t { display: grid; gap: 3px; min-width: 0; }
+.dlp-t b { font-size: 18px; font-weight: 700; line-height: 1.1; }
+.dlp-t small { font-size: 12px; line-height: 1.35; color: var(--t3); }
+.dlp-go { grid-column: 1 / -1; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; border-radius: 12px; font-weight: 700; font-size: 14.5px; color: var(--gold2); background: var(--s1); border: 1px solid var(--gold-line); transition: background .3s, color .3s; }
+.dlp-go svg { width: 17px; height: 17px; }
+.dlp-card.and .dlp-go { background: linear-gradient(180deg, #f1d59e, #d9b26f); color: #1a1206; border-color: transparent; box-shadow: 0 12px 24px -14px rgba(217, 178, 111, .8); }
+.dlp-card:hover .dlp-go { background: linear-gradient(180deg, #f1d59e, #d9b26f); color: #1a1206; border-color: transparent; }
+.dlp-f { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 14px 6px 2px; font-size: 12.5px; font-weight: 600; color: var(--t3); }
+.dlp-f span { display: inline-flex; align-items: center; gap: 7px; }
+.dlp-f i { width: 6px; height: 6px; border-radius: 1.5px; transform: rotate(45deg); background: var(--gold); }
+.dlp-f a { margin-inline-start: auto; color: var(--gold2); text-decoration: none; font-weight: 700; }
+.dlp-f a:hover { text-decoration: underline; }
+.dlp + .ayah { margin-top: 26px; }
+@media (max-width: 520px) {
+  .dlp { padding: 12px; border-radius: 22px; }
+  .dlp-grid { grid-template-columns: minmax(0, 1fr); }
+  .dlp-card { grid-template-columns: auto 1fr auto; grid-template-rows: auto; padding: 12px; }
+  .dlp-go { grid-column: auto; min-height: 40px; padding: 0 14px; }
+  .dlp-go svg { display: none; }
+  .dlp-f a { margin-inline-start: 0; }
+}
 .get-hero { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
 .gh-btn { display: inline-flex; align-items: center; gap: 12px; min-height: 60px; padding: 0 24px 0 18px; border-radius: 18px; text-decoration: none; transition: transform .35s var(--out), box-shadow .35s var(--out), border-color .35s; }
 .gh-btn svg { width: 26px; height: 26px; flex: none; }
@@ -632,15 +666,26 @@ footer p { margin: 18px auto 0; max-width: 60ch; }
         <div class="issue"><span>The Guide</span><span>Edition 13.0</span><span>November 2026</span></div>
         <h1 class="mast">Adh<em>kār</em><small>Remembrance for every moment</small></h1>
         <p class="dek">Every page of the app, every feature, and how to use it, step by step. Free, private, and made with care as ṣadaqah jāriyah.</p>
+        <div class="dlp" role="region" aria-label="Download Adhkār">
+          <div class="dlp-h"><span class="dlp-k">Download Adhkār</span><span class="dlp-v">Version 13.0 · free</span></div>
+          <div class="dlp-grid">
+            <a class="dlp-card and" href="https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar.apk">
+              <span class="dlp-ic"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7.2 9.4h9.6v7.4c0 .62-.5 1.12-1.12 1.12h-.9v2.42a1.18 1.18 0 0 1-2.36 0v-2.42h-.84v2.42a1.18 1.18 0 0 1-2.36 0v-2.42h-.9c-.62 0-1.12-.5-1.12-1.12zM4.8 9.3c.65 0 1.18.53 1.18 1.18v4.88a1.18 1.18 0 0 1-2.36 0v-4.88c0-.65.53-1.18 1.18-1.18zm14.4 0c.65 0 1.18.53 1.18 1.18v4.88a1.18 1.18 0 0 1-2.36 0v-4.88c0-.65.53-1.18 1.18-1.18zM15.3 4.2l1.1-1.6a.25.25 0 0 0-.41-.28l-1.13 1.65a6 6 0 0 0-5.72 0L8.01 2.32a.25.25 0 0 0-.41.28l1.1 1.6A4.9 4.9 0 0 0 7.2 8.6h9.6a4.9 4.9 0 0 0-1.5-4.4zM9.8 7a.6.6 0 1 1 0-1.2.6.6 0 0 1 0 1.2zm4.4 0a.6.6 0 1 1 0-1.2.6.6 0 0 1 0 1.2z"/></svg></span>
+              <span class="dlp-t"><b>Android</b><small>Android 8 and newer · APK · 3.6 MB</small></span>
+              <span class="dlp-go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10.5 12 15.5l5-5M5 20h14"/></svg>Download</span>
+            </a>
+            <a class="dlp-card win" href="https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar-Windows.exe">
+              <span class="dlp-ic"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.4l7.4-1v7.1H3zm8.3-1.13L21 3v8.5h-9.7zM3 12.5h7.4v7.1L3 18.6zm8.3 0H21V21l-9.7-1.3z"/></svg></span>
+              <span class="dlp-t"><b>Windows</b><small>Windows 10 and 11 · one file · 4.2 MB</small></span>
+              <span class="dlp-go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10.5 12 15.5l5-5M5 20h14"/></svg>Download</span>
+            </a>
+          </div>
+          <div class="dlp-f"><span><i></i>No ads</span><span><i></i>No account</span><span><i></i>Works offline</span><a href="#get">How to install <span aria-hidden="true">→</span></a></div>
+        </div>
         <div class="ayah">
           <div class="q" lang="ar">أَلَا بِذِكْرِ ٱللَّهِ تَطْمَئِنُّ ٱلْقُلُوبُ</div>
           <p>Unquestionably, by the remembrance of Allah hearts are assured. Ar-Raʿd 13:28</p>
         </div>
-        <div class="get-hero" aria-label="Download Adhkār">
-          <a class="gh-btn and" href="https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar.apk"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7.2 9.4h9.6v7.4c0 .62-.5 1.12-1.12 1.12h-.9v2.42a1.18 1.18 0 0 1-2.36 0v-2.42h-.84v2.42a1.18 1.18 0 0 1-2.36 0v-2.42h-.9c-.62 0-1.12-.5-1.12-1.12zM4.8 9.3c.65 0 1.18.53 1.18 1.18v4.88a1.18 1.18 0 0 1-2.36 0v-4.88c0-.65.53-1.18 1.18-1.18zm14.4 0c.65 0 1.18.53 1.18 1.18v4.88a1.18 1.18 0 0 1-2.36 0v-4.88c0-.65.53-1.18 1.18-1.18zM15.3 4.2l1.1-1.6a.25.25 0 0 0-.41-.28l-1.13 1.65a6 6 0 0 0-5.72 0L8.01 2.32a.25.25 0 0 0-.41.28l1.1 1.6A4.9 4.9 0 0 0 7.2 8.6h9.6a4.9 4.9 0 0 0-1.5-4.4zM9.8 7a.6.6 0 1 1 0-1.2.6.6 0 0 1 0 1.2zm4.4 0a.6.6 0 1 1 0-1.2.6.6 0 0 1 0 1.2z"/></svg><span><small>Download for</small><b>Android</b></span></a>
-          <a class="gh-btn win" href="https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar-Windows.exe"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.4l7.4-1v7.1H3zm8.3-1.13L21 3v8.5h-9.7zM3 12.5h7.4v7.1L3 18.6zm8.3 0H21V21l-9.7-1.3z"/></svg><span><small>Download for</small><b>Windows</b></span></a>
-        </div>
-        <p class="gh-note">Free, no ads, no account. Version 13.0 · <a href="#get">How to install</a></p>
         <div class="cta">
           <a class="btn" href="#contents">Begin the guide <span class="arr" aria-hidden="true">→</span></a>
           <a class="btn tour" id="tourAll" href="#ch-today"><span class="wi" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.4-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg></span>Take the guided tour</a>
@@ -710,7 +755,7 @@ footer p { margin: 18px auto 0; max-width: 60ch; }
       <a href="https://www.linkedin.com/in/bashirbadmus/" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5.2 3.5a2.1 2.1 0 1 1 0 4.2 2.1 2.1 0 0 1 0-4.2zM3.4 9.2h3.6V20.5H3.4zM9.3 9.2h3.45v1.55h.05c.48-.9 1.65-1.85 3.4-1.85 3.63 0 4.3 2.39 4.3 5.5v6.1h-3.58v-5.4c0-1.29-.02-2.95-1.8-2.95-1.8 0-2.08 1.4-2.08 2.86v5.49H9.3z"/></svg>The maker on LinkedIn</a>
       <a href="https://github.com/Bashyr18/adhkar/releases">Releases</a>
     </nav>
-    <p>Adhkār · The Guide · Edition 12.1 · Every screen shown is from the app itself. Free and open source under GPL-3.0.</p>
+    <p>Adhkār · The Guide · Edition 13.0 · Every screen shown is from the app itself. Free and open source under GPL-3.0.</p>
   </footer>
 </main>
 
