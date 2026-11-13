@@ -1,19 +1,227 @@
+<div align="center">
+
 # Adhkār
 
-A free Android app for daily remembrance, built as ṣadaqah jāriyah.
+**Remembrance for every moment.**
+A free Android app for daily adhkār, prayer and duʿāʾ, built as ṣadaqah jāriyah.
+No ads, no account, no tracking.
 
-- **Remembrance:** morning and evening adhkār, after ṣalāh, sleep, waking, the night, the adhān, worry and distress, and everyday duʿāʾs.
-- **Prayer:** prayer times calculated on the phone, the qibla, Ḍuḥā, qiyām, make-up prayers, iqāmah times, silence during ṣalāh, and a step-by-step guide to the prayer.
-- **Practice:** a Tracker with the numbers the Sunnah sets, counting on the fingers with a guided pace, a duʿāʾ journal, and a quiz with spaced repetition.
-- **On the phone:** home-screen widgets, reminders at the minute, and the whole app in English or Arabic.
+**[Download for Android](https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar.apk)** &nbsp;·&nbsp; **[Read the illustrated guide](https://bashyr18.github.io/adhkar/guide/)** &nbsp;·&nbsp; [All releases](https://github.com/Bashyr18/adhkar/releases)
 
-No ads, no account, no tracking. Everything stays on the phone; the internet is used only for recitations you choose to download.
+<br>
 
-**[Download the app](https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar.apk)** for Android 8 or later, or see [all releases](https://github.com/Bashyr18/adhkar/releases).
+<img src="docs/guide/shots/dark/today.webp" width="200" alt="Today, in dark">&nbsp;
+<img src="docs/guide/shots/light/tracker.webp" width="200" alt="The Tracker, in light">&nbsp;
+<img src="docs/guide/shots/ramadan/today.webp" width="200" alt="Today during Ramaḍān">&nbsp;
+<img src="docs/guide/shots/ar/reader.webp" width="200" alt="The reader, in Arabic">
 
-**[Read the illustrated user guide](https://bashyr18.github.io/adhkar/guide/)**: every page and feature, step by step, in dark and light, English and Arabic.
+<sub>Today · the Tracker in light · Ramaḍān mode · the whole app in Arabic</sub>
 
-## Principles
+</div>
+
+---
+
+## Contents
+
+- [What it does](#what-it-does)
+- [Install](#install)
+- [A tour of the app](#a-tour-of-the-app): [Today](#today) · [Adhkār](#adhkār-and-the-reader) · [Counting](#counting-on-your-fingers) · [Tracker](#the-tracker) · [Ṣalāh](#ṣalāh) · [Duʿāʾ](#duʿāʾ) · [Ramaḍān](#ramaḍān) · [You and settings](#you-and-settings) · [Widgets](#on-your-home-screen) · [Themes and Arabic](#themes-and-arabic)
+- [Gestures](#gestures)
+- [Privacy and sources](#privacy-and-sources)
+- [For developers](#for-developers)
+
+## What it does
+
+| | |
+|---|---|
+| **Remembrance** | Morning and evening adhkār, after ṣalāh, sleep, waking, the night, the adhān, worry and distress, and everyday duʿāʾs. |
+| **Prayer** | Prayer times calculated on the phone, the qibla, Ḍuḥā, qiyām, make-up prayers, iqāmah times, silence during ṣalāh, and a step-by-step guide to the prayer. |
+| **Practice** | A Tracker with the numbers the Sunnah sets, counting on the fingers with a guided pace, a duʿāʾ journal, and a quiz that brings back what you miss. |
+| **On the phone** | Home-screen widgets, reminders at the minute, and the whole app in English or Arabic. |
+
+Every Arabic text comes from a verified source, word for word. Translations are labelled "Translation", and every hadith carries its grade.
+
+## Install
+
+1. On your Android phone (Android 8 or later), download **[Adhkar.apk](https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar.apk)**.
+2. Open the file. If your phone asks, allow installing apps from this source.
+3. Open Adhkār, choose your city or use your location, and you are ready.
+4. To update later, download the newest APK the same way. It installs over the old one and keeps everything you have recorded.
+
+> **Tip:** the [illustrated guide](https://bashyr18.github.io/adhkar/guide/) walks through every screen with numbered markers. Tap **Walk me through** on any screen for a guided tour.
+
+## A tour of the app
+
+### Today
+
+<table><tr>
+<td width="240"><img src="docs/guide/shots/dark/today.webp" width="230" alt="Today"></td>
+<td>
+
+Everything that matters right now.
+
+1. **The sky card** shows the next prayer, a live countdown and the sun crossing the day. Today's five times sit beneath.
+2. **Your place:** tap the location chip to change your city. Times are calculated on your phone, offline.
+3. **Now, or Next** shows the one thing to do now, with a button to begin.
+4. **Log your prayers:** tap a circle once you have prayed.
+5. **The next time of acceptance**, from the Sunnah, live.
+
+</td>
+</tr></table>
+
+### Adhkār and the reader
+
+<table><tr>
+<td width="240"><img src="docs/guide/shots/dark/adhkar.webp" width="230" alt="The Adhkār library"></td>
+<td width="240"><img src="docs/guide/shots/dark/reader.webp" width="230" alt="The reader"></td>
+<td>
+
+1. **Morning and Evening** sit at the top and show which is due now.
+2. **Collections:** after ṣalāh, before sleep, the night, waking up and more.
+3. **Search** in English or Arabic, with or without ḥarakāt.
+4. **The reader** shows one remembrance at a time: the Arabic, then transliteration and translation.
+5. **Listen**, **save**, **share**, or tap the eye to **memorise** by hiding the words.
+
+</td>
+</tr></table>
+
+### Counting on your fingers
+
+<table><tr>
+<td width="240"><img src="docs/guide/shots/dark/counting.webp" width="230" alt="Learning to count on the fingers"></td>
+<td>
+
+The Prophet ﷺ counted tasbīḥ on the fingers of his right hand, so the app never counts for you. It keeps the pace while you count.
+
+1. **Tap** the circle to begin, and count on your fingers.
+2. **Tap again** if you finish a count sooner; the pace follows you.
+3. **Hold** to pause; hold again to carry on.
+4. **Confirm** at the end; nothing is recorded until you say you have finished.
+
+A one-minute practice teaches this the first time you open the app.
+
+</td>
+</tr></table>
+
+### The Tracker
+
+<table><tr>
+<td width="240"><img src="docs/guide/shots/dark/tracker.webp" width="230" alt="The Tracker"></td>
+<td>
+
+Free remembrance, with the numbers the Sunnah sets.
+
+1. **Choose a phrase**, or add your own with the plus.
+2. **The gold tag** gives its Sunnah number; tap the line beneath for the hadith.
+3. **The circle:** tap to begin a round and count on your fingers.
+4. **Round size:** 100, or choose 33, 99 or 1,000.
+5. **Today** shows each Sunnah number filling as you go; the chart button opens your history.
+
+</td>
+</tr></table>
+
+### Ṣalāh
+
+<table><tr>
+<td width="240"><img src="docs/guide/shots/dark/salah.webp" width="230" alt="Prayer times"></td>
+<td width="240"><img src="docs/guide/shots/dark/learn-fajr.webp" width="230" alt="Learning the prayer"></td>
+<td>
+
+1. **Times for any day**, with the Hijri date and a countdown to the next prayer.
+2. **Reminders:** each bell turns a prayer's reminder on or off, with the takbīr from Masjid an-Nabawī.
+3. **Learn the prayer**, step by step from Fajr to Witr. Each act is marked as a pillar, an obligation or a sunnah, with its evidence.
+4. **The qibla**, by compass or by the sun.
+5. Also here: the month's timetable, the night, Ḍuḥā and make-up prayers.
+
+</td>
+</tr></table>
+
+### Duʿāʾ
+
+<table><tr>
+<td width="240"><img src="docs/guide/shots/dark/journal.webp" width="230" alt="The duʿāʾ journal"></td>
+<td>
+
+1. **My duʿāʾs:** write what you are asking for, kept private, in any language.
+2. **The next time of answer**, with gentle reminders at those times.
+3. When Allah answers, tap **Answered** and note how.
+4. **Small deeds:** light acts with heavy rewards, each with its hadith.
+
+</td>
+</tr></table>
+
+### Ramaḍān
+
+<table><tr>
+<td width="240"><img src="docs/guide/shots/ramadan/today.webp" width="230" alt="Today in Ramaḍān"></td>
+<td width="240"><img src="docs/guide/shots/ramadan/month.webp" width="230" alt="The Ramaḍān page"></td>
+<td>
+
+For the whole month the app changes with it, by itself.
+
+1. **Lanterns and a night-indigo palette** across every tab.
+2. **Ifṭār counting down**, and after Maghrib the end of suhūr.
+3. **Fasts** fill in day by day; tap a day to change it.
+4. **Tarāwīḥ**, a **khatm** of the Qurʾān by juzʾ, and **the last ten nights**.
+5. Before the month, a countdown by the Umm al-Qurā calendar.
+
+</td>
+</tr></table>
+
+### You and settings
+
+<table><tr>
+<td width="240"><img src="docs/guide/shots/dark/profile.webp" width="230" alt="Your profile"></td>
+<td>
+
+1. **Your figures:** streak, remembrances, sessions and active days, compared with no one.
+2. **Insights:** your remembrance by day, by time and by phrase.
+3. **Settings**, under You: appearance, reading, prayer times, reminders, widgets, and backup.
+4. **Backup and data:** export, import, or erase everything.
+
+</td>
+</tr></table>
+
+### On your home screen
+
+<p align="center"><img src="docs/guide/shots/extra/widgets.webp" width="420" alt="The home-screen widgets"></p>
+
+- **The prayer widget:** the next prayer with a live countdown. Tap a prayer you have prayed to log it.
+- **The Tracker widget:** tap **Finished 100**, then again to confirm, after a round on your fingers.
+- **Add them:** long-press your home screen, then Widgets › Adhkār. There is also a quick settings tile and app shortcuts.
+
+### Themes and Arabic
+
+<p align="center">
+<img src="docs/guide/shots/dark/today.webp" width="180" alt="Dark">&nbsp;
+<img src="docs/guide/shots/light/today.webp" width="180" alt="Light">&nbsp;
+<img src="docs/guide/shots/ar/today.webp" width="180" alt="Arabic">
+</p>
+
+- **Auto, Dark or Light** from the palette button on Today. Auto follows your phone.
+- **Five accents:** gold, emerald, sapphire, rose and pearl.
+- **The whole app in Arabic:** You › Appearance › Language › العربية. The layout turns right to left, and notifications and widgets follow.
+
+## Gestures
+
+| Gesture | What it does |
+|---|---|
+| Tap the circle | Moves on at once when you finish a count early. |
+| Hold the circle | Pauses; hold again to carry on. |
+| Swipe sideways | Moves between Today, Adhkār, Tracker, Ṣalāh and You. |
+| Swipe from the edge | Goes back. |
+
+## Privacy and sources
+
+- **Private:** no account, no analytics. Everything stays on your phone.
+- **Offline:** prayer times are calculated on the phone. The internet is used only for recitations you choose to download.
+- **Sources:** Arabic adhkār from Ḥiṣn al-Muslim; translations verbatim from sunnah.com and The Clear Quran; every hadith with its grade from sunnah.com. Details are in [Content](#content) and [NOTICE.md](NOTICE.md).
+
+---
+
+## For developers
+
+### Principles
 
 Read these before changing anything. They are why the app is shaped the way it is.
 
@@ -23,7 +231,7 @@ Read these before changing anything. They are why the app is shaped the way it i
 4. **Audio plays exactly what is on screen.** Where no recording of the exact words exists, the app says so.
 5. **Prove it works.** Every change runs the content tests and the interface tests; screens are checked on a device.
 
-## Layout
+### Layout
 
 | Path | What |
 |---|---|
@@ -41,7 +249,7 @@ Read these before changing anything. They are why the app is shaped the way it i
 
 `web/js/prayer.js` is mirrored in `android/src/com/adhkar/app/PrayerCalc.java` (reminders and widgets use the Java one). The tests compare the two to the minute; change both together.
 
-## Build
+### Build
 
 ```bash
 ./build.sh
@@ -63,7 +271,7 @@ The version lives in one place, the `VERSION` file: its first line is the name p
 
 **Signing.** The first build creates a key in `keystore/`. That folder is private and is never committed. Every update must be signed with the same key, so keep a backup of it somewhere safe.
 
-## Tests
+### Tests
 
 ```bash
 node tools/test.js     # content: every item, hadith grades, prayer times against references, JS/Java parity
@@ -72,7 +280,7 @@ node tools/smoke.js    # interface: boots the real app in jsdom, opens every scr
 
 Both run on every build and on every pull request. Write a test for each behaviour you add, named as a sentence about what the person using the app experiences.
 
-## Content
+### Content
 
 ```
 tools/fetch_*.py      → tools/src/*.json            raw sources, kept as fetched
@@ -87,7 +295,7 @@ tools/build_hadith.py  → web/js/hadith.js           hadith, sliced verbatim be
 
 Every deliberate change to a source text is written down in code, with its reason: `FIX` (a correction) and `NOTE` (an explanation shown beside the text, never mixed into it) in `tools/build_hadith.py`.
 
-## Contributing
+### Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
 
