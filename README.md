@@ -6,7 +6,10 @@
 A free Android app for daily adhkār, prayer and duʿāʾ, built as ṣadaqah jāriyah.
 No ads, no account, no tracking.
 
-**[Download for Android](https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar.apk)** &nbsp;·&nbsp; **[Read the illustrated guide](https://bashyr18.github.io/adhkar/guide/)** &nbsp;·&nbsp; [All releases](https://github.com/Bashyr18/adhkar/releases)
+[![Download for Android](https://img.shields.io/badge/Download-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar.apk)
+[![Windows: coming soon](https://img.shields.io/badge/Windows-coming%20soon-4a4f63?style=for-the-badge&logo=windows&logoColor=white)](#windows)
+[![Read the illustrated guide](https://img.shields.io/badge/Read-the%20guide-d9b26f?style=for-the-badge&logo=readthedocs&logoColor=1a1206)](https://bashyr18.github.io/adhkar/guide/)
+[![The maker on LinkedIn](https://img.shields.io/badge/LinkedIn-the%20maker-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/bashirbadmus/)
 
 <br>
 
@@ -24,11 +27,13 @@ No ads, no account, no tracking.
 ## Contents
 
 - [What it does](#what-it-does)
-- [Install](#install)
+- [Install](#install): [Android](#android) · [Windows](#windows)
+- [The illustrated guide](#the-illustrated-guide)
 - [A tour of the app](#a-tour-of-the-app): [Today](#today) · [Adhkār](#adhkār-and-the-reader) · [Counting](#counting-on-your-fingers) · [Tracker](#the-tracker) · [Ṣalāh](#ṣalāh) · [Duʿāʾ](#duʿāʾ) · [Ramaḍān](#ramaḍān) · [You and settings](#you-and-settings) · [Widgets](#on-your-home-screen) · [Themes and Arabic](#themes-and-arabic)
 - [Gestures](#gestures)
 - [Privacy and sources](#privacy-and-sources)
 - [For developers](#for-developers)
+- [Made by](#made-by)
 
 ## What it does
 
@@ -43,12 +48,29 @@ Every Arabic text comes from a verified source, word for word. Translations are 
 
 ## Install
 
+### Android
+
 1. On your Android phone (Android 8 or later), download **[Adhkar.apk](https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar.apk)**.
 2. Open the file. If your phone asks, allow installing apps from this source.
 3. Open Adhkār, choose your city or use your location, and you are ready.
 4. To update later, download the newest APK the same way. It installs over the old one and keeps everything you have recorded.
 
-> **Tip:** the [illustrated guide](https://bashyr18.github.io/adhkar/guide/) walks through every screen with numbered markers. Tap **Walk me through** on any screen for a guided tour.
+Every version is listed on the [releases page](https://github.com/Bashyr18/adhkar/releases), with what changed.
+
+### Windows
+
+**Coming soon.** A Windows app is planned, with the same features, made for a large screen, a keyboard and a mouse. It will appear on the [releases page](https://github.com/Bashyr18/adhkar/releases) when it is ready.
+
+## The illustrated guide
+
+<p align="center"><a href="https://bashyr18.github.io/adhkar/guide/"><img src="docs/readme/guide-cover.webp" width="720" alt="The cover of the illustrated guide"></a></p>
+
+**[Open the guide](https://bashyr18.github.io/adhkar/guide/)**: every page of the app, step by step, in a magazine-style web page that works on a phone or a computer.
+
+- **Numbered markers** on each screen, matched to the steps beside it.
+- **Walk me through** on any screen: it zooms to each part in turn and reads the step; **Take the guided tour** on the cover runs through the whole app.
+- **Dark or light, English or Arabic:** switch the guide's theme, and see each screen in Arabic where it exists.
+- **Tap any screen** to see it full size, then swipe or use the arrow keys to browse them all.
 
 ## A tour of the app
 
@@ -289,6 +311,10 @@ Every deliberate change to a source text is written down in code, with its reaso
 ### Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Made by
+
+Adhkār is made as ṣadaqah jāriyah. To get in touch, or to follow what comes next, find the maker on **[LinkedIn](https://www.linkedin.com/in/bashirbadmus/)**. Please remember the makers, and everyone whose work went into its sources, in your duʿāʾ.
 
 ## Licence
 
