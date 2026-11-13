@@ -18,6 +18,7 @@ python tools/build_content.py >/dev/null
 python tools/build_hadith.py >/dev/null
 node tools/test.js | tail -1
 node tools/smoke.js | tail -1
+node tools/bridge-check.js | tail -1   # every Android bridge method also exists in the Windows app
 
 echo "[2/8] stage web assets"
 python tools/bundle.py web "$OUT/assets/www" "$VNAME"

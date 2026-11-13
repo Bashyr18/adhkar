@@ -1,6 +1,6 @@
 # Adhkār for Windows: the plan
 
-Status: **planned, not built.** This is the plan the Windows edition will be built from. It follows the
+Status: **built in 12.0**, except phone sync, which follows in 12.1. This is the plan the Windows edition was built from. It follows the
 house method for desktop editions, whose reference implementation is Miftāḥ for Windows.
 
 The aim is not the phone app in a window. It is the same app, the same record and the same content

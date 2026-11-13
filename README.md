@@ -3,11 +3,11 @@
 # Adhkār
 
 **Remembrance for every moment.**
-A free Android app for daily adhkār, prayer and duʿāʾ, built as ṣadaqah jāriyah.
+A free app for daily adhkār, prayer and duʿāʾ, for Android and Windows, built as ṣadaqah jāriyah.
 No ads, no account, no tracking.
 
 [![Download for Android](https://img.shields.io/badge/Download-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar.apk)
-[![Windows: coming soon](https://img.shields.io/badge/Windows-coming%20soon-4a4f63?style=for-the-badge&logo=windows&logoColor=white)](#windows)
+[![Download for Windows](https://img.shields.io/badge/Download-Windows-0078D4?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar-Windows.exe)
 [![Read the illustrated guide](https://img.shields.io/badge/Read-the%20guide-d9b26f?style=for-the-badge&logo=readthedocs&logoColor=1a1206)](https://bashyr18.github.io/adhkar/guide/)
 [![The maker on LinkedIn](https://img.shields.io/badge/LinkedIn-the%20maker-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/bashirbadmus/)
 
@@ -59,16 +59,24 @@ Every version is listed on the [releases page](https://github.com/Bashyr18/adhka
 
 ### Windows
 
-**Coming soon.** A Windows app is planned: the same app and the same record, laid out for a large screen, a keyboard, a mouse and a printer. It will appear on the [releases page](https://github.com/Bashyr18/adhkar/releases) when it is ready.
+<p align="center"><img src="docs/readme/desk-today.webp" width="760" alt="Adhkār for Windows: Today, with the rail"></p>
 
-- **A rail and a command palette** (Ctrl K) to reach any remembrance, hadith or page.
-- **The keyboard:** Space taps the counting circle, so counting on the fingers works the same way.
-- **Wide layouts** designed for the screen, not a stretched phone.
-- **Print and PDF:** the morning and evening adhkār as a booklet, and the month's prayer timetable.
-- **Reminders and the next prayer** from the tray, with the adhān takbīr.
-- **With your phone:** pair once over home Wi-Fi to keep both in step; no account, no cloud.
+1. On Windows 10 or 11, download **[Adhkar-Windows.exe](https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar-Windows.exe)**. It is one file, with nothing else to install.
+2. Open it. Windows may say **"Windows protected your PC"** because the app is not yet signed: choose **More info › Run anyway**.
+3. To keep it, open **This computer** in the rail and choose **Install**: Adhkār joins Start and your desktop, for you only, with no administrator needed. Remove it any time from Settings › Apps; your record stays.
 
-Read [the plan](docs/windows-plan.md).
+What a computer adds:
+
+- **A rail and Ctrl K** to reach any remembrance, hadith, page or setting.
+- **The keyboard:** Space taps the counting circle and holding it pauses, so counting on the fingers works as on the phone. ← and → move through the reader; F1 lists every shortcut.
+- **Layouts made for the screen:** Today, Ṣalāh, the Tracker and You in two columns, and the reader at a comfortable width.
+- **Print and PDF:** the morning and evening adhkār as a booklet with every source, and the month's prayer timetable, on A4.
+- **Reminders from the tray**, with the takbīr of the adhān, and a small **next-prayer window** you can keep on top.
+- **Backups:** one a day for 30 days, restorable, and a backup file dropped on the window comes in.
+
+<p align="center"><img src="docs/readme/desk-print.webp" width="380" alt="Print and PDF">&nbsp;<img src="docs/readme/desk-reader.webp" width="380" alt="The reader on a computer"></p>
+
+Phone and computer syncing over home Wi-Fi comes next. Read [the plan](docs/windows-plan.md).
 
 ## The illustrated guide
 

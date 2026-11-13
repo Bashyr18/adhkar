@@ -31,3 +31,32 @@ jobs:
         run: node tools/test.js
       - name: Interface tests
         run: node tools/smoke.js
+      - name: Android and Windows bridges match
+        run: node tools/bridge-check.js
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install the tools
+        run: |
+          cd tools/.node
+          npm ci
+          cd ../..
+          pip install pillow
+      - name: Build the content
+        run: |
+          python tools/build_content.py
+          python tools/build_hadith.py
+      - name: Build the Windows app
+        run: python -I tools/build_windows.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Adhkar-Windows
+          path: dist/Adhkar-Windows.exe
