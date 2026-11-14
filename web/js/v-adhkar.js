@@ -654,8 +654,13 @@
       bottom = H - (fmt === 'post' ? 210 : 290),
       area = bottom - top,
       tw = W - 2 * M - 120;
-    var ar = it.ar.replace(/\n/g, ' '),
-      en = it.en || '',
+    /* the basmalah keeps its own line; the āyāt after it flow on */
+    var keepBsm = function (x) {
+      var p = String(x || '').split('\n');
+      return p.length > 1 && /^(بِسْمِ|In the Name of Allah,.*Most Merciful\.$)/.test(p[0].trim()) ? p[0] + '\n' + p.slice(1).join(' ') : p.join(' ');
+    };
+    var ar = keepBsm(it.ar),
+      en = keepBsm(it.en),
       af = it.quran ? '"Amiri Quran"' : 'Amiri',
       aS,
       aL,
@@ -799,17 +804,24 @@
     g.closePath();
   }
   function wrap(g, text, max) {
-    var words = text.split(/\s+/),
-      lines = [],
-      line = '';
-    words.forEach(function (w) {
-      var t = line ? line + ' ' + w : w;
-      if (g.measureText(t).width > max && line) {
-        lines.push(line);
-        line = w;
-      } else line = t;
-    });
-    if (line) lines.push(line);
+    /* each paragraph (a line break in the text, such as after the basmalah) starts a new line */
+    var lines = [];
+    String(text)
+      .split('\n')
+      .forEach(function (para) {
+        var line = '';
+        para
+          .split(/\s+/)
+          .filter(Boolean)
+          .forEach(function (w) {
+            var t = line ? line + ' ' + w : w;
+            if (g.measureText(t).width > max && line) {
+              lines.push(line);
+              line = w;
+            } else line = t;
+          });
+        if (line) lines.push(line);
+      });
     return lines;
   }
 
@@ -826,8 +838,14 @@
         .map(function (g) {
           return (
             (g.bsm ? '<div class="bsm">' + esc(window.DATA.basmala) + '</div>' : '') +
+            (g.s === 1 && g.v[0] && g.v[0][0] === 1
+              ? '<p class="ayat bsm1"><span class="ay">' + esc(g.v[0][1]) + '</span> <span class="am" aria-label="āyah 1">۝١</span></p>'
+              : '') +
             '<p class="ayat">' +
             g.v
+              .filter(function (v) {
+                return !(g.s === 1 && v[0] === 1);
+              })
               .map(function (v) {
                 return (
                   '<span class="ay">' +
