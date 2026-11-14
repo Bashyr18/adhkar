@@ -2,6 +2,9 @@ name: tests
 
 on:
   push:
+    # the daily download count changes nothing that needs testing
+    paths-ignore:
+      - 'docs/guide/stats.json'
   pull_request:
 
 jobs:
