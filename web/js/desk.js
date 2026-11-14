@@ -1566,7 +1566,7 @@
           '</em></span>'
         : '') +
       '</div><div class="db-wins">' +
-      win('m', ms, es, 'Morning adhkār', 'أذكار الصباح', '#/c/morning', done.morning) +
+      win('m', ms, t.dhuhr, 'Morning adhkār', 'أذكار الصباح', '#/c/morning', done.morning) +
       win('d', t.duhaStart, t.duhaEnd, 'Ḍuḥā', 'الضحى', '#/duha', !!S.duha[k]) +
       win('e', es, t.isha + 90 * 60000, 'Evening adhkār', 'أذكار المساء', '#/c/evening', done.evening) +
       win('n', t.lastThird, b, 'The last third', 'الثلث الأخير', '#/night', false) +

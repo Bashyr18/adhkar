@@ -1,5 +1,5 @@
 """Sound design for the 30-second ad, made in code: air, not music.
-  - a soft whoosh on each cut (filtered noise sweeping down, panned across);
+  - nothing on the cuts;
   - a faint tick as the counting ring rises (one for each count, quiet, like a bead);
   - a soft swell of low air under the logo at the end (no tone, no note).
 Usage: python tools/promo/sfx.py <out.wav> <seconds> <cut,cut,...>
@@ -49,21 +49,19 @@ def put(sig, at, pan_from, pan_to, gain):
     R[a:b] += sig * np.sin(p * np.pi / 2)
 
 
-for i, c in enumerate(CUTS):
-    w = sweep_noise(.42, 2600, 380, 100 + i)
-    put(w, c - .2, .2 if i % 2 else .8, .8 if i % 2 else .2, .55)
+# no sound on the cuts: the pictures move, the room stays still
 
 # the counting ring (the beat from 7.4 s): ticks at the same moments as the numbers on screen
-D0 = 7.4
+D0 = 6.4
 for n in range(2, 34):
-    at = D0 + .6 + 2.1 * ((n - 1) / 32) ** (1 / .8)
+    at = D0 + .5 + 1.8 * ((n - 1) / 32) ** (1 / .8)
     k = int(.03 * SR)
     tt = np.arange(k) / SR
     tick = np.sin(2 * np.pi * 1850 * tt) * np.exp(-tt / .006) + .4 * np.sin(2 * np.pi * 3700 * tt) * np.exp(-tt / .003)
-    put(tick, at, .5, .5, .10)
+    put(tick, at, .5, .5, .05)
 
 # a warm swell under the logo (from 25.9 s): low, soft, rising and settling
-s0, sd = 25.6, 4.2
+s0, sd = 25.0, 4.6
 n = int(sd * SR)
 tt = np.arange(n) / SR
 env = (1 - np.exp(-tt / .5)) * np.exp(-np.maximum(0, tt - 1.2) / 1.6)
@@ -72,7 +70,7 @@ air = rng.standard_normal(n)
 for _ in range(3):
     air = np.convolve(air, np.ones(90) / 90, mode='same')
 sw = air / (np.abs(air).max() + 1e-9) * env
-put(sw, s0, .45, .55, .35)
+put(sw, s0, .45, .55, .22)
 
 pk = max(np.abs(L).max(), np.abs(R).max())
 L, R = L / pk * .6, R / pk * .6

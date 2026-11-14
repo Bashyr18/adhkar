@@ -21,7 +21,7 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
 .fill { position: absolute; inset: 0; }
 .big { position: absolute; left: 60px; right: 60px; text-align: center; font: 700 190px/1 'Quicksand'; letter-spacing: -.045em; }
 .line { position: absolute; left: 80px; right: 80px; text-align: center; font: 700 78px/1.08 'Quicksand'; letter-spacing: -.03em; }
-.line em, .big em { font-style: normal; background: linear-gradient(100deg, #b8873a, #f6dfaa 45%, #d9b26f 70%, #f6dfaa); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.line em, .big em, #Kt em { font-style: normal; background: linear-gradient(100deg, #b8873a, #f6dfaa 45%, #d9b26f 70%, #f6dfaa); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .small { position: absolute; left: 80px; right: 80px; text-align: center; font: 500 36px/1.4 'Quicksand'; color: #c9c2b5; }
 .kick { font: 700 24px/1.2 'Quicksand'; letter-spacing: .36em; text-transform: uppercase; color: #e9c98b; }
 .phone { position: absolute; width: 640px; padding: 11px; border-radius: 68px; background: linear-gradient(160deg, #34373f, #0c0d12 38%, #1c1e25 80%, #2f3239); box-shadow: 0 100px 160px -50px rgba(0,0,0,.95), 0 0 0 2px rgba(255,255,255,.08) inset; transform-style: preserve-3d; }
@@ -105,6 +105,14 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
     <div class="line" id="Fl" style="top:1600px;color:#1c1914">The qibla, and every prayer.<br><span style="font-size:.62em;color:#7a6c55">Anywhere. Even offline.</span></div>
   </div>
 
+  <!-- K · more of the app, on a turning ring -->
+  <div class="b" id="K">
+    <div class="fill" style="background:radial-gradient(70% 45% at 50% 40%, #191c2b, #06070b 72%)"></div>
+    <div id="Kring" style="position:absolute;left:540px;top:820px;width:0;height:0;transform-style:preserve-3d"></div>
+    <div id="Kk" class="kick" style="position:absolute;left:0;right:0;top:1500px;text-align:center">And so much more</div>
+    <div id="Kt" style="position:absolute;left:60px;right:60px;top:1560px;text-align:center;font:700 74px/1.1 Quicksand;letter-spacing:-.03em"></div>
+  </div>
+
   <!-- G · Friday -->
   <div class="b" id="G">
     <div class="fill" style="background:radial-gradient(70% 45% at 50% 34%, #0f3a31, #03110e 74%)"></div>
@@ -184,7 +192,7 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
   var L = function (a, b, x) { return a + (b - a) * x; };
   var DUR = (window.DUR = 30);
   /* beats: [id, from, to]; cuts are hard, with motion carried across them */
-  var BEATS = [['A', 0, 2.5], ['B', 2.5, 4.9], ['C', 4.9, 7.4], ['D', 7.4, 10.4], ['E', 10.4, 12.9], ['F', 12.9, 15.9], ['G', 15.9, 19.9], ['H', 19.9, 22.9], ['I', 22.9, 25.9], ['J', 25.9, 30]];
+  var BEATS = [['A', 0, 2.2], ['B', 2.2, 4.2], ['C', 4.2, 6.4], ['D', 6.4, 9], ['E', 9, 11], ['F', 11, 13.4], ['K', 13.4, 16.6], ['G', 16.6, 19.6], ['H', 19.6, 22.2], ['I', 22.2, 25.2], ['J', 25.2, 30]];
   window.CUTS = BEATS.slice(1).map(function (b) { return b[1]; });
 
   /* ticks of the counting ring */
@@ -233,6 +241,12 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
     }).join('');
   })();
 
+  var FEAT = [['ar/learn-fajr', 'Learn the prayer, <em>step by step.</em>'], ['dark/journal', 'Duʿāʾ, <em>at the times of answer.</em>'], ['dark/plan-fast', 'Plan a fast, <em>the night before.</em>'], ['dark/tracker', 'The Tracker, <em>by the Sunnah.</em>'], ['dark/print', 'Your adhkār, <em>on paper.</em>'], ['light/today', 'Dark or light. <em>English or Arabic.</em>']];
+  (function () {
+    $('Kring').innerHTML = FEAT.map(function (f, i) {
+      return '<div class="phone kp" style="left:-200px;top:-415px;width:400px;padding:8px;border-radius:44px"><div class="scr" style="width:384px;height:796px;border-radius:37px"><img src="../../docs/guide/shots/' + f[0] + '.webp"></div></div>';
+    }).join('');
+  })();
   var DAY = [['Fajr.', '#f19a5a', '#3a2a5e'], ['Work.', '#3f86cf', '#86bfea'], ['ʿAṣr.', '#d79a3c', '#f3d38a'], ['Home.', '#b4566e', '#5b3168'], ['Sleep.', '#0d1030', '#1d1a52']];
   function lanterns(lt) {
     var P = [[120, 140], [330, 230], [560, 110], [780, 200], [970, 130]], h = '';
@@ -250,13 +264,15 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
   }
   /* entering a beat: a quick push in out of a little blur, as a camera cut on movement */
   function enter(el, lt, dir) {
-    var e = o5(seg(lt, 0, .45));
-    el.style.transform = 'scale(' + L(1.08, 1, e) + ') translateY(' + L((dir || 1) * 60, 0, e) + 'px)';
-    el.style.filter = lt < .45 ? 'blur(' + L(14, 0, e) + 'px)' : 'none';
+    var e = o5(seg(lt, 0, .5)), ins = L(9, 0, e), rad = L(80, 0, e);
+    el.style.clipPath = lt < .5 ? 'inset(' + ins * 1.6 + '% ' + ins + '% round ' + rad + 'px)' : 'none';
+    el.style.transform = 'scale(' + L(1.04, 1, e) + ')';
   }
-  function show(id, lt, from, dy, blur) {
-    var e = o5(seg(lt, from, from + .55)), n = $(id);
-    n.style.opacity = e; n.style.transform = 'translateY(' + L(dy || 50, 0, e) + 'px)'; n.style.filter = 'blur(' + L(blur == null ? 10 : blur, 0, e) + 'px)';
+  /* words rise out of their own line, as if from behind a mask */
+  function show(id, lt, from, dy) {
+    var e = o5(seg(lt, from, from + .6)), n = $(id);
+    n.style.opacity = Math.min(1, e * 1.6); n.style.clipPath = 'inset(-20% -5% ' + (100 - 100 * e) + '% -5%)';
+    n.style.transform = 'translateY(' + L(Math.min(dy || 40, 40), 0, e) + 'px)'; n.style.filter = 'none';
   }
 
   window.render = function (t) {
@@ -277,16 +293,16 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
           show('Aword', lt, 1.55, 40, 16);
         },
         B: function () {
-          var i = Math.min(DAY.length, Math.floor(lt / .36));
+          var i = Math.min(DAY.length, Math.floor(lt / .3));
           if (i < DAY.length) {
-            var w = DAY[i], k = (lt - i * .36) / .36;
+            var w = DAY[i], k = (lt - i * .3) / .3;
             $('Bbg').style.background = 'linear-gradient(160deg,' + w[1] + ',' + w[2] + ')';
             $('Bword').textContent = w[0]; $('Bword').style.opacity = 1; $('Bline').style.opacity = 0;
             $('Bword').style.transform = 'scale(' + L(1.35, 1, o5(seg(k, 0, .5))) + ')'; $('Bword').style.letterSpacing = L(-.02, -.05, k) + 'em';
             $('Bword').style.color = i === 1 || i === 2 ? '#0c0d12' : '#fff';
           } else {
             $('Bbg').style.background = 'radial-gradient(70% 45% at 50% 45%, #1a1c33, #07080d 72%)';
-            $('Bword').style.opacity = 0; show('Bline', lt, 1.8, 40, 14);
+            $('Bword').style.opacity = 0; show('Bline', lt, 1.55, 40);
           }
         },
         C: function () {
@@ -296,7 +312,7 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
           show('Ccap', lt, .7, 40, 10);
         },
         D: function () {
-          var n = lt < .6 ? 1 : Math.min(33, 1 + Math.floor(Math.pow((lt - .6) / 2.1, .8) * 32));
+          var n = lt < .5 ? 1 : Math.min(33, 1 + Math.floor(Math.pow((lt - .5) / 1.8, .8) * 32));
           $('Dn').textContent = n;
           $('Darc').setAttribute('stroke-dashoffset', 1570.8 * (1 - n / 33));
           Array.prototype.forEach.call($('Dticks').children, function (c, i) { c.setAttribute('fill', i < n ? '#f1d59e' : 'rgba(233,201,139,.18)'); c.setAttribute('r', i === n - 1 ? 10 : 6); });
@@ -307,11 +323,11 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
           show('Dhand', lt, .3, 60, 0); show('Dl1', lt, .9, 40, 12); show('Dl2', lt, 1.2, 30, 8);
         },
         E: function () {
-          var words = ['Morning.', 'Evening.', 'After ṣalāh.', 'Before sleep.'], i = Math.min(3, Math.floor(lt / .62));
+          var words = ['Morning.', 'Evening.', 'After ṣalāh.', 'Before sleep.'], i = Math.min(3, Math.floor(lt / .5));
           $('Eword').innerHTML = i === 3 ? 'Before <em>sleep.</em>' : words[i];
-          var k = (lt - i * .62) / .62;
+          var k = (lt - i * .5) / .5;
           $('Eword').style.transform = 'scale(' + L(1.25, 1, o5(seg(k, 0, .4))) + ')'; $('Eword').style.opacity = o5(seg(k, 0, .25));
-          $('Egrid').style.transform = 'rotate(-12deg) translate(' + L(80, -140, io(seg(lt, 0, 2.5))) + 'px,' + L(260, -420, io(seg(lt, 0, 2.5))) + 'px) scale(' + L(1.1, 1.18, lt / 2.5) + ')';
+          $('Egrid').style.transform = 'rotate(-12deg) translate(' + L(80, -140, io(seg(lt, 0, 2))) + 'px,' + L(260, -420, io(seg(lt, 0, 2))) + 'px) scale(' + L(1.1, 1.18, lt / 2) + ')';
           Array.prototype.forEach.call(document.querySelectorAll('#Egrid .phone'), function (p, j) { p.style.opacity = .55 + .45 * (j % 4 === i ? 1 : 0); });
         },
         F: function () {
@@ -356,6 +372,23 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
           var s = Math.max(0, 4360 - Math.floor(lt - 1)); $('Icd').textContent = Math.floor(s / 3600) + ':' + ('0' + Math.floor(s % 3600 / 60)).slice(-2) + ':' + ('0' + s % 60).slice(-2);
           show('Il', lt, .9, 40, 12); show('Is', lt, 1.2, 30, 8);
         },
+        K: function () {
+          var step = .53, i = Math.min(FEAT.length - 1, Math.floor(lt / step)), k = (lt - i * step) / step;
+          /* the ring turns one phone at a time, easing into each stop */
+          Array.prototype.forEach.call(document.querySelectorAll('#Kring .kp'), function (p, j) {
+            var a = j * 60 - Math.max(0, (lt < step ? 0 : (i - 1 + io(seg(k, 0, .45)))) * 60), r = ((a % 360) + 540) % 360 - 180;
+            var front = Math.cos(r * Math.PI / 180);
+            p.style.transform = 'rotateY(' + r + 'deg) translateZ(560px) scale(' + (.9 + .1 * Math.max(0, front)) + ')';
+            p.style.opacity = Math.max(0, .2 + .8 * front);
+            p.style.filter = 'brightness(' + (.45 + .55 * Math.max(0, front)) + ')';
+          });
+          var cur = lt < step ? 0 : Math.min(FEAT.length - 1, i);
+          $('Kt').innerHTML = FEAT[cur][1];
+          var te = lt < step ? o5(seg(lt, .15, .5)) : o5(seg(k, 0, .32));
+          $('Kt').style.clipPath = 'inset(0 0 ' + (100 - 100 * te) + '% 0)'; $('Kt').style.transform = 'translateY(' + L(36, 0, te) + 'px)';
+          $('Kring').style.transform = 'translateY(' + L(120, 0, o5(seg(lt, 0, .7))) + 'px) rotateX(-6deg)';
+          show('Kk', lt, .1, 20, 0);
+        },
         J: function () {
           var e = o5(seg(lt, 0, 1));
           $('Jstar').style.transform = 'scale(' + L(1.6, 1, e) + ') rotate(' + (L(-40, 0, e) + lt * 3) + 'deg)'; $('Jstar').style.opacity = e;
@@ -366,7 +399,7 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
     });
     /* a soft flash on the cuts that change the light */
     var fl = 0;
-    [2.5, 15.9, 19.9, 25.9].forEach(function (c) { fl = Math.max(fl, (1 - seg(t, c, c + .35)) * (t >= c ? .5 : 0)); });
+    [16.6, 19.6, 25.2].forEach(function (c) { fl = Math.max(fl, (1 - seg(t, c, c + .4)) * (t >= c ? .18 : 0)); });
     $('flash').style.opacity = fl;
     grain(t);
     $('fade').style.opacity = Math.max(1 - seg(t, 0, .25), seg(t, 29.2, 30));

@@ -1134,8 +1134,8 @@
     'Download the recitations once and they play offline, with Learn mode to repeat after them.':
       'نزّل التلاوات مرة واحدة لتعمل دون اتصال، مع وضع التعلّم لتردّد خلفها.',
     'Could not play. Check your connection and try again.': 'تعذّر التشغيل. تحقق من الاتصال وحاول مجددًا.',
-    'The morning adhkār are from Fajr until ʿAṣr. It is evening now.':
-      'أذكار الصباح من الفجر إلى العصر، والوقت الآن مساء.',
+    'The morning adhkār are from Fajr until before Dhuhr. It is evening now.':
+      'أذكار الصباح من الفجر إلى ما قبل الظهر، والوقت الآن مساء.',
     'Continue learning the prayer': 'تابع تعلّم الصلاة',
     'Test yourself': 'اختبر نفسك',
     'The prayer': 'الصلاة',
@@ -1495,6 +1495,11 @@
       }
     ],
     [
+      /^The morning adhkār end before Dhuhr\. The evening adhkār begin at ʿAṣr, (.+)\.$/,
+      function (m) {
+        return 'تنتهي أذكار الصباح قبل الظهر، وتبدأ أذكار المساء عند العصر، ' + m[1] + '.';
+      }
+    ],    [
       /^The evening adhkār begin at ʿAṣr, (.+)\.$/,
       function (m) {
         return 'تبدأ أذكار المساء عند العصر، ' + m[1] + '.';

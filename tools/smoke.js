@@ -1038,6 +1038,15 @@ ok(/Ramaḍān Mubārak/.test(rt), 'Ramaḍān greeting in Ramaḍān');
   ok(!env.errors.length, 'fast planning runs cleanly ' + env.errors.join(' | '));
 }
 
+/* the morning adhkār end before Dhuhr; the evening ones begin at ʿAṣr */
+{
+  const am = boot('2026-11-11T09:30:00Z', settled), mid = boot('2026-11-11T12:40:00Z', settled), pm = boot('2026-11-11T14:30:00Z', settled);
+  const t = mid.w.A.pday(mid.w.A.today());
+  ok(am.w.A.sessionNow() === 'morning', 'mid-morning is the time of the morning adhkār');
+  ok(Date.now() && mid.w.A.sessionNow() === null && Date.parse('2026-11-11T12:40:00Z') > t.dhuhr && Date.parse('2026-11-11T12:40:00Z') < t.asr, 'between Dhuhr and ʿAṣr neither session is due');
+  ok(pm.w.A.sessionNow() === 'evening', 'after ʿAṣr is the time of the evening adhkār');
+}
+
 /* the basmalah always stands apart from the first āyah: in the Muṣḥaf view, on Today's card and in the translation */
 {
   const env = boot('2026-11-13T10:00:00Z', settled),

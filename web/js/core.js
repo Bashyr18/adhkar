@@ -1315,7 +1315,9 @@
     if (cid === 'morning' && ses !== 'morning')
       return now < t.fajr
         ? 'The morning adhkār begin at Fajr, ' + A.fmtTxt(t.fajr) + '.'
-        : 'The morning adhkār are from Fajr until ʿAṣr. It is evening now.';
+        : now < t.asr
+          ? 'The morning adhkār end before Dhuhr. The evening adhkār begin at ʿAṣr, ' + A.fmtTxt(t.asr) + '.'
+          : 'The morning adhkār are from Fajr until before Dhuhr. It is evening now.';
     if (cid === 'evening' && ses !== 'evening' && now >= t.fajr && now < t.asr)
       return 'The evening adhkār begin at ʿAṣr, ' + A.fmtTxt(t.asr) + '.';
     return '';
@@ -1328,7 +1330,8 @@
       N = S.notif;
     var ms = N.morning && N.morning.from === 'sunrise' ? t.sunrise : t.fajr,
       es = N.evening && N.evening.from === 'maghrib' ? t.maghrib : t.asr;
-    if (now >= ms && now < es) return 'morning';
+    /* the morning adhkār end before Dhuhr, as the sun reaches its height; the evening ones begin at ʿAṣr */
+    if (now >= ms && now < t.dhuhr) return 'morning';
     if (now >= es && now < t.isha + 90 * 60000) return 'evening';
     return null;
   };
