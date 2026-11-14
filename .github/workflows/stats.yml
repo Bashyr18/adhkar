@@ -1,0 +1,44 @@
+name: download stats
+
+# Once a day, GitHub's own counts of the release downloads are written to docs/guide/stats.json for the guide.
+# Counts only: nothing about who downloaded is known or kept.
+on:
+  schedule:
+    - cron: '17 3 * * *'
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+
+concurrency:
+  group: download-stats
+  cancel-in-progress: false
+
+jobs:
+  stats:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Count the downloads
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python tools/download_stats.py
+      - name: Keep them
+        run: |
+          if git diff --quiet -- docs/guide/stats.json; then echo "No change"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/guide/stats.json
+          git commit -m "Download stats for $(date -u +%Y-%m-%d)"
+          git push
+      - name: Republish the guide
+        # a push made with the workflow's own token does not start a Pages build by itself
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh api -X POST "repos/${{ github.repository }}/pages/builds" || echo "Pages build not requested"
