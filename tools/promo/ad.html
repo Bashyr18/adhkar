@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Adhkār · the 30-second ad</title>
-<!-- The 30-second ad, as code: portrait 1080 x 1920. window.render(t) draws the frame at t seconds; tools/promo/render.js
+<title>Adhkār · the 60-second ad</title>
+<!-- The 60-second ad, as code: portrait 1080 x 1920. window.render(t) draws the frame at t seconds; tools/promo/render.js
      steps a headless browser through it into ffmpeg. Open it directly to watch it play.
-     Built like a product ad: short beats on hard, moving cuts; big words on fields of colour; the interface itself
-     animated (the counting ring, the finger joints, the compass, the prayer list, the ifṭār countdown) rather than
-     still screens; real screens of the app in 3D for the moments that need them. -->
+     Built like a product ad: short beats on moving cuts, big words, the interface animated in code (the pace ring,
+     the compass, the prayer list, the progress charts, the ifṭār countdown), real screens in 3D with their key card
+     lifting out of the glass, a soft depth of light behind everything. -->
 <style>
 @font-face { font-family: 'Quicksand'; font-weight: 400 700; src: url(../../docs/guide/fonts/Quicksand-400-700-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+2000-206F; }
 @font-face { font-family: 'Quicksand'; font-weight: 400 700; src: url(../../docs/guide/fonts/Quicksand-400-700-latin-ext.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02FF, U+1E00-1EFF; }
@@ -17,29 +17,45 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; }
 #stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; font-family: 'Quicksand', sans-serif; color: #f5f0e7; background: #050608; }
-.b { position: absolute; inset: 0; visibility: hidden; overflow: hidden; perspective: 2400px; }
+#bokeh { position: absolute; inset: 0; z-index: 0; }
+.b { position: absolute; inset: 0; visibility: hidden; overflow: hidden; perspective: 2400px; z-index: 2; }
 .fill { position: absolute; inset: 0; }
 .big { position: absolute; left: 60px; right: 60px; text-align: center; font: 700 190px/1 'Quicksand'; letter-spacing: -.045em; }
-.line { position: absolute; left: 80px; right: 80px; text-align: center; font: 700 78px/1.08 'Quicksand'; letter-spacing: -.03em; }
-.line em, .big em, #Kt em { font-style: normal; background: linear-gradient(100deg, #b8873a, #f6dfaa 45%, #d9b26f 70%, #f6dfaa); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.small { position: absolute; left: 80px; right: 80px; text-align: center; font: 500 36px/1.4 'Quicksand'; color: #c9c2b5; }
+.line { position: absolute; left: 70px; right: 70px; text-align: center; font: 700 80px/1.06 'Quicksand'; letter-spacing: -.032em; }
+.small { position: absolute; left: 90px; right: 90px; text-align: center; font: 500 34px/1.4 'Quicksand'; color: #c9c2b5; }
+.g { font-style: normal; background: linear-gradient(100deg, #b8873a 0%, #f6dfaa 22%, #fff7e2 30%, #f6dfaa 38%, #d9b26f 60%, #f6dfaa 100%); background-size: 260% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; }
 .kick { font: 700 24px/1.2 'Quicksand'; letter-spacing: .36em; text-transform: uppercase; color: #e9c98b; }
 .phone { position: absolute; width: 640px; padding: 11px; border-radius: 68px; background: linear-gradient(160deg, #34373f, #0c0d12 38%, #1c1e25 80%, #2f3239); box-shadow: 0 100px 160px -50px rgba(0,0,0,.95), 0 0 0 2px rgba(255,255,255,.08) inset; transform-style: preserve-3d; }
 .phone .scr { position: relative; width: 618px; height: 1280px; border-radius: 58px; overflow: hidden; background: #000; }
 .phone img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top; }
 .phone .gl { position: absolute; inset: 0; background: linear-gradient(115deg, transparent 36%, rgba(255,255,255,.16) 48%, transparent 60%); mix-blend-mode: screen; }
+.pop { position: absolute; border-radius: 30px; background-repeat: no-repeat; box-shadow: 0 50px 90px -30px rgba(0,0,0,.9), 0 0 0 1.5px rgba(246,223,170,.35); }
+.glass { position: absolute; border-radius: 40px; background: linear-gradient(160deg, rgba(255,255,255,.07), rgba(255,255,255,.02)); border: 1.5px solid rgba(246,223,170,.16); box-shadow: 0 50px 90px -40px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.08); }
 .ar { font-family: 'Amiri', serif; direction: rtl; }
-#flash { position: absolute; inset: 0; background: #fff6df; opacity: 0; pointer-events: none; z-index: 50; }
-#grain { position: absolute; inset: 0; z-index: 51; pointer-events: none; opacity: .05; }
+.mon { position: absolute; left: 26px; width: 1028px; padding: 14px; border-radius: 26px; background: linear-gradient(180deg, #2c2f37, #0f1014); box-shadow: 0 90px 150px -60px rgba(0,0,0,.95), 0 0 0 2px rgba(255,255,255,.06) inset; transform-origin: 50% 0; }
+.mon .mscr { position: relative; width: 1000px; height: 625px; border-radius: 10px; overflow: hidden; background: #000; }
+.mon .mscr img { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; }
+.mon .neck { position: absolute; left: 444px; bottom: -64px; width: 140px; height: 64px; background: linear-gradient(180deg, #1c1e24, #2a2d35); }
+.mon .foot { position: absolute; left: 354px; bottom: -78px; width: 320px; height: 16px; border-radius: 10px 10px 4px 4px; background: linear-gradient(180deg, #3a3d46, #1a1b20); }
+.lift { position: absolute; overflow: hidden; display: none; box-shadow: 0 60px 110px -30px rgba(0,0,0,.95), 0 0 0 1.5px rgba(246,223,170,.42); }
+.lift i { position: absolute; inset: 0; background-repeat: no-repeat; }
+.lift .lo { filter: brightness(.32) saturate(.5); }
+.lift .sc { position: absolute; top: 0; bottom: 0; width: 3px; background: #fff3d0; box-shadow: 0 0 26px 7px rgba(246,214,150,.7); }
+.key { display: inline-flex; align-items: center; justify-content: center; min-width: 120px; height: 104px; padding: 0 30px; border-radius: 22px; font: 700 40px Quicksand; color: #f5f0e7; background: linear-gradient(180deg, #2a2d35, #16181d); box-shadow: 0 10px 0 #08090b, 0 0 0 1.5px rgba(246,223,170,.25) inset; }
+#cur { position: absolute; width: 34px; height: 34px; z-index: 5; }
+#sweep { position: absolute; inset: 0; z-index: 40; pointer-events: none; opacity: 0; background: linear-gradient(105deg, transparent 40%, rgba(255,240,205,.10) 50%, transparent 60%); }
+#grain { position: absolute; inset: 0; z-index: 51; pointer-events: none; opacity: .035; }
+#vig { position: absolute; inset: 0; z-index: 52; pointer-events: none; background: radial-gradient(120% 85% at 50% 45%, transparent 60%, rgba(0,0,0,.55)); }
 #fade { position: absolute; inset: 0; z-index: 60; background: #000; pointer-events: none; }
 </style>
 </head>
 <body>
 <div id="stage">
+  <canvas id="bokeh" width="540" height="960" style="width:1080px;height:1920px"></canvas>
 
   <!-- A · a point of light becomes the mark -->
   <div class="b" id="A">
-    <div class="fill" style="background:radial-gradient(60% 40% at 50% 46%, #15131c, #050608 70%)"></div>
+    <div class="fill" style="background:radial-gradient(60% 40% at 50% 46%, rgba(30,26,40,.7), rgba(5,6,8,0) 70%)"></div>
     <div id="Aglow" style="position:absolute;left:140px;top:480px;width:800px;height:800px;border-radius:50%;background:radial-gradient(circle,rgba(246,214,150,.55),rgba(246,214,150,0) 62%)"></div>
     <svg id="Astar" viewBox="0 0 64 64" style="position:absolute;left:290px;top:630px;width:500px;height:500px;overflow:visible">
       <defs><linearGradient id="gA" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6dfaa"/><stop offset="1" stop-color="#b8873a"/></linearGradient></defs>
@@ -48,52 +64,57 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
       <path id="Ain" d="M32 21l3 4 4.9-1-1 4.9 4 3.1-4 3 1 4.9-4.9-1-3 4-3-4-4.9 1 1-4.9-4-3 4-3.1-1-4.9 4.9 1z" fill="url(#gA)" style="transform-origin:32px 32px"/>
       <circle id="Aring" cx="32" cy="32" r="10" fill="none" stroke="#f6dfaa" stroke-width=".6"/>
     </svg>
-    <div class="big" id="Aword" style="top:1380px;font-size:120px">Every <em>moment.</em></div>
+    <div class="big" id="Aword" style="top:1380px;font-size:120px">Every <span class="g">moment.</span></div>
   </div>
 
   <!-- B · the day, in single words -->
   <div class="b" id="B">
     <div class="fill" id="Bbg"></div>
     <div class="big" id="Bword" style="top:820px"></div>
-    <div class="line" id="Bline" style="top:800px;font-size:96px;line-height:1.05">Remembrance,<br><em>through it all.</em></div>
   </div>
 
-  <!-- C · the phone arrives -->
+  <!-- C · Today, its sky card lifting out of the glass -->
   <div class="b" id="C">
-    <div class="fill" style="background:radial-gradient(70% 45% at 50% 40%, #1a1f30, #06070b 72%)"></div>
-    <div class="phone" id="Cph" style="left:220px;top:300px"><div class="scr"><img src="../../docs/guide/shots/dark/today.webp"><i class="gl"></i></div></div>
-    <div id="Ccap" style="position:absolute;left:0;right:0;top:1660px;text-align:center"><div class="kick">Today</div><div style="margin-top:14px;font:700 64px Quicksand;letter-spacing:-.02em">Your day, <span style="background:linear-gradient(100deg,#b8873a,#f6dfaa 45%,#d9b26f);-webkit-background-clip:text;background-clip:text;color:transparent">at a glance.</span></div></div>
+    <div class="fill" style="background:radial-gradient(70% 45% at 50% 40%, rgba(32,38,60,.75), rgba(6,7,11,0) 72%)"></div>
+    <div class="phone" id="Cph" style="left:220px;top:300px">
+      <div class="scr"><img src="../../docs/guide/shots/dark/today.webp"><i class="gl"></i></div>
+      <div class="pop" id="Cpop" style="left:36px;top:248px;width:568px;height:345px;background-image:url(../../docs/guide/shots/dark/today.webp);background-size:618px 1280px;background-position:-25px -237px"></div>
+    </div>
+    <div id="Ccap" style="position:absolute;left:0;right:0;top:1660px;text-align:center"><div class="kick">Today</div><div style="margin-top:14px;font:700 66px Quicksand;letter-spacing:-.025em">Your day, <span class="g">at a glance.</span></div></div>
   </div>
 
-  <!-- D · counting, on the fingers -->
+  <!-- D · the pace ring -->
   <div class="b" id="D">
-    <div class="fill" style="background:radial-gradient(60% 40% at 50% 38%, #1b1810, #060605 72%)"></div>
-    <svg id="Dring" viewBox="0 0 600 600" style="position:absolute;left:190px;top:210px;width:700px;height:700px;overflow:visible">
-      <circle cx="300" cy="300" r="250" fill="none" stroke="rgba(233,201,139,.12)" stroke-width="18"/>
-      <circle id="Darc" cx="300" cy="300" r="250" fill="none" stroke="url(#gD)" stroke-width="18" stroke-linecap="round" transform="rotate(-90 300 300)" stroke-dasharray="1570.8" stroke-dashoffset="1570.8"/>
-      <defs><linearGradient id="gD" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6dfaa"/><stop offset="1" stop-color="#c39448"/></linearGradient></defs>
-      <g id="Dticks"></g>
-      <text id="Dn" x="300" y="340" text-anchor="middle" style="font:700 190px Quicksand;fill:#f5f0e7;letter-spacing:-6px">1</text>
-      <text x="300" y="410" text-anchor="middle" style="font:700 30px Quicksand;letter-spacing:8px;fill:#c9c2b5">SUBḤĀNALLĀH</text>
+    <div class="fill" style="background:radial-gradient(60% 40% at 50% 38%, rgba(40,32,16,.7), rgba(6,6,5,0) 72%)"></div>
+    <svg id="Dring" viewBox="0 0 600 600" style="position:absolute;left:140px;top:240px;width:800px;height:800px;overflow:visible">
+      <defs><linearGradient id="gD" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff2cc"/><stop offset=".5" stop-color="#f1d59e"/><stop offset="1" stop-color="#b8873a"/></linearGradient>
+      <filter id="glowD" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="8"/></filter></defs>
+      <g id="Drip"></g>
+      <circle cx="300" cy="300" r="230" fill="rgba(255,255,255,.025)" stroke="rgba(233,201,139,.14)" stroke-width="14"/>
+      <circle id="Dglow" cx="300" cy="300" r="230" fill="none" stroke="#f1d59e" stroke-width="14" stroke-linecap="round" transform="rotate(-90 300 300)" stroke-dasharray="1445" stroke-dashoffset="1445" filter="url(#glowD)" opacity=".6"/>
+      <circle id="Darc" cx="300" cy="300" r="230" fill="none" stroke="url(#gD)" stroke-width="14" stroke-linecap="round" transform="rotate(-90 300 300)" stroke-dasharray="1445" stroke-dashoffset="1445"/>
+      <g id="Dbeads"></g>
+      <text x="300" y="250" text-anchor="middle" style="font:400 66px Amiri;fill:#f3dca6;direction:rtl">سُبْحَانَ اللَّهِ</text>
+      <text id="Dn" x="300" y="380" text-anchor="middle" style="font:700 150px Quicksand;fill:#f5f0e7;letter-spacing:-5px">1</text>
+      <text x="300" y="430" text-anchor="middle" style="font:700 24px Quicksand;letter-spacing:7px;fill:#a99e88">OF 33</text>
     </svg>
-    <svg id="Dhand" viewBox="0 0 560 380" style="position:absolute;left:260px;top:960px;width:560px;height:380px;overflow:visible"></svg>
-    <div class="line" id="Dl1" style="top:1440px">Count on <em>your fingers.</em></div>
-    <div class="small" id="Dl2" style="top:1560px">As the Sunnah teaches. The app keeps the pace.</div>
+    <div class="line" id="Dl1" style="top:1210px">Counted on <span class="g">your fingers.</span></div>
+    <div class="small" id="Dl2" style="top:1430px">As the Sunnah teaches. The app keeps a gentle pace; your right hand keeps the count.</div>
   </div>
 
   <!-- E · a montage of the day's remembrance -->
   <div class="b" id="E">
     <div class="fill" style="background:#07080d"></div>
     <div id="Egrid" style="position:absolute;left:-180px;top:-120px;width:1440px;height:2200px;transform-origin:50% 50%">
-      <div class="phone" data-i="0" style="left:40px;top:60px;transform:scale(.62);transform-origin:0 0"><div class="scr"><img src="../../docs/guide/shots/dark/adhkar.webp"></div></div>
-      <div class="phone" data-i="1" style="left:520px;top:-120px;transform:scale(.62);transform-origin:0 0"><div class="scr"><img src="../../docs/guide/shots/dark/reader.webp"></div></div>
-      <div class="phone" data-i="2" style="left:1000px;top:60px;transform:scale(.62);transform-origin:0 0"><div class="scr"><img src="../../docs/guide/shots/dark/collection.webp"></div></div>
-      <div class="phone" data-i="3" style="left:40px;top:960px;transform:scale(.62);transform-origin:0 0"><div class="scr"><img src="../../docs/guide/shots/ar/reader.webp"></div></div>
-      <div class="phone" data-i="4" style="left:520px;top:780px;transform:scale(.62);transform-origin:0 0"><div class="scr"><img src="../../docs/guide/shots/dark/tracker.webp"></div></div>
-      <div class="phone" data-i="5" style="left:1000px;top:960px;transform:scale(.62);transform-origin:0 0"><div class="scr"><img src="../../docs/guide/shots/dark/night.webp"></div></div>
-      <div class="phone" data-i="6" style="left:520px;top:1680px;transform:scale(.62);transform-origin:0 0"><div class="scr"><img src="../../docs/guide/shots/dark/journal.webp"></div></div>
+      <div class="phone" style="left:40px;top:60px;transform:scale(.62);transform-origin:0 0"><div class="scr"><img src="../../docs/guide/shots/dark/adhkar.webp"></div></div>
+      <div class="phone" style="left:520px;top:-120px;transform:scale(.62);transform-origin:0 0"><div class="scr"><img src="../../docs/guide/shots/dark/reader.webp"></div></div>
+      <div class="phone" style="left:1000px;top:60px;transform:scale(.62);transform-origin:0 0"><div class="scr"><img src="../../docs/guide/shots/dark/collection.webp"></div></div>
+      <div class="phone" style="left:40px;top:960px;transform:scale(.62);transform-origin:0 0"><div class="scr"><img src="../../docs/guide/shots/ar/reader.webp"></div></div>
+      <div class="phone" style="left:520px;top:780px;transform:scale(.62);transform-origin:0 0"><div class="scr"><img src="../../docs/guide/shots/dark/tracker.webp"></div></div>
+      <div class="phone" style="left:1000px;top:960px;transform:scale(.62);transform-origin:0 0"><div class="scr"><img src="../../docs/guide/shots/dark/night.webp"></div></div>
+      <div class="phone" style="left:520px;top:1680px;transform:scale(.62);transform-origin:0 0"><div class="scr"><img src="../../docs/guide/shots/dark/journal.webp"></div></div>
     </div>
-    <div class="fill" style="background:radial-gradient(60% 30% at 50% 50%, rgba(5,6,8,.82), rgba(5,6,8,.2) 80%)"></div>
+    <div class="fill" style="background:radial-gradient(60% 30% at 50% 50%, rgba(5,6,8,.85), rgba(5,6,8,.2) 80%)"></div>
     <div class="big" id="Eword" style="top:860px;font-size:150px"></div>
   </div>
 
@@ -102,28 +123,41 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
     <div class="fill" style="background:radial-gradient(70% 45% at 50% 30%, #f8f2e6, #e7dfcf 80%)"></div>
     <svg id="Fdial" viewBox="0 0 600 600" style="position:absolute;left:215px;top:170px;width:650px;height:650px;overflow:visible"></svg>
     <div id="Flist" style="position:absolute;left:150px;right:150px;top:930px"></div>
-    <div class="line" id="Fl" style="top:1600px;color:#1c1914">The qibla, and every prayer.<br><span style="font-size:.62em;color:#7a6c55">Anywhere. Even offline.</span></div>
+    <div class="line" id="Fl" style="top:1600px;color:#1c1914;font-size:72px">The qibla, and every prayer.<br><span style="font-size:.6em;color:#7a6c55">Anywhere. Even offline.</span></div>
+  </div>
+
+  <!-- P · Insights: the real page, its charts lifting out of the screen and drawing themselves -->
+  <div class="b" id="P">
+    <div class="fill" style="background:radial-gradient(70% 45% at 50% 34%, rgba(34,30,22,.8), rgba(6,7,11,0) 74%)"></div>
+    <div class="mon" id="Pmon" style="top:150px"></div>
+    <div class="lift" id="P1"><i class="lo"></i><i class="hi"></i><b class="sc"></b></div>
+    <div class="lift" id="P2"><i class="lo"></i><i class="hi"></i><b class="sc"></b></div>
+    <div class="lift" id="P3"><i class="lo"></i><i class="hi"></i><b class="sc"></b></div>
+    <div class="lift" id="P4"><i class="lo"></i><i class="hi"></i><b class="sc"></b></div>
+    <div id="Pk" class="kick" style="position:absolute;left:0;right:0;top:1440px;text-align:center">Insights</div>
+    <div class="line" id="Pl" style="top:1500px">Your progress, <span class="g">gently.</span></div>
+    <div class="small" id="Ps" style="top:1620px">Streaks, sessions and patterns, compared with no one.</div>
   </div>
 
   <!-- K · more of the app, on a turning ring -->
   <div class="b" id="K">
-    <div class="fill" style="background:radial-gradient(70% 45% at 50% 40%, #191c2b, #06070b 72%)"></div>
+    <div class="fill" style="background:radial-gradient(70% 45% at 50% 40%, rgba(30,34,50,.75), rgba(6,7,11,0) 72%)"></div>
     <div id="Kring" style="position:absolute;left:540px;top:820px;width:0;height:0;transform-style:preserve-3d"></div>
     <div id="Kk" class="kick" style="position:absolute;left:0;right:0;top:1500px;text-align:center">And so much more</div>
-    <div id="Kt" style="position:absolute;left:60px;right:60px;top:1560px;text-align:center;font:700 74px/1.1 Quicksand;letter-spacing:-.03em"></div>
+    <div id="Kt" style="position:absolute;left:60px;right:60px;top:1560px;text-align:center;font:700 72px/1.1 Quicksand;letter-spacing:-.03em"></div>
   </div>
 
   <!-- G · Friday -->
   <div class="b" id="G">
     <div class="fill" style="background:radial-gradient(70% 45% at 50% 34%, #0f3a31, #03110e 74%)"></div>
-    <svg viewBox="0 0 400 520" id="Garch" style="position:absolute;left:140px;top:120px;width:800px;height:1040px;overflow:visible"><path id="Gpath" d="M20 520V250C20 130 110 50 200 10c90 40 180 120 180 240v270" fill="none" stroke="#e7cf92" stroke-width="1.4" stroke-dasharray="1180" stroke-dashoffset="1180" opacity=".7"/></svg>
+    <svg viewBox="0 0 400 520" style="position:absolute;left:140px;top:120px;width:800px;height:1040px;overflow:visible"><path id="Gpath" d="M20 520V250C20 130 110 50 200 10c90 40 180 120 180 240v270" fill="none" stroke="#e7cf92" stroke-width="1.4" stroke-dasharray="1180" stroke-dashoffset="1180" opacity=".7"/></svg>
     <div id="Gbook" style="position:absolute;left:230px;top:330px;width:620px;height:1284px;transform-style:preserve-3d">
-      <div class="phone" style="left:0;top:0;width:620px"><div class="scr" style="width:598px;height:1262px;transform-style:preserve-3d">
-        <img src="../../docs/guide/shots/friday/kahf-tr.webp" id="Gunder">
+      <div class="phone" style="left:0;top:0;width:620px"><div class="scr" style="width:598px;height:1262px">
+        <img src="../../docs/guide/shots/friday/kahf-tr.webp">
         <div id="Gpage" style="position:absolute;inset:0;transform-origin:100% 50%;backface-visibility:hidden"><img src="../../docs/guide/shots/friday/kahf.webp" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top"></div>
       </div></div>
     </div>
-    <div id="Gt" style="position:absolute;left:0;right:0;top:1660px;text-align:center"><div class="ar" style="font:400 62px/1.2 Amiri;color:#f3dca6">يوم الجمعة</div><div style="margin-top:6px;font:700 84px Quicksand;letter-spacing:-.03em">Every <span style="background:linear-gradient(100deg,#b8873a,#f6dfaa 45%,#d9b26f);-webkit-background-clip:text;background-clip:text;color:transparent">Friday.</span></div><div style="margin-top:10px;font:500 32px Quicksand;color:#b9c7c0">Sūrat al-Kahf, as printed in the Madinah Muṣḥaf.</div></div>
+    <div id="Gt" style="position:absolute;left:0;right:0;top:1660px;text-align:center"><div class="ar" style="font:400 62px/1.2 Amiri;color:#f3dca6">يوم الجمعة</div><div style="margin-top:6px;font:700 84px Quicksand;letter-spacing:-.03em">Every <span class="g">Friday.</span></div><div style="margin-top:10px;font:500 32px Quicksand;color:#b9c7c0">Its Sunnahs, the hour of response, Sūrat al-Kahf.</div></div>
   </div>
 
   <!-- H · Ramaḍān -->
@@ -132,40 +166,90 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
     <svg id="Hlan" viewBox="0 0 1080 700" style="position:absolute;left:0;top:0;width:1080px;height:700px;overflow:visible"></svg>
     <div id="Hk" class="kick" style="position:absolute;left:0;right:0;top:760px;text-align:center">Until ifṭār</div>
     <div id="Hcd" style="position:absolute;left:0;right:0;top:820px;text-align:center;font:700 220px/1 Quicksand;letter-spacing:-.04em;font-variant-numeric:tabular-nums">2:25:14</div>
-    <div id="Hbar" style="position:absolute;left:190px;right:190px;top:1100px;height:10px;border-radius:10px;background:rgba(255,255,255,.1);overflow:hidden"><i id="Hfill" style="display:block;height:100%;width:0;border-radius:10px;background:linear-gradient(90deg,#f6dfaa,#d9a441)"></i></div>
-    <div class="line" id="Hl" style="top:1300px">Ramaḍān, <em>all month.</em></div>
+    <div style="position:absolute;left:190px;right:190px;top:1100px;height:10px;border-radius:10px;background:rgba(255,255,255,.1);overflow:hidden"><i id="Hfill" style="display:block;height:100%;width:0;border-radius:10px;background:linear-gradient(90deg,#f6dfaa,#d9a441)"></i></div>
+    <div class="line" id="Hl" style="top:1300px">Ramaḍān, <span class="g">all month.</span></div>
     <div class="small" id="Hs" style="top:1420px">Suhūr and ifṭār, tarāwīḥ, the khatm, the last ten nights.</div>
+  </div>
+
+  <!-- W · widgets, floating out -->
+  <div class="b" id="W">
+    <div class="fill" style="background:radial-gradient(70% 45% at 50% 38%, rgba(26,40,66,.8), rgba(6,7,11,0) 74%)"></div>
+    <div id="Wwrap" style="position:absolute;left:0;top:0;width:1080px;height:1920px;transform-style:preserve-3d">
+      <div class="pop" id="W1" style="left:160px;top:300px;width:760px;height:472px;border-radius:44px;background-image:url(../../docs/guide/shots/extra/widgets.webp);background-size:776px 1007px;background-position:-8px -14px"></div>
+      <div class="pop" id="W2" style="left:160px;top:830px;width:362px;height:472px;border-radius:40px;background-image:url(../../docs/guide/shots/extra/widgets.webp);background-size:776px 1007px;background-position:-8px -522px"></div>
+      <div class="pop" id="W3" style="left:558px;top:830px;width:362px;height:472px;border-radius:40px;background-image:url(../../docs/guide/shots/extra/widgets.webp);background-size:776px 1007px;background-position:-406px -522px"></div>
+    </div>
+    <div class="line" id="Wl" style="top:1430px">On your home screen, <span class="g">always.</span></div>
   </div>
 
   <!-- I · the computer -->
   <div class="b" id="I">
-    <div class="fill" style="background:radial-gradient(70% 45% at 50% 40%, #1a1f30, #06070b 72%)"></div>
+    <div class="fill" style="background:radial-gradient(70% 45% at 50% 40%, rgba(32,38,60,.75), rgba(6,7,11,0) 72%)"></div>
     <div id="Ilap" style="position:absolute;left:-90px;top:560px;width:1260px">
       <div style="border-radius:28px;padding:16px;background:linear-gradient(180deg,#26292f,#0e0f13);box-shadow:0 100px 160px -60px rgba(0,0,0,.95),0 0 0 2px rgba(255,255,255,.06) inset">
         <div style="position:relative;height:715px;border-radius:12px;overflow:hidden;background:#000">
-          <img src="../../docs/readme/desk-today.webp" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top left">
+          <img src="desk/today.webp" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top left">
           <div id="Ipill" style="position:absolute;left:50%;top:16px;display:flex;align-items:center;gap:13px;height:56px;padding:0 22px 0 8px;border-radius:99px;background:linear-gradient(180deg,#151925,#0d1018);border:1.5px solid rgba(217,178,111,.6);box-shadow:0 18px 40px -12px rgba(0,0,0,.85)">
             <span style="width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:rgba(217,178,111,.14);border:1px solid rgba(217,178,111,.4)"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="#f1d59e" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V11.5c0-2 1.2-3.4 3-4.2M19 20V11.5c0-2-1.2-3.4-3-4.2M7.5 12c0-3.4 2-5.1 4.5-6.6 2.5 1.5 4.5 3.2 4.5 6.6M4 20h16M12 3v2.4"/></svg></span>
-            <b style="font:700 21px Quicksand;color:#f5f0e7">Maghrib</b><span class="ar" style="font:400 19px Amiri;color:#f1d59e">المغرب</span><b id="Icd" style="margin-left:22px;font:700 22px Quicksand;color:#f5f0e7">1:12:40</b>
+            <b style="font:700 21px Quicksand;color:#f5f0e7">Dhuhr</b><span class="ar" style="font:400 19px Amiri;color:#f1d59e">الظهر</span><b id="Icd" style="margin-left:22px;font:700 22px Quicksand;color:#f5f0e7">0:53:40</b>
           </div>
         </div>
       </div>
       <div style="height:24px;margin:0 -70px;border-radius:0 0 24px 24px;background:linear-gradient(180deg,#2b2e36,#121318)"></div>
     </div>
-    <div class="line" id="Il" style="top:1480px">On your computer, <em>too.</em></div>
-    <div class="small" id="Is" style="top:1600px">The next prayer, always in view.</div>
+    <div class="line" id="Il" style="top:1440px">On your computer, <span class="g">too.</span></div>
+    <div class="small" id="Is" style="top:1560px">The Windows edition. The next prayer floats at the top of your screen.</div>
+  </div>
+
+  <!-- I2 · the day, in one line -->
+  <div class="b" id="I2">
+    <div class="fill" style="background:radial-gradient(70% 45% at 50% 30%, rgba(40,52,84,.75), rgba(6,7,11,0) 72%)"></div>
+    <div class="mon" id="I2mon" style="top:170px"></div>
+    <div class="lift" id="I2b"><i class="lo"></i><i class="hi"></i><b class="sc"></b></div>
+    <div id="I2ring" style="position:absolute;border:3px solid #f6dfaa;border-radius:14px;box-shadow:0 0 30px rgba(246,214,150,.6);opacity:0"></div>
+    <div class="line" id="I2l" style="top:1300px">Your day, <span class="g">in one line.</span></div>
+    <div class="small" id="I2s" style="top:1420px">The morning adhkār until Dhuhr, the evening from ʿAṣr, the last third of the night.</div>
+  </div>
+
+  <!-- I3 · made for a big screen: the rail, walked with the mouse -->
+  <div class="b" id="I3">
+    <div class="fill" style="background:radial-gradient(70% 45% at 50% 40%, rgba(32,38,60,.75), rgba(6,7,11,0) 72%)"></div>
+    <div class="mon" id="I3mon" style="top:360px"></div>
+    <svg id="cur" viewBox="0 0 24 24"><path d="M5 3l14 8-6 1.6L10 19z" fill="#fff" stroke="#111" stroke-width="1.4" stroke-linejoin="round"/></svg>
+    <div id="I3rip" style="position:absolute;width:60px;height:60px;border-radius:50%;border:3px solid #f6dfaa;opacity:0"></div>
+    <div class="line" id="I3l" style="top:1260px">Made for <span class="g">a big screen.</span></div>
+    <div class="small" id="I3s" style="top:1380px">A side rail, wide layouts, your keyboard and mouse.</div>
+  </div>
+
+  <!-- I4 · Ctrl K -->
+  <div class="b" id="I4">
+    <div class="fill" style="background:radial-gradient(70% 45% at 50% 40%, rgba(32,38,60,.75), rgba(6,7,11,0) 72%)"></div>
+    <div class="mon" id="I4mon" style="top:160px"></div>
+    <div class="lift" id="I4b"><i class="lo"></i><i class="hi"></i><b class="sc"></b></div>
+    <div id="I4keys" style="position:absolute;left:0;right:0;top:1130px;display:flex;justify-content:center;align-items:center;gap:26px"><span class="key" id="k1">Ctrl</span><span style="font:700 44px Quicksand;color:#a99e88">+</span><span class="key" id="k2">K</span></div>
+    <div class="line" id="I4l" style="top:1360px">Find <span class="g">anything.</span></div>
+    <div class="small" id="I4s" style="top:1480px">Every remembrance, hadith, page and setting, from one box.</div>
+  </div>
+
+  <!-- I5 · paper -->
+  <div class="b" id="I5">
+    <div class="fill" style="background:radial-gradient(70% 45% at 50% 40%, rgba(40,36,30,.75), rgba(6,7,11,0) 72%)"></div>
+    <div class="mon" id="I5mon" style="top:160px"></div>
+    <div class="lift" id="I5b" style="box-shadow:0 70px 130px -30px rgba(0,0,0,.95)"><i class="lo" style="filter:none"></i><i class="hi"></i><b class="sc" style="display:none"></b></div>
+    <div class="line" id="I5l" style="top:1500px">Print it, <span class="g">or save a PDF.</span></div>
+    <div class="small" id="I5s" style="top:1620px">On A4, white to the edge, with every source.</div>
   </div>
 
   <!-- J · the end -->
   <div class="b" id="J">
-    <div class="fill" style="background:radial-gradient(60% 40% at 50% 40%, #16141c, #050608 72%)"></div>
+    <div class="fill" style="background:radial-gradient(60% 40% at 50% 40%, rgba(26,22,34,.7), rgba(5,6,8,0) 72%)"></div>
     <div id="Jglow" style="position:absolute;left:290px;top:300px;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(246,214,150,.42),rgba(246,214,150,0) 62%)"></div>
     <svg id="Jstar" viewBox="0 0 64 64" style="position:absolute;left:420px;top:430px;width:240px;height:240px;overflow:visible">
       <defs><linearGradient id="gJ" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6dfaa"/><stop offset="1" stop-color="#b8873a"/></linearGradient></defs>
       <path d="M32 8l6.1 8.2 9.9-2.1-2.1 9.9L54 32l-8.1 6.1 2.1 9.9-9.9-2.1L32 56l-6.1-8.1-9.9 2.1 2.1-9.9L10 32l8.1-6.1-2.1-9.9 9.9 2.1z" fill="none" stroke="url(#gJ)" stroke-width="1.6" stroke-linejoin="round"/>
       <path d="M32 21l3 4 4.9-1-1 4.9 4 3.1-4 3 1 4.9-4.9-1-3 4-3-4-4.9 1 1-4.9-4-3 4-3.1-1-4.9 4.9 1z" fill="url(#gJ)"/>
     </svg>
-    <div id="Jw" style="position:absolute;left:0;right:0;top:740px;text-align:center;font:400 190px/1 Amiri">Adh<span style="background:linear-gradient(100deg,#b8873a,#f6dfaa 45%,#d9b26f 70%,#f6dfaa);-webkit-background-clip:text;background-clip:text;color:transparent">kār</span></div>
+    <div id="Jw" style="position:absolute;left:0;right:0;top:740px;text-align:center;font:400 190px/1 Amiri">Adh<span class="g">kār</span></div>
     <div id="Jt" style="position:absolute;left:0;right:0;top:1000px;text-align:center;font:700 54px Quicksand;letter-spacing:-.01em;color:#ece6da">Free. Private. Offline.</div>
     <div id="Jb" style="position:absolute;left:0;right:0;top:1130px;display:flex;justify-content:center;gap:22px">
       <span style="display:inline-flex;align-items:center;height:96px;padding:0 46px;border-radius:99px;font:700 34px Quicksand;background:linear-gradient(180deg,#f1d59e,#d9b26f);color:#1a1206">Android</span>
@@ -175,86 +259,102 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
     <div id="Js" class="kick" style="position:absolute;left:0;right:0;top:1700px;text-align:center;color:#a99e88">Built as ṣadaqah jāriyah</div>
   </div>
 
-  <div id="flash"></div>
+  <div id="sweep"></div>
   <canvas id="grain" width="540" height="960" style="width:1080px;height:1920px"></canvas>
+  <div id="vig"></div>
   <div id="fade"></div>
 </div>
 <script>
 (function () {
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
+  var $$ = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
   var clamp = function (x, a, b) { return Math.max(a, Math.min(b, x)); };
   var seg = function (t, a, b) { return clamp((t - a) / (b - a), 0, 1); };
   var o3 = function (x) { return 1 - Math.pow(1 - x, 3); };
   var o5 = function (x) { return 1 - Math.pow(1 - x, 5); };
   var io = function (x) { return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
-  var back = function (x) { var c = 1.7; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+  var back = function (x) { var c = 1.6; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
   var L = function (a, b, x) { return a + (b - a) * x; };
-  var DUR = (window.DUR = 30);
-  /* beats: [id, from, to]; cuts are hard, with motion carried across them */
-  var BEATS = [['A', 0, 2.2], ['B', 2.2, 4.2], ['C', 4.2, 6.4], ['D', 6.4, 9], ['E', 9, 11], ['F', 11, 13.4], ['K', 13.4, 16.6], ['G', 16.6, 19.6], ['H', 19.6, 22.2], ['I', 22.2, 25.2], ['J', 25.2, 30]];
+  var DUR = (window.DUR = 60);
+  var BEATS = [['A', 0, 2.6], ['B', 2.6, 4.6], ['C', 4.6, 7.8], ['D', 7.8, 11.2], ['E', 11.2, 13.6], ['F', 13.6, 16.6], ['P', 16.6, 23.6], ['K', 23.6, 28], ['G', 28, 31.6], ['H', 31.6, 34.8], ['W', 34.8, 37.6],
+    ['I', 37.6, 41], ['I2', 41, 44.6], ['I3', 44.6, 48.6], ['I4', 48.6, 51.6], ['I5', 51.6, 55.4], ['J', 55.4, 60]];
   window.CUTS = BEATS.slice(1).map(function (b) { return b[1]; });
 
-  /* ticks of the counting ring */
+  /* ---------- the pieces drawn once ---------- */
   (function () {
     var h = '';
     for (var i = 0; i < 33; i++) {
-      var a = (i / 33) * Math.PI * 2 - Math.PI / 2, x = 300 + Math.cos(a) * 292, y = 300 + Math.sin(a) * 292;
-      h += '<circle data-k="' + i + '" cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="6" fill="rgba(233,201,139,.18)"/>';
+      var a = (i / 33) * Math.PI * 2 - Math.PI / 2;
+      h += '<circle cx="' + (300 + Math.cos(a) * 276).toFixed(1) + '" cy="' + (300 + Math.sin(a) * 276).toFixed(1) + '" r="6"/>';
     }
-    $('Dticks').innerHTML = h;
-  })();
-  /* the right hand, drawn simply: four fingers of three joints and the thumb; the joints light in counting order */
-  var JOINTS = [];
-  (function () {
-    var h = '', fx = [120, 220, 320, 420], tops = [70, 30, 40, 90];
-    fx.forEach(function (x, f) {
-      h += '<rect x="' + (x - 38) + '" y="' + tops[f] + '" width="76" height="' + (330 - tops[f]) + '" rx="38" fill="rgba(245,240,231,.05)" stroke="rgba(233,201,139,.35)" stroke-width="2"/>';
-      for (var j = 0; j < 3; j++) {
-        var y = tops[f] + 42 + j * ((290 - tops[f]) / 3);
-        JOINTS.push([x, y]);
-        h += '<circle class="jt" cx="' + x + '" cy="' + y.toFixed(1) + '" r="17" fill="rgba(233,201,139,.12)" stroke="rgba(233,201,139,.4)" stroke-width="2"/>';
-        if (j < 2) h += '<line x1="' + (x - 22) + '" x2="' + (x + 22) + '" y1="' + (y + (290 - tops[f]) / 6).toFixed(1) + '" y2="' + (y + (290 - tops[f]) / 6).toFixed(1) + '" stroke="rgba(233,201,139,.2)" stroke-width="2"/>';
-      }
-    });
-    h += '<rect x="470" y="210" width="72" height="150" rx="36" transform="rotate(28 506 285)" fill="rgba(245,240,231,.05)" stroke="rgba(233,201,139,.35)" stroke-width="2"/>';
-    h += '<circle id="Dthumb" cx="520" cy="250" r="24" fill="#f6dfaa" opacity=".9"/>';
-    $('Dhand').innerHTML = h;
-  })();
-  /* the qibla dial */
-  (function () {
-    var h = '<circle cx="300" cy="300" r="290" fill="#fffaf0" stroke="#d8c7a3" stroke-width="3"/><circle cx="300" cy="300" r="250" fill="none" stroke="#efe4cd" stroke-width="2"/>';
-    for (var i = 0; i < 72; i++) {
-      var a = i * 5 * Math.PI / 180, r1 = i % 6 ? 262 : 244, x1 = 300 + Math.sin(a) * r1, y1 = 300 - Math.cos(a) * r1, x2 = 300 + Math.sin(a) * 280, y2 = 300 - Math.cos(a) * 280;
-      h += '<line x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '" stroke="' + (i % 6 ? '#cdb994' : '#8a6420') + '" stroke-width="' + (i % 6 ? 2 : 4) + '"/>';
+    $('Dbeads').innerHTML = h;
+    var d = '<circle cx="300" cy="300" r="300" fill="#fffaf0" stroke="#d8c7a3" stroke-width="3"/><circle cx="300" cy="300" r="250" fill="none" stroke="#efe4cd" stroke-width="2"/>';
+    for (var j = 0; j < 72; j++) {
+      var b = j * 5 * Math.PI / 180, r1 = j % 6 ? 262 : 244;
+      d += '<line x1="' + (300 + Math.sin(b) * r1).toFixed(1) + '" y1="' + (300 - Math.cos(b) * r1).toFixed(1) + '" x2="' + (300 + Math.sin(b) * 282).toFixed(1) + '" y2="' + (300 - Math.cos(b) * 282).toFixed(1) + '" stroke="' + (j % 6 ? '#cdb994' : '#8a6420') + '" stroke-width="' + (j % 6 ? 2 : 4) + '"/>';
     }
     [['N', 0], ['E', 90], ['S', 180], ['W', 270]].forEach(function (c) {
-      var a = c[1] * Math.PI / 180;
-      h += '<text x="' + (300 + Math.sin(a) * 205).toFixed(1) + '" y="' + (312 - Math.cos(a) * 205).toFixed(1) + '" text-anchor="middle" style="font:700 36px Quicksand;fill:' + (c[0] === 'N' ? '#b8873a' : '#6b604f') + '">' + c[0] + '</text>';
+      var a2 = c[1] * Math.PI / 180;
+      d += '<text x="' + (300 + Math.sin(a2) * 205).toFixed(1) + '" y="' + (312 - Math.cos(a2) * 205).toFixed(1) + '" text-anchor="middle" style="font:700 36px Quicksand;fill:' + (c[0] === 'N' ? '#b8873a' : '#6b604f') + '">' + c[0] + '</text>';
     });
-    h = '<g id="Frose">' + h + '<g transform="rotate(65 300 300)"><path d="M300 52l18 40h-36z" fill="#b8873a"/><rect x="284" y="20" width="32" height="32" rx="5" fill="#1c1914"/><rect x="284" y="27" width="32" height="5" fill="#d9b26f"/></g></g>';
-    h += '<path id="Fneedle" d="M300 70L322 300 300 330 278 300z" fill="url(#gF)"/><circle cx="300" cy="300" r="20" fill="#1c1914"/><circle cx="300" cy="300" r="8" fill="#f6dfaa"/>';
-    h = '<defs><linearGradient id="gF" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6dfaa"/><stop offset="1" stop-color="#9a7428"/></linearGradient></defs>' + h;
-    $('Fdial').innerHTML = h;
-    $('Flist').innerHTML = [['Fajr', 'الفجر', '5:17'], ['Dhuhr', 'الظهر', '12:06'], ['ʿAṣr', 'العصر', '3:14'], ['Maghrib', 'المغرب', '5:35'], ['ʿIshāʾ', 'العشاء', '6:50']].map(function (p, i) {
-      return '<div class="pr" style="display:flex;align-items:center;gap:22px;height:104px;padding:0 34px;margin-bottom:12px;border-radius:28px;background:#fffaf2;box-shadow:0 18px 40px -26px rgba(80,60,20,.5);border:1.5px solid rgba(138,100,32,.12)"><b style="font:700 40px Quicksand;color:#1c1914;flex:1">' + p[0] + '</b><span class="ar" style="font:400 36px Amiri;color:#8a6420">' + p[1] + '</span><b style="font:700 40px Quicksand;color:#1c1914;font-variant-numeric:tabular-nums;min-width:130px;text-align:right">' + p[2] + '</b></div>';
+    d = '<g id="Frose">' + d + '<g transform="rotate(65 300 300)"><path d="M300 52l18 40h-36z" fill="#b8873a"/><rect x="284" y="20" width="32" height="32" rx="5" fill="#1c1914"/><rect x="284" y="27" width="32" height="5" fill="#d9b26f"/></g></g>';
+    d += '<path d="M300 70L322 300 300 330 278 300z" fill="url(#gF)"/><circle cx="300" cy="300" r="20" fill="#1c1914"/><circle cx="300" cy="300" r="8" fill="#f6dfaa"/>';
+    $('Fdial').innerHTML = '<defs><linearGradient id="gF" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6dfaa"/><stop offset="1" stop-color="#9a7428"/></linearGradient></defs>' + d;
+    $('Flist').innerHTML = [['Fajr', 'الفجر', '5:17'], ['Dhuhr', 'الظهر', '12:06'], ['ʿAṣr', 'العصر', '3:14'], ['Maghrib', 'المغرب', '5:35'], ['ʿIshāʾ', 'العشاء', '6:50']].map(function (p) {
+      return '<div class="pr" style="display:flex;align-items:center;gap:22px;height:104px;padding:0 34px;margin-bottom:12px;border-radius:28px;background:#fffaf2;box-shadow:0 18px 40px -26px rgba(80,60,20,.5);border:1.5px solid rgba(138,100,32,.12)"><b style="font:700 40px Quicksand;color:#1c1914;flex:1">' + p[0] + '</b><span class="ar" style="font:400 36px Amiri;color:#8a6420">' + p[1] + '</span><b style="font:700 40px Quicksand;color:#1c1914;min-width:130px;text-align:right">' + p[2] + '</b></div>';
     }).join('');
   })();
+  var MON = { Pmon: ['insights'], I2mon: ['today'], I3mon: ['today', 'adhkar', 'tracker', 'salah', 'calendar', 'journal', 'learn'], I4mon: ['today', 'pal'], I5mon: ['print'] };
+  Object.keys(MON).forEach(function (id) {
+    $(id).innerHTML = '<div class="mscr">' + MON[id].map(function (n) { return '<img data-n="' + n + '" src="desk/' + n + '.webp">'; }).join('') + '</div><div class="neck"></div><div class="foot"></div>';
+  });
+  /* which screen a monitor shows, cross-fading over k (0..1) from a to b */
+  function screen(id, a, b, k) {
+    $$('#' + id + ' img').forEach(function (im) { var n = im.dataset.n; im.style.opacity = n === a ? 1 : n === b ? k : 0; im.style.zIndex = n === b ? 2 : 1; });
+  }
+  var LIFT = { P1: 'insights', P2: 'insights', P3: 'insights', P4: 'insights', I2b: 'today', I4b: 'pal', I5b: 'print' };
+  Object.keys(LIFT).forEach(function (id) { $$('#' + id + ' i').forEach(function (i) { i.style.backgroundImage = 'url(desk/' + LIFT[id] + '.webp)'; }); });
+  /* a card lifting out of a monitor's screen: r is its rectangle on the 1600 x 1000 screen, my the monitor's top,
+     to where it lands [x, y, width]; e how far it has flown, p how much of it has drawn, x how far it has left */
+  function lift(id, r, my, to, e, p, x) {
+    var n = $(id), k = .625, fx = 40 + r[0] * k, fy = my + 14 + r[1] * k, fw = r[2] * k;
+    var w = L(fw, to[2], e), h = w * r[3] / r[2], s = w / r[2];
+    n.style.display = e > 0 && x < 1 ? 'block' : 'none';
+    n.style.left = L(fx, to[0], e) + 'px'; n.style.top = L(fy, to[1], e) + 'px'; n.style.width = w + 'px'; n.style.height = h + 'px';
+    n.style.borderRadius = L(6, 24, e) + 'px';
+    $$('#' + id + ' i').forEach(function (i) { i.style.backgroundSize = 1600 * s + 'px ' + 1000 * s + 'px'; i.style.backgroundPosition = -r[0] * s + 'px ' + -r[1] * s + 'px'; });
+    n.querySelector('.hi').style.clipPath = 'inset(0 ' + (100 - 100 * p) + '% 0 0)';
+    var sc = n.querySelector('.sc'); sc.style.left = p * w - 1.5 + 'px'; sc.style.opacity = p > 0 && p < 1 ? 1 : 0;
+    n.style.transform = 'translateY(' + -200 * x + 'px) scale(' + (1 + .035 * Math.sin(e * Math.PI)) * (1 - .1 * x) + ')';
+    n.style.opacity = 1 - x;
+    return [L(fx, to[0], e), L(fy, to[1], e), w, h, s];
+  }
+  /* a monitor rising into place, settled (no transform) by the time anything lifts out of it */
+  function monIn(id, lt, d) {
+    var e = o5(seg(lt, 0, d || .7));
+    $(id).style.transform = e < 1 ? 'translateY(' + L(260, 0, e) + 'px) rotateX(' + L(24, 0, e) + 'deg)' : 'none';
+    $(id).style.opacity = e;
+  }
+  var FEAT = [['ar/learn-fajr', 'Learn the prayer, <span class="g">step by step.</span>'], ['dark/journal', 'Duʿāʾ, <span class="g">at the times of answer.</span>'], ['dark/plan-fast', 'Plan a fast, <span class="g">the night before.</span>'], ['dark/calendar', 'The Hijri year, <span class="g">its Sunnah fasts.</span>'], ['dark/print', 'Your adhkār, <span class="g">on paper.</span>'], ['light/today', 'Dark or light. <span class="g">English or Arabic.</span>']];
+  $('Kring').innerHTML = FEAT.map(function (f) {
+    return '<div class="phone kp" style="left:-200px;top:-415px;width:400px;padding:8px;border-radius:44px"><div class="scr" style="width:384px;height:796px;border-radius:37px"><img src="../../docs/guide/shots/' + f[0] + '.webp"></div></div>';
+  }).join('');
+  var DAY = [['Fajr.', '#f19a5a', '#3a2a5e', '#fff'], ['Work.', '#3f86cf', '#86bfea', '#0c0d12'], ['ʿAṣr.', '#d79a3c', '#f3d38a', '#0c0d12'], ['Home.', '#b4566e', '#5b3168', '#fff'], ['Sleep.', '#0d1030', '#1d1a52', '#fff']];
 
-  var FEAT = [['ar/learn-fajr', 'Learn the prayer, <em>step by step.</em>'], ['dark/journal', 'Duʿāʾ, <em>at the times of answer.</em>'], ['dark/plan-fast', 'Plan a fast, <em>the night before.</em>'], ['dark/tracker', 'The Tracker, <em>by the Sunnah.</em>'], ['dark/print', 'Your adhkār, <em>on paper.</em>'], ['light/today', 'Dark or light. <em>English or Arabic.</em>']];
-  (function () {
-    $('Kring').innerHTML = FEAT.map(function (f, i) {
-      return '<div class="phone kp" style="left:-200px;top:-415px;width:400px;padding:8px;border-radius:44px"><div class="scr" style="width:384px;height:796px;border-radius:37px"><img src="../../docs/guide/shots/' + f[0] + '.webp"></div></div>';
-    }).join('');
-  })();
-  var DAY = [['Fajr.', '#f19a5a', '#3a2a5e'], ['Work.', '#3f86cf', '#86bfea'], ['ʿAṣr.', '#d79a3c', '#f3d38a'], ['Home.', '#b4566e', '#5b3168'], ['Sleep.', '#0d1030', '#1d1a52']];
-  function lanterns(lt) {
-    var P = [[120, 140], [330, 230], [560, 110], [780, 200], [970, 130]], h = '';
-    P.forEach(function (l, i) {
-      var a = Math.sin(lt * (1.1 + i * .13) + i) * 6, g = .6 + .4 * Math.sin(lt * 2.6 + i * 1.7), drop = L(-420, 0, o3(seg(lt, i * .08, .9 + i * .08)));
-      h += '<g transform="translate(' + l[0] + ',' + drop + ') rotate(' + a + ')"><line x1="0" y1="-500" x2="0" y2="' + l[1] + '" stroke="#b08a4a" stroke-width="1.8" opacity=".7"/><g transform="translate(0,' + l[1] + ') scale(1.5)"><circle cy="46" r="70" fill="rgba(255,200,110,' + .18 * g + ')"/><path d="M-14 0h28l-4 12h-20z" fill="#c9a15a"/><path d="M-22 12h44l8 34-8 40h-44l-8-40z" fill="rgba(255,214,140,' + (.3 + .22 * g) + ')" stroke="#e7c27e" stroke-width="2"/><path d="M0 12v74M-26 46h52" stroke="#e7c27e" stroke-width="1" opacity=".6"/><ellipse cy="50" rx="6" ry="10" fill="#fff2cf" opacity="' + (.7 + .3 * g) + '"/><path d="M-16 86h32l-6 10h-20z" fill="#c9a15a"/></g></g>';
+  /* ---------- light: soft out-of-focus circles drifting behind everything ---------- */
+  var bctx = $('bokeh').getContext('2d'), BK = [], rs = 777;
+  function rnd() { rs = (rs * 16807) % 2147483647; return rs / 2147483647; }
+  for (var q = 0; q < 26; q++) BK.push({ x: rnd() * 540, y: rnd() * 960, r: 18 + rnd() * 70, v: 3 + rnd() * 9, ph: rnd() * 6.3, a: .04 + rnd() * .09 });
+  function bokeh(t, tint) {
+    bctx.clearRect(0, 0, 540, 960);
+    BK.forEach(function (p) {
+      var y = (p.y - t * p.v) % 960; if (y < -p.r) y += 960 + p.r * 2;
+      var x = p.x + Math.sin(t * .2 + p.ph) * 26, a = p.a * (.6 + .4 * Math.sin(t * .7 + p.ph));
+      var g = bctx.createRadialGradient(x, y, 0, x, y, p.r);
+      g.addColorStop(0, 'rgba(' + tint + ',' + a + ')'); g.addColorStop(.7, 'rgba(' + tint + ',' + a * .5 + ')'); g.addColorStop(1, 'rgba(' + tint + ',0)');
+      bctx.fillStyle = g; bctx.beginPath(); bctx.arc(x, y, p.r, 0, 6.29); bctx.fill();
     });
-    $('Hlan').innerHTML = h;
   }
   var gctx = $('grain').getContext('2d'), gimg = gctx.createImageData(540, 960);
   function grain(t) {
@@ -262,9 +362,17 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
     for (var i = 0; i < d.length; i += 4) { seed = (seed * 16807) % 2147483647; var v = seed & 255; d[i] = d[i + 1] = d[i + 2] = v; d[i + 3] = 255; }
     gctx.putImageData(gimg, 0, 0);
   }
-  /* entering a beat: a quick push in out of a little blur, as a camera cut on movement */
-  function enter(el, lt, dir) {
-    var e = o5(seg(lt, 0, .5)), ins = L(9, 0, e), rad = L(80, 0, e);
+  function lanterns(lt) {
+    var P = [[120, 140], [330, 230], [560, 110], [780, 200], [970, 130]], h = '';
+    P.forEach(function (l, i) {
+      var a = Math.sin(lt * (1.1 + i * .13) + i) * 6, g = .6 + .4 * Math.sin(lt * 2.6 + i * 1.7), drop = L(-420, 0, o3(seg(lt, -.35 + i * .06, .55 + i * .06)));
+      h += '<g transform="translate(' + l[0] + ',' + drop + ') rotate(' + a + ')"><line x1="0" y1="-500" x2="0" y2="' + l[1] + '" stroke="#b08a4a" stroke-width="1.8" opacity=".7"/><g transform="translate(0,' + l[1] + ') scale(1.5)"><circle cy="46" r="70" fill="rgba(255,200,110,' + .18 * g + ')"/><path d="M-14 0h28l-4 12h-20z" fill="#c9a15a"/><path d="M-22 12h44l8 34-8 40h-44l-8-40z" fill="rgba(255,214,140,' + (.3 + .22 * g) + ')" stroke="#e7c27e" stroke-width="2"/><path d="M0 12v74M-26 46h52" stroke="#e7c27e" stroke-width="1" opacity=".6"/><ellipse cy="50" rx="6" ry="10" fill="#fff2cf" opacity="' + (.7 + .3 * g) + '"/><path d="M-16 86h32l-6 10h-20z" fill="#c9a15a"/></g></g>';
+    });
+    $('Hlan').innerHTML = h;
+  }
+  /* every beat opens out of a rounded window */
+  function enter(el, lt) {
+    var e = o5(seg(lt, 0, .5)), ins = L(8, 0, e), rad = L(80, 0, e);
     el.style.clipPath = lt < .5 ? 'inset(' + ins * 1.6 + '% ' + ins + '% round ' + rad + 'px)' : 'none';
     el.style.transform = 'scale(' + L(1.04, 1, e) + ')';
   }
@@ -272,137 +380,187 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
   function show(id, lt, from, dy) {
     var e = o5(seg(lt, from, from + .6)), n = $(id);
     n.style.opacity = Math.min(1, e * 1.6); n.style.clipPath = 'inset(-20% -5% ' + (100 - 100 * e) + '% -5%)';
-    n.style.transform = 'translateY(' + L(Math.min(dy || 40, 40), 0, e) + 'px)'; n.style.filter = 'none';
+    n.style.transform = 'translateY(' + L(dy == null ? 40 : dy, 0, e) + 'px)';
   }
+  var TINT = { I2: '150,180,255', I3: '150,180,255', I4: '150,180,255', I5: '246,214,150', A: '246,214,150', B: '255,255,255', C: '150,180,255', D: '246,214,150', E: '246,214,150', F: '200,160,90', P: '246,214,150', K: '170,190,255', G: '150,230,190', H: '190,170,255', W: '150,190,255', I: '150,180,255', J: '246,214,150' };
 
   window.render = function (t) {
+    var cur = 'A';
     BEATS.forEach(function (b) {
       var el = $(b[0]), on = t >= b[1] && t < b[2];
       el.style.visibility = on ? 'visible' : 'hidden';
       if (!on) return;
+      cur = b[0];
       var lt = t - b[1];
-      if (b[0] !== 'A') enter(el, lt, b[0] === 'E' ? -1 : 1);
+      if (b[0] !== 'A') enter(el, lt);
       ({
         A: function () {
-          $('Adot').setAttribute('r', L(0, 2.4, o3(seg(lt, .1, .45))) * (1 - seg(lt, .7, .9)));
-          $('Aout').style.strokeDashoffset = 176 * (1 - io(seg(lt, .35, 1.35)));
-          var f = back(seg(lt, 1.15, 1.6)); $('Ain').style.transform = 'scale(' + Math.max(0, f) + ')'; $('Ain').style.opacity = seg(lt, 1.15, 1.3);
-          var rg = o3(seg(lt, 1.3, 2.1)); $('Aring').setAttribute('r', L(8, 40, rg)); $('Aring').style.opacity = 1 - rg;
-          $('Aglow').style.opacity = o3(seg(lt, .3, 1.6)) * (.8 + .2 * Math.sin(lt * 4));
-          $('Astar').style.transform = 'scale(' + L(1, 1.12, seg(lt, 0, 2.5)) + ') rotate(' + lt * 8 + 'deg)';
-          show('Aword', lt, 1.55, 40, 16);
+          $('Adot').setAttribute('r', L(0, 2.4, o3(seg(lt, .1, .4))) * (1 - seg(lt, .6, .8)));
+          $('Aout').style.strokeDashoffset = 176 * (1 - io(seg(lt, .3, 1.2)));
+          var f = back(seg(lt, 1, 1.4)); $('Ain').style.transform = 'scale(' + Math.max(0, f) + ')'; $('Ain').style.opacity = seg(lt, 1, 1.12);
+          var rg = o3(seg(lt, 1.15, 1.9)); $('Aring').setAttribute('r', L(8, 40, rg)); $('Aring').style.opacity = 1 - rg;
+          $('Aglow').style.opacity = o3(seg(lt, .3, 1.4)) * (.85 + .15 * Math.sin(lt * 4));
+          $('Astar').style.transform = 'scale(' + L(1, 1.12, seg(lt, 0, 2)) + ') rotate(' + lt * 8 + 'deg)';
+          show('Aword', lt, 1.35);
         },
         B: function () {
-          var i = Math.min(DAY.length, Math.floor(lt / .3));
-          if (i < DAY.length) {
-            var w = DAY[i], k = (lt - i * .3) / .3;
-            $('Bbg').style.background = 'linear-gradient(160deg,' + w[1] + ',' + w[2] + ')';
-            $('Bword').textContent = w[0]; $('Bword').style.opacity = 1; $('Bline').style.opacity = 0;
-            $('Bword').style.transform = 'scale(' + L(1.35, 1, o5(seg(k, 0, .5))) + ')'; $('Bword').style.letterSpacing = L(-.02, -.05, k) + 'em';
-            $('Bword').style.color = i === 1 || i === 2 ? '#0c0d12' : '#fff';
-          } else {
-            $('Bbg').style.background = 'radial-gradient(70% 45% at 50% 45%, #1a1c33, #07080d 72%)';
-            $('Bword').style.opacity = 0; show('Bline', lt, 1.55, 40);
-          }
+          var i = Math.min(DAY.length - 1, Math.floor(lt / .36)), w = DAY[i], k = (lt - i * .36) / .36;
+          $('Bbg').style.background = 'linear-gradient(160deg,' + w[1] + ',' + w[2] + ')';
+          $('Bword').textContent = w[0]; $('Bword').style.color = w[3];
+          $('Bword').style.transform = 'scale(' + L(1.3, 1, o5(seg(k, 0, .55))) + ')'; $('Bword').style.letterSpacing = L(-.02, -.05, k) + 'em';
         },
         C: function () {
-          var e = o5(seg(lt, 0, 1.4)), s = seg(lt, 0, 2.5);
-          $('Cph').style.transform = 'translate3d(0,' + L(500, 0, e) + 'px,' + L(-400, 0, e) + 'px) rotateY(' + L(-55, -10, e) + 'deg) rotateX(' + L(18, 6, e) + 'deg) rotateZ(' + L(-8, -2, e) + 'deg) scale(' + L(.95, 1.04, s) + ')';
-          $('Cph').querySelector('.gl').style.transform = 'translateX(' + L(-130, 130, seg(lt, .5, 2.2)) + '%)';
-          show('Ccap', lt, .7, 40, 10);
+          var e = o5(seg(lt, 0, 1.3)), s = seg(lt, 0, 2.5);
+          $('Cph').style.transform = 'translate3d(0,' + L(500, 0, e) + 'px,' + L(-400, 0, e) + 'px) rotateY(' + L(-50, -14, e) + 'deg) rotateX(' + L(18, 7, e) + 'deg) rotateZ(' + L(-7, -2, e) + 'deg) scale(' + L(.95, 1.03, s) + ')';
+          var pe = back(seg(lt, 1.1, 1.8));
+          $('Cpop').style.transform = 'translateZ(' + L(0, 140, pe) + 'px) scale(' + L(1, 1.05, pe) + ')';
+          $('Cpop').style.boxShadow = '0 ' + L(0, 60, pe) + 'px ' + L(0, 100, pe) + 'px -30px rgba(0,0,0,.9), 0 0 0 1.5px rgba(246,223,170,' + .35 * pe + ')';
+          $('Cph').querySelector('.gl').style.transform = 'translateX(' + L(-130, 130, seg(lt, .4, 2)) + '%)';
+          show('Ccap', lt, .7);
         },
         D: function () {
-          var n = lt < .5 ? 1 : Math.min(33, 1 + Math.floor(Math.pow((lt - .5) / 1.8, .8) * 32));
+          var p = lt < .5 ? 0 : Math.min(1, Math.pow((lt - .5) / 2.4, .85)), n = Math.max(1, Math.min(33, 1 + Math.floor(p * 32))), frac = n / 33;
           $('Dn').textContent = n;
-          $('Darc').setAttribute('stroke-dashoffset', 1570.8 * (1 - n / 33));
-          Array.prototype.forEach.call($('Dticks').children, function (c, i) { c.setAttribute('fill', i < n ? '#f1d59e' : 'rgba(233,201,139,.18)'); c.setAttribute('r', i === n - 1 ? 10 : 6); });
-          var jt = document.querySelectorAll('#Dhand .jt'), cur = (n - 1) % 12;
-          Array.prototype.forEach.call(jt, function (j, i) { var lit = i === cur; j.setAttribute('fill', lit ? '#f6dfaa' : i < cur ? 'rgba(233,201,139,.35)' : 'rgba(233,201,139,.12)'); j.setAttribute('r', lit ? 21 : 17); });
-          var jp = JOINTS[cur]; $('Dthumb').setAttribute('cx', L(520, jp[0] + 30, .6)); $('Dthumb').setAttribute('cy', jp[1]);
-          $('Dring').style.transform = 'scale(' + L(.8, 1, o5(seg(lt, 0, .8))) + ')';
-          show('Dhand', lt, .3, 60, 0); show('Dl1', lt, .9, 40, 12); show('Dl2', lt, 1.2, 30, 8);
+          $('Darc').setAttribute('stroke-dashoffset', 1445 * (1 - frac)); $('Dglow').setAttribute('stroke-dashoffset', 1445 * (1 - frac));
+          $$('#Dbeads circle').forEach(function (c, i) { c.setAttribute('fill', i < n ? '#f1d59e' : 'rgba(233,201,139,.16)'); c.setAttribute('r', i === n - 1 ? 9 : 6); });
+          var since = lt < .5 ? 1 : (p * 32) % 1, rip = '';
+          for (var r = 0; r < 2; r++) { var u = clamp(r ? since - .35 : since, 0, 1); rip += '<circle cx="300" cy="300" r="' + L(232, 300, o3(u)) + '" fill="none" stroke="rgba(246,223,170,' + (.35 * (1 - u)) + ')" stroke-width="' + L(6, 1, u) + '"/>'; }
+          $('Drip').innerHTML = n < 33 ? rip : '';
+          $('Dring').style.transform = 'scale(' + L(.82, 1, o5(seg(lt, 0, .8))) + ') rotate(' + L(-30, 0, o5(seg(lt, 0, .8))) + 'deg)';
+          show('Dl1', lt, .6); show('Dl2', lt, .9, 30);
         },
         E: function () {
-          var words = ['Morning.', 'Evening.', 'After ṣalāh.', 'Before sleep.'], i = Math.min(3, Math.floor(lt / .5));
-          $('Eword').innerHTML = i === 3 ? 'Before <em>sleep.</em>' : words[i];
-          var k = (lt - i * .5) / .5;
-          $('Eword').style.transform = 'scale(' + L(1.25, 1, o5(seg(k, 0, .4))) + ')'; $('Eword').style.opacity = o5(seg(k, 0, .25));
-          $('Egrid').style.transform = 'rotate(-12deg) translate(' + L(80, -140, io(seg(lt, 0, 2))) + 'px,' + L(260, -420, io(seg(lt, 0, 2))) + 'px) scale(' + L(1.1, 1.18, lt / 2) + ')';
-          Array.prototype.forEach.call(document.querySelectorAll('#Egrid .phone'), function (p, j) { p.style.opacity = .55 + .45 * (j % 4 === i ? 1 : 0); });
+          var words = ['Morning.', 'Evening.', 'After ṣalāh.', 'Before <span class="g">sleep.</span>'], i = Math.min(3, Math.floor(lt / .55)), k = (lt - i * .55) / .55;
+          $('Eword').innerHTML = words[i];
+          $('Eword').style.transform = 'scale(' + L(1.22, 1, o5(seg(k, 0, .45))) + ')'; $('Eword').style.opacity = o5(seg(k, 0, .3));
+          $('Egrid').style.transform = 'rotate(-12deg) translate(' + L(80, -140, io(seg(lt, 0, 2.4))) + 'px,' + L(260, -420, io(seg(lt, 0, 2.4))) + 'px) scale(' + L(1.1, 1.18, lt / 2.4) + ')';
         },
         F: function () {
-          var a = L(150, 0, back(seg(lt, .1, 1.5)) ) + Math.sin(lt * 9) * 2 * (1 - seg(lt, 1.2, 1.8));
-          document.getElementById('Frose').setAttribute('transform', 'rotate(' + (a - 65) + ' 300 300)');
-          $('Fdial').style.transform = 'scale(' + L(.7, 1, o5(seg(lt, 0, .7))) + ') rotate(' + L(-20, 0, o5(seg(lt, 0, .7))) + 'deg)';
-          var nx = 3;
-          Array.prototype.forEach.call(document.querySelectorAll('#Flist .pr'), function (r, i) {
-            var e = o5(seg(lt, .6 + i * .12, 1.2 + i * .12));
-            r.style.opacity = e; r.style.transform = 'translateX(' + L(i % 2 ? 160 : -160, 0, e) + 'px)';
-            var hl = i === nx ? o3(seg(lt, 1.6, 2)) : 0;
+          var a = L(150, 0, back(seg(lt, .1, 1.4)));
+          $('Frose').setAttribute('transform', 'rotate(' + (a - 65) + ' 300 300)');
+          $('Fdial').style.transform = 'scale(' + L(.7, 1, o5(seg(lt, 0, .7))) + ')';
+          $$('#Flist .pr').forEach(function (r, i) {
+            var e = o5(seg(lt, .5 + i * .1, 1.1 + i * .1)), hl = i === 3 ? o3(seg(lt, 1.5, 1.9)) : 0;
+            r.style.opacity = e; r.style.transform = 'translateX(' + L(i % 2 ? 160 : -160, 0, e) + 'px) scale(' + (1 + .04 * hl) + ')';
             r.style.background = hl ? 'linear-gradient(90deg,#f6dfaa,#e9c27a)' : '#fffaf2';
-            r.style.transform += ' scale(' + (1 + .04 * hl) + ')';
           });
-          show('Fl', lt, 1.4, 30, 10);
+          show('Fl', lt, 1.2);
+        },
+        P: function () {
+          monIn('Pmon', lt, .8); screen('Pmon', 'insights', null, 0);
+          $('Pmon').style.filter = 'brightness(' + L(1, .4, o3(seg(lt, .9, 1.4))) + ')';
+          var R = [[306, 719, 607, 204], [939, 167, 607, 285], [939, 691, 607, 309], [306, 231, 607, 210]], st = [1, 2.5, 4, 5.5];
+          R.forEach(function (r, i) {
+            var a = st[i], last = i === R.length - 1, to = [24, 780 - 1032 * r[3] / r[2] / 2, 1032];
+            lift('P' + (i + 1), r, 150, to, lt < a ? 0 : o5(seg(lt, a, a + .65)), io(seg(lt, a + .45, a + 1.35)), last ? 0 : io(seg(lt, a + 1.45, a + 1.75)));
+          });
+          show('Pk', lt, .5, 20); show('Pl', lt, .7); show('Ps', lt, 1, 30);
+        },
+        K: function () {
+          var step = .7, i = Math.min(FEAT.length - 1, Math.floor(lt / step)), k = (lt - i * step) / step, turn = i === 0 ? 0 : i - 1 + io(seg(k, 0, .45));
+          $$('#Kring .kp').forEach(function (p, j) {
+            var r = ((j * 60 - turn * 60) % 360 + 540) % 360 - 180, front = Math.cos(r * Math.PI / 180);
+            p.style.transform = 'rotateY(' + r + 'deg) translateZ(560px) scale(' + (.9 + .1 * Math.max(0, front)) + ')';
+            p.style.opacity = Math.max(0, .2 + .8 * front); p.style.filter = 'brightness(' + (.45 + .55 * Math.max(0, front)) + ')';
+          });
+          var c = i === 0 ? 0 : Math.min(FEAT.length - 1, i);
+          $('Kt').innerHTML = FEAT[c][1];
+          var te = i === 0 ? o5(seg(lt, .12, .45)) : o5(seg(k, 0, .32));
+          $('Kt').style.clipPath = 'inset(-20% -5% ' + (100 - 100 * te) + '% -5%)'; $('Kt').style.transform = 'translateY(' + L(36, 0, te) + 'px)';
+          $('Kring').style.transform = 'translateY(' + L(120, 0, o5(seg(lt, 0, .7))) + 'px) rotateX(-6deg)';
+          show('Kk', lt, .05, 20);
         },
         G: function () {
-          $('Gpath').style.strokeDashoffset = 1180 * (1 - io(seg(lt, 0, 1.4)));
-          var e = o5(seg(lt, .2, 1.2));
-          $('Gbook').style.transform = 'translateY(' + L(300, 0, e) + 'px) rotateX(' + L(25, 4, e) + 'deg) scale(' + L(.86, .9, seg(lt, 0, 4)) + ')';
+          $('Gpath').style.strokeDashoffset = 1180 * (1 - io(seg(lt, 0, 1.3)));
+          var e = o5(seg(lt, .15, 1.1));
+          $('Gbook').style.transform = 'translateY(' + L(300, 0, e) + 'px) rotateX(' + L(25, 4, e) + 'deg) scale(' + L(.86, .9, seg(lt, 0, 3)) + ')';
           $('Gbook').style.opacity = e;
-          var fl = io(seg(lt, 1.8, 2.8));
+          var fl = io(seg(lt, 1.4, 2.3));
           $('Gpage').style.transform = 'rotateY(' + L(0, 170, fl) + 'deg)';
           $('Gpage').style.filter = 'brightness(' + L(1, .55, Math.sin(fl * Math.PI)) + ')';
           $('Gpage').style.opacity = fl > .55 ? 0 : 1;
-          show('Gt', lt, .9, 40, 12);
+          show('Gt', lt, .8);
         },
         H: function () {
           lanterns(lt);
           var s = Math.max(0, 8714 - Math.floor(lt * 9));
           $('Hcd').textContent = Math.floor(s / 3600) + ':' + ('0' + Math.floor(s % 3600 / 60)).slice(-2) + ':' + ('0' + s % 60).slice(-2);
-          show('Hk', lt, .3, 20, 6); show('Hcd', lt, .4, 60, 16);
-          $('Hfill').style.width = L(10, 78, o3(seg(lt, .6, 3))) + '%';
-          show('Hl', lt, 1, 40, 12); show('Hs', lt, 1.3, 30, 8);
+          show('Hk', lt, .08, 20); show('Hcd', lt, .12, 50);
+          $('Hfill').style.width = L(10, 78, o3(seg(lt, .5, 2.3))) + '%';
+          show('Hl', lt, .9); show('Hs', lt, 1.15, 30);
+        },
+        W: function () {
+          [['W1', 0, -8], ['W2', .12, 10], ['W3', .22, -6]].forEach(function (w) {
+            var e = back(seg(lt, w[1], w[1] + .8)), n = $(w[0]);
+            n.style.opacity = seg(lt, w[1], w[1] + .2);
+            n.style.transform = 'translateY(' + L(260, 0, e) + 'px) translateZ(' + L(-300, 0, e) + 'px) rotateX(' + L(30, 0, e) + 'deg) rotateY(' + (w[2] * (1 - e) + Math.sin(lt * 1.2 + w[1] * 9) * 2) + 'deg)';
+          });
+          show('Wl', lt, .7);
         },
         I: function () {
-          var e = o5(seg(lt, 0, 1.2));
-          $('Ilap').style.transform = 'translateY(' + L(500, 0, e) + 'px) rotateX(' + L(30, 6, e) + 'deg) scale(' + L(.8, .86, seg(lt, 0, 3)) + ')';
-          var pe = back(seg(lt, 1, 1.5));
-          $('Ipill').style.transform = 'translate(-50%,' + L(-90, 0, pe) + 'px) scale(' + L(.7, 1.12, pe) + ')';
-          $('Ipill').style.opacity = seg(lt, 1, 1.2);
-          var s = Math.max(0, 4360 - Math.floor(lt - 1)); $('Icd').textContent = Math.floor(s / 3600) + ':' + ('0' + Math.floor(s % 3600 / 60)).slice(-2) + ':' + ('0' + s % 60).slice(-2);
-          show('Il', lt, .9, 40, 12); show('Is', lt, 1.2, 30, 8);
+          var e = o5(seg(lt, 0, 1));
+          $('Ilap').style.transform = 'translateY(' + L(500, 0, e) + 'px) rotateX(' + L(30, 6, e) + 'deg) scale(' + L(.8, .86, seg(lt, 0, 3.4)) + ')';
+          var pe = back(seg(lt, .9, 1.4));
+          $('Ipill').style.transform = 'translate(-50%,' + L(-90, 0, pe) + 'px) scale(' + L(.7, 1.15, pe) + ')';
+          $('Ipill').style.opacity = seg(lt, .9, 1.1);
+          var s2 = Math.max(0, 3220 - Math.floor(lt - .9)); $('Icd').textContent = Math.floor(s2 / 3600) + ':' + ('0' + Math.floor(s2 % 3600 / 60)).slice(-2) + ':' + ('0' + s2 % 60).slice(-2);
+          show('Il', lt, .7); show('Is', lt, 1.1, 30);
         },
-        K: function () {
-          var step = .53, i = Math.min(FEAT.length - 1, Math.floor(lt / step)), k = (lt - i * step) / step;
-          /* the ring turns one phone at a time, easing into each stop */
-          Array.prototype.forEach.call(document.querySelectorAll('#Kring .kp'), function (p, j) {
-            var a = j * 60 - Math.max(0, (lt < step ? 0 : (i - 1 + io(seg(k, 0, .45)))) * 60), r = ((a % 360) + 540) % 360 - 180;
-            var front = Math.cos(r * Math.PI / 180);
-            p.style.transform = 'rotateY(' + r + 'deg) translateZ(560px) scale(' + (.9 + .1 * Math.max(0, front)) + ')';
-            p.style.opacity = Math.max(0, .2 + .8 * front);
-            p.style.filter = 'brightness(' + (.45 + .55 * Math.max(0, front)) + ')';
-          });
-          var cur = lt < step ? 0 : Math.min(FEAT.length - 1, i);
-          $('Kt').innerHTML = FEAT[cur][1];
-          var te = lt < step ? o5(seg(lt, .15, .5)) : o5(seg(k, 0, .32));
-          $('Kt').style.clipPath = 'inset(0 0 ' + (100 - 100 * te) + '% 0)'; $('Kt').style.transform = 'translateY(' + L(36, 0, te) + 'px)';
-          $('Kring').style.transform = 'translateY(' + L(120, 0, o5(seg(lt, 0, .7))) + 'px) rotateX(-6deg)';
-          show('Kk', lt, .1, 20, 0);
+        I2: function () {
+          monIn('I2mon', lt, .6); screen('I2mon', 'today', null, 0);
+          $('I2mon').style.filter = 'brightness(' + L(1, .45, o3(seg(lt, .7, 1.2))) + ')';
+          var b = lift('I2b', [300, 108, 1250, 210], 170, [20, 860, 1040], lt < .6 ? 0 : o5(seg(lt, .6, 1.3)), io(seg(lt, 1, 2)), 0);
+          var rg = o3(seg(lt, 2, 2.4)), s3 = b[4];
+          $('I2ring').style.left = b[0] + (326 - 300) * s3 - 8 + 'px'; $('I2ring').style.top = b[1] + (232 - 108) * s3 - 8 + 'px';
+          $('I2ring').style.width = (688 - 326) * s3 + 16 + 'px'; $('I2ring').style.height = (262 - 232) * s3 + 16 + 'px';
+          $('I2ring').style.opacity = rg * (.75 + .25 * Math.sin(lt * 6)); $('I2ring').style.transform = 'scale(' + L(1.15, 1, rg) + ')';
+          show('I2l', lt, 1.2); show('I2s', lt, 1.5, 30);
+        },
+        I3: function () {
+          monIn('I3mon', lt, .6);
+          var SEQ = [['adhkar', 264], ['tracker', 308], ['salah', 352], ['calendar', 352], ['journal', 396], ['learn', 352]], step = .55, t0 = .45;
+          var i = Math.floor((lt - t0) / step), k = (lt - t0) / step - i, at = function (j) { return SEQ[Math.max(0, Math.min(SEQ.length - 1, j))]; };
+          var prev = i < 1 ? 'today' : at(i - 1)[0], next = i < 0 ? 'today' : at(i)[0];
+          screen('I3mon', prev, next, i < 0 ? 0 : o3(seg(k, .35, .75)));
+          var my = 360 + 14, ty = i < 0 ? 220 : at(i)[1], fy = i < 1 ? 220 : at(i - 1)[1], m = io(seg(k, 0, .32));
+          var cx = 40 + 92 * .625, cy = my + L(fy, ty, i < 0 ? 0 : m) * .625, ce = o5(seg(lt, .2, .6));
+          $('cur').style.left = L(cx + 300, cx, ce) + 'px'; $('cur').style.top = L(cy + 200, cy, ce) - 4 + 'px'; $('cur').style.opacity = ce;
+          var rp = i < 0 ? 1 : seg(k, .32, .7);
+          $('I3rip').style.left = cx - 30 + 'px'; $('I3rip').style.top = cy - 30 + 'px';
+          $('I3rip').style.opacity = rp < 1 ? (1 - rp) * .9 : 0; $('I3rip').style.transform = 'scale(' + L(.3, 1.4, rp) + ')';
+          if (lt >= .6) $('I3mon').style.transform = 'scale(' + L(1, 1.03, seg(lt, .6, 4)) + ')';
+          show('I3l', lt, .6); show('I3s', lt, .9, 30);
+        },
+        I4: function () {
+          monIn('I4mon', lt, .6);
+          screen('I4mon', 'today', 'pal', o3(seg(lt, .75, 1.05)));
+          [['k1', .55], ['k2', .65]].forEach(function (q) { var d = Math.sin(seg(lt, q[1], q[1] + .25) * Math.PI); $(q[0]).style.transform = 'translateY(' + 8 * d + 'px)'; $(q[0]).style.boxShadow = '0 ' + (10 - 8 * d) + 'px 0 #08090b, 0 0 0 1.5px rgba(246,223,170,' + (.25 + .5 * d) + ') inset'; $(q[0]).style.color = d > .3 ? '#f6dfaa' : '#f5f0e7'; });
+          show('I4keys', lt, .3, 30);
+          $('I4keys').style.opacity = Math.min(+$('I4keys').style.opacity, 1 - seg(lt, 1.2, 1.5));
+          lift('I4b', [461, 118, 680, 250], 160, [40, 770, 1000], lt < 1.2 ? 0 : o5(seg(lt, 1.2, 1.85)), io(seg(lt, 1.5, 2.3)), 0);
+          show('I4l', lt, 1.4); show('I4s', lt, 1.7, 30);
+        },
+        I5: function () {
+          monIn('I5mon', lt, .6); screen('I5mon', 'print', null, 0);
+          $('I5mon').style.filter = 'brightness(' + L(1, .45, o3(seg(lt, .9, 1.4))) + ')';
+          var e = lt < .8 ? 0 : o5(seg(lt, .8, 1.7));
+          lift('I5b', [836, 214, 502, 786], 160, [215, 330, 650], e, 1, 0);
+          $('I5b').style.transform = 'rotate(' + L(-4, -1.5, e) + 'deg) scale(' + (1 + .02 * seg(lt, 1.7, 3.8)) + ')';
+          show('I5l', lt, 1.3); show('I5s', lt, 1.6, 30);
         },
         J: function () {
-          var e = o5(seg(lt, 0, 1));
+          var e = o5(seg(lt, 0, .9));
           $('Jstar').style.transform = 'scale(' + L(1.6, 1, e) + ') rotate(' + (L(-40, 0, e) + lt * 3) + 'deg)'; $('Jstar').style.opacity = e;
           $('Jglow').style.opacity = e * (.8 + .2 * Math.sin(lt * 3));
-          show('Jw', lt, .4, 40, 16); show('Jt', lt, 1, 30, 10); show('Jb', lt, 1.4, 30, 8); show('Ju', lt, 1.8, 20, 6); show('Js', lt, 2.3, 16, 6);
+          show('Jw', lt, .3); show('Jt', lt, .8, 30); show('Jb', lt, 1.1, 30); show('Ju', lt, 1.4, 20); show('Js', lt, 1.8, 16);
         }
       })[b[0]]();
     });
-    /* a soft flash on the cuts that change the light */
-    var fl = 0;
-    [16.6, 19.6, 25.2].forEach(function (c) { fl = Math.max(fl, (1 - seg(t, c, c + .4)) * (t >= c ? .18 : 0)); });
-    $('flash').style.opacity = fl;
+    $$('.g').forEach(function (g) { g.style.backgroundPosition = (100 - ((t * 38) % 160)) + '% 0'; });
+    var sw = (t % 5) / 5; $('sweep').style.opacity = Math.sin(clamp((sw - .1) / .25, 0, 1) * Math.PI) * .9; $('sweep').style.transform = 'translateX(' + L(-60, 60, sw) + '%)';
+    bokeh(t, TINT[cur]);
     grain(t);
-    $('fade').style.opacity = Math.max(1 - seg(t, 0, .25), seg(t, 29.2, 30));
+    $('fade').style.opacity = Math.max(1 - seg(t, 0, .25), seg(t, 59.2, 60));
   };
   if (!/[?&]render/.test(location.search)) {
     var t0 = performance.now();

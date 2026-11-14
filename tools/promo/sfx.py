@@ -1,4 +1,4 @@
-"""Sound design for the 30-second ad, made in code: air, not music.
+"""Sound design for the 60-second ad, made in code: air, not music.
   - nothing on the cuts;
   - a faint tick as the counting ring rises (one for each count, quiet, like a bead);
   - a soft swell of low air under the logo at the end (no tone, no note).
@@ -51,17 +51,17 @@ def put(sig, at, pan_from, pan_to, gain):
 
 # no sound on the cuts: the pictures move, the room stays still
 
-# the counting ring (the beat from 7.4 s): ticks at the same moments as the numbers on screen
-D0 = 6.4
+# the counting ring (the beat from 7.8 s): ticks at the same moments as the numbers on screen
+D0 = 7.8
 for n in range(2, 34):
-    at = D0 + .5 + 1.8 * ((n - 1) / 32) ** (1 / .8)
+    at = D0 + .5 + 2.4 * ((n - 1) / 32) ** (1 / .85)
     k = int(.03 * SR)
     tt = np.arange(k) / SR
     tick = np.sin(2 * np.pi * 1850 * tt) * np.exp(-tt / .006) + .4 * np.sin(2 * np.pi * 3700 * tt) * np.exp(-tt / .003)
     put(tick, at, .5, .5, .05)
 
-# a warm swell under the logo (from 25.9 s): low, soft, rising and settling
-s0, sd = 25.0, 4.6
+# a warm swell under the logo (from 55.0 s): low, soft, rising and settling
+s0, sd = 55.0, 5.0
 n = int(sd * SR)
 tt = np.arange(n) / SR
 env = (1 - np.exp(-tt / .5)) * np.exp(-np.maximum(0, tt - 1.2) / 1.6)
