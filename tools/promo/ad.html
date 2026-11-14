@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Adhkār · the 30-second ad</title>
+<!-- The 30-second ad, as code: portrait 1080 x 1920. window.render(t) draws the frame at t seconds; tools/promo/render.js
+     steps a headless browser through it into ffmpeg. Open it directly to watch it play.
+     Built like a product ad: short beats on hard, moving cuts; big words on fields of colour; the interface itself
+     animated (the counting ring, the finger joints, the compass, the prayer list, the ifṭār countdown) rather than
+     still screens; real screens of the app in 3D for the moments that need them. -->
+<style>
+@font-face { font-family: 'Quicksand'; font-weight: 400 700; src: url(../../docs/guide/fonts/Quicksand-400-700-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+2000-206F; }
+@font-face { font-family: 'Quicksand'; font-weight: 400 700; src: url(../../docs/guide/fonts/Quicksand-400-700-latin-ext.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02FF, U+1E00-1EFF; }
+@font-face { font-family: 'Amiri'; font-weight: 400; src: url(../../docs/guide/fonts/Amiri-400-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+2000-206F; }
+@font-face { font-family: 'Amiri'; font-weight: 400; src: url(../../docs/guide/fonts/Amiri-400-latin-ext.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02FF, U+1E00-1EFF; }
+@font-face { font-family: 'Amiri'; font-weight: 400; src: url(../../docs/guide/fonts/Amiri-400-arabic.woff2) format('woff2'); unicode-range: U+0600-06FF, U+FB50-FDFF, U+FE70-FEFF; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; }
+#stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; font-family: 'Quicksand', sans-serif; color: #f5f0e7; background: #050608; }
+.b { position: absolute; inset: 0; visibility: hidden; overflow: hidden; perspective: 2400px; }
+.fill { position: absolute; inset: 0; }
+.big { position: absolute; left: 60px; right: 60px; text-align: center; font: 700 190px/1 'Quicksand'; letter-spacing: -.045em; }
+.line { position: absolute; left: 80px; right: 80px; text-align: center; font: 700 78px/1.08 'Quicksand'; letter-spacing: -.03em; }
+.line em, .big em { font-style: normal; background: linear-gradient(100deg, #b8873a, #f6dfaa 45%, #d9b26f 70%, #f6dfaa); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.small { position: absolute; left: 80px; right: 80px; text-align: center; font: 500 36px/1.4 'Quicksand'; color: #c9c2b5; }
+.kick { font: 700 24px/1.2 'Quicksand'; letter-spacing: .36em; text-transform: uppercase; color: #e9c98b; }
+.phone { position: absolute; width: 640px; padding: 11px; border-radius: 68px; background: linear-gradient(160deg, #34373f, #0c0d12 38%, #1c1e25 80%, #2f3239); box-shadow: 0 100px 160px -50px rgba(0,0,0,.95), 0 0 0 2px rgba(255,255,255,.08) inset; transform-style: preserve-3d; }
+.phone .scr { position: relative; width: 618px; height: 1280px; border-radius: 58px; overflow: hidden; background: #000; }
+.phone img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.phone .gl { position: absolute; inset: 0; background: linear-gradient(115deg, transparent 36%, rgba(255,255,255,.16) 48%, transparent 60%); mix-blend-mode: screen; }
+.ar { font-family: 'Amiri', serif; direction: rtl; }
+#flash { position: absolute; inset: 0; background: #fff6df; opacity: 0; pointer-events: none; z-index: 50; }
+#grain { position: absolute; inset: 0; z-index: 51; pointer-events: none; opacity: .05; }
+#fade { position: absolute; inset: 0; z-index: 60; background: #000; pointer-events: none; }
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <!-- A · a point of light becomes the mark -->
+  <div class="b" id="A">
+    <div class="fill" style="background:radial-gradient(60% 40% at 50% 46%, #15131c, #050608 70%)"></div>
+    <div id="Aglow" style="position:absolute;left:140px;top:480px;width:800px;height:800px;border-radius:50%;background:radial-gradient(circle,rgba(246,214,150,.55),rgba(246,214,150,0) 62%)"></div>
+    <svg id="Astar" viewBox="0 0 64 64" style="position:absolute;left:290px;top:630px;width:500px;height:500px;overflow:visible">
+      <defs><linearGradient id="gA" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6dfaa"/><stop offset="1" stop-color="#b8873a"/></linearGradient></defs>
+      <circle id="Adot" cx="32" cy="32" r="2" fill="#fff3d6"/>
+      <path id="Aout" d="M32 8l6.1 8.2 9.9-2.1-2.1 9.9L54 32l-8.1 6.1 2.1 9.9-9.9-2.1L32 56l-6.1-8.1-9.9 2.1 2.1-9.9L10 32l8.1-6.1-2.1-9.9 9.9 2.1z" fill="none" stroke="url(#gA)" stroke-width="1.4" stroke-linejoin="round" stroke-dasharray="176" stroke-dashoffset="176"/>
+      <path id="Ain" d="M32 21l3 4 4.9-1-1 4.9 4 3.1-4 3 1 4.9-4.9-1-3 4-3-4-4.9 1 1-4.9-4-3 4-3.1-1-4.9 4.9 1z" fill="url(#gA)" style="transform-origin:32px 32px"/>
+      <circle id="Aring" cx="32" cy="32" r="10" fill="none" stroke="#f6dfaa" stroke-width=".6"/>
+    </svg>
+    <div class="big" id="Aword" style="top:1380px;font-size:120px">Every <em>moment.</em></div>
+  </div>
+
+  <!-- B · the day, in single words -->
+  <div class="b" id="B">
+    <div class="fill" id="Bbg"></div>
+    <div class="big" id="Bword" style="top:820px"></div>
+    <div class="line" id="Bline" style="top:800px;font-size:96px;line-height:1.05">Remembrance,<br><em>through it all.</em></div>
+  </div>
+
+  <!-- C · the phone arrives -->
+  <div class="b" id="C">
+    <div class="fill" style="background:radial-gradient(70% 45% at 50% 40%, #1a1f30, #06070b 72%)"></div>
+    <div class="phone" id="Cph" style="left:220px;top:300px"><div class="scr"><img src="../../docs/guide/shots/dark/today.webp"><i class="gl"></i></div></div>
+    <div id="Ccap" style="position:absolute;left:0;right:0;top:1660px;text-align:center"><div class="kick">Today</div><div style="margin-top:14px;font:700 64px Quicksand;letter-spacing:-.02em">Your day, <span style="background:linear-gradient(100deg,#b8873a,#f6dfaa 45%,#d9b26f);-webkit-background-clip:text;background-clip:text;color:transparent">at a glance.</span></div></div>
+  </div>
+
+  <!-- D · counting, on the fingers -->
+  <div class="b" id="D">
+    <div class="fill" style="background:radial-gradient(60% 40% at 50% 38%, #1b1810, #060605 72%)"></div>
+    <svg id="Dring" viewBox="0 0 600 600" style="position:absolute;left:190px;top:210px;width:700px;height:700px;overflow:visible">
+      <circle cx="300" cy="300" r="250" fill="none" stroke="rgba(233,201,139,.12)" stroke-width="18"/>
+      <circle id="Darc" cx="300" cy="300" r="250" fill="none" stroke="url(#gD)" stroke-width="18" stroke-linecap="round" transform="rotate(-90 300 300)" stroke-dasharray="1570.8" stroke-dashoffset="1570.8"/>
+      <defs><linearGradient id="gD" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6dfaa"/><stop offset="1" stop-color="#c39448"/></linearGradient></defs>
+      <g id="Dticks"></g>
+      <text id="Dn" x="300" y="340" text-anchor="middle" style="font:700 190px Quicksand;fill:#f5f0e7;letter-spacing:-6px">1</text>
+      <text x="300" y="410" text-anchor="middle" style="font:700 30px Quicksand;letter-spacing:8px;fill:#c9c2b5">SUBḤĀNALLĀH</text>
+    </svg>
+    <svg id="Dhand" viewBox="0 0 560 380" style="position:absolute;left:260px;top:960px;width:560px;height:380px;overflow:visible"></svg>
+    <div class="line" id="Dl1" style="top:1440px">Count on <em>your fingers.</em></div>
+    <div class="small" id="Dl2" style="top:1560px">As the Sunnah teaches. The app keeps the pace.</div>
+  </div>
+
+  <!-- E · a montage of the day's remembrance -->
+  <div class="b" id="E">
+    <div class="fill" style="background:#07080d"></div>
+    <div id="Egrid" style="position:absolute;left:-180px;top:-120px;width:1440px;height:2200px;transform-origin:50% 50%">
+      <div class="phone" data-i="0" style="left:40px;top:60px;transform:scale(.62);transform-origin:0 0"><div class="scr"><img src="../../docs/guide/shots/dark/adhkar.webp"></div></div>
+      <div class="phone" data-i="1" style="left:520px;top:-120px;transform:scale(.62);transform-origin:0 0"><div class="scr"><img src="../../docs/guide/shots/dark/reader.webp"></div></div>
+      <div class="phone" data-i="2" style="left:1000px;top:60px;transform:scale(.62);transform-origin:0 0"><div class="scr"><img src="../../docs/guide/shots/dark/collection.webp"></div></div>
+      <div class="phone" data-i="3" style="left:40px;top:960px;transform:scale(.62);transform-origin:0 0"><div class="scr"><img src="../../docs/guide/shots/ar/reader.webp"></div></div>
+      <div class="phone" data-i="4" style="left:520px;top:780px;transform:scale(.62);transform-origin:0 0"><div class="scr"><img src="../../docs/guide/shots/dark/tracker.webp"></div></div>
+      <div class="phone" data-i="5" style="left:1000px;top:960px;transform:scale(.62);transform-origin:0 0"><div class="scr"><img src="../../docs/guide/shots/dark/night.webp"></div></div>
+      <div class="phone" data-i="6" style="left:520px;top:1680px;transform:scale(.62);transform-origin:0 0"><div class="scr"><img src="../../docs/guide/shots/dark/journal.webp"></div></div>
+    </div>
+    <div class="fill" style="background:radial-gradient(60% 30% at 50% 50%, rgba(5,6,8,.82), rgba(5,6,8,.2) 80%)"></div>
+    <div class="big" id="Eword" style="top:860px;font-size:150px"></div>
+  </div>
+
+  <!-- F · the qibla, and the five prayers -->
+  <div class="b" id="F">
+    <div class="fill" style="background:radial-gradient(70% 45% at 50% 30%, #f8f2e6, #e7dfcf 80%)"></div>
+    <svg id="Fdial" viewBox="0 0 600 600" style="position:absolute;left:215px;top:170px;width:650px;height:650px;overflow:visible"></svg>
+    <div id="Flist" style="position:absolute;left:150px;right:150px;top:930px"></div>
+    <div class="line" id="Fl" style="top:1600px;color:#1c1914">The qibla, and every prayer.<br><span style="font-size:.62em;color:#7a6c55">Anywhere. Even offline.</span></div>
+  </div>
+
+  <!-- G · Friday -->
+  <div class="b" id="G">
+    <div class="fill" style="background:radial-gradient(70% 45% at 50% 34%, #0f3a31, #03110e 74%)"></div>
+    <svg viewBox="0 0 400 520" id="Garch" style="position:absolute;left:140px;top:120px;width:800px;height:1040px;overflow:visible"><path id="Gpath" d="M20 520V250C20 130 110 50 200 10c90 40 180 120 180 240v270" fill="none" stroke="#e7cf92" stroke-width="1.4" stroke-dasharray="1180" stroke-dashoffset="1180" opacity=".7"/></svg>
+    <div id="Gbook" style="position:absolute;left:230px;top:330px;width:620px;height:1284px;transform-style:preserve-3d">
+      <div class="phone" style="left:0;top:0;width:620px"><div class="scr" style="width:598px;height:1262px;transform-style:preserve-3d">
+        <img src="../../docs/guide/shots/friday/kahf-tr.webp" id="Gunder">
+        <div id="Gpage" style="position:absolute;inset:0;transform-origin:100% 50%;backface-visibility:hidden"><img src="../../docs/guide/shots/friday/kahf.webp" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top"></div>
+      </div></div>
+    </div>
+    <div id="Gt" style="position:absolute;left:0;right:0;top:1660px;text-align:center"><div class="ar" style="font:400 62px/1.2 Amiri;color:#f3dca6">يوم الجمعة</div><div style="margin-top:6px;font:700 84px Quicksand;letter-spacing:-.03em">Every <span style="background:linear-gradient(100deg,#b8873a,#f6dfaa 45%,#d9b26f);-webkit-background-clip:text;background-clip:text;color:transparent">Friday.</span></div><div style="margin-top:10px;font:500 32px Quicksand;color:#b9c7c0">Sūrat al-Kahf, as printed in the Madinah Muṣḥaf.</div></div>
+  </div>
+
+  <!-- H · Ramaḍān -->
+  <div class="b" id="H">
+    <div class="fill" style="background:radial-gradient(70% 50% at 50% 36%, #241e66, #05061a 74%)"></div>
+    <svg id="Hlan" viewBox="0 0 1080 700" style="position:absolute;left:0;top:0;width:1080px;height:700px;overflow:visible"></svg>
+    <div id="Hk" class="kick" style="position:absolute;left:0;right:0;top:760px;text-align:center">Until ifṭār</div>
+    <div id="Hcd" style="position:absolute;left:0;right:0;top:820px;text-align:center;font:700 220px/1 Quicksand;letter-spacing:-.04em;font-variant-numeric:tabular-nums">2:25:14</div>
+    <div id="Hbar" style="position:absolute;left:190px;right:190px;top:1100px;height:10px;border-radius:10px;background:rgba(255,255,255,.1);overflow:hidden"><i id="Hfill" style="display:block;height:100%;width:0;border-radius:10px;background:linear-gradient(90deg,#f6dfaa,#d9a441)"></i></div>
+    <div class="line" id="Hl" style="top:1300px">Ramaḍān, <em>all month.</em></div>
+    <div class="small" id="Hs" style="top:1420px">Suhūr and ifṭār, tarāwīḥ, the khatm, the last ten nights.</div>
+  </div>
+
+  <!-- I · the computer -->
+  <div class="b" id="I">
+    <div class="fill" style="background:radial-gradient(70% 45% at 50% 40%, #1a1f30, #06070b 72%)"></div>
+    <div id="Ilap" style="position:absolute;left:-90px;top:560px;width:1260px">
+      <div style="border-radius:28px;padding:16px;background:linear-gradient(180deg,#26292f,#0e0f13);box-shadow:0 100px 160px -60px rgba(0,0,0,.95),0 0 0 2px rgba(255,255,255,.06) inset">
+        <div style="position:relative;height:715px;border-radius:12px;overflow:hidden;background:#000">
+          <img src="../../docs/readme/desk-today.webp" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top left">
+          <div id="Ipill" style="position:absolute;left:50%;top:16px;display:flex;align-items:center;gap:13px;height:56px;padding:0 22px 0 8px;border-radius:99px;background:linear-gradient(180deg,#151925,#0d1018);border:1.5px solid rgba(217,178,111,.6);box-shadow:0 18px 40px -12px rgba(0,0,0,.85)">
+            <span style="width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:rgba(217,178,111,.14);border:1px solid rgba(217,178,111,.4)"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="#f1d59e" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V11.5c0-2 1.2-3.4 3-4.2M19 20V11.5c0-2-1.2-3.4-3-4.2M7.5 12c0-3.4 2-5.1 4.5-6.6 2.5 1.5 4.5 3.2 4.5 6.6M4 20h16M12 3v2.4"/></svg></span>
+            <b style="font:700 21px Quicksand;color:#f5f0e7">Maghrib</b><span class="ar" style="font:400 19px Amiri;color:#f1d59e">المغرب</span><b id="Icd" style="margin-left:22px;font:700 22px Quicksand;color:#f5f0e7">1:12:40</b>
+          </div>
+        </div>
+      </div>
+      <div style="height:24px;margin:0 -70px;border-radius:0 0 24px 24px;background:linear-gradient(180deg,#2b2e36,#121318)"></div>
+    </div>
+    <div class="line" id="Il" style="top:1480px">On your computer, <em>too.</em></div>
+    <div class="small" id="Is" style="top:1600px">The next prayer, always in view.</div>
+  </div>
+
+  <!-- J · the end -->
+  <div class="b" id="J">
+    <div class="fill" style="background:radial-gradient(60% 40% at 50% 40%, #16141c, #050608 72%)"></div>
+    <div id="Jglow" style="position:absolute;left:290px;top:300px;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(246,214,150,.42),rgba(246,214,150,0) 62%)"></div>
+    <svg id="Jstar" viewBox="0 0 64 64" style="position:absolute;left:420px;top:430px;width:240px;height:240px;overflow:visible">
+      <defs><linearGradient id="gJ" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6dfaa"/><stop offset="1" stop-color="#b8873a"/></linearGradient></defs>
+      <path d="M32 8l6.1 8.2 9.9-2.1-2.1 9.9L54 32l-8.1 6.1 2.1 9.9-9.9-2.1L32 56l-6.1-8.1-9.9 2.1 2.1-9.9L10 32l8.1-6.1-2.1-9.9 9.9 2.1z" fill="none" stroke="url(#gJ)" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M32 21l3 4 4.9-1-1 4.9 4 3.1-4 3 1 4.9-4.9-1-3 4-3-4-4.9 1 1-4.9-4-3 4-3.1-1-4.9 4.9 1z" fill="url(#gJ)"/>
+    </svg>
+    <div id="Jw" style="position:absolute;left:0;right:0;top:740px;text-align:center;font:400 190px/1 Amiri">Adh<span style="background:linear-gradient(100deg,#b8873a,#f6dfaa 45%,#d9b26f 70%,#f6dfaa);-webkit-background-clip:text;background-clip:text;color:transparent">kār</span></div>
+    <div id="Jt" style="position:absolute;left:0;right:0;top:1000px;text-align:center;font:700 54px Quicksand;letter-spacing:-.01em;color:#ece6da">Free. Private. Offline.</div>
+    <div id="Jb" style="position:absolute;left:0;right:0;top:1130px;display:flex;justify-content:center;gap:22px">
+      <span style="display:inline-flex;align-items:center;height:96px;padding:0 46px;border-radius:99px;font:700 34px Quicksand;background:linear-gradient(180deg,#f1d59e,#d9b26f);color:#1a1206">Android</span>
+      <span style="display:inline-flex;align-items:center;height:96px;padding:0 46px;border-radius:99px;font:700 34px Quicksand;border:2px solid rgba(231,207,146,.5);color:#f3dca6">Windows</span>
+    </div>
+    <div id="Ju" style="position:absolute;left:0;right:0;top:1300px;text-align:center;font:700 40px Quicksand;color:#f3dca6">bashyr18.github.io/adhkar/guide</div>
+    <div id="Js" class="kick" style="position:absolute;left:0;right:0;top:1700px;text-align:center;color:#a99e88">Built as ṣadaqah jāriyah</div>
+  </div>
+
+  <div id="flash"></div>
+  <canvas id="grain" width="540" height="960" style="width:1080px;height:1920px"></canvas>
+  <div id="fade"></div>
+</div>
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var clamp = function (x, a, b) { return Math.max(a, Math.min(b, x)); };
+  var seg = function (t, a, b) { return clamp((t - a) / (b - a), 0, 1); };
+  var o3 = function (x) { return 1 - Math.pow(1 - x, 3); };
+  var o5 = function (x) { return 1 - Math.pow(1 - x, 5); };
+  var io = function (x) { return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+  var back = function (x) { var c = 1.7; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+  var L = function (a, b, x) { return a + (b - a) * x; };
+  var DUR = (window.DUR = 30);
+  /* beats: [id, from, to]; cuts are hard, with motion carried across them */
+  var BEATS = [['A', 0, 2.5], ['B', 2.5, 4.9], ['C', 4.9, 7.4], ['D', 7.4, 10.4], ['E', 10.4, 12.9], ['F', 12.9, 15.9], ['G', 15.9, 19.9], ['H', 19.9, 22.9], ['I', 22.9, 25.9], ['J', 25.9, 30]];
+  window.CUTS = BEATS.slice(1).map(function (b) { return b[1]; });
+
+  /* ticks of the counting ring */
+  (function () {
+    var h = '';
+    for (var i = 0; i < 33; i++) {
+      var a = (i / 33) * Math.PI * 2 - Math.PI / 2, x = 300 + Math.cos(a) * 292, y = 300 + Math.sin(a) * 292;
+      h += '<circle data-k="' + i + '" cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="6" fill="rgba(233,201,139,.18)"/>';
+    }
+    $('Dticks').innerHTML = h;
+  })();
+  /* the right hand, drawn simply: four fingers of three joints and the thumb; the joints light in counting order */
+  var JOINTS = [];
+  (function () {
+    var h = '', fx = [120, 220, 320, 420], tops = [70, 30, 40, 90];
+    fx.forEach(function (x, f) {
+      h += '<rect x="' + (x - 38) + '" y="' + tops[f] + '" width="76" height="' + (330 - tops[f]) + '" rx="38" fill="rgba(245,240,231,.05)" stroke="rgba(233,201,139,.35)" stroke-width="2"/>';
+      for (var j = 0; j < 3; j++) {
+        var y = tops[f] + 42 + j * ((290 - tops[f]) / 3);
+        JOINTS.push([x, y]);
+        h += '<circle class="jt" cx="' + x + '" cy="' + y.toFixed(1) + '" r="17" fill="rgba(233,201,139,.12)" stroke="rgba(233,201,139,.4)" stroke-width="2"/>';
+        if (j < 2) h += '<line x1="' + (x - 22) + '" x2="' + (x + 22) + '" y1="' + (y + (290 - tops[f]) / 6).toFixed(1) + '" y2="' + (y + (290 - tops[f]) / 6).toFixed(1) + '" stroke="rgba(233,201,139,.2)" stroke-width="2"/>';
+      }
+    });
+    h += '<rect x="470" y="210" width="72" height="150" rx="36" transform="rotate(28 506 285)" fill="rgba(245,240,231,.05)" stroke="rgba(233,201,139,.35)" stroke-width="2"/>';
+    h += '<circle id="Dthumb" cx="520" cy="250" r="24" fill="#f6dfaa" opacity=".9"/>';
+    $('Dhand').innerHTML = h;
+  })();
+  /* the qibla dial */
+  (function () {
+    var h = '<circle cx="300" cy="300" r="290" fill="#fffaf0" stroke="#d8c7a3" stroke-width="3"/><circle cx="300" cy="300" r="250" fill="none" stroke="#efe4cd" stroke-width="2"/>';
+    for (var i = 0; i < 72; i++) {
+      var a = i * 5 * Math.PI / 180, r1 = i % 6 ? 262 : 244, x1 = 300 + Math.sin(a) * r1, y1 = 300 - Math.cos(a) * r1, x2 = 300 + Math.sin(a) * 280, y2 = 300 - Math.cos(a) * 280;
+      h += '<line x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '" stroke="' + (i % 6 ? '#cdb994' : '#8a6420') + '" stroke-width="' + (i % 6 ? 2 : 4) + '"/>';
+    }
+    [['N', 0], ['E', 90], ['S', 180], ['W', 270]].forEach(function (c) {
+      var a = c[1] * Math.PI / 180;
+      h += '<text x="' + (300 + Math.sin(a) * 205).toFixed(1) + '" y="' + (312 - Math.cos(a) * 205).toFixed(1) + '" text-anchor="middle" style="font:700 36px Quicksand;fill:' + (c[0] === 'N' ? '#b8873a' : '#6b604f') + '">' + c[0] + '</text>';
+    });
+    h = '<g id="Frose">' + h + '<g transform="rotate(65 300 300)"><path d="M300 52l18 40h-36z" fill="#b8873a"/><rect x="284" y="20" width="32" height="32" rx="5" fill="#1c1914"/><rect x="284" y="27" width="32" height="5" fill="#d9b26f"/></g></g>';
+    h += '<path id="Fneedle" d="M300 70L322 300 300 330 278 300z" fill="url(#gF)"/><circle cx="300" cy="300" r="20" fill="#1c1914"/><circle cx="300" cy="300" r="8" fill="#f6dfaa"/>';
+    h = '<defs><linearGradient id="gF" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6dfaa"/><stop offset="1" stop-color="#9a7428"/></linearGradient></defs>' + h;
+    $('Fdial').innerHTML = h;
+    $('Flist').innerHTML = [['Fajr', 'الفجر', '5:17'], ['Dhuhr', 'الظهر', '12:06'], ['ʿAṣr', 'العصر', '3:14'], ['Maghrib', 'المغرب', '5:35'], ['ʿIshāʾ', 'العشاء', '6:50']].map(function (p, i) {
+      return '<div class="pr" style="display:flex;align-items:center;gap:22px;height:104px;padding:0 34px;margin-bottom:12px;border-radius:28px;background:#fffaf2;box-shadow:0 18px 40px -26px rgba(80,60,20,.5);border:1.5px solid rgba(138,100,32,.12)"><b style="font:700 40px Quicksand;color:#1c1914;flex:1">' + p[0] + '</b><span class="ar" style="font:400 36px Amiri;color:#8a6420">' + p[1] + '</span><b style="font:700 40px Quicksand;color:#1c1914;font-variant-numeric:tabular-nums;min-width:130px;text-align:right">' + p[2] + '</b></div>';
+    }).join('');
+  })();
+
+  var DAY = [['Fajr.', '#f19a5a', '#3a2a5e'], ['Work.', '#3f86cf', '#86bfea'], ['ʿAṣr.', '#d79a3c', '#f3d38a'], ['Home.', '#b4566e', '#5b3168'], ['Sleep.', '#0d1030', '#1d1a52']];
+  function lanterns(lt) {
+    var P = [[120, 140], [330, 230], [560, 110], [780, 200], [970, 130]], h = '';
+    P.forEach(function (l, i) {
+      var a = Math.sin(lt * (1.1 + i * .13) + i) * 6, g = .6 + .4 * Math.sin(lt * 2.6 + i * 1.7), drop = L(-420, 0, o3(seg(lt, i * .08, .9 + i * .08)));
+      h += '<g transform="translate(' + l[0] + ',' + drop + ') rotate(' + a + ')"><line x1="0" y1="-500" x2="0" y2="' + l[1] + '" stroke="#b08a4a" stroke-width="1.8" opacity=".7"/><g transform="translate(0,' + l[1] + ') scale(1.5)"><circle cy="46" r="70" fill="rgba(255,200,110,' + .18 * g + ')"/><path d="M-14 0h28l-4 12h-20z" fill="#c9a15a"/><path d="M-22 12h44l8 34-8 40h-44l-8-40z" fill="rgba(255,214,140,' + (.3 + .22 * g) + ')" stroke="#e7c27e" stroke-width="2"/><path d="M0 12v74M-26 46h52" stroke="#e7c27e" stroke-width="1" opacity=".6"/><ellipse cy="50" rx="6" ry="10" fill="#fff2cf" opacity="' + (.7 + .3 * g) + '"/><path d="M-16 86h32l-6 10h-20z" fill="#c9a15a"/></g></g>';
+    });
+    $('Hlan').innerHTML = h;
+  }
+  var gctx = $('grain').getContext('2d'), gimg = gctx.createImageData(540, 960);
+  function grain(t) {
+    var seed = Math.floor(t * 24) * 7919 + 1, d = gimg.data;
+    for (var i = 0; i < d.length; i += 4) { seed = (seed * 16807) % 2147483647; var v = seed & 255; d[i] = d[i + 1] = d[i + 2] = v; d[i + 3] = 255; }
+    gctx.putImageData(gimg, 0, 0);
+  }
+  /* entering a beat: a quick push in out of a little blur, as a camera cut on movement */
+  function enter(el, lt, dir) {
+    var e = o5(seg(lt, 0, .45));
+    el.style.transform = 'scale(' + L(1.08, 1, e) + ') translateY(' + L((dir || 1) * 60, 0, e) + 'px)';
+    el.style.filter = lt < .45 ? 'blur(' + L(14, 0, e) + 'px)' : 'none';
+  }
+  function show(id, lt, from, dy, blur) {
+    var e = o5(seg(lt, from, from + .55)), n = $(id);
+    n.style.opacity = e; n.style.transform = 'translateY(' + L(dy || 50, 0, e) + 'px)'; n.style.filter = 'blur(' + L(blur == null ? 10 : blur, 0, e) + 'px)';
+  }
+
+  window.render = function (t) {
+    BEATS.forEach(function (b) {
+      var el = $(b[0]), on = t >= b[1] && t < b[2];
+      el.style.visibility = on ? 'visible' : 'hidden';
+      if (!on) return;
+      var lt = t - b[1];
+      if (b[0] !== 'A') enter(el, lt, b[0] === 'E' ? -1 : 1);
+      ({
+        A: function () {
+          $('Adot').setAttribute('r', L(0, 2.4, o3(seg(lt, .1, .45))) * (1 - seg(lt, .7, .9)));
+          $('Aout').style.strokeDashoffset = 176 * (1 - io(seg(lt, .35, 1.35)));
+          var f = back(seg(lt, 1.15, 1.6)); $('Ain').style.transform = 'scale(' + Math.max(0, f) + ')'; $('Ain').style.opacity = seg(lt, 1.15, 1.3);
+          var rg = o3(seg(lt, 1.3, 2.1)); $('Aring').setAttribute('r', L(8, 40, rg)); $('Aring').style.opacity = 1 - rg;
+          $('Aglow').style.opacity = o3(seg(lt, .3, 1.6)) * (.8 + .2 * Math.sin(lt * 4));
+          $('Astar').style.transform = 'scale(' + L(1, 1.12, seg(lt, 0, 2.5)) + ') rotate(' + lt * 8 + 'deg)';
+          show('Aword', lt, 1.55, 40, 16);
+        },
+        B: function () {
+          var i = Math.min(DAY.length, Math.floor(lt / .36));
+          if (i < DAY.length) {
+            var w = DAY[i], k = (lt - i * .36) / .36;
+            $('Bbg').style.background = 'linear-gradient(160deg,' + w[1] + ',' + w[2] + ')';
+            $('Bword').textContent = w[0]; $('Bword').style.opacity = 1; $('Bline').style.opacity = 0;
+            $('Bword').style.transform = 'scale(' + L(1.35, 1, o5(seg(k, 0, .5))) + ')'; $('Bword').style.letterSpacing = L(-.02, -.05, k) + 'em';
+            $('Bword').style.color = i === 1 || i === 2 ? '#0c0d12' : '#fff';
+          } else {
+            $('Bbg').style.background = 'radial-gradient(70% 45% at 50% 45%, #1a1c33, #07080d 72%)';
+            $('Bword').style.opacity = 0; show('Bline', lt, 1.8, 40, 14);
+          }
+        },
+        C: function () {
+          var e = o5(seg(lt, 0, 1.4)), s = seg(lt, 0, 2.5);
+          $('Cph').style.transform = 'translate3d(0,' + L(500, 0, e) + 'px,' + L(-400, 0, e) + 'px) rotateY(' + L(-55, -10, e) + 'deg) rotateX(' + L(18, 6, e) + 'deg) rotateZ(' + L(-8, -2, e) + 'deg) scale(' + L(.95, 1.04, s) + ')';
+          $('Cph').querySelector('.gl').style.transform = 'translateX(' + L(-130, 130, seg(lt, .5, 2.2)) + '%)';
+          show('Ccap', lt, .7, 40, 10);
+        },
+        D: function () {
+          var n = lt < .6 ? 1 : Math.min(33, 1 + Math.floor(Math.pow((lt - .6) / 2.1, .8) * 32));
+          $('Dn').textContent = n;
+          $('Darc').setAttribute('stroke-dashoffset', 1570.8 * (1 - n / 33));
+          Array.prototype.forEach.call($('Dticks').children, function (c, i) { c.setAttribute('fill', i < n ? '#f1d59e' : 'rgba(233,201,139,.18)'); c.setAttribute('r', i === n - 1 ? 10 : 6); });
+          var jt = document.querySelectorAll('#Dhand .jt'), cur = (n - 1) % 12;
+          Array.prototype.forEach.call(jt, function (j, i) { var lit = i === cur; j.setAttribute('fill', lit ? '#f6dfaa' : i < cur ? 'rgba(233,201,139,.35)' : 'rgba(233,201,139,.12)'); j.setAttribute('r', lit ? 21 : 17); });
+          var jp = JOINTS[cur]; $('Dthumb').setAttribute('cx', L(520, jp[0] + 30, .6)); $('Dthumb').setAttribute('cy', jp[1]);
+          $('Dring').style.transform = 'scale(' + L(.8, 1, o5(seg(lt, 0, .8))) + ')';
+          show('Dhand', lt, .3, 60, 0); show('Dl1', lt, .9, 40, 12); show('Dl2', lt, 1.2, 30, 8);
+        },
+        E: function () {
+          var words = ['Morning.', 'Evening.', 'After ṣalāh.', 'Before sleep.'], i = Math.min(3, Math.floor(lt / .62));
+          $('Eword').innerHTML = i === 3 ? 'Before <em>sleep.</em>' : words[i];
+          var k = (lt - i * .62) / .62;
+          $('Eword').style.transform = 'scale(' + L(1.25, 1, o5(seg(k, 0, .4))) + ')'; $('Eword').style.opacity = o5(seg(k, 0, .25));
+          $('Egrid').style.transform = 'rotate(-12deg) translate(' + L(80, -140, io(seg(lt, 0, 2.5))) + 'px,' + L(260, -420, io(seg(lt, 0, 2.5))) + 'px) scale(' + L(1.1, 1.18, lt / 2.5) + ')';
+          Array.prototype.forEach.call(document.querySelectorAll('#Egrid .phone'), function (p, j) { p.style.opacity = .55 + .45 * (j % 4 === i ? 1 : 0); });
+        },
+        F: function () {
+          var a = L(150, 0, back(seg(lt, .1, 1.5)) ) + Math.sin(lt * 9) * 2 * (1 - seg(lt, 1.2, 1.8));
+          document.getElementById('Frose').setAttribute('transform', 'rotate(' + (a - 65) + ' 300 300)');
+          $('Fdial').style.transform = 'scale(' + L(.7, 1, o5(seg(lt, 0, .7))) + ') rotate(' + L(-20, 0, o5(seg(lt, 0, .7))) + 'deg)';
+          var nx = 3;
+          Array.prototype.forEach.call(document.querySelectorAll('#Flist .pr'), function (r, i) {
+            var e = o5(seg(lt, .6 + i * .12, 1.2 + i * .12));
+            r.style.opacity = e; r.style.transform = 'translateX(' + L(i % 2 ? 160 : -160, 0, e) + 'px)';
+            var hl = i === nx ? o3(seg(lt, 1.6, 2)) : 0;
+            r.style.background = hl ? 'linear-gradient(90deg,#f6dfaa,#e9c27a)' : '#fffaf2';
+            r.style.transform += ' scale(' + (1 + .04 * hl) + ')';
+          });
+          show('Fl', lt, 1.4, 30, 10);
+        },
+        G: function () {
+          $('Gpath').style.strokeDashoffset = 1180 * (1 - io(seg(lt, 0, 1.4)));
+          var e = o5(seg(lt, .2, 1.2));
+          $('Gbook').style.transform = 'translateY(' + L(300, 0, e) + 'px) rotateX(' + L(25, 4, e) + 'deg) scale(' + L(.86, .9, seg(lt, 0, 4)) + ')';
+          $('Gbook').style.opacity = e;
+          var fl = io(seg(lt, 1.8, 2.8));
+          $('Gpage').style.transform = 'rotateY(' + L(0, 170, fl) + 'deg)';
+          $('Gpage').style.filter = 'brightness(' + L(1, .55, Math.sin(fl * Math.PI)) + ')';
+          $('Gpage').style.opacity = fl > .55 ? 0 : 1;
+          show('Gt', lt, .9, 40, 12);
+        },
+        H: function () {
+          lanterns(lt);
+          var s = Math.max(0, 8714 - Math.floor(lt * 9));
+          $('Hcd').textContent = Math.floor(s / 3600) + ':' + ('0' + Math.floor(s % 3600 / 60)).slice(-2) + ':' + ('0' + s % 60).slice(-2);
+          show('Hk', lt, .3, 20, 6); show('Hcd', lt, .4, 60, 16);
+          $('Hfill').style.width = L(10, 78, o3(seg(lt, .6, 3))) + '%';
+          show('Hl', lt, 1, 40, 12); show('Hs', lt, 1.3, 30, 8);
+        },
+        I: function () {
+          var e = o5(seg(lt, 0, 1.2));
+          $('Ilap').style.transform = 'translateY(' + L(500, 0, e) + 'px) rotateX(' + L(30, 6, e) + 'deg) scale(' + L(.8, .86, seg(lt, 0, 3)) + ')';
+          var pe = back(seg(lt, 1, 1.5));
+          $('Ipill').style.transform = 'translate(-50%,' + L(-90, 0, pe) + 'px) scale(' + L(.7, 1.12, pe) + ')';
+          $('Ipill').style.opacity = seg(lt, 1, 1.2);
+          var s = Math.max(0, 4360 - Math.floor(lt - 1)); $('Icd').textContent = Math.floor(s / 3600) + ':' + ('0' + Math.floor(s % 3600 / 60)).slice(-2) + ':' + ('0' + s % 60).slice(-2);
+          show('Il', lt, .9, 40, 12); show('Is', lt, 1.2, 30, 8);
+        },
+        J: function () {
+          var e = o5(seg(lt, 0, 1));
+          $('Jstar').style.transform = 'scale(' + L(1.6, 1, e) + ') rotate(' + (L(-40, 0, e) + lt * 3) + 'deg)'; $('Jstar').style.opacity = e;
+          $('Jglow').style.opacity = e * (.8 + .2 * Math.sin(lt * 3));
+          show('Jw', lt, .4, 40, 16); show('Jt', lt, 1, 30, 10); show('Jb', lt, 1.4, 30, 8); show('Ju', lt, 1.8, 20, 6); show('Js', lt, 2.3, 16, 6);
+        }
+      })[b[0]]();
+    });
+    /* a soft flash on the cuts that change the light */
+    var fl = 0;
+    [2.5, 15.9, 19.9, 25.9].forEach(function (c) { fl = Math.max(fl, (1 - seg(t, c, c + .35)) * (t >= c ? .5 : 0)); });
+    $('flash').style.opacity = fl;
+    grain(t);
+    $('fade').style.opacity = Math.max(1 - seg(t, 0, .25), seg(t, 29.2, 30));
+  };
+  if (!/[?&]render/.test(location.search)) {
+    var t0 = performance.now();
+    (function loop() { window.render(((performance.now() - t0) / 1000) % DUR); requestAnimationFrame(loop); })();
+  }
+})();
+</script>
+</body>
+</html>
