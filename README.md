@@ -3,7 +3,7 @@
 # Adhkār
 
 **Remembrance for every moment.**
-A free app for daily adhkār, prayer and duʿāʾ, for Android and Windows, built as ṣadaqah jāriyah.
+A free Islamic app for Android and Windows: adhkār, prayer, Jumuʿah, Ramaḍān and the Hijri year, built as ṣadaqah jāriyah.
 No ads, no account, no tracking.
 
 [![Download for Android](https://img.shields.io/badge/Download-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar.apk)
