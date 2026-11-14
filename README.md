@@ -42,7 +42,7 @@ No ads, no account, no tracking.
 | **Remembrance** | Morning and evening adhkār, after ṣalāh, sleep, waking, the night, the adhān, worry and distress, and everyday duʿāʾs. |
 | **Prayer** | Prayer times calculated on the phone, the qibla, Ḍuḥā, qiyām, make-up prayers, iqāmah times, silence during ṣalāh, and a step-by-step guide to the prayer. |
 | **Practice** | A Tracker with the numbers the Sunnah sets, counting on the fingers with a guided pace, a duʿāʾ journal, and a quiz that brings back what you miss. |
-| **Jumuʿah** | A Friday mode from Thursday Maghrib to Friday Maghrib: its Sunnahs with their evidence, the two hours of response with an alert, and Sūrat al-Kahf on its Madani pages with recitation. |
+| **Jumuʿah** | A Friday mode from Thursday Maghrib to Friday Maghrib: its Sunnahs with their evidence, the two hours of response with an alert, and Sūrat al-Kahf to read and listen to. |
 | **On the phone** | Home-screen widgets, reminders at the minute, and the whole app in English or Arabic. |
 
 Every Arabic text comes from a verified source, word for word. Translations are labelled "Translation", and every hadith carries its grade.
@@ -208,7 +208,7 @@ For the whole month the app changes with it, by itself.
 <p align="center">
 <img src="docs/guide/shots/friday/today.webp" width="230" alt="Today on Friday">&nbsp;
 <img src="docs/guide/shots/friday/jumuah.webp" width="230" alt="The Jumuʿah page">&nbsp;
-<img src="docs/guide/shots/friday/kahf.webp" width="230" alt="Sūrat al-Kahf on its Madani page">
+<img src="docs/guide/shots/friday/kahf.webp" width="230" alt="Sūrat al-Kahf">
 </p>
 
 From Maghrib on Thursday to Maghrib on Friday the app wears an emerald night with gold arches.
@@ -217,7 +217,7 @@ From Maghrib on Thursday to Maghrib on Friday the app wears an emerald night wit
 2. **The two hours of response:** from when the imam sits until the prayer ends (Muslim 853), and the last hour before Maghrib (Abū Dāwūd 1048). When the last hour begins, a card can appear over other apps.
 3. **The prayer:** Jumuʿah in place of Ẓuhr for a brother; for a sister, who is not required to attend, Jumuʿah with the imam or Ẓuhr at home.
 4. **The Sunnahs of the day,** each with its narration and grade: ghusl, siwāk and perfume, going early, listening in silence, abundant ṣalawāt, al-Kahf.
-5. **Sūrat al-Kahf** on pages 293 to 304 of the Madinah Muṣḥaf, in the King Fahd Complex's page fonts, line for line; or verse by verse with The Clear Quran. Recited by Mishary al-ʿAfāsī, the reciting verse lit and the page turning with it.
+5. **Sūrat al-Kahf** as printed in the Madinah Muṣḥaf, page by page; or verse by verse with The Clear Quran. Recited by Mishary al-ʿAfāsī, the reciting verse lit and the page turning with it.
 
 A day that has not come can't be logged as fasted: tap it in the calendar to **plan the fast**, with a reminder at Maghrib the evening before. And under You, **Print and PDF** puts the adhkār booklet and the timetable on paper from the phone too.
 

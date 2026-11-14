@@ -355,9 +355,9 @@
       }).length;
     h +=
       '<a class="card fr-kahf press" href="#/kahf"><div class="fr-kahf-a" lang="ar">الكهف</div><div class="grow"><div class="eyebrow">' +
-      esc(A.T('Sūrat al-Kahf')) +
+      esc(A.T('Every Friday')) +
       '</div><div class="ttl">' +
-      esc(rec.kahf ? A.T('Read this Jumuʿah') : kp.page ? A.T('Continue from page') + ' ' + A.fmtN(293 + kp.page) : A.T('Read on its Madani pages')) +
+      esc(rec.kahf ? A.T('Al-Kahf read this Jumuʿah') : kp.page ? A.T('Continue al-Kahf from page') + ' ' + A.fmtN(293 + kp.page) : A.T('Read Sūrat al-Kahf')) +
       '</div><div class="sub">' +
       esc(A.T('110 verses · 12 pages')) +
       (read ? ' · ' + A.fmtN(read) + ' ' + esc(A.T(read === 1 ? 'Jumuʿah read' : 'Jumuʿahs read')) : '') +
@@ -954,7 +954,9 @@
       'Sūrat al-Kahf': 'سورة الكهف',
       'Read this Jumuʿah': 'قُرئت هذه الجمعة',
       'Continue from page': 'تابع من الصفحة',
-      'Read on its Madani pages': 'اقرأها في صفحات المصحف المدني',
+      'Every Friday': 'كل جمعة',
+      'Al-Kahf read this Jumuʿah': 'قُرئت الكهف هذه الجمعة',
+      'Continue al-Kahf from page': 'تابع الكهف من الصفحة',
       '110 verses · 12 pages': '١١٠ آيات · ١٢ صفحة',
       'Jumuʿah read': 'جمعة قُرئت',
       'Jumuʿahs read': 'جُمع قُرئت',
