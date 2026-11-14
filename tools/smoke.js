@@ -1038,6 +1038,26 @@ ok(/Ramaḍān Mubārak/.test(rt), 'Ramaḍān greeting in Ramaḍān');
   ok(!env.errors.length, 'fast planning runs cleanly ' + env.errors.join(' | '));
 }
 
+/* the basmalah always stands apart from the first āyah: in the Muṣḥaf view, on Today's card and in the translation */
+{
+  const env = boot('2026-11-13T10:00:00Z', settled),
+    A = env.w.A,
+    d = env.w.document;
+  const all = [];
+  A.COLS.forEach((c) => A.items(c.id, c.perPrayer ? 'fajr' : undefined).forEach((it, i) => { if (it.qs) all.push({ c, it, i }); }));
+  const ikh = all.find((x) => x.it.qs[0].s === 112), fat = all.find((x) => x.it.qs[0].s === 1);
+  const m1 = d.createElement('div'); m1.innerHTML = A.mushaf(ikh.it.qs, false);
+  ok(m1.querySelector('.bsm') && !/بِسْمِ/.test(m1.querySelector('.ayat').textContent), 'al-Ikhlāṣ: the basmalah is its own line, not part of the first āyah');
+  const m2 = d.createElement('div'); m2.innerHTML = A.mushaf(fat.it.qs, false);
+  ok(m2.querySelector('.ayat.bsm1') && m2.querySelectorAll('.ayat.bsm1 .am').length === 1 && !/بِسْمِ/.test(m2.querySelectorAll('.ayat')[1].textContent), 'al-Fātiḥah: its first āyah, the basmalah, has a line of its own');
+  const en = d.createElement('div'); en.innerHTML = A.txLines(ikh.it.en);
+  ok(en.firstChild.classList.contains('bsm-l') && en.querySelectorAll('.ln.v').length === 4, 'the translation opens with the basmalah alone, then the numbered āyāt');
+  A.dailyDhikr = () => ikh;
+  const today = visit(env, '#/');
+  ok(/class="card dod[\s\S]*class="bsm"[\s\S]*bsm-l/.test(today), "Today's dhikr of the day keeps the basmalah apart, in the Arabic and the translation");
+  ok(!env.errors.length, 'basmalah views run cleanly ' + env.errors.join(' | '));
+}
+
 /* Arabic mode reaches the reader, which sits outside the page */
 {
   const st = JSON.parse(JSON.stringify(settled));

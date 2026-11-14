@@ -72,7 +72,7 @@ def main():
     fw = os.path.join(os.environ['WINDIR'], 'Microsoft.NET', 'Framework64', 'v4.0.30319')
     csc = os.path.join(fw, 'csc.exe')
     lib = os.path.join(PKG, 'lib', 'net462')
-    exe = os.path.join(ROOT, 'dist', 'Adhkar-Windows.exe'); os.makedirs(os.path.dirname(exe), exist_ok=True)
+    exe = os.environ.get('WIN_OUT') or os.path.join(ROOT, 'dist', 'Adhkar-Windows.exe'); os.makedirs(os.path.dirname(exe), exist_ok=True)
     args = [csc, '/nologo', '/optimize+', '/target:winexe', '/platform:x64', '/langversion:5', '/codepage:65001', '/utf8output',
             '/out:' + exe, '/win32icon:' + ico,
             '/resource:' + app + ',app.zip',

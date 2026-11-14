@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Adhkār · promo</title>
+<!-- The promo film, as code: portrait (1080 x 1920), two minutes. window.render(t) draws the frame at t seconds,
+     deterministically; tools/promo/render.js steps a headless browser through it into ffmpeg. Open the page directly
+     to watch it play. Every screen is a real screen of the app; every word of Arabic is the app's own verified text.
+     The film is data: SCENES below, each with its screens, a camera path (zooms and pans to features, by the same
+     percentage positions the guide's tour uses), spotlights, captions and a transition. -->
+<style>
+@font-face { font-family: 'Quicksand'; font-weight: 400 700; src: url(../../docs/guide/fonts/Quicksand-400-700-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+2000-206F; }
+@font-face { font-family: 'Quicksand'; font-weight: 400 700; src: url(../../docs/guide/fonts/Quicksand-400-700-latin-ext.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02FF, U+1E00-1EFF; }
+@font-face { font-family: 'Amiri'; font-weight: 400; src: url(../../docs/guide/fonts/Amiri-400-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+2000-206F; }
+@font-face { font-family: 'Amiri'; font-weight: 400; src: url(../../docs/guide/fonts/Amiri-400-latin-ext.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02FF, U+1E00-1EFF; }
+@font-face { font-family: 'Amiri'; font-weight: 400; src: url(../../docs/guide/fonts/Amiri-400-arabic.woff2) format('woff2'); unicode-range: U+0600-06FF, U+FB50-FDFF, U+FE70-FEFF; }
+@font-face { font-family: 'Amiri Quran'; font-weight: 400; src: url(../../docs/guide/fonts/AmiriQuran-400-arabic.woff2) format('woff2'); unicode-range: U+0600-06FF, U+FB50-FDFF, U+FE70-FEFF; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; }
+#stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; font-family: 'Quicksand', sans-serif; color: #f5f0e7; }
+.layer { position: absolute; inset: 0; }
+.pat { opacity: .07; background: #d9b26f;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Cg fill='none' stroke='%23000' stroke-width='.8'%3E%3Cpath d='M40 16.2l8.3 3.4 3.4 8.3-3.4 8.3L40 39.6l-8.3-3.4-3.4-8.3 3.4-8.3z'/%3E%3Cpath d='M28.3 16.2h23.4v23.4H28.3z'/%3E%3Cpath d='M0 56.2l8.3 3.4 3.4 8.3-3.4 8.3L0 79.6l-8.3-3.4-3.4-8.3 3.4-8.3zM80 56.2l8.3 3.4 3.4 8.3-3.4 8.3L80 79.6l-8.3-3.4-3.4-8.3 3.4-8.3z'/%3E%3C/g%3E%3C/svg%3E") 0 0/120px 120px repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Cg fill='none' stroke='%23000' stroke-width='.8'%3E%3Cpath d='M40 16.2l8.3 3.4 3.4 8.3-3.4 8.3L40 39.6l-8.3-3.4-3.4-8.3 3.4-8.3z'/%3E%3Cpath d='M28.3 16.2h23.4v23.4H28.3z'/%3E%3Cpath d='M0 56.2l8.3 3.4 3.4 8.3-3.4 8.3L0 79.6l-8.3-3.4-3.4-8.3 3.4-8.3zM80 56.2l8.3 3.4 3.4 8.3-3.4 8.3L80 79.6l-8.3-3.4-3.4-8.3 3.4-8.3z'/%3E%3C/g%3E%3C/svg%3E") 0 0/120px 120px repeat; }
+.arc { opacity: 0; background: #e7cf92;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 64'%3E%3Cpath d='M4 64V32C4 18 13 9 24 3c11 6 20 15 20 29v32' fill='none' stroke='%23000' stroke-width='1'/%3E%3C/svg%3E") 0 0/66px 88px repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 64'%3E%3Cpath d='M4 64V32C4 18 13 9 24 3c11 6 20 15 20 29v32' fill='none' stroke='%23000' stroke-width='1'/%3E%3C/svg%3E") 0 0/66px 88px repeat; }
+.sc { position: absolute; inset: 0; overflow: hidden; visibility: hidden; perspective: 2600px; }
+.sc .bg { position: absolute; inset: -40px; }
+.world { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform; }
+.phone { position: relative; width: 724px; padding: 12px; border-radius: 74px; background: linear-gradient(160deg, #30333c, #0c0d12 38%, #1c1e25 80%, #2b2e36); box-shadow: 0 90px 160px -50px rgba(0,0,0,.95), 0 0 0 2px rgba(255,255,255,.07) inset; }
+.phone .scr { position: relative; width: 700px; height: 1450px; border-radius: 62px; overflow: hidden; background: #000; }
+.phone img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.phone .spot { position: absolute; inset: 0; pointer-events: none; }
+.phone .ring { position: absolute; border-radius: 28px; border: 3px solid #f1d59e; box-shadow: 0 0 0 6px rgba(241,213,158,.18), 0 0 40px rgba(241,213,158,.45); opacity: 0; }
+.phone .gl { position: absolute; inset: 0; background: linear-gradient(115deg, transparent 38%, rgba(255,255,255,.14) 48%, transparent 58%); mix-blend-mode: screen; }
+.cap { position: absolute; left: 80px; right: 80px; top: 150px; z-index: 5; }
+.scrim { position: absolute; left: 0; right: 0; top: 0; height: 780px; z-index: 4; background: linear-gradient(180deg, var(--scrim) 0, var(--scrim) 50%, transparent); pointer-events: none; }
+.kick { font: 700 26px/1.2 'Quicksand'; letter-spacing: .34em; text-transform: uppercase; color: #e9c98b; }
+.title { margin-top: 22px; font: 700 88px/1.04 'Quicksand'; letter-spacing: -.025em; color: #f5f0e7; }
+.title .w { display: inline-block; white-space: pre; }
+.title em { font-style: normal; background: linear-gradient(100deg, #b8873a, #f6dfaa 45%, #d9b26f 70%, #f6dfaa); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.sub { margin-top: 24px; font: 500 34px/1.45 'Quicksand'; color: #c3bdb1; max-width: 900px; }
+.light .title { color: #1c1914; } .light .sub { color: #5f584c; } .light .kick { color: #8a6420; }
+.light .title em { background: linear-gradient(100deg, #8a6420, #c39448 50%, #8a6420); -webkit-background-clip: text; background-clip: text; }
+.uline { height: 4px; margin-top: 22px; width: 0; border-radius: 4px; background: linear-gradient(90deg, #f6dfaa, #b8873a); }
+.chip { display: inline-flex; align-items: center; gap: 12px; height: 70px; padding: 0 32px; border-radius: 99px; border: 2px solid rgba(231,207,146,.45); background: rgba(231,207,146,.08); font: 700 28px 'Quicksand'; color: #f3dca6; }
+.ar { font-family: 'Amiri', serif; direction: rtl; }
+#rim { position: absolute; border-radius: 50%; border: 3px solid rgba(246,223,170,.9); box-shadow: 0 0 40px rgba(246,223,170,.6), inset 0 0 40px rgba(246,223,170,.35); pointer-events: none; z-index: 25; opacity: 0; }
+#wipe { position: absolute; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, transparent, #f6dfaa 20% 80%, transparent); box-shadow: 0 0 30px #f6dfaa; z-index: 25; opacity: 0; }
+#dust { position: absolute; inset: 0; z-index: 30; pointer-events: none; }
+#vig { position: absolute; inset: 0; z-index: 31; pointer-events: none; background: radial-gradient(130% 90% at 50% 45%, transparent 58%, rgba(0,0,0,.5)); }
+#fade { position: absolute; inset: 0; z-index: 40; background: #000; pointer-events: none; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="layer" id="sky"></div>
+  <div class="layer pat" id="pat" style="inset:-200px"></div>
+  <div class="layer arc" id="arcade" style="inset:-90px"></div>
+  <div id="scenes"></div>
+  <div id="rim"></div>
+  <div id="wipe"></div>
+  <canvas id="dust" width="1080" height="1920"></canvas>
+  <div id="vig"></div>
+  <div id="fade"></div>
+</div>
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var clamp = function (x, a, b) { return Math.max(a, Math.min(b, x)); };
+  var seg = function (t, a, b) { return clamp((t - a) / (b - a), 0, 1); };
+  var out3 = function (x) { return 1 - Math.pow(1 - x, 3); };
+  var out5 = function (x) { return 1 - Math.pow(1 - x, 5); };
+  var inout = function (x) { return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+  var lerp = function (a, b, x) { return a + (b - a) * x; };
+  var S = '../../docs/guide/shots/', R = '../../docs/readme/';
+  var XF = 0.9; /* transition length */
+
+  /* ---------------------------------------------------------------- the film ----------------------------------------------------------------
+     cam: [time in scene, zoom, x%, y%]: the camera eases from key to key; x% y% are positions on the screen, as in the guide's tour.
+     spot: [from, to, x%, y%, w%, h%]: a ring and a soft spotlight on one feature.
+     shots: [[image, from]]: screens shown in turn, crossfading.                                                                              */
+  var SCENES = [
+    { id: 'intro', d: 8, kind: 'intro', tr: 'none' },
+    { id: 'ayah', d: 6.4, kind: 'ayah', tr: 'rise' },
+    { id: 'today', d: 9, tr: 'fill', kick: 'Your day at a glance', title: 'Everything that *matters,* right now',
+      shots: [[S + 'dark/today.webp', 0]],
+      cam: [[0, .62, 50, 50], [1.6, .62, 50, 50], [3.2, 1.32, 50, 30], [5.0, 1.32, 50, 54], [6.8, 1.28, 66, 70], [9, 1.1, 50, 82]],
+      spot: [[3.2, 4.8, 50, 31, 92, 27], [5.0, 6.5, 50, 54, 92, 9], [6.8, 8.6, 50, 70, 92, 10]] },
+    { id: 'adhkar', d: 8, tr: 'rise', kick: 'The library', title: 'Remembrance for *every moment*', sub: 'Morning and evening, after ṣalāh, before sleep, on waking, in worry and distress.',
+      shots: [[S + 'dark/adhkar.webp', 0]],
+      cam: [[0, .7, 50, 46], [1.4, .7, 50, 46], [3, 1.38, 50, 29], [5.2, 1.3, 50, 56], [8, 1.18, 50, 70]],
+      spot: [[3, 5, 50, 29, 92, 17], [5.2, 7.6, 50, 56, 92, 22]] },
+    { id: 'reader', d: 7, tr: 'fill', kick: 'Read, listen, count', title: 'Every word, *word for word*', sub: 'Arabic from Ḥiṣn al-Muslim, with transliteration and translation.',
+      shots: [[S + 'dark/reader.webp', 0]],
+      cam: [[0, .7, 50, 50], [1.2, .7, 50, 50], [2.8, 1.42, 50, 46], [4.8, 1.42, 50, 70], [7, 1.3, 50, 88]],
+      spot: [[2.8, 4.6, 50, 46, 92, 22], [5.6, 6.9, 50, 89, 40, 9]] },
+    { id: 'count', d: 6.6, tr: 'slide', kick: 'As the Sunnah teaches', title: 'Counted on *your fingers*', sub: 'The app keeps the pace; you keep the count.',
+      shots: [[S + 'dark/counting.webp', 0]],
+      cam: [[0, .7, 50, 48], [1.2, .7, 50, 48], [2.8, 1.45, 50, 36], [6.6, 1.3, 50, 56]],
+      spot: [[2.8, 4.6, 50, 35, 80, 26]], extra: 'ring' },
+    { id: 'tracker', d: 6.4, tr: 'rise', kick: 'Remembrance through the day', title: 'The numbers *the Sunnah sets*', sub: 'Each phrase with its count and its evidence.',
+      shots: [[S + 'dark/tracker.webp', 0]],
+      cam: [[0, .7, 50, 50], [1.2, .7, 50, 50], [2.6, 1.4, 50, 32], [4.4, 1.4, 50, 50], [6.4, 1.25, 50, 66]],
+      spot: [[2.6, 4.2, 50, 30, 92, 9], [4.4, 6.2, 50, 49, 70, 24]] },
+    { id: 'salah', d: 6.6, tr: 'fill', kick: 'The pillar of the day', title: 'Prayer times, *anywhere*', sub: 'Calculated on your phone, even offline.',
+      shots: [[S + 'dark/salah.webp', 0]],
+      cam: [[0, .7, 50, 48], [1.2, .7, 50, 48], [2.6, 1.42, 50, 26], [4.6, 1.38, 30, 41], [6.6, 1.25, 50, 60]],
+      spot: [[2.6, 4.4, 50, 26, 92, 12], [4.6, 6.4, 50, 41, 92, 7]] },
+    { id: 'qibla', d: 5.6, tr: 'slide', light: true, theme: 'light', kick: 'Wherever you are', title: 'The qibla, *by compass or sun*',
+      shots: [[S + 'light/qibla.webp', 0]],
+      cam: [[0, .72, 50, 50], [1.2, .72, 50, 50], [2.8, 1.42, 50, 50], [5.6, 1.3, 50, 72]],
+      spot: [[2.8, 5.2, 50, 51, 72, 36]] },
+    { id: 'learn', d: 6.8, tr: 'rise', kick: 'Step by step', title: 'Learn the prayer, *with its evidence*', sub: 'Every position and every word, as the Prophet <span class="ar" style="font-size:1.1em;color:#e9c98b">ﷺ</span> prayed.',
+      shots: [[S + 'ar/learn-fajr.webp', 0]],
+      cam: [[0, .7, 50, 50], [1.2, .7, 50, 50], [2.8, 1.4, 50, 26], [4.8, 1.4, 50, 47], [6.8, 1.25, 50, 66]],
+      spot: [[2.8, 4.6, 50, 24, 70, 30], [4.8, 6.6, 50, 46, 92, 14]] },
+    { id: 'dua', d: 6.4, tr: 'fill', kick: 'Asking, and being answered', title: 'Your duʿāʾ, *at the times of answer*', sub: 'A private journal, and a reminder when the time comes.',
+      shots: [[S + 'dark/journal.webp', 0]],
+      cam: [[0, .7, 50, 50], [1.2, .7, 50, 50], [2.6, 1.42, 50, 21], [4.4, 1.4, 50, 40], [6.4, 1.28, 50, 56]],
+      spot: [[2.6, 4.2, 50, 21, 92, 10], [4.4, 6.2, 50, 40, 92, 14]] },
+    { id: 'jumuah', d: 12, tr: 'fill', theme: 'emerald', kick: 'Yawm al-Jumuʿah', ar: 'يوم الجمعة', title: 'Friday, kept as *it should be*', sub: 'Its Sunnahs, the hour of response, and Sūrat al-Kahf.',
+      shots: [[S + 'friday/today.webp', 0], [S + 'friday/jumuah.webp', 4.2], [S + 'friday/kahf.webp', 8]],
+      cam: [[0, .7, 50, 50], [1.2, .7, 50, 50], [2.4, 1.4, 34, 30], [4.0, 1.4, 34, 30], [4.6, .9, 50, 34], [6, 1.4, 50, 31], [7.6, 1.4, 50, 41], [8.4, .9, 50, 52], [10, 1.42, 50, 52], [12, 1.3, 50, 60]],
+      spot: [[2.4, 4, 31, 30, 62, 20], [6, 7.2, 50, 31, 92, 7], [6.8, 7.8, 50, 41, 92, 7], [10, 11.8, 50, 52, 96, 36]] },
+    { id: 'ramadan', d: 10, tr: 'rise', theme: 'indigo', kick: 'The blessed month', title: 'Ramaḍān, *all month long*', sub: 'Suhūr and ifṭār, tarāwīḥ, the khatm and the last ten nights.',
+      shots: [[S + 'ramadan/today.webp', 0], [S + 'ramadan/month.webp', 3.6], [S + 'ramadan/taraweeh.webp', 6.8]],
+      cam: [[0, .7, 50, 50], [1.1, 1.36, 50, 20], [3.2, 1.36, 50, 22], [3.8, .9, 50, 40], [5, 1.38, 50, 53], [6.6, 1.38, 50, 55], [7.2, .9, 50, 60], [8.4, 1.4, 50, 79], [10, 1.3, 50, 72]],
+      spot: [[1.4, 3.1, 50, 22, 94, 18], [5, 6.4, 50, 53, 92, 30], [8.4, 9.8, 50, 79, 92, 18]], extra: 'lanterns' },
+    { id: 'calendar', d: 6.6, tr: 'slide', kick: 'The Islamic year', title: 'Plan a fast, *prepare the night before*', sub: 'Sunnah fasts on the Hijri calendar, and a reminder at Maghrib.',
+      shots: [[S + 'dark/calendar.webp', 0], [S + 'dark/plan-fast.webp', 3.2]],
+      cam: [[0, .72, 50, 50], [1.2, 1.36, 50, 43], [3, 1.36, 50, 43], [3.6, .9, 50, 60], [4.8, 1.4, 50, 76], [6.6, 1.3, 50, 72]],
+      spot: [[1.4, 3, 50, 43, 94, 34], [4.8, 6.4, 50, 78, 92, 14]] },
+    { id: 'themes', d: 7, tr: 'fill', light: true, theme: 'light', kick: 'Make it yours', title: 'Dark or light, *English or Arabic*', sub: 'Five accents, and the whole app right to left.',
+      shots: [[S + 'light/today.webp', 0], [S + 'ar/today.webp', 2.4], [S + 'extra/theme-sheet.webp', 4.6]],
+      cam: [[0, .72, 50, 50], [2.2, .84, 50, 42], [4.4, .84, 50, 42], [5.4, 1.42, 50, 88], [7, 1.3, 50, 82]],
+      spot: [[5.4, 6.8, 50, 92, 92, 12]] },
+    { id: 'paper', d: 5.6, tr: 'rise', kick: 'Print and PDF', title: 'Your adhkār, *on paper*', sub: 'A booklet with every source, and the month’s timetable.',
+      shots: [[S + 'dark/print.webp', 0]],
+      cam: [[0, .72, 50, 50], [1.2, 1.4, 50, 55], [5.6, 1.3, 50, 66]],
+      spot: [[1.4, 5, 50, 55, 80, 36]] },
+    { id: 'widgets', d: 5.6, tr: 'fill', kind: 'widgets', kick: 'On your home screen', title: 'Four widgets, *always in view*', sub: 'The next prayer, your adhkār, the Tracker and the dhikr of the day.' },
+    { id: 'desk', d: 9, tr: 'slide', kind: 'desk', kick: 'On your computer', title: 'A desktop *of its own*', sub: 'The day at a glance, and the pill above your work.' },
+    { id: 'end', d: 9.2, tr: 'fill', kind: 'end' }
+  ];
+  var T = 0;
+  SCENES.forEach(function (s, i) { s.t0 = i ? T - XF : 0; T = s.t0 + s.d; s.t1 = T; });
+  var DUR = (window.DUR = T);
+
+  /* ---------------------------------------------------------------- building the scenes ---------------------------------------------------------------- */
+  var BGS = {
+    night: 'radial-gradient(80% 50% at 50% 30%, #121624, #07080d 75%)',
+    emerald: 'radial-gradient(80% 50% at 50% 28%, #0e2e27, #04100e 75%)',
+    indigo: 'radial-gradient(80% 50% at 50% 28%, #1e1a56, #05061a 75%)',
+    light: 'radial-gradient(80% 50% at 50% 28%, #fbf7ef, #ece5d6 80%)'
+  };
+  function title(s) {
+    /* *gold* words; each word its own span so it can rise in turn */
+    var gold = false, out = '';
+    s.split(/(\*)/).forEach(function (p) {
+      if (p === '*') { gold = !gold; return; }
+      p.split(/(\s+)/).forEach(function (w) {
+        if (!w) return;
+        if (/^\s+$/.test(w)) { out += ' '; return; }
+        out += '<span class="w">' + (gold ? '<em>' + w + '</em>' : w) + '</span>';
+      });
+    });
+    return out;
+  }
+  function caption(s) {
+    return '<div class="scrim"></div><div class="cap">' + (s.ar ? '<div class="ar" style="font:400 64px/1.3 Amiri;color:#f3dca6;margin-bottom:6px">' + s.ar + '</div>' : '') +
+      '<div class="kick">' + s.kick + '</div><div class="title">' + title(s.title) + '</div><div class="uline"></div>' + (s.sub ? '<div class="sub">' + s.sub + '</div>' : '') + '</div>';
+  }
+  var ICON = '<path class="out" d="M32 8l6.1 8.2 9.9-2.1-2.1 9.9L54 32l-8.1 6.1 2.1 9.9-9.9-2.1L32 56l-6.1-8.1-9.9 2.1 2.1-9.9L10 32l8.1-6.1-2.1-9.9 9.9 2.1z" fill="none" stroke="url(#g1)" stroke-width="1.6" stroke-linejoin="round"/><path class="in" d="M32 21l3 4 4.9-1-1 4.9 4 3.1-4 3 1 4.9-4.9-1-3 4-3-4-4.9 1 1-4.9-4-3 4-3.1-1-4.9 4.9 1z" fill="url(#g1)"/>';
+  var DEFS = '<defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6dfaa"/><stop offset="1" stop-color="#b8873a"/></linearGradient></defs>';
+  var html = '';
+  SCENES.forEach(function (s) {
+    var bg = BGS[s.theme || 'night'];
+    var scrim = s.light ? 'rgba(245,240,230,.97)' : s.theme === 'emerald' ? 'rgba(4,16,14,.94)' : s.theme === 'indigo' ? 'rgba(6,7,28,.94)' : 'rgba(7,8,13,.94)';
+    var h = '<div class="sc' + (s.light ? ' light' : '') + '" id="sc-' + s.id + '" style="--scrim:' + scrim + '"><div class="bg" style="background:' + bg + '"></div>';
+    if (s.kind === 'intro') {
+      h += '<div id="iglow" style="position:absolute;left:190px;top:420px;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(233,196,120,.45),rgba(233,196,120,0) 65%)"></div>' +
+        '<div id="irays" style="position:absolute;left:-460px;top:-230px;width:2000px;height:2000px;background:repeating-conic-gradient(from 0deg at 50% 50%, rgba(246,223,170,.07) 0deg 4deg, transparent 4deg 18deg);-webkit-mask:radial-gradient(circle,#000 0,transparent 55%);mask:radial-gradient(circle,#000 0,transparent 55%)"></div>' +
+        '<svg id="iicon" viewBox="0 0 64 64" style="position:absolute;left:340px;top:570px;width:400px;height:400px;overflow:visible">' + DEFS + ICON + '</svg>' +
+        '<div id="iword" style="position:absolute;left:0;right:0;top:1050px;text-align:center;font:400 190px/1 Amiri">Adh<em style="font-style:normal;background:linear-gradient(100deg,#b8873a,#f6dfaa 45%,#d9b26f 70%,#f6dfaa);-webkit-background-clip:text;background-clip:text;color:transparent">kār</em></div>' +
+        '<div id="iar" class="ar" style="position:absolute;left:0;right:0;top:1270px;text-align:center;font:400 76px/1.3 Amiri;color:#f3dca6">أذكار</div>' +
+        '<div id="itag" class="kick" style="position:absolute;left:0;right:0;top:1440px;text-align:center;color:#c3bdb1;letter-spacing:.42em;font-size:28px">Remembrance for every moment</div>';
+    } else if (s.kind === 'ayah') {
+      h += '<div id="aar" class="ar" style="position:absolute;left:60px;right:60px;top:600px;text-align:center;font:400 118px/1.9 \'Amiri Quran\';color:#f3dca6">أَلَا بِذِكْرِ ٱللَّهِ<br>تَطْمَئِنُّ ٱلْقُلُوبُ</div>' +
+        '<div id="aen" style="position:absolute;left:110px;right:110px;top:1170px;text-align:center;font:400 54px/1.4 Amiri;color:#ece6da">Unquestionably, by the remembrance of Allah hearts are assured.</div>' +
+        '<div id="aref" style="position:absolute;left:0;right:0;top:1400px;display:flex;align-items:center;justify-content:center;gap:26px"><i id="al1" style="display:block;height:2px;width:0;background:linear-gradient(90deg,transparent,#d9b26f)"></i><span class="kick">Ar-Raʿd 13:28</span><i id="al2" style="display:block;height:2px;width:0;background:linear-gradient(270deg,transparent,#d9b26f)"></i></div>';
+    } else if (s.kind === 'widgets') {
+      h += caption(s) + '<div class="world" id="w-widgets"><div style="width:760px;border-radius:48px;overflow:hidden;box-shadow:0 90px 160px -50px rgba(0,0,0,.95),0 0 0 2px rgba(255,255,255,.08)"><img src="' + S + 'extra/widgets.webp" style="display:block;width:760px;height:986px"></div></div>';
+    } else if (s.kind === 'desk') {
+      h += caption(s) + '<div class="world" id="w-desk"><div style="width:1500px;border-radius:30px;padding:18px;background:linear-gradient(180deg,#26292f,#0e0f13);box-shadow:0 100px 160px -60px rgba(0,0,0,.95),0 0 0 2px rgba(255,255,255,.06) inset">' +
+        '<div style="position:relative;width:1464px;height:868px;border-radius:12px;overflow:hidden;background:#000">' +
+        '<img id="dk1" src="' + R + 'desk-today.webp" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top left">' +
+        '<img id="dk2" src="' + R + 'desk-reader.webp" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top left;opacity:0">' +
+        '<div id="dpill" style="position:absolute;left:50%;top:18px;display:flex;align-items:center;gap:14px;height:58px;padding:0 24px 0 9px;border-radius:99px;background:linear-gradient(180deg,#151925,#0d1018);border:1.5px solid rgba(217,178,111,.55);box-shadow:0 18px 40px -12px rgba(0,0,0,.85)">' +
+        '<span style="width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:rgba(217,178,111,.14);border:1px solid rgba(217,178,111,.4)"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="#f1d59e" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V11.5c0-2 1.2-3.4 3-4.2M19 20V11.5c0-2-1.2-3.4-3-4.2M7.5 12c0-3.4 2-5.1 4.5-6.6 2.5 1.5 4.5 3.2 4.5 6.6M4 20h16M12 3v2.4"/></svg></span>' +
+        '<b style="font:700 21px Quicksand;color:#f5f0e7">Maghrib</b><span class="ar" style="font:400 19px Amiri;color:#f1d59e">المغرب</span><b id="dcd" style="margin-left:24px;font:700 22px Quicksand;color:#f5f0e7">1:12:40</b></div>' +
+        '</div></div><div style="height:26px;margin:0 -80px;border-radius:0 0 26px 26px;background:linear-gradient(180deg,#2b2e36,#121318)"></div></div>';
+    } else if (s.kind === 'end') {
+      h += '<div style="position:absolute;left:290px;top:250px;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(233,196,120,.38),rgba(233,196,120,0) 65%)"></div>' +
+        '<svg id="eicon" viewBox="0 0 64 64" style="position:absolute;left:420px;top:380px;width:240px;height:240px;overflow:visible">' + DEFS.replace('g1', 'g2') + ICON.replace(/g1/g, 'g2') + '</svg>' +
+        '<div id="eword" style="position:absolute;left:0;right:0;top:690px;text-align:center;font:400 170px/1 Amiri">Adh<em style="font-style:normal;background:linear-gradient(100deg,#b8873a,#f6dfaa 45%,#d9b26f 70%,#f6dfaa);-webkit-background-clip:text;background-clip:text;color:transparent">kār</em></div>' +
+        '<div id="efeat" style="position:absolute;left:70px;right:70px;top:920px;display:flex;flex-wrap:wrap;justify-content:center;gap:16px">' +
+        ['Adhkār', 'Prayer times', 'Qibla', 'Learn the prayer', 'Tracker', 'Duʿāʾ', 'Jumuʿah', 'Al-Kahf', 'Ramaḍān', 'Hijri calendar', 'Widgets', 'Print and PDF'].map(function (f) { return '<span class="chip" style="height:60px;font-size:24px;padding:0 24px">' + f + '</span>'; }).join('') + '</div>' +
+        '<div id="efree" style="position:absolute;left:0;right:0;top:1250px;text-align:center;font:600 36px Quicksand;color:#e2dbcc">Free <b style="color:#d9b26f;margin:0 12px">·</b> No ads <b style="color:#d9b26f;margin:0 12px">·</b> No account <b style="color:#d9b26f;margin:0 12px">·</b> Offline</div>' +
+        '<div id="edl" style="position:absolute;left:0;right:0;top:1350px;display:flex;justify-content:center;gap:24px">' +
+        '<span class="chip" style="height:92px;padding:0 44px;font-size:32px;background:linear-gradient(180deg,#f1d59e,#d9b26f);color:#1a1206;border-color:transparent">Android</span><span class="chip" style="height:92px;padding:0 44px;font-size:32px">Windows</span></div>' +
+        '<div id="eurl" style="position:absolute;left:0;right:0;top:1510px;text-align:center;font:700 40px Quicksand;color:#f3dca6">bashyr18.github.io/adhkar/guide</div>' +
+        '<div id="esad" class="kick" style="position:absolute;left:0;right:0;top:1680px;text-align:center">Built as ṣadaqah jāriyah</div>';
+    } else {
+      h += caption(s) + '<div class="world" id="w-' + s.id + '"><div class="phone"><div class="scr">' +
+        s.shots.map(function (sh, i) { return '<img src="' + sh[0] + '">'; }).join('') +
+        '<div class="spot"></div><div class="ring"></div><i class="gl"></i></div></div></div>';
+      if (s.extra === 'ring') h += '<svg id="cring" viewBox="0 0 200 200" style="position:absolute;left:740px;top:1440px;width:280px;height:280px;z-index:6"><circle cx="100" cy="100" r="86" fill="rgba(7,8,13,.85)" stroke="rgba(231,207,146,.2)" stroke-width="7"/><circle id="carc" cx="100" cy="100" r="86" fill="none" stroke="#e9c98b" stroke-width="7" stroke-linecap="round" transform="rotate(-90 100 100)" stroke-dasharray="540.4" stroke-dashoffset="540.4"/><text id="cnum" x="100" y="114" text-anchor="middle" style="font:700 66px Quicksand;fill:#f5f0e7">1</text><text x="100" y="148" text-anchor="middle" style="font:700 15px Quicksand;letter-spacing:3px;fill:#c3bdb1">OF 33</text></svg>';
+      if (s.extra === 'lanterns') h += '<svg id="lan" viewBox="0 0 1080 600" style="position:absolute;left:0;top:0;width:1080px;height:600px;z-index:6;overflow:visible"></svg>';
+    }
+    html += h + '</div>';
+  });
+  $('scenes').innerHTML = html;
+
+  /* ---------------------------------------------------------------- motion ---------------------------------------------------------------- */
+  var SW = 700, SH = 1450, PAD = 12;
+  function camAt(keys, lt) {
+    if (lt <= keys[0][0]) return keys[0];
+    for (var i = 1; i < keys.length; i++) if (lt <= keys[i][0]) {
+      var a = keys[i - 1], b = keys[i], x = inout(seg(lt, a[0], b[0]));
+      return [lt, lerp(a[1], b[1], x), lerp(a[2], b[2], x), lerp(a[3], b[3], x)];
+    }
+    return keys[keys.length - 1];
+  }
+  function words(el, lt, at) {
+    Array.prototype.forEach.call(el.querySelectorAll('.title .w'), function (w, i) {
+      var e = out5(seg(lt, at + i * .07, at + i * .07 + .7));
+      w.style.opacity = e; w.style.transform = 'translateY(' + lerp(60, 0, e) + 'px)'; w.style.filter = 'blur(' + lerp(10, 0, e) + 'px)';
+    });
+    var k = el.querySelector('.cap .kick'); if (k) { var ke = out3(seg(lt, at - .2, at + .5)); k.style.opacity = ke; k.style.letterSpacing = lerp(.6, .34, ke) + 'em'; }
+    var u = el.querySelector('.uline'); if (u) u.style.width = lerp(0, 220, out3(seg(lt, at + .5, at + 1.3))) + 'px';
+    var sb = el.querySelector('.sub'); if (sb) { var se = out3(seg(lt, at + .7, at + 1.5)); sb.style.opacity = se; sb.style.transform = 'translateY(' + lerp(24, 0, se) + 'px)'; }
+    var ar = el.querySelector('.cap .ar'); if (ar) { var ae = out3(seg(lt, at - .3, at + .6)); ar.style.opacity = ae; ar.style.transform = 'translateY(' + lerp(20, 0, ae) + 'px)'; }
+  }
+  function phoneScene(s, el, lt) {
+    var c = camAt(s.cam, lt), z = c[1];
+    var wx = PAD + c[2] / 100 * SW, wy = PAD + c[3] / 100 * SH;
+    var cy = lerp(1210, 1270, clamp((z - .7) / .7, 0, 1));
+    var tilt = lerp(10, 0, out3(seg(lt, 0, 1.7))), enter = out5(seg(lt, 0, 1.3));
+    var dz = 1 + .012 * Math.sin(lt * .9), dx = Math.sin(lt * .55) * 6, dy = Math.cos(lt * .47) * 6;
+    var world = el.querySelector('.world');
+    world.style.transform = 'translate(' + (540 + dx) + 'px,' + (cy + dy + lerp(260, 0, enter)) + 'px) scale(' + (z * dz) + ') rotateX(' + tilt + 'deg) translate(' + -wx + 'px,' + -wy + 'px)';
+    world.style.opacity = enter;
+    Array.prototype.forEach.call(el.querySelectorAll('.scr img'), function (im, i) {
+      var from = s.shots[i][1];
+      im.style.opacity = i === 0 ? 1 : out3(seg(lt, from - .35, from + .25));
+      im.style.transform = i === 0 ? 'none' : 'scale(' + lerp(1.05, 1, out3(seg(lt, from - .35, from + .45))) + ')';
+    });
+    var spot = el.querySelector('.spot'), ring = el.querySelector('.ring'), on = null, k = 0;
+    (s.spot || []).forEach(function (p) { var v = Math.min(seg(lt, p[0], p[0] + .45), 1 - seg(lt, p[1] - .4, p[1])); if (v > k) { k = v; on = p; } });
+    if (on) {
+      var x = on[2] / 100 * SW, y = on[3] / 100 * SH, w = on[4] / 100 * SW, hh = on[5] / 100 * SH, grow = lerp(1.2, 1, out3(k));
+      spot.style.background = 'radial-gradient(' + (w * .78) + 'px ' + (hh * .95) + 'px at ' + x + 'px ' + y + 'px, transparent 70%, rgba(0,0,0,' + (.5 * k) + ') 100%)';
+      ring.style.left = x - w / 2 * grow + 'px'; ring.style.top = y - hh / 2 * grow + 'px'; ring.style.width = w * grow + 'px'; ring.style.height = hh * grow + 'px';
+      ring.style.opacity = k * (.75 + .25 * Math.sin(lt * 5));
+    } else { spot.style.background = 'none'; ring.style.opacity = 0; }
+    el.querySelector('.gl').style.transform = 'translateX(' + lerp(-130, 130, seg(lt, .4, 2.4)) + '%)';
+    words(el, lt, .25);
+  }
+  function sky(t) {
+    var cur = SCENES.filter(function (s) { return t >= s.t0 && t < s.t1; }).pop() || SCENES[0];
+    $('sky').style.background = BGS[cur.theme && cur.theme !== 'light' ? cur.theme : 'night'];
+    $('pat').style.transform = 'translate(' + (-t * 7) % 120 + 'px,' + (-t * 4) % 120 + 'px)';
+    $('arcade').style.opacity = cur.theme === 'emerald' ? .08 : 0;
+    $('arcade').style.transform = 'translateY(' + (-t * 5) % 88 + 'px)';
+  }
+  var ctx = $('dust').getContext('2d'), P = [], rr = 9876;
+  function rnd() { rr = (rr * 16807) % 2147483647; return rr / 2147483647; }
+  for (var q = 0; q < 160; q++) P.push({ x: rnd() * 1080, y: rnd() * 1920, s: .5 + rnd() * 2, v: 8 + rnd() * 26, ph: rnd() * 6.28, w: .2 + rnd() * .8 });
+  function dust(t, lightK) {
+    ctx.clearRect(0, 0, 1080, 1920);
+    if (lightK >= 1) return;
+    P.forEach(function (p) {
+      var y = (p.y - t * p.v) % 1920; if (y < 0) y += 1920;
+      var x = p.x + Math.sin(t * .3 * p.w + p.ph) * 34, a = (.25 + .75 * (.5 + .5 * Math.sin(t * 1.3 * p.w + p.ph))) * .5;
+      var g = ctx.createRadialGradient(x, y, 0, x, y, p.s * 6);
+      g.addColorStop(0, 'rgba(246,223,170,' + a + ')'); g.addColorStop(1, 'rgba(246,223,170,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, p.s * 6, 0, 6.29); ctx.fill();
+    });
+  }
+  function lanterns(lt) {
+    var L = [[110, 150], [320, 230], [560, 120], [780, 210], [970, 140]], h = '';
+    L.forEach(function (l, i) {
+      var a = Math.sin(lt * (.9 + i * .13) + i) * 5, g = .6 + .4 * Math.sin(lt * 2.3 + i * 1.7);
+      h += '<g transform="translate(' + l[0] + ',0) rotate(' + a + ')"><line x1="0" y1="0" x2="0" y2="' + l[1] + '" stroke="#b08a4a" stroke-width="1.6" opacity=".7"/><g transform="translate(0,' + l[1] + ') scale(1.15)"><circle cy="46" r="70" fill="rgba(255,200,110,' + .16 * g + ')"/><path d="M-14 0h28l-4 12h-20z" fill="#c9a15a"/><path d="M-22 12h44l8 34-8 40h-44l-8-40z" fill="rgba(255,214,140,' + (.28 + .2 * g) + ')" stroke="#e7c27e" stroke-width="2"/><path d="M0 12v74M-26 46h52" stroke="#e7c27e" stroke-width="1" opacity=".6"/><ellipse cy="50" rx="6" ry="10" fill="#fff2cf" opacity="' + (.7 + .3 * g) + '"/><path d="M-16 86h32l-6 10h-20z" fill="#c9a15a"/></g></g>';
+    });
+    var s = $('lan'); s.innerHTML = h;
+    /* they come down, then rise away above the words as the screens take over */
+    s.style.transform = 'translateY(' + (lerp(-320, 0, out3(seg(lt, 0, 1.4))) - lerp(0, 330, inout(seg(lt, 1.2, 2.2)))) + 'px)';
+  }
+
+  window.render = function (t) {
+    sky(t);
+    var lightK = 0, rim = $('rim'), wipe = $('wipe');
+    rim.style.opacity = 0; wipe.style.opacity = 0;
+    SCENES.forEach(function (s, i) {
+      var el = $('sc-' + s.id), lt = t - s.t0, live = t >= s.t0 && t < s.t1 + .02;
+      el.style.visibility = live ? 'visible' : 'hidden';
+      if (!live) return;
+      el.style.zIndex = i + 1;
+      var e = inout(seg(lt, 0, XF)), clip = 'none', tf = 'none';
+      if (i && lt < XF) {
+        if (s.tr === 'fill') {
+          var R = lerp(0, 2300, e);
+          clip = 'circle(' + R + 'px at 540px 1240px)';
+          rim.style.opacity = Math.sin(e * Math.PI); rim.style.left = 540 - R + 'px'; rim.style.top = 1240 - R + 'px'; rim.style.width = rim.style.height = R * 2 + 'px';
+        } else if (s.tr === 'rise') {
+          var y = lerp(1920, 0, e); clip = 'inset(' + y + 'px 0 0 0)';
+          wipe.style.opacity = Math.sin(e * Math.PI); wipe.style.top = y - 2 + 'px';
+        } else if (s.tr === 'slide') {
+          clip = 'inset(0 0 0 ' + lerp(1080, 0, e) + 'px)'; tf = 'translateX(' + lerp(80, 0, e) + 'px)';
+        }
+      }
+      el.style.clipPath = clip; el.style.transform = tf;
+      if (s.light && lt > XF * .5) lightK = 1;
+
+      if (s.kind === 'intro') {
+        var o = el.querySelector('#iicon .out'), L = 176;
+        o.style.strokeDasharray = L; o.style.strokeDashoffset = L * (1 - inout(seg(lt, .4, 2.8)));
+        var inner = el.querySelector('#iicon .in'), ie = out3(seg(lt, 2, 3.2));
+        inner.style.opacity = ie; inner.style.transformOrigin = '32px 32px'; inner.style.transform = 'scale(' + lerp(.5, 1, ie) + ')';
+        $('iglow').style.opacity = out3(seg(lt, 1.2, 3.6)) * (.85 + .15 * Math.sin(lt * 1.7));
+        $('irays').style.opacity = out3(seg(lt, 2.4, 4)); $('irays').style.transform = 'rotate(' + lt * 6 + 'deg)';
+        var pull = inout(seg(lt, 3, 4.6));
+        $('iicon').style.transform = 'translateY(' + lerp(0, -170, pull) + 'px) scale(' + lerp(1.15, .78, pull) + ') rotate(' + lt * 2 + 'deg)';
+        $('iglow').style.transform = 'translateY(' + lerp(0, -170, pull) + 'px)';
+        var we = out5(seg(lt, 3.4, 4.8));
+        $('iword').style.opacity = we; $('iword').style.filter = 'blur(' + lerp(16, 0, we) + 'px)'; $('iword').style.letterSpacing = lerp(.18, -.01, we) + 'em';
+        $('iword').style.transform = 'translateY(' + lerp(-90, -150, inout(seg(lt, 3.4, 8))) + 'px) scale(' + lerp(1.08, 1, we) + ')';
+        var ae = out3(seg(lt, 4.4, 5.4)); $('iar').style.opacity = ae; $('iar').style.transform = 'translateY(' + lerp(-110, -150, ae) + 'px)';
+        var te = out3(seg(lt, 5, 6)); $('itag').style.opacity = te; $('itag').style.transform = 'translateY(' + lerp(-120, -150, te) + 'px)'; $('itag').style.letterSpacing = lerp(.7, .42, te) + 'em';
+      } else if (s.kind === 'ayah') {
+        var aw = inout(seg(lt, .6, 3.2));
+        $('aar').style.clipPath = 'inset(0 0 0 ' + (100 - aw * 100) + '%)';
+        $('aar').style.transform = 'scale(' + lerp(1.06, 1, out3(seg(lt, .6, 6))) + ')';
+        $('aar').style.filter = 'drop-shadow(0 0 ' + lerp(30, 8, aw) + 'px rgba(240,200,120,.35))';
+        var ee = out3(seg(lt, 2.8, 3.8)); $('aen').style.opacity = ee; $('aen').style.transform = 'translateY(' + lerp(30, 0, ee) + 'px)'; $('aen').style.filter = 'blur(' + lerp(8, 0, ee) + 'px)';
+        var re = out3(seg(lt, 3.6, 4.6)); $('aref').style.opacity = re; $('al1').style.width = $('al2').style.width = lerp(0, 220, re) + 'px';
+      } else if (s.kind === 'widgets') {
+        var w = $('w-widgets'), we2 = out5(seg(lt, .2, 1.5)), pz = inout(seg(lt, 1.4, 5.6)), zz = lerp(.9, 1.3, pz);
+        w.style.opacity = we2;
+        w.style.transform = 'translate(' + (540 - 380 * zz) + 'px,' + (lerp(1520, 1270, we2) - lerp(493, 600, pz) * zz) + 'px) scale(' + zz + ')';
+        words(el, lt, .25);
+      } else if (s.kind === 'desk') {
+        var dk = $('w-desk'), de = out5(seg(lt, .2, 1.5));
+        var keys = [[0, .66, 750, 520], [1.6, .66, 750, 520], [3.4, 1.05, 750, 170], [5.4, 1.05, 750, 170], [6.2, .66, 750, 520], [9, .72, 750, 500]];
+        var c = camAt(keys, lt);
+        dk.style.opacity = de;
+        dk.style.transform = 'translate(540px,' + lerp(1500, 1250, de) + 'px) scale(' + c[1] + ') translate(' + -c[2] + 'px,' + -c[3] + 'px)';
+        var pe = out3(seg(lt, 2.6, 3.4)), pill = $('dpill');
+        pill.style.opacity = pe; pill.style.transform = 'translate(-50%,' + lerp(-100, 0, pe) + 'px) scale(' + lerp(.7, 1, pe) + ')';
+        pill.style.boxShadow = '0 18px 40px -12px rgba(0,0,0,.85), 0 0 ' + (34 * Math.sin(seg(lt, 3.2, 5) * Math.PI)) + 'px rgba(241,213,158,.6)';
+        var left = Math.max(0, 4360 - Math.floor(lt - 2.6)); $('dcd').textContent = Math.floor(left / 3600) + ':' + ('0' + Math.floor(left % 3600 / 60)).slice(-2) + ':' + ('0' + left % 60).slice(-2);
+        $('dk2').style.opacity = out3(seg(lt, 6, 6.8));
+        words(el, lt, .25);
+      } else if (s.kind === 'end') {
+        var ie2 = out5(seg(lt, .5, 1.8));
+        $('eicon').style.opacity = ie2; $('eicon').style.transform = 'scale(' + lerp(.6, 1, ie2) + ') rotate(' + lt * 3 + 'deg)';
+        var ep = $('eicon').querySelector('.out'); ep.style.strokeDasharray = 176; ep.style.strokeDashoffset = 176 * (1 - inout(seg(lt, .5, 2)));
+        [['eword', 1, 40], ['efree', 3.2, 24], ['edl', 3.7, 30], ['eurl', 4.3, 20], ['esad', 4.9, 16]].forEach(function (a) {
+          var x = out5(seg(lt, a[1], a[1] + 1)), n = $(a[0]); n.style.opacity = x; n.style.transform = 'translateY(' + lerp(a[2], 0, x) + 'px)'; n.style.filter = 'blur(' + lerp(10, 0, x) + 'px)';
+        });
+        Array.prototype.forEach.call($('efeat').children, function (c, i) {
+          var x = out5(seg(lt, 1.6 + i * .09, 2.3 + i * .09)); c.style.opacity = x; c.style.transform = 'translateY(' + lerp(30, 0, x) + 'px) scale(' + lerp(.85, 1, x) + ')';
+        });
+      } else {
+        phoneScene(s, el, lt);
+        if (s.extra === 'ring') {
+          var n = Math.min(33, Math.max(1, Math.floor((lt - 2.2) / .12) + 1));
+          $('cnum').textContent = lt < 2.2 ? 1 : n; $('carc').setAttribute('stroke-dashoffset', 540.4 * (1 - (lt < 2.2 ? 0 : n / 33)));
+          var ce = out5(seg(lt, 1.8, 2.6)); $('cring').style.opacity = ce; $('cring').style.transform = 'scale(' + lerp(.6, 1, ce) + ')';
+        }
+        if (s.extra === 'lanterns') lanterns(lt);
+      }
+    });
+    dust(t, lightK);
+    $('fade').style.opacity = Math.max(1 - seg(t, 0, 1.4), seg(t, DUR - 1.8, DUR));
+  };
+  if (!/[?&]render/.test(location.search)) {
+    var t0 = performance.now();
+    (function loop() { window.render(((performance.now() - t0) / 1000) % DUR); requestAnimationFrame(loop); })();
+  }
+})();
+</script>
+</body>
+</html>

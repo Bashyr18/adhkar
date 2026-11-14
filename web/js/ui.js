@@ -146,7 +146,12 @@
   };
   /* the transliteration and translation of a text, one design everywhere: a label, then the text in its own
      direction; āyah numbers "(1)" become small markers, as in the Arabic */
-  A.txSections = function (it, compact) {
+  /* a translation or transliteration, line by line: the basmalah that opens a sūrah stands on its own line, and
+     āyah numbers "(1)" become small markers */
+  A.txLines = function (t) {
+    return A.txSections({ en: t }, false, true);
+  };
+  A.txSections = function (it, compact, linesOnly) {
     /* line by line: an āyah number becomes a marker, and the basmalah that opens a sūrah becomes a quiet divider */
     var BSM = /^(Bismill[āa]hir-Ra[ḥh]m[āa]nir-Ra[ḥh][īi]m\.?|In the Name of Allah,.*Most Merciful\.)$/;
     var vn = function (t) {
@@ -167,6 +172,7 @@
         })
         .join('');
     };
+    if (linesOnly) return vn(it.en || '');
     var h = '';
     if (S.prefs.tr && it.tr)
       h +=

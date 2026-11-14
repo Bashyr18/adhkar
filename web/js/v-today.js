@@ -350,10 +350,10 @@
       x.c.hue +
       '"><div class="spread"><div class="eyebrow" style="color:var(--h)">Dhikr of the day</div><span class="faint small">' +
       esc(x.c.id === 'morning' ? 'Morning & evening' : x.c.title) +
-      '</span></div><div class="ar" lang="ar">' +
-      esc(x.it.ar) +
-      '</div><div class="en">' +
-      esc(x.it.en) +
+      '</span></div>' +
+      (x.it.qs ? A.mushaf(x.it.qs, false) : '<div class="ar" lang="ar">' + esc(x.it.ar) + '</div>') +
+      '<div class="en tx-t">' +
+      A.txLines(x.it.en || '') +
       '</div><div class="foot"><span class="faint small clamp1" style="flex:1">' +
       esc(x.it.refs && x.it.refs[0] ? x.it.refs[0].l : '') +
       '</span><button type="button" class="ib ghost sm" data-a="dod-share" aria-label="Share">' +

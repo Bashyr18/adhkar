@@ -78,6 +78,11 @@
   font-size: 9.5pt;
   font-weight: 700;
 }
+.pp-ar,
+.pp-en,
+.pp-tr {
+  white-space: pre-line;
+}
 .pp-ar {
   margin: 2.5mm 0 0;
   font-family: 'Amiri Quran', 'Amiri', serif;
