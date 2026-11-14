@@ -187,7 +187,9 @@ final class Widgets {
             PrayerCalc.Day d = PrayerCalc.dayAt(now, 0, o);
             boolean eveFromMaghrib = n != null && n.optJSONObject("evening") != null && "maghrib".equals(n.optJSONObject("evening").optString("from"));
             long eve = eveFromMaghrib ? d.maghrib : d.asr;
-            if (now >= d.fajr && now < eve) { sess = "morning"; when = now < d.sunrise ? L.t("BEFORE SUNRISE", "قبل الشروق") : L.t("THIS MORNING", "هذا الصباح"); bg = now < d.sunrise ? R.drawable.widget_bg_dawn : R.drawable.widget_bg_day; }
+            /* the morning adhkār end before Dhuhr; until ʿAṣr the widget shows the evening's, still to come */
+            if (now >= d.fajr && now < d.dhuhr) { sess = "morning"; when = now < d.sunrise ? L.t("BEFORE SUNRISE", "قبل الشروق") : L.t("THIS MORNING", "هذا الصباح"); bg = now < d.sunrise ? R.drawable.widget_bg_dawn : R.drawable.widget_bg_day; }
+            else if (now >= d.dhuhr && now < eve) { sess = "evening"; when = L.t("FROM ʿAṢR", "من العصر"); bg = R.drawable.widget_bg_day; }
             else if (now >= eve && now < d.isha) { sess = "evening"; when = L.t("THIS EVENING", "هذا المساء"); bg = now < d.maghrib ? R.drawable.widget_bg_asr : R.drawable.widget_bg_dusk; }
             else { sess = "sleep"; when = L.t("BEFORE YOU SLEEP", "قبل النوم"); bg = R.drawable.widget_bg_night; }
         }
