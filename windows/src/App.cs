@@ -86,7 +86,12 @@ namespace Adhkar {
         static void Unpack() {
             var asm = Assembly.GetExecutingAssembly();
             using (var s = asm.GetManifestResourceStream("app.zip")) {
-                string tag = "app-" + Version + "-" + s.Length;
+                /* named by a hash of the contents, not their size: two builds can come out the same size, and the
+                   second would then never be unpacked */
+                string sum;
+                using (var h = System.Security.Cryptography.SHA1.Create()) sum = BitConverter.ToString(h.ComputeHash(s)).Replace("-", "").Substring(0, 12).ToLowerInvariant();
+                s.Position = 0;
+                string tag = "app-" + Version + "-" + sum;
                 Store.AppDir = Path.Combine(Store.Root, tag);
                 if (!File.Exists(Path.Combine(Store.AppDir, ".done"))) {
                     if (Directory.Exists(Store.AppDir)) Directory.Delete(Store.AppDir, true);

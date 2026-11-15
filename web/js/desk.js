@@ -712,7 +712,8 @@
         kicker: L('THE HOUR OF RESPONSE', 'ساعة الإجابة'),
         title: L('Make duʿāʾ', 'ادعُ الله')
       };
-      o.untilLabel = f.now === 'last' ? L('until Maghrib', 'حتى المغرب') : L('until the prayer ends', 'حتى تنقضي الصلاة');
+      o.untilLabel =
+        f.now === 'last' ? L('until Maghrib', 'حتى المغرب') : L('until the prayer ends', 'حتى تنقضي الصلاة');
       o.rows.push({
         icon: 'mosque',
         title: L('Yawm al-Jumuʿah', 'يوم الجمعة'),
@@ -727,7 +728,10 @@
       if (sess === id && !p.complete) o.ring = +p.frac.toFixed(3);
       o.rows.push({
         icon: id === 'morning' ? 'sunrise' : 'moon',
-        title: L(id === 'morning' ? 'Morning adhkār' : 'Evening adhkār', id === 'morning' ? 'أذكار الصباح' : 'أذكار المساء'),
+        title: L(
+          id === 'morning' ? 'Morning adhkār' : 'Evening adhkār',
+          id === 'morning' ? 'أذكار الصباح' : 'أذكار المساء'
+        ),
         sub: p.complete
           ? L('Complete · mā shāʾ Allāh', 'اكتملت · ما شاء الله')
           : (sess === id ? L('Now · ', 'الآن · ') : '') + A.fmtN(p.done) + ' / ' + A.fmtN(p.total),
@@ -747,7 +751,12 @@
         route: 'calendar'
       });
     else if (pp.fast && S.fastPlan && S.fastPlan[k] && !S.fasts[k])
-      o.rows.push({ icon: 'fast', title: L('Today you planned to fast', 'نويت صيام اليوم'), sub: L('Log it in the calendar', 'سجّله في التقويم'), route: 'calendar' });
+      o.rows.push({
+        icon: 'fast',
+        title: L('Today you planned to fast', 'نويت صيام اليوم'),
+        sub: L('Log it in the calendar', 'سجّله في التقويم'),
+        route: 'calendar'
+      });
     return o;
   }
   function at(t, hm) {
@@ -897,13 +906,20 @@
   var tk = null;
   Desk.takbir = function () {
     if (tk) return;
-    tk = new Audio('/audio/adhan_takbir.ogg');
-    tk.onended = tk.onerror = function () {
+    /* played from memory (window.DeskMedia, in the Windows shim): WebView2 does not serve an <audio> element's own
+       requests from the app's files */
+    var clear = function () {
       tk = null;
     };
-    tk.play().catch(function () {
-      tk = null;
-    });
+    tk = {};
+    (window.DeskMedia ? window.DeskMedia('/audio/adhan_takbir.ogg') : Promise.resolve('/audio/adhan_takbir.ogg')).then(
+      function (url) {
+        tk = new Audio(url);
+        tk.onended = tk.onerror = clear;
+        tk.play().catch(clear);
+      },
+      clear
+    );
   };
   Desk.stopAudio = function () {
     if (window.DeskAudio) window.DeskAudio.stop();
@@ -1029,7 +1045,12 @@
       '<div class="dk-row dk-pill-row"><div class="grow"><b>' +
       esc(L('Where it sits', 'مكانها')) +
       '</b><small>' +
-      esc(L('At the top, like a notch; in the corner; or wherever you drop it', 'في الأعلى كالنتوء، أو في الزاوية، أو حيث تضعها')) +
+      esc(
+        L(
+          'At the top, like a notch; in the corner; or wherever you drop it',
+          'في الأعلى كالنتوء، أو في الزاوية، أو حيث تضعها'
+        )
+      ) +
       '</small></div>' +
       seg('place', [
         ['top', L('Top', 'الأعلى')],
@@ -1059,15 +1080,29 @@
       '<section class="card dk-card"><h3>' +
       esc(L('Recitations', 'التلاوات')) +
       '</h3><div class="dk-row"><div class="grow"><b>' +
-      esc(miss.length ? L('Download every recitation', 'نزّل كل التلاوات') : L('Every recitation is on this computer', 'كل التلاوات على هذا الحاسوب')) +
+      esc(
+        miss.length
+          ? L('Download every recitation', 'نزّل كل التلاوات')
+          : L('Every recitation is on this computer', 'كل التلاوات على هذا الحاسوب')
+      ) +
       '</b><small>' +
       esc(
         miss.length
-          ? A.plural(miss.length, 'recording') + ' · ' + A.audio.mb(A.audio.bytes(miss)) + ' · ' + L('then they play offline', 'ثم تعمل دون اتصال')
+          ? A.plural(miss.length, 'recording') +
+              ' · ' +
+              A.audio.mb(A.audio.bytes(miss)) +
+              ' · ' +
+              L('then they play offline', 'ثم تعمل دون اتصال')
           : L('They play offline, in the reader and in Learn mode', 'تعمل دون اتصال في القارئ ووضع التعلّم')
       ) +
       '</small><div class="au-dl" data-au-all style="margin-top:10px"><i></i></div><small data-au-all-t></small></div>' +
-      (miss.length ? '<button class="btn pri sm" data-a="au-get-all">' + ic('download', 18) + '<span>' + esc(L('Download', 'نزّل')) + '</span></button>' : A.icon('check', 's')) +
+      (miss.length
+        ? '<button class="btn pri sm" data-a="au-get-all">' +
+          ic('download', 18) +
+          '<span>' +
+          esc(L('Download', 'نزّل')) +
+          '</span></button>'
+        : A.icon('check', 's')) +
       '</div><div class="dk-row"><div class="grow"><b>' +
       esc(L('Space used', 'المساحة المستخدمة')) +
       '</b><small>' +
@@ -1075,7 +1110,12 @@
       '</small></div>' +
       (used ? '<button class="btn ghost sm" data-a="au-clear">' + esc(L('Remove', 'إزالة')) + '</button>' : '') +
       '</div><p class="dk-note">' +
-      esc(L('Ḥiṣn al-Muslim recordings, and the Qurʾān by Mishary al-ʿAfāsī. Sūrat al-Kahf downloads when you first press Listen.', 'تسجيلات حصن المسلم، والقرآن بصوت مشاري العفاسي. تُنزّل سورة الكهف عند أول ضغطة على استمع.')) +
+      esc(
+        L(
+          'Ḥiṣn al-Muslim recordings, and the Qurʾān by Mishary al-ʿAfāsī. Sūrat al-Kahf downloads when you first press Listen.',
+          'تسجيلات حصن المسلم، والقرآن بصوت مشاري العفاسي. تُنزّل سورة الكهف عند أول ضغطة على استمع.'
+        )
+      ) +
       '</p></section>'
     );
   }
@@ -1112,7 +1152,12 @@
       '<div class="dk-row"><div class="grow"><b>' +
       esc(L('Adhkār on your phone', 'أذكار على هاتفك')) +
       '</b><small>' +
-      esc(L('The Android app, free from the same page. Open this on your phone, or download it here and send it across.', 'تطبيق أندرويد، مجانًا من الصفحة نفسها. افتح الرابط على هاتفك، أو نزّله هنا وأرسله إليه.')) +
+      esc(
+        L(
+          'The Android app, free from the same page. Open this on your phone, or download it here and send it across.',
+          'تطبيق أندرويد، مجانًا من الصفحة نفسها. افتح الرابط على هاتفك، أو نزّله هنا وأرسله إليه.'
+        )
+      ) +
       '</small></div><a class="btn ghost sm" data-a="ext" href="https://github.com/Bashyr18/adhkar/releases/latest">' +
       esc(L('Get it', 'احصل عليه')) +
       '</a></div>' +
@@ -1136,7 +1181,10 @@
         'next',
         I.next,
         L('A floating pill that keeps the day in view', 'كبسولة عائمة تُبقي يومك أمامك'),
-        L('The next prayer, the Friday hour, your adhkār and a planned fast. Click to open it, drag it anywhere', 'الصلاة القادمة وساعة الجمعة وأذكارك وصيام نويته. انقر لفتحها واسحبها حيث شئت')
+        L(
+          'The next prayer, the Friday hour, your adhkār and a planned fast. Click to open it, drag it anywhere',
+          'الصلاة القادمة وساعة الجمعة وأذكارك وصيام نويته. انقر لفتحها واسحبها حيث شئت'
+        )
       ) +
       toggle('nextTop', I.nextTop, L('Keep it on top of other windows', 'إبقاؤها فوق النوافذ الأخرى'), '') +
       pillOptions() +

@@ -225,5 +225,12 @@ shown.forEach(([f, src]) => {
   ok(K.bismillah.indexOf('بِسْمِ') === 0, 'the bismillah comes from al-Fātiḥah 1:1');
 }
 
+/* the Windows app plays recitations and the takbīr in the page, from in-memory copies of its own files */
+{
+  const html = require('fs').readFileSync(require('path').join(__dirname, '..', 'web', 'index.html'), 'utf8');
+  const m = /media-src ([^;]+)/.exec(html);
+  ok(!!m && /'self'/.test(m[1]) && /blob:/.test(m[1]), "the page's policy lets the desktop play audio (media-src 'self' blob:)");
+}
+
 console.log(pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

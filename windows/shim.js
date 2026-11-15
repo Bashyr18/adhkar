@@ -81,9 +81,35 @@
     };
   });
 
-  /* ---------- recitations: played here, from the files the computer downloaded (served under /rec/) ---------- */
-  var Q = { list: [], i: 0, el: null, rate: 1, t: 0 };
+  /* ---------- recitations: played here, from the files the computer downloaded (served under /rec/) ----------
+     WebView2 does not pass an <audio> element's requests through the app's own file server (they would go out to a
+     host that does not exist and fail with "no supported source"), but it does pass fetch(). So each file is fetched,
+     held in memory as a blob, and played from there. The last few stay ready, and the next verse is fetched while
+     the current one plays, so a recitation runs on without gaps. */
+  var blobs = {},
+    order = [];
+  var media = (window.DeskMedia = function (path) {
+    if (blobs[path]) return Promise.resolve(blobs[path]);
+    return fetch(path)
+      .then(function (r) {
+        if (!r.ok) throw new Error(r.status);
+        return r.blob();
+      })
+      .then(function (b) {
+        if (blobs[path]) return blobs[path];
+        blobs[path] = URL.createObjectURL(b);
+        order.push(path);
+        while (order.length > 12) {
+          var old = order.shift();
+          URL.revokeObjectURL(blobs[old]);
+          delete blobs[old];
+        }
+        return blobs[path];
+      });
+  });
+  var Q = { list: [], i: 0, el: null, rate: 1, t: 0, gen: 0, held: false };
   function stopEl() {
+    Q.gen++;
     clearInterval(Q.t);
     if (Q.el) {
       Q.el.onended = Q.el.onerror = null;
@@ -99,21 +125,28 @@
       if (nat().onAudioEnd) nat().onAudioEnd();
       return;
     }
-    var a = (Q.el = new Audio('/rec/' + Q.list[Q.i]));
-    a.playbackRate = Q.rate;
-    a.onended = function () {
-      Q.i++;
-      next();
-    };
-    a.onerror = function () {
-      stopEl();
-      if (nat().onAudioEnd) nat().onAudioEnd();
-    };
-    a.play().catch(function () {});
-    Q.t = setInterval(function () {
-      if (Q.el && Q.el.duration && nat().onAudioPos)
-        nat().onAudioPos(Q.i, Q.list.length, Q.el.currentTime * 1000, Q.el.duration * 1000, !Q.el.paused);
-    }, 200);
+    var gen = Q.gen,
+      fail = function () {
+        if (gen !== Q.gen) return;
+        stopEl();
+        if (nat().onAudioEnd) nat().onAudioEnd();
+      };
+    media('/rec/' + Q.list[Q.i]).then(function (url) {
+      if (gen !== Q.gen) return;
+      var a = (Q.el = new Audio(url));
+      a.playbackRate = Q.rate;
+      a.onended = function () {
+        Q.i++;
+        next();
+      };
+      a.onerror = fail;
+      if (!Q.held) a.play().catch(fail);
+      if (Q.i + 1 < Q.list.length) media('/rec/' + Q.list[Q.i + 1]).catch(function () {});
+      Q.t = setInterval(function () {
+        if (Q.el && Q.el.duration && nat().onAudioPos)
+          nat().onAudioPos(Q.i, Q.list.length, Q.el.currentTime * 1000, Q.el.duration * 1000, !Q.el.paused);
+      }, 200);
+    }, fail);
   }
   B.audioPlay = function (json, rate) {
     try {
@@ -122,13 +155,16 @@
       Q.list = [];
     }
     Q.i = 0;
+    Q.held = false;
     Q.rate = Math.max(0.5, Math.min(1.5, +rate || 1));
     if (Q.list.length) next();
   };
   B.audioPause = function () {
+    Q.held = true;
     if (Q.el) Q.el.pause();
   };
   B.audioResume = function () {
+    Q.held = false;
     if (Q.el) Q.el.play().catch(function () {});
   };
   B.audioRate = function (r) {
@@ -146,14 +182,21 @@
       adhan = null;
       return false;
     }
-    adhan = new Audio('/audio/adhan_takbir.ogg');
-    adhan.onended = function () {
-      adhan = null;
+    var me = (adhan = {
+      pause: function () {
+        me.off = true;
+      }
+    });
+    var done = function () {
+      if (adhan === me) adhan = null;
       if (nat().onAdhanEnd) nat().onAdhanEnd();
     };
-    adhan.play().catch(function () {
-      adhan = null;
-    });
+    media('/audio/adhan_takbir.ogg').then(function (url) {
+      if (me.off || adhan !== me) return;
+      var a = (adhan = new Audio(url));
+      a.onended = a.onerror = done;
+      a.play().catch(done);
+    }, done);
     return true;
   };
   window.AndroidBridge = B;
