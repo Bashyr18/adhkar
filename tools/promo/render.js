@@ -44,4 +44,6 @@ module.exports = async (page) => {
   ff.stdin.end();
   await new Promise((r) => ff.on('close', r));
   console.log('video:', n, 'frames in', Math.round((Date.now() - t0) / 1000) + 's');
+  /* the sound cues the film publishes (window.SFX), for tools/promo/sfx.py */
+  fs.writeFileSync(path.join(out, 'sfx.json'), (await page.eval('JSON.stringify(window.SFX||[])')) || '[]');
 };

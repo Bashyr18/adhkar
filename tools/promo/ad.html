@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Adhkār · the 60-second ad</title>
-<!-- The 60-second ad, as code: portrait 1080 x 1920. window.render(t) draws the frame at t seconds; tools/promo/render.js
+<title>Adhkār · the 45-second film</title>
+<!-- The 45-second film, as code, in two shapes: portrait 1080 x 1920 for status and stories, and with ?land
+     landscape 1920 x 1080 for LinkedIn and the web, where the words stand in a column beside the screens.: portrait 1080 x 1920. window.render(t) draws the frame at t seconds; tools/promo/render.js
      steps a headless browser through it into ffmpeg. Open it directly to watch it play.
      Built like a product ad: short beats on moving cuts, big words, the interface animated in code (the pace ring,
      the compass, the prayer list, the progress charts, the ifṭār countdown), real screens in 3D with their key card
@@ -16,6 +17,27 @@
 @font-face { font-family: 'Amiri'; font-weight: 400; src: url(../../docs/guide/fonts/Amiri-400-arabic.woff2) format('woff2'); unicode-range: U+0600-06FF, U+FB50-FDFF, U+FE70-FEFF; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; }
+html.land, html.land body, html.land #stage { width: 1920px; height: 1080px; }
+html.feed, html.feed body, html.feed #stage { width: 1080px; height: 1350px; }
+.vis { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform-origin: 0 0; }
+/* the words: a column at the left of a landscape frame; a band across the top of a portrait or feed frame, clear of
+   the name, caption and buttons that LinkedIn and status viewers lay over the bottom and the right */
+.txt { position: absolute; z-index: 3; display: flex; flex-direction: column; justify-content: center; gap: 20px; }
+html.land .txt { left: 120px; top: 0; bottom: 0; width: 790px; gap: 26px; }
+html.port .txt { left: 80px; right: 80px; top: 130px; height: 330px; align-items: center; }
+html.feed .txt { left: 70px; right: 70px; top: 54px; height: 280px; align-items: center; }
+.txt > * { position: static !important; left: auto !important; right: auto !important; top: auto !important; width: auto !important; margin: 0 !important; }
+html.land .txt > * { text-align: left !important; }
+html.port .txt > *, html.feed .txt > * { text-align: center !important; }
+.txt .line { font-size: 76px; }
+html.port .txt .line { font-size: 70px; }
+html.feed .txt .line { font-size: 60px; }
+.txt .small { font-size: 32px; }
+html.feed .txt .small { font-size: 27px; }
+.txt #Hcd { font-size: 170px; }
+html.port .txt #Hcd { font-size: 130px; }
+html.feed .txt #Hcd { font-size: 104px; }
+html.feed .txt { gap: 14px; }
 #stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; font-family: 'Quicksand', sans-serif; color: #f5f0e7; background: #050608; }
 #bokeh { position: absolute; inset: 0; z-index: 0; }
 .b { position: absolute; inset: 0; visibility: hidden; overflow: hidden; perspective: 2400px; z-index: 2; }
@@ -57,6 +79,7 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
   <div class="b" id="A">
     <div class="fill" style="background:radial-gradient(60% 40% at 50% 46%, rgba(30,26,40,.7), rgba(5,6,8,0) 70%)"></div>
     <div id="Aglow" style="position:absolute;left:140px;top:480px;width:800px;height:800px;border-radius:50%;background:radial-gradient(circle,rgba(246,214,150,.55),rgba(246,214,150,0) 62%)"></div>
+    <div id="Arays" style="position:absolute;left:40px;top:380px;width:1000px;height:1000px;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(246,214,150,.16) 0deg 3deg,rgba(246,214,150,0) 3deg 15deg);-webkit-mask:radial-gradient(circle,#000 18%,transparent 62%);mask:radial-gradient(circle,#000 18%,transparent 62%);opacity:0"></div>
     <svg id="Astar" viewBox="0 0 64 64" style="position:absolute;left:290px;top:630px;width:500px;height:500px;overflow:visible">
       <defs><linearGradient id="gA" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6dfaa"/><stop offset="1" stop-color="#b8873a"/></linearGradient></defs>
       <circle id="Adot" cx="32" cy="32" r="2" fill="#fff3d6"/>
@@ -64,13 +87,14 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
       <path id="Ain" d="M32 21l3 4 4.9-1-1 4.9 4 3.1-4 3 1 4.9-4.9-1-3 4-3-4-4.9 1 1-4.9-4-3 4-3.1-1-4.9 4.9 1z" fill="url(#gA)" style="transform-origin:32px 32px"/>
       <circle id="Aring" cx="32" cy="32" r="10" fill="none" stroke="#f6dfaa" stroke-width=".6"/>
     </svg>
-    <div class="big" id="Aword" style="top:1380px;font-size:120px">Every <span class="g">moment.</span></div>
+    <div class="big" id="Aword" style="top:1360px;font-size:104px;line-height:1.08">Remember Allah,<br><span class="g">every moment.</span></div>
   </div>
 
   <!-- B · the day, in single words -->
   <div class="b" id="B">
     <div class="fill" id="Bbg"></div>
-    <div class="big" id="Bword" style="top:820px"></div>
+    <div class="big" id="Bword" style="top:800px"></div>
+    <div id="Btime" style="position:absolute;left:0;right:0;top:1020px;text-align:center;font:700 40px Quicksand;letter-spacing:.06em;opacity:.8"></div>
   </div>
 
   <!-- C · Today, its sky card lifting out of the glass -->
@@ -80,7 +104,7 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
       <div class="scr"><img src="../../docs/guide/shots/dark/today.webp"><i class="gl"></i></div>
       <div class="pop" id="Cpop" style="left:36px;top:248px;width:568px;height:345px;background-image:url(../../docs/guide/shots/dark/today.webp);background-size:618px 1280px;background-position:-25px -237px"></div>
     </div>
-    <div id="Ccap" style="position:absolute;left:0;right:0;top:1660px;text-align:center"><div class="kick">Today</div><div style="margin-top:14px;font:700 66px Quicksand;letter-spacing:-.025em">Your day, <span class="g">at a glance.</span></div></div>
+    <div id="Ccap" style="position:absolute;left:0;right:0;top:1660px;text-align:center"><div class="kick">Today</div><div style="margin-top:14px;font:700 66px Quicksand;letter-spacing:-.025em">It knows <span class="g">what is next.</span></div><div style="margin-top:12px;font:500 30px/1.4 Quicksand;color:#c9c2b5">The next prayer, the adhkār due now, the time duʿāʾ is answered.</div></div>
   </div>
 
   <!-- D · the pace ring -->
@@ -98,8 +122,8 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
       <text id="Dn" x="300" y="380" text-anchor="middle" style="font:700 150px Quicksand;fill:#f5f0e7;letter-spacing:-5px">1</text>
       <text x="300" y="430" text-anchor="middle" style="font:700 24px Quicksand;letter-spacing:7px;fill:#a99e88">OF 33</text>
     </svg>
-    <div class="line" id="Dl1" style="top:1210px">Counted on <span class="g">your fingers.</span></div>
-    <div class="small" id="Dl2" style="top:1430px">As the Sunnah teaches. The app keeps a gentle pace; your right hand keeps the count.</div>
+    <div class="line" id="Dl1" style="top:1210px">Count on your fingers, <span class="g">as the Sunnah teaches.</span></div>
+    <div class="small" id="Dl2" style="top:1430px">The circle keeps a gentle pace. Your right hand keeps the count.</div>
   </div>
 
   <!-- E · a montage of the day's remembrance -->
@@ -123,7 +147,7 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
     <div class="fill" style="background:radial-gradient(70% 45% at 50% 30%, #f8f2e6, #e7dfcf 80%)"></div>
     <svg id="Fdial" viewBox="0 0 600 600" style="position:absolute;left:215px;top:170px;width:650px;height:650px;overflow:visible"></svg>
     <div id="Flist" style="position:absolute;left:150px;right:150px;top:930px"></div>
-    <div class="line" id="Fl" style="top:1600px;color:#1c1914;font-size:72px">The qibla, and every prayer.<br><span style="font-size:.6em;color:#7a6c55">Anywhere. Even offline.</span></div>
+    <div class="line" id="Fl" style="top:1600px;color:#1c1914;font-size:72px">Every prayer, <span style="color:#a8823e">anywhere.</span><br><span style="font-size:.5em;color:#7a6c55;font-weight:500">Times worked out on your phone, the qibla in your hand. No internet needed.</span></div>
   </div>
 
   <!-- P · Insights: the real page, its charts lifting out of the screen and drawing themselves -->
@@ -134,16 +158,16 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
     <div class="lift" id="P2"><i class="lo"></i><i class="hi"></i><b class="sc"></b></div>
     <div class="lift" id="P3"><i class="lo"></i><i class="hi"></i><b class="sc"></b></div>
     <div class="lift" id="P4"><i class="lo"></i><i class="hi"></i><b class="sc"></b></div>
-    <div id="Pk" class="kick" style="position:absolute;left:0;right:0;top:1440px;text-align:center">Insights</div>
-    <div class="line" id="Pl" style="top:1500px">Your progress, <span class="g">gently.</span></div>
-    <div class="small" id="Ps" style="top:1620px">Streaks, sessions and patterns, compared with no one.</div>
+    <div id="Pk" class="kick" style="position:absolute;left:0;right:0;top:1440px;text-align:center">Your progress</div>
+    <div class="line" id="Pl" style="top:1500px">Watch your <span class="g">consistency grow.</span></div>
+    <div class="small" id="Ps" style="top:1620px">Streaks, every prayer logged, the days you remember most. Compared with no one.</div>
   </div>
 
   <!-- K · more of the app, on a turning ring -->
   <div class="b" id="K">
     <div class="fill" style="background:radial-gradient(70% 45% at 50% 40%, rgba(30,34,50,.75), rgba(6,7,11,0) 72%)"></div>
     <div id="Kring" style="position:absolute;left:540px;top:820px;width:0;height:0;transform-style:preserve-3d"></div>
-    <div id="Kk" class="kick" style="position:absolute;left:0;right:0;top:1500px;text-align:center">And so much more</div>
+    <div id="Kk" class="kick" style="position:absolute;left:0;right:0;top:1500px;text-align:center">Everything in one place</div>
     <div id="Kt" style="position:absolute;left:60px;right:60px;top:1560px;text-align:center;font:700 72px/1.1 Quicksand;letter-spacing:-.03em"></div>
   </div>
 
@@ -157,7 +181,7 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
         <div id="Gpage" style="position:absolute;inset:0;transform-origin:100% 50%;backface-visibility:hidden"><img src="../../docs/guide/shots/friday/kahf.webp" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top"></div>
       </div></div>
     </div>
-    <div id="Gt" style="position:absolute;left:0;right:0;top:1660px;text-align:center"><div class="ar" style="font:400 62px/1.2 Amiri;color:#f3dca6">يوم الجمعة</div><div style="margin-top:6px;font:700 84px Quicksand;letter-spacing:-.03em">Every <span class="g">Friday.</span></div><div style="margin-top:10px;font:500 32px Quicksand;color:#b9c7c0">Its Sunnahs, the hour of response, Sūrat al-Kahf.</div></div>
+    <div id="Gt" style="position:absolute;left:0;right:0;top:1660px;text-align:center"><div class="ar" style="font:400 62px/1.2 Amiri;color:#f3dca6">يوم الجمعة</div><div style="margin-top:6px;font:700 84px Quicksand;letter-spacing:-.03em">Jumuʿah, <span class="g">made special.</span></div><div style="margin-top:10px;font:500 32px Quicksand;color:#b9c7c0">Its Sunnahs, the hour of response, and Sūrat al-Kahf to read and hear.</div></div>
   </div>
 
   <!-- H · Ramaḍān -->
@@ -167,8 +191,8 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
     <div id="Hk" class="kick" style="position:absolute;left:0;right:0;top:760px;text-align:center">Until ifṭār</div>
     <div id="Hcd" style="position:absolute;left:0;right:0;top:820px;text-align:center;font:700 220px/1 Quicksand;letter-spacing:-.04em;font-variant-numeric:tabular-nums">2:25:14</div>
     <div style="position:absolute;left:190px;right:190px;top:1100px;height:10px;border-radius:10px;background:rgba(255,255,255,.1);overflow:hidden"><i id="Hfill" style="display:block;height:100%;width:0;border-radius:10px;background:linear-gradient(90deg,#f6dfaa,#d9a441)"></i></div>
-    <div class="line" id="Hl" style="top:1300px">Ramaḍān, <span class="g">all month.</span></div>
-    <div class="small" id="Hs" style="top:1420px">Suhūr and ifṭār, tarāwīḥ, the khatm, the last ten nights.</div>
+    <div class="line" id="Hl" style="top:1300px">Ramaḍān, <span class="g">every day of it.</span></div>
+    <div class="small" id="Hs" style="top:1420px">Suḥūr and ifṭār, tarāwīḥ, your khatm, the last ten nights.</div>
   </div>
 
   <!-- W · widgets, floating out -->
@@ -179,7 +203,7 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
       <div class="pop" id="W2" style="left:160px;top:830px;width:362px;height:472px;border-radius:40px;background-image:url(../../docs/guide/shots/extra/widgets.webp);background-size:776px 1007px;background-position:-8px -522px"></div>
       <div class="pop" id="W3" style="left:558px;top:830px;width:362px;height:472px;border-radius:40px;background-image:url(../../docs/guide/shots/extra/widgets.webp);background-size:776px 1007px;background-position:-406px -522px"></div>
     </div>
-    <div class="line" id="Wl" style="top:1430px">On your home screen, <span class="g">always.</span></div>
+    <div class="line" id="Wl" style="top:1430px">Never more than <span class="g">a glance away.</span></div><div class="small" id="Ws" style="top:1560px">Widgets for the next prayer and your count for the day.</div>
   </div>
 
   <!-- I · the computer -->
@@ -198,7 +222,7 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
       <div style="height:24px;margin:0 -70px;border-radius:0 0 24px 24px;background:linear-gradient(180deg,#2b2e36,#121318)"></div>
     </div>
     <div class="line" id="Il" style="top:1440px">On your computer, <span class="g">too.</span></div>
-    <div class="small" id="Is" style="top:1560px">The Windows edition. The next prayer floats at the top of your screen.</div>
+    <div class="small" id="Is" style="top:1560px">The next prayer floats above your work, even with the app closed.</div>
   </div>
 
   <!-- I2 · the day, in one line -->
@@ -208,7 +232,7 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
     <div class="lift" id="I2b"><i class="lo"></i><i class="hi"></i><b class="sc"></b></div>
     <div id="I2ring" style="position:absolute;border:3px solid #f6dfaa;border-radius:14px;box-shadow:0 0 30px rgba(246,214,150,.6);opacity:0"></div>
     <div class="line" id="I2l" style="top:1300px">Your day, <span class="g">in one line.</span></div>
-    <div class="small" id="I2s" style="top:1420px">The morning adhkār until Dhuhr, the evening from ʿAṣr, the last third of the night.</div>
+    <div class="small" id="I2s" style="top:1420px">From Fajr to Fajr: the morning adhkār until Dhuhr, the evening from ʿAṣr, the last third of the night.</div>
   </div>
 
   <!-- I3 · made for a big screen: the rail, walked with the mouse -->
@@ -217,8 +241,8 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
     <div class="mon" id="I3mon" style="top:360px"></div>
     <svg id="cur" viewBox="0 0 24 24"><path d="M5 3l14 8-6 1.6L10 19z" fill="#fff" stroke="#111" stroke-width="1.4" stroke-linejoin="round"/></svg>
     <div id="I3rip" style="position:absolute;width:60px;height:60px;border-radius:50%;border:3px solid #f6dfaa;opacity:0"></div>
-    <div class="line" id="I3l" style="top:1260px">Made for <span class="g">a big screen.</span></div>
-    <div class="small" id="I3s" style="top:1380px">A side rail, wide layouts, your keyboard and mouse.</div>
+    <div class="line" id="I3l" style="top:1260px">Built for <span class="g">a big screen.</span></div>
+    <div class="small" id="I3s" style="top:1380px">Every page laid out for the screen. Space counts, Ctrl K finds anything.</div>
   </div>
 
   <!-- I4 · Ctrl K -->
@@ -237,7 +261,7 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
     <div class="mon" id="I5mon" style="top:160px"></div>
     <div class="lift" id="I5b" style="box-shadow:0 70px 130px -30px rgba(0,0,0,.95)"><i class="lo" style="filter:none"></i><i class="hi"></i><b class="sc" style="display:none"></b></div>
     <div class="line" id="I5l" style="top:1500px">Print it, <span class="g">or save a PDF.</span></div>
-    <div class="small" id="I5s" style="top:1620px">On A4, white to the edge, with every source.</div>
+    <div class="small" id="I5s" style="top:1620px">Your adhkār as an A4 booklet, with every source.</div>
   </div>
 
   <!-- J · the end -->
@@ -250,13 +274,13 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
       <path d="M32 21l3 4 4.9-1-1 4.9 4 3.1-4 3 1 4.9-4.9-1-3 4-3-4-4.9 1 1-4.9-4-3 4-3.1-1-4.9 4.9 1z" fill="url(#gJ)"/>
     </svg>
     <div id="Jw" style="position:absolute;left:0;right:0;top:740px;text-align:center;font:400 190px/1 Amiri">Adh<span class="g">kār</span></div>
-    <div id="Jt" style="position:absolute;left:0;right:0;top:1000px;text-align:center;font:700 54px Quicksand;letter-spacing:-.01em;color:#ece6da">Free. Private. Offline.</div>
+    <div id="Jt" style="position:absolute;left:0;right:0;top:1000px;text-align:center;font:700 54px Quicksand;letter-spacing:-.01em;color:#ece6da">Free. Private. Works offline.</div>
     <div id="Jb" style="position:absolute;left:0;right:0;top:1130px;display:flex;justify-content:center;gap:22px">
       <span style="display:inline-flex;align-items:center;height:96px;padding:0 46px;border-radius:99px;font:700 34px Quicksand;background:linear-gradient(180deg,#f1d59e,#d9b26f);color:#1a1206">Android</span>
       <span style="display:inline-flex;align-items:center;height:96px;padding:0 46px;border-radius:99px;font:700 34px Quicksand;border:2px solid rgba(231,207,146,.5);color:#f3dca6">Windows</span>
     </div>
     <div id="Ju" style="position:absolute;left:0;right:0;top:1300px;text-align:center;font:700 40px Quicksand;color:#f3dca6">bashyr18.github.io/adhkar/guide</div>
-    <div id="Js" class="kick" style="position:absolute;left:0;right:0;top:1700px;text-align:center;color:#a99e88">Built as ṣadaqah jāriyah</div>
+    <div id="Js" class="kick" style="position:absolute;left:0;right:0;top:1700px;text-align:center;color:#a99e88">No ads · No account · Built as ṣadaqah jāriyah</div>
   </div>
 
   <div id="sweep"></div>
@@ -276,9 +300,15 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
   var io = function (x) { return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
   var back = function (x) { var c = 1.6; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
   var L = function (a, b, x) { return a + (b - a) * x; };
-  var DUR = (window.DUR = 60);
-  var BEATS = [['A', 0, 2.6], ['B', 2.6, 4.6], ['C', 4.6, 7.8], ['D', 7.8, 11.2], ['E', 11.2, 13.6], ['F', 13.6, 16.6], ['P', 16.6, 23.6], ['K', 23.6, 28], ['G', 28, 31.6], ['H', 31.6, 34.8], ['W', 34.8, 37.6],
-    ['I', 37.6, 41], ['I2', 41, 44.6], ['I3', 44.6, 48.6], ['I4', 48.6, 51.6], ['I5', 51.6, 55.4], ['J', 55.4, 60]];
+  var DUR = (window.DUR = 45);
+  var BEATS = [['A', 0, 2.4], ['B', 2.4, 4.2], ['C', 4.2, 7], ['D', 7, 10], ['E', 10, 12], ['F', 12, 14.6], ['P', 14.6, 20.2], ['K', 20.2, 23.8], ['G', 23.8, 26.6], ['H', 26.6, 29], ['W', 29, 31.2],
+    ['I', 31.2, 33.6], ['I2', 33.6, 36.4], ['I3', 36.4, 39.4], ['I5', 39.4, 42], ['J', 42, 45]];
+  var AT = {};
+  BEATS.forEach(function (b) { AT[b[0]] = b[1]; });
+  /* three shapes: port (9:16, status and stories), feed (4:5, the LinkedIn feed) and land (16:9, the web) */
+  var SHAPE = (window.SHAPE = /[?&]land/.test(location.search) ? 'land' : /[?&]feed/.test(location.search) ? 'feed' : 'port');
+  var LAND = SHAPE === 'land';
+  document.documentElement.classList.add(SHAPE);
   window.CUTS = BEATS.slice(1).map(function (b) { return b[1]; });
 
   /* ---------- the pieces drawn once ---------- */
@@ -343,20 +373,22 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
   var DAY = [['Fajr.', '#f19a5a', '#3a2a5e', '#fff'], ['Work.', '#3f86cf', '#86bfea', '#0c0d12'], ['ʿAṣr.', '#d79a3c', '#f3d38a', '#0c0d12'], ['Home.', '#b4566e', '#5b3168', '#fff'], ['Sleep.', '#0d1030', '#1d1a52', '#fff']];
 
   /* ---------- light: soft out-of-focus circles drifting behind everything ---------- */
+  var CW = LAND ? 960 : 540, CH = LAND ? 540 : SHAPE === 'feed' ? 675 : 960;
+  ['bokeh', 'grain'].forEach(function (id) { var c = $(id); c.width = CW; c.height = CH; c.style.width = CW * 2 + 'px'; c.style.height = CH * 2 + 'px'; });
   var bctx = $('bokeh').getContext('2d'), BK = [], rs = 777;
   function rnd() { rs = (rs * 16807) % 2147483647; return rs / 2147483647; }
-  for (var q = 0; q < 26; q++) BK.push({ x: rnd() * 540, y: rnd() * 960, r: 18 + rnd() * 70, v: 3 + rnd() * 9, ph: rnd() * 6.3, a: .04 + rnd() * .09 });
+  for (var q = 0; q < 26; q++) BK.push({ x: rnd() * CW, y: rnd() * CH, r: 18 + rnd() * 70, v: 3 + rnd() * 9, ph: rnd() * 6.3, a: .04 + rnd() * .09 });
   function bokeh(t, tint) {
-    bctx.clearRect(0, 0, 540, 960);
+    bctx.clearRect(0, 0, CW, CH);
     BK.forEach(function (p) {
-      var y = (p.y - t * p.v) % 960; if (y < -p.r) y += 960 + p.r * 2;
+      var y = (p.y - t * p.v) % CH; if (y < -p.r) y += CH + p.r * 2;
       var x = p.x + Math.sin(t * .2 + p.ph) * 26, a = p.a * (.6 + .4 * Math.sin(t * .7 + p.ph));
       var g = bctx.createRadialGradient(x, y, 0, x, y, p.r);
       g.addColorStop(0, 'rgba(' + tint + ',' + a + ')'); g.addColorStop(.7, 'rgba(' + tint + ',' + a * .5 + ')'); g.addColorStop(1, 'rgba(' + tint + ',0)');
       bctx.fillStyle = g; bctx.beginPath(); bctx.arc(x, y, p.r, 0, 6.29); bctx.fill();
     });
   }
-  var gctx = $('grain').getContext('2d'), gimg = gctx.createImageData(540, 960);
+  var gctx = $('grain').getContext('2d'), gimg = gctx.createImageData(CW, CH);
   function grain(t) {
     var seed = Math.floor(t * 24) * 7919 + 1, d = gimg.data;
     for (var i = 0; i < d.length; i += 4) { seed = (seed * 16807) % 2147483647; var v = seed & 255; d[i] = d[i + 1] = d[i + 2] = v; d[i + 3] = 255; }
@@ -370,11 +402,31 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
     });
     $('Hlan').innerHTML = h;
   }
-  /* every beat opens out of a rounded window */
-  function enter(el, lt) {
-    var e = o5(seg(lt, 0, .5)), ins = L(8, 0, e), rad = L(80, 0, e);
-    el.style.clipPath = lt < .5 ? 'inset(' + ins * 1.6 + '% ' + ins + '% round ' + rad + 'px)' : 'none';
-    el.style.transform = 'scale(' + L(1.04, 1, e) + ')';
+  /* each beat has its own way in: a rounded window, an iris, a diagonal wipe, a push from below, or a soft zoom */
+  var KIND = { B: 'iris', C: 'window', D: 'zoom', E: 'wipe', F: 'iris', P: 'push', K: 'zoom', G: 'wipe', H: 'iris', W: 'push', I: 'window', I2: 'wipe', I3: 'push', I5: 'iris', J: 'zoom' };
+  function enter(el, lt, id) {
+    var k = KIND[id] || 'window', e = o5(seg(lt, 0, .55)), done = lt >= .55;
+    el.style.opacity = 1;
+    if (k === 'window') {
+      var ins = L(8, 0, e), rad = L(80, 0, e);
+      el.style.clipPath = done ? 'none' : 'inset(' + ins * 1.6 + '% ' + ins + '% round ' + rad + 'px)';
+      el.style.transform = 'scale(' + L(1.04, 1, e) + ')';
+    } else if (k === 'iris') {
+      el.style.clipPath = done ? 'none' : 'circle(' + L(0, 120, io(seg(lt, 0, .55))) + '% at 50% 50%)';
+      el.style.transform = 'scale(' + L(1.06, 1, e) + ')';
+    } else if (k === 'wipe') {
+      var x = L(-30, 130, io(seg(lt, 0, .55)));
+      el.style.clipPath = done ? 'none' : 'polygon(0 0,' + x + '% 0,' + (x - 30) + '% 100%,0 100%)';
+      el.style.transform = 'translateX(' + L(-40, 0, e) + 'px)';
+    } else if (k === 'push') {
+      el.style.clipPath = 'none';
+      el.style.transform = 'translateY(' + L(18, 0, e) + '%) scale(' + L(.97, 1, e) + ')';
+      el.style.opacity = Math.min(1, e * 1.4);
+    } else {
+      el.style.clipPath = 'none';
+      el.style.transform = 'scale(' + L(1.14, 1, e) + ')';
+      el.style.opacity = Math.min(1, e * 1.5);
+    }
   }
   /* words rise out of their own line, as if from behind a mask */
   function show(id, lt, from, dy) {
@@ -384,6 +436,57 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
   }
   var TINT = { I2: '150,180,255', I3: '150,180,255', I4: '150,180,255', I5: '246,214,150', A: '246,214,150', B: '255,255,255', C: '150,180,255', D: '246,214,150', E: '246,214,150', F: '200,160,90', P: '246,214,150', K: '170,190,255', G: '150,230,190', H: '190,170,255', W: '150,190,255', I: '150,180,255', J: '246,214,150' };
 
+  /* ---------- landscape: the screens scaled into the right of the frame, the words in a column at the left ----------
+     s is the scale; cy the portrait height that sits at the middle of the frame; mid beats stay centred */
+  var LAYOUT = {
+    A: { s: .75, cy: 1100, mid: 1 }, B: { s: 1, cy: 915, mid: 1 }, E: { s: .9, cy: 935, mid: 1 }, J: { s: .7, cy: 1030, mid: 1 },
+    C: { s: .66, cy: 950 }, D: { s: .78, cy: 640 }, F: { s: .62, cy: 865 }, P: { s: .8, cy: 725 }, K: { s: .85, cy: 820 }, G: { s: .7, cy: 867 },
+    H: { s: .8, cy: 560 }, W: { s: .95, cy: 800 }, I: { s: .75, cy: 930 }, I2: { s: .9, cy: 600 }, I3: { s: .85, cy: 700 }, I5: { s: .8, cy: 795 }
+  };
+  /* where the screens go in each shape: the middle of the frame (x, y) and the height they may fill (h) */
+  var AREA = { land: { x: 1440, mx: 960, y: 540, h: 1080 }, port: { x: 540, mx: 540, y: 975, h: 990 }, feed: { x: 540, mx: 540, y: 845, h: 900 } }[SHAPE];
+  BEATS.forEach(function (b) {
+      var el = $(b[0]), c = LAYOUT[b[0]], vis = document.createElement('div'), txt = null;
+      vis.className = 'vis';
+      if (!c.mid) { txt = document.createElement('div'); txt.className = 'txt'; }
+      [].slice.call(el.children).forEach(function (n) {
+        if (n.classList.contains('fill')) return;
+        var words = !c.mid && (n.matches('.line, .small, .kick, .big, #Ccap, #Gt, #Kk, #Kt, #Hk, #Hcd, #Ws') && !n.matches('.lift'));
+        (words ? txt : vis).appendChild(n);
+      });
+      el.appendChild(vis);
+      if (txt) el.appendChild(txt);
+      /* portrait and feed frames are a full 1080 wide: the screens may use it (PS), not a landscape-sized share of it */
+      var PS = { A: .8, B: 1, E: 1, J: 1, C: .8, D: 1, F: .74, P: 1, K: 1, G: .78, H: 1, W: 1, I: .95, I2: 1, I3: 1, I5: .82 };
+      var sc = LAND ? c.s : Math.min(1, PS[b[0]] * (AREA.h / 990)), mid = c.mid && SHAPE !== 'land';
+      /* a centred beat in a portrait or feed frame fills the safe middle, its own words included */
+      var x = (c.mid ? AREA.mx : AREA.x) - 540 * sc, y = AREA.y - c.cy * sc;
+      vis.style.transform = 'translate(' + x + 'px,' + y + 'px) scale(' + sc + ')';
+      vis.dataset.base = vis.style.transform;
+    });
+
+  /* ---------- the sound, cued by the picture: tools/promo/sfx.py plays exactly these ----------
+     click: something lands or is pressed · fill: a soft rising air while something fills · rustle: paper · tick: a bead */
+  var SFX = (window.SFX = []);
+  var cue = function (k, t, o) { SFX.push(Object.assign({ k: k, t: +t.toFixed(3) }, o || {})); };
+  cue('fill', AT.A + .3, { d: .9 }); cue('click', AT.A + 1.02, { p: 1.3 });
+  for (var i = 0; i < 5; i++) cue('click', AT.B + i * .36, { p: .9 + i * .06 });
+  cue('fill', AT.C + .1, { d: .9 }); cue('click', AT.C + 1.15, { p: 1.1 });
+  for (var n = 2; n <= 33; n++) cue('tick', AT.D + .5 + 2.4 * Math.pow((n - 1) / 32, 1 / .85));
+  cue('fill', AT.D + .5, { d: 2.4, g: .6 }); cue('click', AT.D + 2.95, { p: 1.4 });
+  for (var w = 0; w < 4; w++) cue('click', AT.E + w * .48, { p: 1 + w * .05 });
+  cue('click', AT.F + 1.15, { p: .8 }); for (var r = 0; r < 5; r++) cue('tick', AT.F + .55 + r * .1, { p: .7 }); cue('click', AT.F + 1.55, { p: 1.2 });
+  [.85, 2, 3.15, 4.3].forEach(function (a) { cue('click', AT.P + a, { p: 1 }); cue('fill', AT.P + a + .35, { d: .7, g: .8 }); });
+  for (var f = 1; f < 6; f++) cue('click', AT.K + f * .6, { p: .95 });
+  cue('rustle', AT.G + 1.15, { d: .8 });
+  cue('fill', AT.H + .4, { d: 1.6, g: .6 });
+  [0, .12, .22].forEach(function (a, i) { cue('click', AT.W + a + .35, { p: 1.1 + i * .1 }); });
+  cue('click', AT.I + 1.05, { p: 1.25 });
+  cue('fill', AT.I2 + .9, { d: 1, g: .8 }); cue('click', AT.I2 + 2.05, { p: 1.2 });
+  for (var c2 = 0; c2 < 6; c2++) cue('click', AT.I3 + .4 + c2 * .42 + .14, { p: 1.05 });
+  cue('rustle', AT.I5 + .8, { d: .9 });
+  cue('click', AT.J + .3, { p: .9 });
+
   window.render = function (t) {
     var cur = 'A';
     BEATS.forEach(function (b) {
@@ -392,7 +495,9 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
       if (!on) return;
       cur = b[0];
       var lt = t - b[1];
-      if (b[0] !== 'A') enter(el, lt);
+      if (b[0] !== 'A') enter(el, lt, b[0]);
+      var vs = el.querySelector(':scope > .vis');
+      if (vs) vs.style.transform = vs.dataset.base + ' translate(540px, 960px) scale(' + L(1, 1.035, io(seg(lt, 0, b[2] - b[1]))) + ') translate(-540px, -960px)';
       ({
         A: function () {
           $('Adot').setAttribute('r', L(0, 2.4, o3(seg(lt, .1, .4))) * (1 - seg(lt, .6, .8)));
@@ -400,13 +505,16 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
           var f = back(seg(lt, 1, 1.4)); $('Ain').style.transform = 'scale(' + Math.max(0, f) + ')'; $('Ain').style.opacity = seg(lt, 1, 1.12);
           var rg = o3(seg(lt, 1.15, 1.9)); $('Aring').setAttribute('r', L(8, 40, rg)); $('Aring').style.opacity = 1 - rg;
           $('Aglow').style.opacity = o3(seg(lt, .3, 1.4)) * (.85 + .15 * Math.sin(lt * 4));
-          $('Astar').style.transform = 'scale(' + L(1, 1.12, seg(lt, 0, 2)) + ') rotate(' + lt * 8 + 'deg)';
+          $('Astar').style.transform = 'scale(' + L(1.05, 1.22, seg(lt, 0, 2.4)) + ') rotate(' + lt * 8 + 'deg)';
+          $('Arays').style.opacity = o3(seg(lt, .9, 1.6)) * .9; $('Arays').style.transform = 'rotate(' + lt * -6 + 'deg) scale(' + L(.8, 1.05, o5(seg(lt, .9, 2.2))) + ')';
           show('Aword', lt, 1.35);
         },
         B: function () {
           var i = Math.min(DAY.length - 1, Math.floor(lt / .36)), w = DAY[i], k = (lt - i * .36) / .36;
           $('Bbg').style.background = 'linear-gradient(160deg,' + w[1] + ',' + w[2] + ')';
           $('Bword').textContent = w[0]; $('Bword').style.color = w[3];
+          $('Btime').textContent = ['5:24 am', '9:00 am', '3:53 pm', '6:30 pm', '10:15 pm'][i]; $('Btime').style.color = w[3];
+          $('Btime').style.transform = 'translateY(' + L(24, 0, o5(seg(k, .1, .6))) + 'px)'; $('Btime').style.opacity = .8 * o5(seg(k, .1, .5));
           $('Bword').style.transform = 'scale(' + L(1.3, 1, o5(seg(k, 0, .55))) + ')'; $('Bword').style.letterSpacing = L(-.02, -.05, k) + 'em';
         },
         C: function () {
@@ -430,10 +538,10 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
           show('Dl1', lt, .6); show('Dl2', lt, .9, 30);
         },
         E: function () {
-          var words = ['Morning.', 'Evening.', 'After ṣalāh.', 'Before <span class="g">sleep.</span>'], i = Math.min(3, Math.floor(lt / .55)), k = (lt - i * .55) / .55;
+          var words = ['Morning.', 'Evening.', 'After ṣalāh.', 'Before <span class="g">sleep.</span>'], i = Math.min(3, Math.floor(lt / .48)), k = (lt - i * .48) / .48;
           $('Eword').innerHTML = words[i];
           $('Eword').style.transform = 'scale(' + L(1.22, 1, o5(seg(k, 0, .45))) + ')'; $('Eword').style.opacity = o5(seg(k, 0, .3));
-          $('Egrid').style.transform = 'rotate(-12deg) translate(' + L(80, -140, io(seg(lt, 0, 2.4))) + 'px,' + L(260, -420, io(seg(lt, 0, 2.4))) + 'px) scale(' + L(1.1, 1.18, lt / 2.4) + ')';
+          $('Egrid').style.transform = 'rotate(-12deg) translate(' + L(80, -140, io(seg(lt, 0, 2))) + 'px,' + L(260, -420, io(seg(lt, 0, 2))) + 'px) scale(' + L(1.1, 1.18, lt / 2) + ')';
         },
         F: function () {
           var a = L(150, 0, back(seg(lt, .1, 1.4)));
@@ -449,15 +557,15 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
         P: function () {
           monIn('Pmon', lt, .8); screen('Pmon', 'insights', null, 0);
           $('Pmon').style.filter = 'brightness(' + L(1, .4, o3(seg(lt, .9, 1.4))) + ')';
-          var R = [[306, 719, 607, 204], [939, 167, 607, 285], [939, 691, 607, 309], [306, 231, 607, 210]], st = [1, 2.5, 4, 5.5];
+          var R = [[306, 719, 607, 204], [939, 167, 607, 285], [939, 691, 607, 309], [306, 231, 607, 210]], st = [.85, 2, 3.15, 4.3];
           R.forEach(function (r, i) {
             var a = st[i], last = i === R.length - 1, to = [24, 780 - 1032 * r[3] / r[2] / 2, 1032];
-            lift('P' + (i + 1), r, 150, to, lt < a ? 0 : o5(seg(lt, a, a + .65)), io(seg(lt, a + .45, a + 1.35)), last ? 0 : io(seg(lt, a + 1.45, a + 1.75)));
+            lift('P' + (i + 1), r, 150, to, lt < a ? 0 : o5(seg(lt, a, a + .55)), io(seg(lt, a + .35, a + 1.05)), last ? 0 : io(seg(lt, a + 1.05, a + 1.3)));
           });
           show('Pk', lt, .5, 20); show('Pl', lt, .7); show('Ps', lt, 1, 30);
         },
         K: function () {
-          var step = .7, i = Math.min(FEAT.length - 1, Math.floor(lt / step)), k = (lt - i * step) / step, turn = i === 0 ? 0 : i - 1 + io(seg(k, 0, .45));
+          var step = .6, i = Math.min(FEAT.length - 1, Math.floor(lt / step)), k = (lt - i * step) / step, turn = i === 0 ? 0 : i - 1 + io(seg(k, 0, .45));
           $$('#Kring .kp').forEach(function (p, j) {
             var r = ((j * 60 - turn * 60) % 360 + 540) % 360 - 180, front = Math.cos(r * Math.PI / 180);
             p.style.transform = 'rotateY(' + r + 'deg) translateZ(560px) scale(' + (.9 + .1 * Math.max(0, front)) + ')';
@@ -495,7 +603,7 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
             n.style.opacity = seg(lt, w[1], w[1] + .2);
             n.style.transform = 'translateY(' + L(260, 0, e) + 'px) translateZ(' + L(-300, 0, e) + 'px) rotateX(' + L(30, 0, e) + 'deg) rotateY(' + (w[2] * (1 - e) + Math.sin(lt * 1.2 + w[1] * 9) * 2) + 'deg)';
           });
-          show('Wl', lt, .7);
+          show('Wl', lt, .7); show('Ws', lt, 1, 30);
         },
         I: function () {
           var e = o5(seg(lt, 0, 1));
@@ -518,7 +626,7 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
         },
         I3: function () {
           monIn('I3mon', lt, .6);
-          var SEQ = [['adhkar', 264], ['tracker', 308], ['salah', 352], ['calendar', 352], ['journal', 396], ['learn', 352]], step = .55, t0 = .45;
+          var SEQ = [['adhkar', 264], ['tracker', 308], ['salah', 352], ['calendar', 352], ['journal', 396], ['learn', 352]], step = .42, t0 = .4;
           var i = Math.floor((lt - t0) / step), k = (lt - t0) / step - i, at = function (j) { return SEQ[Math.max(0, Math.min(SEQ.length - 1, j))]; };
           var prev = i < 1 ? 'today' : at(i - 1)[0], next = i < 0 ? 'today' : at(i)[0];
           screen('I3mon', prev, next, i < 0 ? 0 : o3(seg(k, .35, .75)));
@@ -560,7 +668,7 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; 
     var sw = (t % 5) / 5; $('sweep').style.opacity = Math.sin(clamp((sw - .1) / .25, 0, 1) * Math.PI) * .9; $('sweep').style.transform = 'translateX(' + L(-60, 60, sw) + '%)';
     bokeh(t, TINT[cur]);
     grain(t);
-    $('fade').style.opacity = Math.max(1 - seg(t, 0, .25), seg(t, 59.2, 60));
+    $('fade').style.opacity = Math.max(1 - seg(t, 0, .25), seg(t, 44.25, 45));
   };
   if (!/[?&]render/.test(location.search)) {
     var t0 = performance.now();
