@@ -596,6 +596,105 @@ footer p { margin: 18px auto 0; max-width: 60ch; }
 .figure.rv { transform: translateY(40px) scale(.96); filter: blur(6px); transition: opacity 1.1s var(--out), transform 1.1s var(--out), filter 1.1s var(--out); }
 .figure.rv.in { transform: none; filter: none; }
 
+
+/* ---------- on your computer: each chapter's desktop screens ---------- */
+.gc-more { display: inline-flex; gap: 6px; margin-top: 14px; color: var(--gold2); font-weight: 700; font-size: 14px; text-decoration: none; }
+.gc-more:hover { text-decoration: underline; }
+.deskband { margin-top: clamp(56px, 8vw, 110px); }
+.deskband .dk-h { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+.deskband .dk-h h4 { margin: 4px 0 0; font: 700 clamp(22px, 2.4vw, 30px)/1.15 var(--sans); letter-spacing: -.02em; }
+.deskband .dk-h .hint { color: var(--t3); font-size: 13px; }
+.dk-rail { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+.dk-rail.one { grid-template-columns: minmax(0, 1fr); }
+.dk-rail.three .dk-fig:first-child { grid-column: 1 / -1; }
+.dk-fig { margin: 0; display: grid; gap: 12px; }
+.mon { position: relative; display: block; border-radius: 14px; padding: 8px; background: var(--frame); box-shadow: var(--shadow), inset 0 0 0 1.5px rgba(255, 255, 255, .08); transition: transform .6s var(--out), box-shadow .6s var(--out); }
+.mon img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; object-position: top left; border-radius: 7px; background: #000; }
+.mon::after { content: ""; position: absolute; left: 50%; bottom: -10px; width: 22%; height: 10px; transform: translateX(-50%); border-radius: 0 0 10px 10px; background: linear-gradient(180deg, #2a2d36, #121318); }
+a.mon:hover { transform: translateY(-4px); box-shadow: 0 50px 90px -40px rgba(0, 0, 0, .9), inset 0 0 0 1.5px var(--gold-line); }
+.dk-fig figcaption { padding: 10px 4px 0; display: grid; gap: 4px; }
+.dk-fig figcaption b { font-size: 16px; }
+.dk-fig figcaption span { color: var(--t2); font-size: 14px; line-height: 1.55; }
+
+/* ---------- installing, step by step ---------- */
+.install { position: relative; padding: clamp(70px, 10vw, 130px) 0; border-top: 1px solid var(--line); }
+.install h2 { font: 700 clamp(34px, 5vw, 60px)/1.04 var(--sans); letter-spacing: -.035em; margin: 10px 0 14px; }
+.install .i-dek { color: var(--t2); font-size: clamp(16px, 1.6vw, 19px); line-height: 1.6; max-width: 760px; }
+.trust { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin: 34px 0 44px; }
+.trust div { padding: 20px; border-radius: 22px; border: 1px solid var(--line); background: color-mix(in srgb, var(--s1) 75%, transparent); }
+.trust .ti { width: 40px; height: 40px; border-radius: 13px; display: grid; place-items: center; background: var(--gold-soft); color: var(--gold2); margin-bottom: 12px; }
+.trust .ti svg { width: 20px; height: 20px; }
+.trust b { display: block; font-size: 15.5px; margin-bottom: 6px; }
+.trust p { margin: 0; color: var(--t2); font-size: 13.5px; line-height: 1.55; }
+.trust a { color: var(--gold2); }
+.itabs { display: inline-flex; gap: 4px; padding: 5px; border-radius: 99px; border: 1px solid var(--line2); background: color-mix(in srgb, var(--s1) 80%, transparent); margin-bottom: 26px; }
+.itabs button { border: 0; background: none; color: var(--t2); font: 700 14px var(--sans); height: 40px; padding: 0 20px; border-radius: 99px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+.itabs button svg { width: 16px; height: 16px; }
+.itabs button[aria-selected="true"] { background: var(--gold-soft); color: var(--gold2); box-shadow: inset 0 0 0 1px var(--gold-line); }
+.ipane[hidden] { display: none; }
+.isteps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 18px; counter-reset: st; }
+.isteps.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.isteps li { counter-increment: st; display: grid; grid-template-rows: auto 1fr; gap: 14px; }
+.ishot { position: relative; border-radius: 22px; padding: 6px; background: var(--frame); box-shadow: var(--shadow); }
+.ishot img { display: block; width: 100%; height: auto; border-radius: 17px; }
+.ishot .ring { position: absolute; border: 2.5px solid var(--gold2); border-radius: 12px; box-shadow: 0 0 0 4px rgba(241, 213, 158, .18), 0 0 26px rgba(241, 213, 158, .35); animation: ring 2.4s var(--out) infinite; pointer-events: none; }
+@keyframes ring { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+.isteps li > div:last-child { display: grid; gap: 6px; align-content: start; }
+.isteps b { font-size: 15.5px; display: flex; gap: 10px; align-items: baseline; }
+.isteps b::before { content: counter(st); flex: none; width: 26px; height: 26px; border-radius: 50%; display: inline-grid; place-items: center; font: 800 12px/1 var(--sans); background: var(--gold-soft); color: var(--gold2); border: 1px solid var(--gold-line); }
+.isteps p { margin: 0; color: var(--t2); font-size: 13.5px; line-height: 1.55; }
+.inote { margin-top: 26px; display: flex; gap: 14px; align-items: flex-start; padding: 18px 20px; border-radius: 20px; border: 1px solid var(--gold-line); background: color-mix(in srgb, var(--gold) 6%, var(--s1)); }
+.inote svg { flex: none; width: 22px; height: 22px; color: var(--gold2); margin-top: 2px; }
+.inote p { margin: 0; color: var(--t2); font-size: 14px; line-height: 1.6; }
+.inote b { color: var(--t1); }
+/* Windows' own warning, drawn (not a screenshot): the two places to press */
+.ss { aspect-ratio: 1 / 1.05; border-radius: 17px; background: #1f5fa8; color: #fff; padding: 9% 9% 7%; display: flex; flex-direction: column; font-family: 'Segoe UI', var(--sans); position: relative; overflow: hidden; }
+.ss .ss-t { font-size: clamp(15px, 1.5vw, 20px); font-weight: 600; line-height: 1.2; }
+.ss .ss-p { font-size: clamp(10px, .85vw, 12px); line-height: 1.45; margin-top: 10px; opacity: .92; }
+.ss .ss-l { font-size: clamp(10px, .85vw, 12px); margin-top: 10px; text-decoration: underline; }
+.ss .ss-k { font-size: clamp(10px, .85vw, 12px); margin-top: 10px; line-height: 1.6; opacity: .92; }
+.ss .ss-b { margin-top: auto; display: flex; justify-content: flex-end; gap: 6px; }
+.ss .ss-b span { font-size: clamp(9px, .8vw, 11.5px); padding: 6px 10px; border: 1px solid rgba(255, 255, 255, .7); background: rgba(255, 255, 255, .06); white-space: nowrap; }
+.ss .hl { outline: 2.5px solid #f1d59e; outline-offset: 3px; border-radius: 3px; box-shadow: 0 0 22px rgba(241, 213, 158, .55); animation: ring 2.4s var(--out) infinite; }
+.ss .ill { position: absolute; top: 8px; right: 10px; font: 700 9px/1 var(--sans); letter-spacing: .14em; text-transform: uppercase; opacity: .7; }
+.ss.dl { background: linear-gradient(160deg, var(--s2), var(--s1)); color: var(--t1); border: 1px solid var(--line2); }
+.ss.dl .file { margin: auto; display: grid; justify-items: center; gap: 12px; text-align: center; }
+.ss.dl .file i { width: 64px; height: 64px; border-radius: 18px; display: grid; place-items: center; background: var(--gold-soft); color: var(--gold2); font-style: normal; }
+.ss.dl .file i svg { width: 30px; height: 30px; }
+.ss.dl .file b { font-size: 14px; } .ss.dl .file span { font-size: 12px; color: var(--t3); }
+.iupd { margin-top: clamp(50px, 7vw, 90px); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: clamp(28px, 5vw, 70px); align-items: center; }
+.iupd .pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.iupd h3 { font: 700 clamp(26px, 3vw, 38px)/1.1 var(--sans); letter-spacing: -.025em; margin: 8px 0 12px; }
+.iupd p { color: var(--t2); line-height: 1.6; }
+.iupd ul { margin: 14px 0 0; padding-inline-start: 20px; color: var(--t2); line-height: 1.7; font-size: 14.5px; }
+@media (max-width: 1100px) { .trust { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 860px) {
+  /* swipe through the steps and the computer screens, one at a time, each snapping into place */
+  .isteps, .isteps.four, .dk-rail, .dk-rail.one { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 74vw; overflow-x: auto; scroll-snap-type: x mandatory; gap: 14px; padding: 4px var(--g) 18px; margin-inline: calc(-1 * var(--g)); scrollbar-width: none; }
+  .isteps::-webkit-scrollbar, .dk-rail::-webkit-scrollbar { display: none; }
+  .isteps li, .dk-fig { scroll-snap-align: center; }
+  .dk-rail { grid-auto-columns: 86vw; }
+  .dk-rail.three .dk-fig:first-child { grid-column: auto; }
+  .trust { grid-template-columns: minmax(0, 1fr); gap: 10px; margin: 26px 0 32px; }
+  .trust div { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 4px 14px; padding: 16px; }
+  .trust .ti { grid-row: span 2; margin: 0; }
+  .itabs { display: flex; width: 100%; } .itabs button { flex: 1; justify-content: center; }
+  .iupd { grid-template-columns: minmax(0, 1fr); }
+  .install .swipe-hint { display: flex; }
+  /* the screen pinned above its steps shows where you are: a count and a line that fills */
+  .figure .spos { display: flex; }
+  .spread .figure { background: linear-gradient(var(--bg) calc(100% - 26px), transparent); padding-bottom: 30px; }
+  /* lighter on a phone: no blur while things arrive, and far chapters are not drawn until near */
+  .figure.rv { filter: none; }
+  .chapter { content-visibility: auto; contain-intrinsic-size: auto 2400px; }
+}
+.swipe-hint { display: none; align-items: center; gap: 8px; color: var(--t3); font-size: 12.5px; margin: -8px 0 10px; }
+.swipe-hint svg { width: 16px; height: 16px; animation: nudge 1.8s var(--out) infinite; }
+@keyframes nudge { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(6px); } }
+.spos { display: none; align-items: center; gap: 10px; width: min(70vw, 280px); margin-top: 10px; font: 700 11.5px/1 var(--sans); color: var(--t3); letter-spacing: .04em; }
+.spos i { flex: 1; height: 3px; border-radius: 3px; background: var(--line2); overflow: hidden; }
+.spos i b { display: block; height: 100%; width: 0; background: var(--gold2); border-radius: 3px; transition: width .45s var(--out); }
+
 /* ---------- phones: their own layout, not a squeezed desktop ---------- */
 @media (max-width: 860px) {
   body { font-size: 15.5px; }
@@ -714,7 +813,7 @@ footer p { margin: 18px auto 0; max-width: 60ch; }
     <svg class="orn" id="orn" viewBox="-100 -100 200 200" aria-hidden="true"></svg>
     <div class="wrap">
       <div class="rv">
-        <div class="issue"><span>The Guide</span><span>Edition 13.0</span><span>November 2026</span></div>
+        <div class="issue"><span>The Guide</span><span>Edition 13.1</span><span>November 2026</span></div>
         <h1 class="mast">Adh<em>kār</em><small>Remembrance for every moment</small></h1>
         <p class="dek">Every page of the app, every feature, and how to use it, step by step. Free, private, and made with care as ṣadaqah jāriyah.</p>
         <div class="dlp" role="region" aria-label="Download Adhkār">
@@ -772,13 +871,13 @@ footer p { margin: 18px auto 0; max-width: 60ch; }
           <div class="gc-head"><span class="gc-ic"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7.2 9.4h9.6v7.4c0 .62-.5 1.12-1.12 1.12h-.9v2.42a1.18 1.18 0 0 1-2.36 0v-2.42h-.84v2.42a1.18 1.18 0 0 1-2.36 0v-2.42h-.9c-.62 0-1.12-.5-1.12-1.12zM4.8 9.3c.65 0 1.18.53 1.18 1.18v4.88a1.18 1.18 0 0 1-2.36 0v-4.88c0-.65.53-1.18 1.18-1.18zm14.4 0c.65 0 1.18.53 1.18 1.18v4.88a1.18 1.18 0 0 1-2.36 0v-4.88c0-.65.53-1.18 1.18-1.18zM15.3 4.2l1.1-1.6a.25.25 0 0 0-.41-.28l-1.13 1.65a6 6 0 0 0-5.72 0L8.01 2.32a.25.25 0 0 0-.41.28l1.1 1.6A4.9 4.9 0 0 0 7.2 8.6h9.6a4.9 4.9 0 0 0-1.5-4.4zM9.8 7a.6.6 0 1 1 0-1.2.6.6 0 0 1 0 1.2zm4.4 0a.6.6 0 1 1 0-1.2.6.6 0 0 1 0 1.2z"/></svg></span><div><h3>Adhkār for Android</h3><p>Android 8 and newer · about 4 MB</p></div></div>
           <ul class="gc-list"><li>Widgets, reminders and the Madinah takbīr</li><li>Sūrat al-Kahf to read and to listen to</li><li>Print or save the adhkār and the timetable as PDF</li></ul>
           <a class="btn pri gc-btn" href="https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar.apk">Download the APK <span class="arr" aria-hidden="true">→</span></a>
-          <ol class="gc-steps"><li><b>Download</b> the file above.</li><li><b>Open it</b> from your notifications or Downloads.</li><li>If asked, <b>allow installs</b> from your browser, then <b>Install</b>.</li></ol>
+          <ol class="gc-steps"><li><b>Download</b> the file above.</li><li><b>Open it</b> from your notifications or Downloads.</li><li>If asked, <b>allow installs</b> from your browser, then <b>Install</b>.</li></ol><a class="gc-more" href="#install">Every step, with pictures <span aria-hidden="true">→</span></a>
         </article>
         <article class="get-card rv">
           <div class="gc-head"><span class="gc-ic"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.4l7.4-1v7.1H3zm8.3-1.13L21 3v8.5h-9.7zM3 12.5h7.4v7.1L3 18.6zm8.3 0H21V21l-9.7-1.3z"/></svg></span><div><h3>Adhkār for Windows</h3><p>Windows 10 and 11 · one file, about 4 MB</p></div></div>
           <ul class="gc-list"><li>The pill at the top of your screen: the next prayer, the Friday hour, your adhkār</li><li>A desktop of its own: the day band, the session beside the reader, Ctrl K</li><li>Print and PDF on A4, white to the edge</li></ul>
           <a class="btn pri gc-btn" href="https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar-Windows.exe">Download for Windows <span class="arr" aria-hidden="true">→</span></a>
-          <ol class="gc-steps"><li><b>Download</b> and open the file. Nothing to unpack.</li><li>If Windows says it protected your PC, choose <b>More info</b>, then <b>Run anyway</b>.</li><li>Under <b>This computer</b>, install it to the Start menu and choose where the pill sits.</li></ol>
+          <ol class="gc-steps"><li><b>Download</b> and open the file. Nothing to unpack.</li><li>If Windows says it protected your PC, choose <b>More info</b>, then <b>Run anyway</b>.</li><li>Under <b>This computer</b>, install it to the Start menu and choose where the pill sits.</li></ol><a class="gc-more" href="#install" data-tab="w">Every step, with pictures <span aria-hidden="true">→</span></a>
         </article>
       </div>
       <div class="reach" id="reach" hidden>
@@ -798,6 +897,41 @@ footer p { margin: 18px auto 0; max-width: 60ch; }
     </div>
   </section>
 
+  <section class="install" id="install">
+    <div class="wrap">
+      <div class="kicker rv">Installing, step by step</div>
+      <h2 class="rv">Safe to install. Here is how.</h2>
+      <p class="i-dek rv">Adhkār comes straight from its release page rather than an app store, so your phone or computer asks you to confirm before it installs. That warning is the same for every app from outside a store. These are the screens you will see, taken from a real phone.</p>
+      <div class="trust">
+        <div class="rv"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 4l-3 16"/></svg></span><b>Open source</b><p>Every line of the app is public on <a href="https://github.com/Bashyr18/adhkar">GitHub</a>, for anyone to read and check.</p></div>
+        <div class="rv"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg></span><b>Nothing taken</b><p>No ads, no account, no tracking. It never reads your contacts, messages or files; your record stays on the device.</p></div>
+        <div class="rv"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7.5 3v5.5c0 4.6-3.2 8.3-7.5 9.5-4.3-1.2-7.5-4.9-7.5-9.5V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg></span><b>Check it yourself</b><p>Each file has its SHA-256 fingerprint on the <a href="https://github.com/Bashyr18/adhkar/releases/latest">release page</a>. Scan it with Play Protect, or upload it to <a href="https://www.virustotal.com/">VirusTotal</a>.</p></div>
+        <div class="rv"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg></span><b>Why the warning</b><p>App stores and paid certificates vouch for a publisher. Adhkār is free and has neither, so Android and Windows ask you to decide.</p></div>
+      </div>
+      <div class="itabs rv" role="tablist" aria-label="Your device">
+        <button type="button" role="tab" aria-selected="true" aria-controls="inst-a" id="tab-a" data-p="a"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7.2 9.4h9.6v7.4c0 .62-.5 1.12-1.12 1.12h-.9v2.42a1.18 1.18 0 0 1-2.36 0v-2.42h-.84v2.42a1.18 1.18 0 0 1-2.36 0v-2.42h-.9c-.62 0-1.12-.5-1.12-1.12zM8.3 4.6l-.9-1.4a.25.25 0 0 1 .42-.27l.94 1.45a5.6 5.6 0 0 1 6.48 0l.94-1.45a.25.25 0 0 1 .42.27l-.9 1.4A4.9 4.9 0 0 1 16.8 8.6H7.2a4.9 4.9 0 0 1 1.1-4z"/></svg>Android</button>
+        <button type="button" role="tab" aria-selected="false" aria-controls="inst-w" id="tab-w" data-p="w"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.4l7.4-1v7.1H3zm8.3-1.13L21 3v8.5h-9.7zM3 12.5h7.4v7.1L3 18.6zm8.3 0H21V21l-9.7-1.3z"/></svg>Windows</button>
+      </div>
+      <div class="ipane" id="inst-a" role="tabpanel" aria-labelledby="tab-a">
+        <p class="swipe-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M14 7l5 5-5 5"/></svg>Swipe through the five steps</p>
+        <ol class="isteps"><li class="rv"><div class="ishot"><img src="shots/install/downloads.webp" alt="Chrome’s Downloads list with Adhkar.apk" loading="lazy" decoding="async"><i class="ring" style="left:2%;top:7.5%;width:96%;height:6.5%"></i></div><div><b>Download the APK</b><p>Tap <b>Download the APK</b> above. Chrome saves <b>Adhkar.apk</b>, about 4 MB; tap it in your notifications or in Downloads.</p></div></li><li class="rv"><div class="ishot"><img src="shots/install/blocked.webp" alt="Android: your phone isn’t allowed to install unknown apps from this source" loading="lazy" decoding="async"><i class="ring" style="left:72%;top:56%;width:22%;height:5%"></i></div><div><b>Android asks first</b><p>Android shows this for <b>every</b> app that does not come from the Play Store. It is a general rule, not a finding about Adhkār. Tap <b>Settings</b>.</p></div></li><li class="rv"><div class="ishot"><img src="shots/install/allow.webp" alt="Install unknown apps: Allow from this source, for Chrome" loading="lazy" decoding="async"><i class="ring" style="left:80%;top:41%;width:18%;height:5.5%"></i></div><div><b>Allow your browser, once</b><p>Turn on <b>Allow from this source</b> for Chrome (or the browser you used), then go back. You can turn it off again afterwards.</p></div></li><li class="rv"><div class="ishot"><img src="shots/install/install.webp" alt="Adhkār: Do you want to install this app?" loading="lazy" decoding="async"><i class="ring" style="left:74%;top:55%;width:18%;height:5%"></i></div><div><b>Install</b><p>Tap <b>Install</b>. If Google Play Protect offers to scan the app, let it. If it says it doesn’t recognise the developer, choose <b>Install anyway</b> (sometimes under <b>More details</b>).</p></div></li><li class="rv"><div class="ishot"><img src="shots/install/installed.webp" alt="Adhkār: App installed" loading="lazy" decoding="async"><i class="ring" style="left:74%;top:55%;width:18%;height:5%"></i></div><div><b>Open it</b><p>Tap <b>Open</b>, choose your city and you are ready. Everything you record stays on the phone.</p></div></li></ol>
+      </div>
+      <div class="ipane" id="inst-w" role="tabpanel" aria-labelledby="tab-w" hidden>
+        <p class="swipe-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M14 7l5 5-5 5"/></svg>Swipe through the four steps</p>
+        <ol class="isteps four"><li class="rv"><div class="ishot"><div class="ss dl"><span class="ill">Illustration</span><div class="file"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7.5 10.5L12 15l4.5-4.5M4 20.5h16"/></svg></i><b>Adhkar-Windows.exe</b><span>about 4 MB · one file</span></div></div></div><div><b>Download and open</b><p>Tap <b>Download for Windows</b> above, then open the file from your browser’s downloads. There is nothing to unpack.</p></div></li><li class="rv"><div class="ishot"><div class="ss"><span class="ill">Illustration</span><div class="ss-t">Windows protected your PC</div><div class="ss-p">Microsoft Defender SmartScreen prevented an unrecognised app from starting. Running this app might put your PC at risk.</div><div class="ss-l hl">More info</div><div class="ss-b"><span>Don’t run</span></div></div></div><div><b>Windows asks first</b><p>Windows shows this for new programs without a paid signing certificate, until enough people have opened them. Click <b>More info</b>.</p></div></li><li class="rv"><div class="ishot"><div class="ss"><span class="ill">Illustration</span><div class="ss-t">Windows protected your PC</div><div class="ss-k">App: Adhkar-Windows.exe<br>Publisher: Unknown publisher</div><div class="ss-b"><span class="hl">Run anyway</span><span>Don’t run</span></div></div></div><div><b>Run anyway</b><p>Check the name reads <b>Adhkar-Windows.exe</b>, then click <b>Run anyway</b>. Windows asks only this first time.</p></div></li><li class="rv"><div class="ishot"><img src="shots/desk/pc.webp" alt="This computer: install Adhkār to the Start menu" loading="lazy" decoding="async" style="aspect-ratio:16/10;object-fit:cover;object-position:top left"><i class="ring" style="left:41%;top:16%;width:30%;height:14%"></i></div><div><b>Keep it</b><p>In <b>This computer</b>, choose <b>Install</b>: Adhkār joins Start and your desktop, for you only, with no administrator needed.</p></div></li></ol>
+        <div class="inote rv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg><p>The two Windows screens are drawn here so you know where to click; yours will look like them. <b>If your browser says the file is uncommon</b>, open its downloads, choose <b>Keep</b> (in Edge, under <b>…</b>), then open it.</p></div>
+      </div>
+      <div class="iupd">
+        <div class="rv">
+          <div class="kicker">Later</div>
+          <h3>Updates, from inside the app</h3>
+          <p>Open <b>You › About</b> and tap <b>Check now</b>, or turn on <b>Check once a week</b>. When a new version is out, a small gold <b>Update</b> key appears on Today (and in the rail on a computer).</p>
+          <ul><li>The file comes from the official release page and is checked against its SHA-256 fingerprint before anything changes.</li><li>On Android, Android itself refuses an update that isn’t signed with the same key as the app you have.</li><li>On Windows, Adhkār swaps its file and starts again. Your record stays as it is.</li><li>Nothing is checked unless you ask, or turn the weekly check on.</li></ul>
+        </div>
+        <div class="pair"><div class="ishot"><img src="shots/install/updates.webp" alt="About: Updates, Check now and Check once a week" loading="lazy" decoding="async"><i class="ring" style="left:5%;top:53%;width:90%;height:9%"></i></div><div class="ishot"><img src="shots/install/update-confirm.webp" alt="Android: Do you want to update this app?" loading="lazy" decoding="async"><i class="ring" style="left:74%;top:55%;width:18%;height:5%"></i></div></div>
+      </div>
+    </div>
+  </section>
   <section class="close" id="end">
     <div class="wrap">
       <div class="kicker rv">Why it is free</div>
@@ -819,7 +953,7 @@ footer p { margin: 18px auto 0; max-width: 60ch; }
       <a href="https://www.linkedin.com/in/bashirbadmus/" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5.2 3.5a2.1 2.1 0 1 1 0 4.2 2.1 2.1 0 0 1 0-4.2zM3.4 9.2h3.6V20.5H3.4zM9.3 9.2h3.45v1.55h.05c.48-.9 1.65-1.85 3.4-1.85 3.63 0 4.3 2.39 4.3 5.5v6.1h-3.58v-5.4c0-1.29-.02-2.95-1.8-2.95-1.8 0-2.08 1.4-2.08 2.86v5.49H9.3z"/></svg>The maker on LinkedIn</a>
       <a href="https://github.com/Bashyr18/adhkar/releases">Releases</a>
     </nav>
-    <p>Adhkār · The Guide · Edition 13.0 · Every screen shown is from the app itself. Free and open source under GPL-3.0.</p>
+    <p>Adhkār · The Guide · Edition 13.1 · Every screen shown is from the app itself. Free and open source under GPL-3.0.</p>
   </footer>
 </main>
 
@@ -841,8 +975,31 @@ footer p { margin: 18px auto 0; max-width: 60ch; }
 /* ---------- the guide's content ----------
    Each chapter has spreads: one screen with numbered steps. A step is [title, text, x %, y %]; x and y place its marker on
    the screenshot. A strip shows the other pages of the chapter. vars lists the versions of a screen that exist. */
+/* each chapter on a computer: [shot, title, text]; a shot with -light or -ar versions follows the guide's own switches */
+var DK = {
+  today: [['desk/today', 'Your whole day, in one line', 'The day band runs from Fajr to the next Fajr: the morning adhkār until Dhuhr, the evening from ʿAṣr, Ḍuḥā and the last third, with now marked. Remembrance and the dhikr of the day sit beside the sky.']],
+  adhkar: [['desk/adhkar', 'The library, laid out', 'Both sessions side by side and every collection in a grid.'], ['desk/reader', 'The session beside the reader', 'Every remembrance of the session in a list, the one you are on marked. Space counts; the arrow keys move.'], ['desk/palette', 'Ctrl K', 'Any remembrance, hadith, page or setting, from one box.']],
+  tracker: [['desk/tracker', 'Every phrase in view', 'The phrases across the top, the counter with this week’s real counts beneath it, and today’s numbers on the right.'], ['desk/insights', 'Insights, full width', 'The Ṣalāh log, when you remember, consistency and every chart, side by side.']],
+  salah: [['desk/salah', 'The day’s prayers, and every tool', 'The next prayer and the five times on one side; Learn the prayer, the Sunnah times and the tools on the other.'], ['desk/learn', 'Learn the prayer, as a spread', 'The posture large on one side, its words and evidence beside it.'], ['desk/calendar', 'The Hijri month', 'The Sunnah fast days, ʿĪd, your fasts and the days you planned.']],
+  dua: [['desk/journal', 'Today’s times of answer', 'Every time of answered duʿāʾ today in order across the page, now and next marked, with your duʿāʾs and reminders beneath.']],
+  you: [['desk/profile', 'Your record beside your settings', 'The profile, your figures and the achievements on one side, every setting on the other.']],
+  settings: [['desk/pc', 'This computer', 'Install, start with Windows, the tray, the pill at the top of the screen, text size, backups and updates.'], ['desk/print', 'Print and PDF', 'The adhkār as an A4 booklet with every source, and the month’s prayer timetable.']]
+};
+var DKV = { 'desk/today': ['light', 'ar'], 'desk/tracker': ['light', 'ar'], 'desk/salah': ['light'] };
+function deskBand(list) {
+  return '<div class="deskband"><div class="dk-h rv"><div><div class="kicker">On your computer</div><h4>The same, laid out for a big screen</h4></div><span class="hint">Adhkār for Windows</span></div>' +
+    '<div class="dk-rail' + (list.length === 1 ? ' one' : list.length === 3 ? ' three' : '') + '">' + list.map(function (x) {
+      return '<figure class="dk-fig rv"><a class="mon" href="shots/' + x[0] + '.webp" target="_blank" rel="noopener"><img data-dk="' + x[0] + '" src="shots/' + x[0] + '.webp" alt="' + esc('On a computer: ' + x[1]) + '" loading="lazy" decoding="async"></a><figcaption><b>' + esc(x[1]) + '</b><span>' + esc(x[2]) + '</span></figcaption></figure>';
+    }).join('') + '</div></div>';
+}
+function deskRefresh() {
+  $$('img[data-dk]').forEach(function (im) {
+    var b = im.dataset.dk, v = DKV[b] || [], want = state.lang === 'ar' && v.indexOf('ar') >= 0 ? b + '-ar' : state.theme === 'light' && v.indexOf('light') >= 0 ? b + '-light' : b;
+    if (im.getAttribute('src') !== 'shots/' + want + '.webp') { im.src = 'shots/' + want + '.webp'; im.parentNode.href = 'shots/' + want + '.webp'; }
+  });
+}
 var CH = [
-  { id: 'today', kicker: 'Your day at a glance', title: 'Today', dek: 'Everything that matters right now: the next prayer, what is due, and the day’s remembrance.', thumb: 'dark/today',
+  { id: 'today', desk: DK.today, kicker: 'Your day at a glance', title: 'Today', dek: 'Everything that matters right now: the next prayer, what is due, and the day’s remembrance.', thumb: 'dark/today',
     spreads: [
       { shot: 'today', vars: ['dark', 'light', 'ar'], h: 'The home of the app', p: 'Today changes with the day. Before sunrise it leads with the morning adhkār; between the times of remembrance it shows what opens next.', drop: true,
         steps: [
@@ -854,7 +1011,7 @@ var CH = [
           ['Search, theme and you', 'Top right: search the whole app, change the theme, and open your profile.', 79, 6]
         ] }
     ] },
-  { id: 'adhkar', kicker: 'The library', title: 'Adhkār', dek: 'Morning and evening, after ṣalāh, sleep, waking, the night, the adhān, worry and distress, and everyday duʿāʾs.', thumb: 'dark/adhkar',
+  { id: 'adhkar', desk: DK.adhkar, kicker: 'The library', title: 'Adhkār', dek: 'Morning and evening, after ṣalāh, sleep, waking, the night, the adhān, worry and distress, and everyday duʿāʾs.', thumb: 'dark/adhkar',
     spreads: [
       { shot: 'adhkar', vars: ['dark', 'light', 'ar'], h: 'Find any remembrance', p: 'The two great sessions of the day sit at the top; every other collection follows.',
         steps: [
@@ -897,7 +1054,7 @@ var CH = [
         ] }
     ],
     gestures: true },
-  { id: 'tracker', kicker: 'Remembrance through the day', title: 'Tracker', dek: 'Free remembrance, with the numbers the Sunnah sets and their evidence.', thumb: 'dark/tracker',
+  { id: 'tracker', desk: DK.tracker, kicker: 'Remembrance through the day', title: 'Tracker', dek: 'Free remembrance, with the numbers the Sunnah sets and their evidence.', thumb: 'dark/tracker',
     spreads: [
       { shot: 'tracker', vars: ['dark', 'light', 'ar'], h: 'A hundred a day', p: 'Subḥānallāh, subḥānallāhi wa biḥamdih and istighfār: a hundred each day, each shown on its own.', drop: true,
         steps: [
@@ -909,7 +1066,7 @@ var CH = [
           ['History', 'The chart button opens your tracker history.', 90, 7]
         ] }
     ] },
-  { id: 'salah', kicker: 'The pillar of the day', title: 'Ṣalāh', dek: 'Prayer times anywhere, offline. Reminders with the Madinah takbīr. And a teacher for the prayer itself.', thumb: 'dark/salah',
+  { id: 'salah', desk: DK.salah, kicker: 'The pillar of the day', title: 'Ṣalāh', dek: 'Prayer times anywhere, offline. Reminders with the Madinah takbīr. And a teacher for the prayer itself.', thumb: 'dark/salah',
     spreads: [
       { shot: 'salah', vars: ['dark', 'light', 'ar'], h: 'Times and reminders', p: 'Calculated on your phone for your place and your method.',
         steps: [
@@ -944,7 +1101,7 @@ var CH = [
         ] }
     ],
     strip: [['dark/learn', 'Choose a prayer', 'Fajr to Witr, behind an imam or alone, shortened for travel.'], ['dark/month', 'The month’s timetable', 'Every time for the month; the headings stay in view.'], ['dark/night', 'Qiyām al-Layl', 'The night as a timeline, with the last third marked.'], ['dark/duha', 'Ṣalāt al-Ḍuḥā', 'Its window today and when it opens next.'], ['dark/qada', 'Make-up prayers', 'A private count of prayers owed, made up one by one.']] },
-  { id: 'dua', kicker: 'Asking, and being answered', title: 'Duʿāʾ', dek: 'A private journal, the authentic times of answer, and small deeds with great rewards.', thumb: 'dark/journal',
+  { id: 'dua', desk: DK.dua, kicker: 'Asking, and being answered', title: 'Duʿāʾ', dek: 'A private journal, the authentic times of answer, and small deeds with great rewards.', thumb: 'dark/journal',
     spreads: [
       { shot: 'journal', vars: ['dark'], h: 'My duʿāʾs', p: 'What you are asking for, kept private, with gentle reminders at the times duʿāʾ is answered.',
         steps: [
@@ -1068,7 +1225,7 @@ var CH = [
         ],
         after: [['Its reference', 'The virtue of reading al-Kahf on Jumuʿah is narrated by al-Ḥākim and al-Bayhaqī, graded ṣaḥīḥ by al-Albānī (Ṣaḥīḥ al-Jāmiʿ 6470); the first ten verses and the Dajjāl, by Muslim 809.']] }
     ] },
-  { id: 'you', kicker: 'Your record', title: 'You', dek: 'Your progress, gently: streaks, sessions and insights, with nothing compared to anyone.', thumb: 'dark/profile',
+  { id: 'you', desk: DK.you, kicker: 'Your record', title: 'You', dek: 'Your progress, gently: streaks, sessions and insights, with nothing compared to anyone.', thumb: 'dark/profile',
     spreads: [
       { shot: 'profile', vars: ['dark', 'light'], h: 'Your profile', p: '"Striving since" the month you began.',
         steps: [
@@ -1084,7 +1241,7 @@ var CH = [
           ['The charts', 'Columns for the early days, a curve once there is a shape to show.', 50, 77]
         ] }
     ] },
-  { id: 'settings', kicker: 'Fine-tuning', title: 'Settings', dek: 'Everything is found under You. Each setting explains itself in a line.', thumb: 'dark/s-reading',
+  { id: 'settings', desk: DK.settings, kicker: 'Fine-tuning', title: 'Settings', dek: 'Everything is found under You. Each setting explains itself in a line.', thumb: 'dark/s-reading',
     spreads: [
       { shot: 's-reading', vars: ['dark'], h: 'Reading and counting', p: 'How the text looks, and how the counting circle behaves.',
         steps: [
@@ -1265,6 +1422,7 @@ $('#chapters').innerHTML = CH.map(function (c, ci) {
       '<div class="cap">' + (s.steps.length > 1 ? walkBtn(s.steps.length) : '<span>' + esc(s.h) + '</span>') + (v.ar ? '<div class="seg vars" role="group" aria-label="Show this screen in"><i class="pill" aria-hidden="true"></i><button type="button" data-l="en" aria-pressed="true">English</button><button type="button" data-l="ar" lang="ar" aria-pressed="false">العربية</button></div>' : '') + '</div></div>';
     h += '<div class="text rv"><h3>' + esc(s.h) + '</h3><p' + (s.drop ? ' class="lede"' : '') + '>' + esc(s.p) + '</p>' + stepList(s.steps, s.after) + '</div></div>';
   });
+  if (c.desk) h += deskBand(c.desk);
   if (c.widgets) h += '<div class="spread flip"><div class="figure rv"><div class="widgets"><img src="shots/extra/widgets.webp" alt="The prayer widget and two tracker widgets on a home screen" loading="lazy" decoding="async">' +
     hotspots([['The prayer widget', '', 50, 24], ['The Tracker widget', '', 24, 70], ['Finished 100', '', 24, 94]]) + '</div></div><div class="text rv"><h3>Widgets that think like the app</h3><p>The widgets share the app’s own state, so what you do on the home screen is counted in the app, on the right day.</p>' +
     stepList([['The prayer widget', 'The next prayer with a live countdown, today’s five times and a sky that follows the day. Tap a prayer you have prayed to log it.'],
@@ -1284,7 +1442,10 @@ $('#chapters').innerHTML = CH.map(function (c, ci) {
 var mobile = matchMedia('(max-width: 860px)');
 $$('.spread').forEach(function (sp) {
   var spots = $$('.hs', sp), items = $$('.steps li', sp);
-  sp._on = function (i) { spots.forEach(function (s) { s.classList.toggle('on', +s.dataset.i === i); }); items.forEach(function (li, j) { li.classList.toggle('on', j === i); }); };
+  var cap = $('.cap', sp), pos = null;
+  if (cap && items.length > 1) { pos = document.createElement('div'); pos.className = 'spos'; pos.innerHTML = '<span>1 / ' + items.length + '</span><i><b></b></i>'; cap.insertAdjacentElement('afterend', pos); }
+  sp._on = function (i) { spots.forEach(function (s) { s.classList.toggle('on', +s.dataset.i === i); }); items.forEach(function (li, j) { li.classList.toggle('on', j === i); });
+    if (pos) { pos.firstChild.textContent = (i + 1) + ' / ' + items.length; pos.lastChild.firstChild.style.width = ((i + 1) / items.length) * 100 + '%'; } };
   items.forEach(function (li, i) { li.addEventListener('mouseenter', function () { sp._on(i); }); li.addEventListener('focus', function () { sp._on(i); }); li.addEventListener('click', function () { sp._on(i); }); });
   spots.forEach(function (s) { s.addEventListener('click', function (e) { e.stopPropagation(); var i = +s.dataset.i; sp._on(i); if (items[i] && mobile.matches) items[i].scrollIntoView({ behavior: 'smooth', block: 'center' }); }); });
   sp._on(0);
@@ -1422,7 +1583,7 @@ function refresh(ph) {
 }
 function movePill(g) { var b = $('button[aria-pressed="true"]', g), p = $('.pill', g); if (b && p && b.offsetWidth) { p.style.left = b.offsetLeft + 'px'; p.style.width = b.offsetWidth + 'px'; } }
 function press(g, val) { $$('button', g).forEach(function (x) { x.setAttribute('aria-pressed', String(x.dataset.l === val)); }); movePill(g); }
-function refreshAll() { $$('.phone[data-base]').forEach(refresh); }
+function refreshAll() { $$('.phone[data-base]').forEach(refresh); deskRefresh(); }
 /* one spread's own language switch */
 $$('.vars').forEach(function (g) {
   g.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; var ph = g.closest('.figure').querySelector('.phone'); ph.dataset.lang = b.dataset.l; press(g, b.dataset.l); refresh(ph); });
@@ -1438,6 +1599,14 @@ function setLang(l) {
 $('#lang').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b && b.dataset.l !== state.lang) setLang(b.dataset.l); });
 
 /* ---------- the guide's own theme; screens with a light version follow it ---------- */
+/* ---------- installing: Android and Windows tabs; the Windows card's link opens its tab ---------- */
+function instTab(p) {
+  $$('.itabs button').forEach(function (b) { var on = b.dataset.p === p; b.setAttribute('aria-selected', String(on)); $('#inst-' + b.dataset.p).hidden = !on; });
+  $$('#inst-' + p + ' .rv').forEach(function (x) { x.classList.add('in'); });
+}
+$$('.itabs button').forEach(function (b) { b.addEventListener('click', function () { instTab(b.dataset.p); }); });
+$$('a[data-tab]').forEach(function (a) { a.addEventListener('click', function () { instTab(a.dataset.tab); }); });
+if (/windows/i.test(navigator.userAgent) && !/android/i.test(navigator.userAgent)) instTab('w');
 var root = document.documentElement;
 function setTheme(t) {
   state.theme = t; root.dataset.theme = t; $('#theme').setAttribute('aria-label', t === 'dark' ? 'Switch to light' : 'Switch to dark');
