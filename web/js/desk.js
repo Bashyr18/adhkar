@@ -246,12 +246,272 @@
   }
   /* a wide window, filled: the tab pages lay their cards out in two balanced columns */
   var COLS = { today: 1, profile: 1, salah: 1, tracker: 1, journal: 1, deeds: 1, insights: 1 };
+  /* Some pages are laid out on purpose rather than poured into columns: a left and a right column, with the header
+     (and any .dk-span row) across both. Each names the block that starts its right column; what comes before it is
+     the left. The split is applied again whenever the app redraws the page. */
+  var direct = function (v, el) {
+    while (el && el.parentElement && el.parentElement !== v && !/\bdk-c[ab]\b/.test(el.parentElement.className))
+      el = el.parentElement;
+    return el;
+  };
+  var SPLIT = {
+    tracker: function (v) {
+      return v.querySelector('.trk-day') && direct(v, v.querySelector('.trk-day')).previousElementSibling;
+    },
+    salah: function (v) {
+      return v.querySelector('.lp-entry') ? direct(v, v.querySelector('.lp-entry')) : null;
+    },
+    /* the achievements under the profile; the settings on their own on the right */
+    profile: function (v) {
+      var m = v.querySelector('a.set');
+      return m ? direct(v, m).previousElementSibling : null;
+    },
+    journal: function (v) {
+      var n = v.querySelector('[data-a="dua-nudge"]');
+      return n ? direct(v, n).previousElementSibling : null;
+    }
+  };
+  var across = function (e) {
+    return e.matches('header.top, .back, .dk-day, .dk-span');
+  };
+  function lay(v, name) {
+    var f = SPLIT[name],
+      ca = v.querySelector(':scope > .dk-ca'),
+      cb = v.querySelector(':scope > .dk-cb'),
+      kids = [].slice.call(v.children);
+    var stray = kids.filter(function (e) {
+      return e !== ca && e !== cb && !across(e);
+    });
+    if (ca && cb && !stray.length) return;
+    var flat = [];
+    kids.forEach(function (e) {
+      if (e === ca || e === cb) flat = flat.concat([].slice.call(e.children));
+      else flat.push(e);
+    });
+    if (ca) ca.remove();
+    if (cb) cb.remove();
+    v.classList.remove('dk-two');
+    var split = f && f(v);
+    if (!split) {
+      flat.forEach(function (e) {
+        if (e.parentElement !== v) v.appendChild(e);
+      });
+      return;
+    }
+    ca = document.createElement('div');
+    ca.className = 'dk-ca';
+    cb = document.createElement('div');
+    cb.className = 'dk-cb';
+    var side = ca;
+    flat.forEach(function (e) {
+      if (across(e)) return;
+      if (e === split) side = cb;
+      side.appendChild(e);
+    });
+    v.appendChild(ca);
+    v.appendChild(cb);
+    v.classList.add('dk-two');
+  }
+  /* the Tracker, on a computer: the last seven days of remembrance under the counter, from the tracker's own record */
+  var DAY_AR = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+  function dayName(k, short) {
+    if (A.ar && A.ar()) return DAY_AR[A.dow(k)];
+    var n = A.DOW[A.dow(k)];
+    return short ? n.slice(0, 3) : n;
+  }
+  function week() {
+    var days = [],
+      max = 1,
+      sum = 0,
+      best = null;
+    for (var i = 6; i >= 0; i--) {
+      var k = A.shift(A.today(), -i),
+        n = (S.tasbih.days && S.tasbih.days[k]) || 0;
+      days.push([k, n]);
+      max = Math.max(max, n);
+      sum += n;
+      if (n && (!best || n > best[1])) best = [k, n];
+    }
+    return (
+      '<div class="card dk-week" data-sig="' +
+      days.join(';') +
+      '"><div class="dk-week-h"><div><div class="eyebrow">' +
+      esc(T('This week')) +
+      '</div><div class="dk-week-n"><b class="num">' +
+      A.fmtN(sum) +
+      '</b><span>' +
+      esc(L('remembrances', 'ذكرًا')) +
+      '</span></div></div>' +
+      (best
+        ? '<div class="dk-week-b"><span>' +
+          esc(L('Strongest day', 'أقوى يوم')) +
+          '</span><b>' +
+          esc(dayName(best[0])) +
+          '</b></div>'
+        : '') +
+      '</div><div class="dk-bars">' +
+      days
+        .map(function (d, j) {
+          return (
+            '<div class="dk-bar' +
+            (j === 6 ? ' on' : '') +
+            (d[1] ? '' : ' zero') +
+            '"><b class="num">' +
+            (d[1] ? A.fmtN(d[1]) : '·') +
+            '</b><i style="height:' +
+            Math.max(4, Math.round((d[1] / max) * 100)) +
+            '%"></i><span>' +
+            esc(j === 6 ? L('Today', 'اليوم') : dayName(d[0], true)) +
+            '</span></div>'
+          );
+        })
+        .join('') +
+      '</div></div>'
+    );
+  }
+  /* My duʿāʾs, on a computer: today's times of answered duʿāʾ in order, the one now or next marked */
+  function answerRow() {
+    if (!S.loc || !window.Prayer) return '';
+    var P = window.Prayer,
+      MIN = 60000,
+      k = A.today(),
+      t = A.pday(k),
+      y = A.pday(A.shift(k, -1)),
+      now = Date.now(),
+      list = [{ t: T('The last third of the night'), a: y.lastThird, b: t.fajr, ic: 'moon' }];
+    A.PRAYERS.forEach(function (p) {
+      var end = S.iqama && S.iqama.on && A.iqamaAt ? A.iqamaAt(k, p) : t[p] + 20 * MIN;
+      list.push({ t: T(P.NAMES[p]), s: L('After the adhān', 'بعد الأذان'), a: t[p], b: end, ic: 'mosque' });
+      if (p === 'asr' && A.dow(k) === 5)
+        list.push({ t: T('The last hour of Friday'), a: t.maghrib - 60 * MIN, b: t.maghrib, ic: 'spark' });
+    });
+    list.push({
+      t: L('Tonight', 'الليلة'),
+      s: T('The last third of the night'),
+      a: t.lastThird,
+      b: A.pday(A.shift(k, 1)).fajr,
+      ic: 'moon'
+    });
+    var next = null;
+    list.forEach(function (x) {
+      x.st = now >= x.b ? 'past' : now >= x.a ? 'now' : '';
+      if (!x.st && !next) next = x;
+    });
+    if (next) next.st = 'next';
+    return (
+      '<div class="dk-span dk-ans" data-sig="' +
+      list
+        .map(function (x) {
+          return x.st;
+        })
+        .join(',') +
+      '"><div class="dk-ans-h"><span class="eyebrow">' +
+      esc(L('The times of answer, today', 'أوقات الإجابة اليوم')) +
+      '</span><a class="faint small" href="#/answered">' +
+      esc(L('The evidence', 'الأدلة')) +
+      '</a></div><div class="dk-ans-row">' +
+      list
+        .map(function (x) {
+          return (
+            '<div class="dk-ans-t ' +
+            x.st +
+            '">' +
+            A.icon(x.ic, 'xs') +
+            '<b>' +
+            esc(x.t) +
+            '</b><span>' +
+            esc(x.s || '') +
+            '</span><em class="num">' +
+            A.fmtT(x.a) +
+            '</em>' +
+            (x.st === 'now'
+              ? '<i>' + esc(L('Now', 'الآن')) + '</i>'
+              : x.st === 'next'
+                ? '<i>' + esc(L('Next', 'التالي')) + '</i>'
+                : '') +
+            '</div>'
+          );
+        })
+        .join('') +
+      '</div></div>'
+    );
+  }
+  /* This computer: its cards dealt into two columns by height, so neither column ends with a hole */
+  function deal(g) {
+    if (!g) return;
+    var cols = g.querySelectorAll(':scope > .dk-gc'),
+      stray = [].slice.call(g.children).filter(function (e) {
+        return !e.classList.contains('dk-gc');
+      });
+    if (cols.length === 2 && !stray.length) return;
+    var cards = [];
+    [].slice.call(g.children).forEach(function (e) {
+      if (e.classList.contains('dk-gc')) cards = cards.concat([].slice.call(e.children));
+      else cards.push(e);
+    });
+    var hs = cards.map(function (c) {
+      return c.offsetHeight;
+    });
+    g.innerHTML = '';
+    var a = document.createElement('div'),
+      b = document.createElement('div'),
+      ha = 0,
+      hb = 0;
+    a.className = b.className = 'dk-gc';
+    cards.forEach(function (c, i) {
+      if (ha <= hb) {
+        a.appendChild(c);
+        ha += hs[i];
+      } else {
+        b.appendChild(c);
+        hb += hs[i];
+      }
+    });
+    g.appendChild(a);
+    g.appendChild(b);
+    g.classList.add('dealt');
+  }
   function wide() {
     var v = $('#app > .view'),
       name = A.route().name;
     if (!v) return;
     v.classList.toggle('dk-wide', !!COLS[name]);
+    if (name === 'tracker') {
+      /* the phrases go across the whole page under the header, where they fit on a line or two */
+      var chips = v.querySelector('.trk .trk-chips'),
+        head = v.querySelector(':scope > header.top');
+      if (chips && head) {
+        [].slice.call(v.querySelectorAll(':scope > .trk-chips')).forEach(function (o) {
+          o.remove();
+        });
+        chips.classList.add('dk-span');
+        head.insertAdjacentElement('afterend', chips);
+      }
+      var trk = v.querySelector('.trk'),
+        wk = v.querySelector('.dk-week'),
+        html = trk ? week() : '';
+      if (trk && (!wk || wk.dataset.sig !== /data-sig="([^"]*)"/.exec(html)[1])) {
+        if (wk) wk.outerHTML = html;
+        else trk.insertAdjacentHTML('afterend', html);
+      }
+    }
+    if (name === 'journal') {
+      var top = v.querySelector(':scope > header.top'),
+        an = v.querySelector('.dk-ans'),
+        row = answerRow(),
+        sig = /data-sig="([^"]*)"/.exec(row);
+      if (top && row && (!an || an.dataset.sig !== sig[1])) {
+        if (an) an.outerHTML = row;
+        else top.insertAdjacentHTML('afterend', row);
+      }
+    }
+    lay(v, SPLIT[name] && COLS[name] ? name : '');
+    deal(v.querySelector('.dk-grid'));
   }
+  /* the times of answer move on through the day */
+  setInterval(function () {
+    if (A.route().name === 'journal') wide();
+  }, 60000);
   var screens = new MutationObserver(function () {
     clearTimeout(screens._t);
     screens._t = setTimeout(after, 16);

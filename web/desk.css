@@ -1254,9 +1254,7 @@ html.is-desk .lp {
     'stage dock';
   column-gap: clamp(28px, 3.4vw, 56px);
   padding: 8px var(--dk-gut) 0;
-  background:
-    radial-gradient(60% 70% at 24% 55%, var(--gold-soft), transparent 70%),
-    var(--bg);
+  background: radial-gradient(60% 70% at 24% 55%, var(--gold-soft), transparent 70%), var(--bg);
 }
 html.is-desk .lp-top {
   grid-area: top;
@@ -1316,4 +1314,316 @@ html.is-desk .lp-next {
     height: clamp(170px, 30vh, 280px);
     margin: 4px 16px 0;
   }
+}
+
+/* ---------- pages laid out on purpose: a left and a right column, the header across both (desk.js: lay) ---------- */
+html.has-rail #app > .view.dk-wide.dk-two {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  column-count: auto;
+  column-gap: 26px;
+  row-gap: 0;
+  align-items: start;
+}
+html.has-rail .view.dk-two > header.top,
+html.has-rail .view.dk-two > .back,
+html.has-rail .view.dk-two > .dk-span {
+  grid-column: 1 / -1;
+}
+html.has-rail .view.dk-two > .back {
+  justify-self: start;
+  margin-bottom: 14px;
+}
+html.has-rail .view.dk-two > .dk-ca,
+html.has-rail .view.dk-two > .dk-cb {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap, 14px);
+  min-width: 0;
+  margin: 0;
+}
+html.has-rail .view.dk-two .dk-ca > .sec,
+html.has-rail .view.dk-two .dk-cb > .sec {
+  margin-top: 6px;
+}
+html.has-rail .view.dk-two .dk-cb > .sec:first-child,
+html.has-rail .view.dk-two .dk-ca > .sec:first-child {
+  margin-top: 0;
+}
+@media (max-width: 1000px) {
+  html.has-rail #app > .view.dk-wide.dk-two {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--gap, 14px);
+  }
+}
+
+/* Tracker: every phrase in view (they wrap rather than scroll off under the other column), and the week beneath */
+html.has-rail .dk-two .trk-chips {
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  margin-bottom: 22px !important;
+  width: auto;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+}
+.dk-week {
+  padding: 20px 22px 18px;
+}
+.dk-week-h {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.dk-week-n {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 6px;
+}
+.dk-week-n b {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.dk-week-n span,
+.dk-week-b span {
+  color: var(--t3);
+  font-size: 13px;
+}
+.dk-week-b {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+.dk-week-b b {
+  font-size: 14px;
+  color: var(--gold);
+}
+.dk-bars {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 10px;
+  height: 150px;
+  align-items: end;
+}
+.dk-bar {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  min-width: 0;
+}
+.dk-bar i {
+  display: block;
+  width: 100%;
+  max-width: 34px;
+  border-radius: 8px 8px 4px 4px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--gold) 55%, transparent),
+    color-mix(in srgb, var(--gold) 22%, transparent)
+  );
+}
+.dk-bar.on i {
+  background: linear-gradient(180deg, var(--gold2, var(--gold)), var(--gold));
+  box-shadow: 0 10px 24px -10px var(--gold);
+}
+.dk-bar.zero i {
+  background: var(--line);
+}
+.dk-bar b {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--t2);
+}
+.dk-bar span {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--t3);
+  white-space: nowrap;
+}
+.dk-bar.on span,
+.dk-bar.on b {
+  color: var(--gold);
+}
+
+/* You: the profile as one compact row beside its picture, the two buttons the same height */
+html.has-rail .dk-two .phead {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas: 'av n' 'av s' 'av b';
+  align-items: center;
+  justify-items: start;
+  text-align: start;
+  column-gap: 24px;
+  row-gap: 4px;
+  padding: 22px 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: linear-gradient(180deg, var(--s1), var(--s1b));
+  box-shadow: var(--hi), var(--shadow);
+}
+html.has-rail .dk-two .phead .avatar {
+  grid-area: av;
+}
+html.has-rail .dk-two .phead h1 {
+  grid-area: n;
+  margin: 0;
+}
+html.has-rail .dk-two .phead .s {
+  grid-area: s;
+}
+html.has-rail .dk-two .phead .row {
+  grid-area: b;
+  justify-content: flex-start !important;
+  align-items: center;
+  margin-top: 8px !important;
+  gap: 10px;
+}
+html.has-rail .dk-two .phead .row .btn {
+  height: 40px;
+  margin: 0;
+}
+/* the medals in even rows of five, each tile the same height */
+html.has-rail .dk-two .medals {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-auto-rows: 1fr;
+}
+html.has-rail .dk-two .medal-c {
+  height: 100%;
+  justify-content: flex-start;
+}
+@media (max-width: 1200px) {
+  html.has-rail .dk-two .medals {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* My duʿāʾs: today's times of answer, in order, across the page */
+.dk-ans {
+  margin-bottom: 22px;
+}
+.dk-ans-h {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 0 4px 10px;
+}
+.dk-ans-h a {
+  text-decoration: none;
+}
+.dk-ans-h a:hover {
+  color: var(--gold);
+}
+.dk-ans-row {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 10px;
+}
+.dk-ans-t {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  padding: 14px 14px 13px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: linear-gradient(180deg, var(--s1), var(--s1b));
+}
+.dk-ans-t .ic {
+  color: var(--t3);
+  margin-bottom: 4px;
+}
+.dk-ans-t b {
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dk-ans-t span {
+  font-size: 11.5px;
+  color: var(--t3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 1.3em;
+}
+.dk-ans-t em {
+  font-style: normal;
+  font-size: 15px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+.dk-ans-t i {
+  position: absolute;
+  top: 12px;
+  inset-inline-end: 12px;
+  font: 800 10px/1 var(--f-ui);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-style: normal;
+  color: var(--gold);
+}
+.dk-ans-t.past {
+  opacity: 0.45;
+}
+.dk-ans-t.next,
+.dk-ans-t.now {
+  border-color: var(--gold-line);
+  box-shadow: inset 0 0 0 1px var(--gold-line);
+}
+.dk-ans-t.next .ic,
+.dk-ans-t.now .ic,
+.dk-ans-t.now em,
+.dk-ans-t.next em {
+  color: var(--gold);
+}
+@media (max-width: 1200px) {
+  .dk-ans-row {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+/* the journal's add key, a real button on a computer */
+html.has-rail .view.dk-two > header.top .acts .ib[data-a='dua-add'] {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  width: auto;
+  height: 40px;
+  padding: 0 18px 0 14px;
+  gap: 8px;
+  border: 1px solid var(--gold-line);
+  border-radius: 99px;
+  color: var(--gold);
+}
+html.has-rail .view.dk-two > header.top .acts .ib[data-a='dua-add']::after {
+  content: attr(aria-label);
+  font: 700 13.5px var(--f-ui);
+}
+
+/* This computer: cards dealt into two columns by height */
+.dk-grid.dealt {
+  align-items: start;
+}
+.dk-gc {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+/* phone-only controls have no place on a computer: home-screen widgets and the phone's own device settings */
+html.is-desk [data-a='pin-widget'],
+html.is-desk a.set[href='#/settings/device'] {
+  display: none;
 }

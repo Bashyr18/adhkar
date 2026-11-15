@@ -30,7 +30,7 @@ function sample() {
 }
 module.exports = async (page) => {
   const out = process.argv[3];
-  await page.size(1600, 1000, 1);
+  await page.size(+(process.env.W || 1600), +(process.env.H || 1000), 1);
   /* the sample goes in before the app's own scripts run, so the app never saves over it */
   await page.send('Page.addScriptToEvaluateOnNewDocument', { source: `localStorage.setItem('adhkar.v10', ${JSON.stringify(JSON.stringify(sample()))})` });
   await page.send('Page.navigate', { url: process.env.CDP_ORIGIN });
@@ -38,7 +38,10 @@ module.exports = async (page) => {
   const routes = (process.env.ROUTES || 'today=#/,insights=#/insights,tracker=#/tracker,reader=#/adhkar,calendar=#/calendar,salah=#/salah,journal=#/journal,learn=#/learn').split(',');
   for (const r of routes) {
     const [name, h] = r.split('=');
-    await page.eval(`location.hash=${JSON.stringify(h)};1`);
+    /* rail:<label> clicks that item in the rail (the computer's own pages are not plain hash routes) */
+    if (h.indexOf('rail:') === 0)
+      await page.eval(`[].slice.call(document.querySelectorAll('#rail a,#rail button')).filter(function(e){return e.textContent.indexOf(${JSON.stringify(h.slice(5))})>=0})[0].click();1`);
+    else await page.eval(`location.hash=${JSON.stringify(h)};1`);
     await page.wait(1600);
     /* pal: the Ctrl K palette, with a few letters typed */
     if (name === 'pal') {
