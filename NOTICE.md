@@ -20,6 +20,8 @@ Downloaded by the app at the user's request, not bundled: the Ḥiṣn al-Muslim
 
 The prayer-time takbīr (`android/res/raw/adhan_takbir.ogg`) is the opening of the adhān of Masjid an-Nabawī, from the archive.org item "Azan Masjid Nabawi".
 
+The film's adhān (`tools/promo/adhan-madinah-opening.ogg`, its first 44 seconds) is Sheikh Faisal Noman's Maghrib adhān at Masjid an-Nabawī, 1 August 2009, from the archive.org item "MadinahAzanByFaisalNoman", marked public domain.
+
 ## Fonts
 
 Bundled in `web/fonts/` and `docs/guide/fonts/`, each under the SIL Open Font License 1.1 (https://openfontlicense.org):
