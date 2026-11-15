@@ -1610,6 +1610,12 @@
       }
     ],
     [
+      /^(\d+) of (\d+)$/,
+      function (m) {
+        return m[1] + ' من ' + m[2];
+      }
+    ],
+    [
       /^of (\d+)$/,
       function (m) {
         return 'من ' + m[1];

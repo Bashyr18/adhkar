@@ -1338,9 +1338,16 @@ html.has-rail .view.dk-two > .dk-ca,
 html.has-rail .view.dk-two > .dk-cb {
   display: flex;
   flex-direction: column;
-  gap: var(--gap, 14px);
+  gap: 18px;
   min-width: 0;
   margin: 0;
+}
+/* every block in a column keeps its own room: no margins pulling it into the next */
+html.has-rail .view.dk-two > .dk-ca > *,
+html.has-rail .view.dk-two > .dk-cb > * {
+  margin-top: 0;
+  margin-bottom: 0;
+  flex: none;
 }
 html.has-rail .view.dk-two .dk-ca > .sec,
 html.has-rail .view.dk-two .dk-cb > .sec {
@@ -1353,7 +1360,7 @@ html.has-rail .view.dk-two .dk-ca > .sec:first-child {
 @media (max-width: 1000px) {
   html.has-rail #app > .view.dk-wide.dk-two {
     grid-template-columns: minmax(0, 1fr);
-    row-gap: var(--gap, 14px);
+    row-gap: 18px;
   }
 }
 
@@ -1369,6 +1376,7 @@ html.has-rail .dk-two .trk-chips {
 }
 .dk-week {
   padding: 20px 22px 18px;
+  text-align: start;
 }
 .dk-week-h {
   display: flex;
@@ -1839,4 +1847,104 @@ html.has-rail #app > .view:has(> .dk-page) > .dk-page {
 .dk-pill-prev img {
   transform: scale(1.25);
   transform-origin: center;
+}
+
+/* ---------- the quiz: a centred stage, the answers two by two, the keys to answer with (desk.js: dk-quiz) ---------- */
+html.has-rail #app > .view.dk-quiz {
+  max-width: 1080px;
+}
+html.has-rail .view.dk-quiz .qz-card {
+  padding: 30px 32px;
+}
+html.has-rail .view.dk-quiz .qz-q {
+  font-size: 26px;
+  line-height: 1.35;
+  margin: 6px 0 8px;
+}
+html.has-rail .view.dk-quiz .qz-opts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  counter-reset: qk;
+}
+html.has-rail .view.dk-quiz .qz-opt {
+  margin: 0;
+  min-height: 84px;
+  height: 100%;
+  counter-increment: qk;
+  position: relative;
+}
+/* the key that chooses it, quietly in the corner */
+html.has-rail .view.dk-quiz .qz-opt::after {
+  content: counter(qk);
+  position: absolute;
+  top: 10px;
+  inset-inline-end: 12px;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  font: 700 11px var(--f-ui);
+  color: var(--t3);
+}
+html.has-rail .view.dk-quiz .qz-opt[disabled]::after {
+  display: none;
+}
+@media (max-width: 1000px) {
+  html.has-rail .view.dk-quiz .qz-opts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------- a collection: the scene across, the remembrances in two columns beneath ---------- */
+html.has-rail #app > .view.dk-coll {
+  max-width: 1240px;
+}
+html.has-rail .view.dk-coll > .card.pad0 > .list {
+  display: block;
+  column-count: 2;
+  column-gap: 0;
+  column-rule: 1px solid var(--line);
+}
+html.has-rail .view.dk-coll > .card.pad0 > .list > * {
+  break-inside: avoid;
+}
+@media (max-width: 1100px) {
+  html.has-rail .view.dk-coll > .card.pad0 > .list {
+    column-count: 1;
+  }
+}
+/* Learn: the opening hadith across both columns */
+html.has-rail .view.dk-two > .lp-lead {
+  grid-column: 1 / -1;
+  margin-bottom: 18px;
+}
+
+/* the week with nothing counted yet: a short strip and one line of what fills it, not a tall empty box */
+.dk-week-go {
+  align-self: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--gold);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.dk-week-go:hover {
+  border-color: var(--gold);
+}
+.dk-week-e {
+  margin: -6px 0 14px;
+  color: var(--t3);
+  font-size: 13.5px;
+}
+.dk-week.dk-week-none .dk-bars {
+  height: 44px;
+}
+.dk-week.dk-week-none .dk-bar b {
+  display: none;
 }

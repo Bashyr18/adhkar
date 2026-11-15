@@ -249,7 +249,41 @@
     sessionPane();
   }
   /* a wide window, filled: the tab pages lay their cards out in two balanced columns */
-  var COLS = { today: 1, profile: 1, salah: 1, tracker: 1, journal: 1, deeds: 1, insights: 1 };
+  var COLS = {
+    today: 1,
+    profile: 1,
+    salah: 1,
+    tracker: 1,
+    journal: 1,
+    deeds: 1,
+    insights: 1,
+    learn: 1,
+    answered: 1,
+    night: 1,
+    duha: 1,
+    qada: 1,
+    ramadan: 1,
+    jumuah: 1,
+    calendar: 1,
+    qibla: 1
+  };
+  /* the page's key: a lesson or the quiz inside Learn are pages of their own, never split like Learn itself */
+  function pageKey() {
+    var r = A.route();
+    return r.name === 'learn' && r.a.length ? 'learn/' + r.a[0] : r.name;
+  }
+  /* any block may start the right column, except one straight after its heading (a heading stays with what it
+     heads); balance() then takes the split that leaves the columns closest in height */
+  function auto(v) {
+    var flat = [];
+    [].slice.call(v.children).forEach(function (e) {
+      if (/\bdk-c[ab]\b/.test(e.className)) flat = flat.concat([].slice.call(e.children));
+      else if (!across(e)) flat.push(e);
+    });
+    return flat.filter(function (e, i) {
+      return i > 0 && !flat[i - 1].classList.contains('sec');
+    });
+  }
   /* Some pages are laid out on purpose rather than poured into columns: a left and a right column, with the header
      (and any .dk-span row) across both. Each names the block that starts its right column; what comes before it is
      the left. The split is applied again whenever the app redraws the page. */
@@ -273,6 +307,15 @@
         st = v.querySelector('a.set');
       return [m && direct(v, m).previousElementSibling, st && direct(v, st).previousElementSibling].filter(Boolean);
     },
+    learn: auto,
+    answered: auto,
+    night: auto,
+    duha: auto,
+    qada: auto,
+    ramadan: auto,
+    jumuah: auto,
+    calendar: auto,
+    qibla: auto,
     journal: function (v) {
       var n = v.querySelector('[data-a="dua-nudge"]');
       return n ? direct(v, n).previousElementSibling : null;
@@ -379,7 +422,9 @@
       if (n && (!best || n > best[1])) best = [k, n];
     }
     return (
-      '<div class="card dk-week" data-sig="' +
+      '<div class="card dk-week' +
+      (sum ? '' : ' dk-week-none') +
+      '" data-sig="' +
       days.join(';') +
       '"><div class="dk-week-h"><div><div class="eyebrow">' +
       esc(T('This week')) +
@@ -394,8 +439,14 @@
           '</span><b>' +
           esc(dayName(best[0])) +
           '</b></div>'
-        : '') +
-      '</div><div class="dk-bars">' +
+        : '<a class="dk-week-go" href="#/tracker">' + esc(L('Open the tracker', 'افتح العدّاد')) + '</a>') +
+      '</div>' +
+      (sum
+        ? ''
+        : '<p class="dk-week-e">' +
+          esc(L('Each glorification you count fills in its day here.', 'كل تسبيحة تعدّها تملأ يومها هنا.')) +
+          '</p>') +
+      '<div class="dk-bars">' +
       days
         .map(function (d, j) {
           return (
@@ -531,9 +582,18 @@
   }
   function wide() {
     var v = $('#app > .view'),
-      name = A.route().name;
+      name = pageKey();
     if (!v) return;
     v.classList.toggle('dk-wide', !!COLS[name]);
+    /* the quiz on a computer: a centred stage, the answers two by two, and the keys to answer with */
+    v.classList.toggle('dk-quiz', name === 'learn/quiz');
+    /* a collection: its scene across the top, the remembrances in two columns beneath */
+    v.classList.toggle('dk-coll', name === 'c');
+    /* Learn: the hadith it begins with goes across both columns */
+    if (name === 'learn') {
+      var lead = v.querySelector('.lp-lead');
+      if (lead) lead.classList.add('dk-span');
+    }
     /* the library: the two sessions side by side at a calmer height, the collections in a grid */
     v.classList.toggle('dk-lib', name === 'adhkar');
     if (name === 'tracker') {
@@ -588,10 +648,27 @@
     clearTimeout(wide._r);
     wide._r = setTimeout(function () {
       var v = $('#app > .view'),
-        n = A.route().name;
+        n = pageKey();
       if (v && SPLIT[n] && COLS[n]) lay(v, n);
       if (v) deal(v.querySelector('.dk-grid'));
     }, 250);
+  });
+  /* the quiz from the keyboard: 1 to 4 choose an answer, Enter goes on */
+  addEventListener('keydown', function (e) {
+    if (pageKey() !== 'learn/quiz' || e.ctrlKey || e.metaKey || e.altKey) return;
+    var t = e.target;
+    if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+    var opts = [].slice.call(document.querySelectorAll('#app .qz-opt:not([disabled])'));
+    if (/^[1-4]$/.test(e.key) && opts[+e.key - 1]) {
+      e.preventDefault();
+      opts[+e.key - 1].click();
+    } else if (e.key === 'Enter') {
+      var nx = document.querySelector('#app [data-a="qz-next"]');
+      if (nx) {
+        e.preventDefault();
+        nx.click();
+      }
+    }
   });
   /* the times of answer move on through the day */
   setInterval(function () {
