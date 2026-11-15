@@ -1,8 +1,9 @@
-/* Renders tools/promo/promo.html to video, frame by frame, through tools/cdp.js (headless Edge).
-     STILLS="1,8,15" CDP_ORIGIN=file:///…/promo.html?render node tools/cdp.js tools/promo/render.js <outdir>
+/* Renders tools/promo/ad.html (the film) to video, frame by frame, through tools/cdp.js (headless Edge).
+     STILLS="1,8,15" CDP_ORIGIN=file:///…/ad.html?render node tools/cdp.js tools/promo/render.js <outdir>
        saves those seconds as JPEGs, for checking;
-     CDP_ORIGIN=file:///…/promo.html?render node tools/cdp.js tools/promo/render.js <outdir>
-       pipes every frame (30 a second) to ffmpeg as <outdir>/video.mp4 (no sound; tools/promo/build.sh adds it). */
+     CDP_ORIGIN=file:///…/ad.html?render node tools/cdp.js tools/promo/render.js <outdir>
+       pipes every frame (30 a second) to ffmpeg as <outdir>/video.mp4, and writes the film's sound cues to
+       <outdir>/sfx.json (tools/promo/film.sh adds the sound). ?feed and ?land draw the 4:5 and 16:9 shapes. */
 const path = require('path'),
   fs = require('fs'),
   { spawn } = require('child_process');

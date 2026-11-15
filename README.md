@@ -218,7 +218,7 @@ python -I tools/readme_images.py        # docs/screens/*.webp, composed from tho
 ### The promotional films
 
 ```bash
-bash tools/promo/build.sh               # the films are code too: tools/promo/*.html drawn frame by frame, sound made in code
+bash tools/promo/film.sh                # the 45-second film in 4:5, 9:16 and 16:9: tools/promo/ad.html drawn frame by frame, its sound cued by the picture
 ```
 
 ### Download counts
@@ -232,6 +232,7 @@ Once a day, `.github/workflows/stats.yml` keeps GitHub's release download counts
 | `node tools/test.js` | Content: every item against its source, hadith grades, Sūrat al-Kahf's pages, prayer times against references, the JavaScript and Java prayer engines to the minute |
 | `node tools/smoke.js` | The interface: boots the real app in jsdom in both languages, opens every screen and drives the actions |
 | `node tools/bridge-check.js` | Every bridge method the Android app has also exists in the Windows app |
+| `node tools/cdp.js tools/desk-sweep.js build/sweep` | Every desktop screen, in English and Arabic at 1333 × 790 and 1600 × 1000: script errors and anything wider than the window (`CDP_ORIGIN=file:///…/web/index.html?desk`) |
 | `prettier --check` | Formatting, as the CI runs it |
 
 All of them run on every push and pull request.
