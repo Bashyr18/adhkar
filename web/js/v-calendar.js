@@ -280,17 +280,19 @@
         FAST_TYPES.filter(function (x) {
           /* a Ramaḍān fast is planned only for a day of Ramaḍān, and any other only outside it */
           return (x[0] === 'ramadan') === !!(A.isRamadan && A.isRamadan(d));
-        }).map(function (x) {
-          return (
-            '<button type="button" class="opt" data-plan="' +
-            x[0] +
-            '" aria-pressed="' +
-            (plan === x[0]) +
-            '"><span class="rad"></span><div class="grow"><div class="t">' +
-            x[1] +
-            '</div></div></button>'
-          );
-        }).join('') +
+        })
+          .map(function (x) {
+            return (
+              '<button type="button" class="opt" data-plan="' +
+              x[0] +
+              '" aria-pressed="' +
+              (plan === x[0]) +
+              '"><span class="rad"></span><div class="grow"><div class="t">' +
+              x[1] +
+              '</div></div></button>'
+            );
+          })
+          .join('') +
         (plan ? '<button type="button" class="btn ghost" data-plan="">Remove the plan</button>' : '') +
         '</div>';
     else

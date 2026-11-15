@@ -990,20 +990,35 @@ ok(/Ramaḍān Mubārak/.test(rt), 'Ramaḍān greeting in Ramaḍān');
   ok(f.on && f.phase === 'day' && f.key === '2026-11-13', 'Friday morning is Jumuʿah, by day');
   const today = visit(fri, '#/');
   ok(root.hasAttribute('data-friday') && /fr-hero/.test(today), 'Friday dresses the app and leads Today with its card');
-  ok(!/seek the hour of response before Maghrib/.test(today),'the Friday occasion line steps aside for the card');
-  ok(/Jumuʿah/.test(visit(fri, '#/salah')) && !/>Dhuhr</.test(visit(fri, '#/salah')), 'on Friday the Dhuhr row is Jumuʿah for a brother');
+  ok(!/seek the hour of response before Maghrib/.test(today), 'the Friday occasion line steps aside for the card');
+  ok(
+    /Jumuʿah/.test(visit(fri, '#/salah')) && !/>Dhuhr</.test(visit(fri, '#/salah')),
+    'on Friday the Dhuhr row is Jumuʿah for a brother'
+  );
   const jp = visit(fri, '#/jumuah');
-  ok(/Ṣalāt al-Jumuʿah/.test(jp) && /fr-hr mb/.test(jp) && /fr-hr ls/.test(jp), 'the Jumuʿah page shows the prayer and the two hours');
+  ok(
+    /Ṣalāt al-Jumuʿah/.test(jp) && /fr-hr mb/.test(jp) && /fr-hr ls/.test(jp),
+    'the Jumuʿah page shows the prayer and the two hours'
+  );
   ok(!/If you attend the masjid/.test(jp), 'a brother sees every Sunnah of attending as his');
   const kh = visit(fri, '#/kahf');
   ok((kh.match(/class="kf-page"/g) || []).length === 12, 'al-Kahf opens on its twelve Madani pages');
-  ok(new Set((kh.match(/kf-w end" data-v="(\d+)"/g) || []).map((x) => x.match(/\d+/)[0])).size === 110, 'every verse end of al-Kahf is on the pages');
+  ok(
+    new Set((kh.match(/kf-w end" data-v="(\d+)"/g) || []).map((x) => x.match(/\d+/)[0])).size === 110,
+    'every verse end of al-Kahf is on the pages'
+  );
   A.S.profile.gender = 'f';
   const sp = visit(fri, '#/jumuah');
-  ok(/Jumuʿah or Ẓuhr/.test(sp) && /If you attend the masjid/.test(sp), 'a sister sees Jumuʿah or Ẓuhr, and the Sunnahs of attending as optional');
+  ok(
+    /Jumuʿah or Ẓuhr/.test(sp) && /If you attend the masjid/.test(sp),
+    'a sister sees Jumuʿah or Ẓuhr, and the Sunnahs of attending as optional'
+  );
   ok(/Jumuʿah or Ẓuhr/.test(visit(fri, '#/salah')), 'a sister’s Ṣalāh list names Jumuʿah or Ẓuhr');
   A.S.excused.on = true;
-  ok(/On a break from ṣalāh/.test(visit(fri, '#/jumuah')) && !/data-a="fr-prayed"/.test(visit(fri, '#/jumuah')), 'on a break, the Friday prayer is not asked of her');
+  ok(
+    /On a break from ṣalāh/.test(visit(fri, '#/jumuah')) && !/data-a="fr-prayed"/.test(visit(fri, '#/jumuah')),
+    'on a break, the Friday prayer is not asked of her'
+  );
   A.S.excused.on = false;
   A.S.profile.gender = '';
   ok(!fri.errors.length, 'Friday pages open cleanly ' + fri.errors.join(' | '));
@@ -1011,10 +1026,16 @@ ok(/Ramaḍān Mubārak/.test(rt), 'Ramaḍān greeting in Ramaḍān');
   const last = boot('2026-11-13T15:40:00Z', settled);
   ok(last.w.A.jumuah().now === 'last', 'the last hour before Maghrib is lit as the hour of response');
   const thu = boot('2026-11-12T18:00:00Z', settled);
-  ok(thu.w.A.jumuah().on && thu.w.A.jumuah().phase === 'night' && thu.w.A.jumuah().key === '2026-11-13', 'Thursday after Maghrib is the night of Jumuʿah');
+  ok(
+    thu.w.A.jumuah().on && thu.w.A.jumuah().phase === 'night' && thu.w.A.jumuah().key === '2026-11-13',
+    'Thursday after Maghrib is the night of Jumuʿah'
+  );
   const wed = boot('2026-11-11T12:00:00Z', settled);
   visit(wed, '#/');
-  ok(!wed.w.A.jumuah().on && !wed.w.document.documentElement.hasAttribute('data-friday'), 'a Wednesday is an ordinary day');
+  ok(
+    !wed.w.A.jumuah().on && !wed.w.document.documentElement.hasAttribute('data-friday'),
+    'a Wednesday is an ordinary day'
+  );
   const after = boot('2026-11-13T17:30:00Z', settled);
   ok(!after.w.A.jumuah().on, 'Jumuʿah ends at Maghrib on Friday');
 }
@@ -1029,21 +1050,41 @@ ok(/Ramaḍān Mubārak/.test(rt), 'Ramaḍān greeting in Ramaḍān');
   btn.dataset.k = '2026-11-16';
   A.acts['cal-day'](btn);
   const sh = [...d.querySelectorAll('.sheet')].pop();
-  ok(sh && /Plan a fast/.test(sh.innerHTML) && !sh.querySelector('[data-fast]'), 'a future day offers a plan, not a log');
+  ok(
+    sh && /Plan a fast/.test(sh.innerHTML) && !sh.querySelector('[data-fast]'),
+    'a future day offers a plan, not a log'
+  );
   sh.querySelector('[data-plan="sunnah"]').click();
-  ok(A.S.fastPlan['2026-11-16'] === 'sunnah' && !A.S.fasts['2026-11-16'], 'planning a fast does not count it as fasted');
-  ok(/class="[^"]*plan[^"]*"[^>]*data-k|data-k="2026-11-16" class="[^"]*plan/.test(visit(env, '#/calendar')), 'a planned day is marked on the calendar');
+  ok(
+    A.S.fastPlan['2026-11-16'] === 'sunnah' && !A.S.fasts['2026-11-16'],
+    'planning a fast does not count it as fasted'
+  );
+  ok(
+    /class="[^"]*plan[^"]*"[^>]*data-k|data-k="2026-11-16" class="[^"]*plan/.test(visit(env, '#/calendar')),
+    'a planned day is marked on the calendar'
+  );
   const eve = boot('2026-11-15T18:00:00Z', JSON.parse(JSON.stringify(A.S)));
-  ok(eve.w.A.occasion('2026-11-15', true).some((o) => o.t === 'Tomorrow you plan to fast'), 'the evening before shows the planned fast');
+  ok(
+    eve.w.A.occasion('2026-11-15', true).some((o) => o.t === 'Tomorrow you plan to fast'),
+    'the evening before shows the planned fast'
+  );
   ok(!env.errors.length, 'fast planning runs cleanly ' + env.errors.join(' | '));
 }
 
 /* the morning adhkār end before Dhuhr; the evening ones begin at ʿAṣr */
 {
-  const am = boot('2026-11-11T09:30:00Z', settled), mid = boot('2026-11-11T12:40:00Z', settled), pm = boot('2026-11-11T14:30:00Z', settled);
+  const am = boot('2026-11-11T09:30:00Z', settled),
+    mid = boot('2026-11-11T12:40:00Z', settled),
+    pm = boot('2026-11-11T14:30:00Z', settled);
   const t = mid.w.A.pday(mid.w.A.today());
   ok(am.w.A.sessionNow() === 'morning', 'mid-morning is the time of the morning adhkār');
-  ok(Date.now() && mid.w.A.sessionNow() === null && Date.parse('2026-11-11T12:40:00Z') > t.dhuhr && Date.parse('2026-11-11T12:40:00Z') < t.asr, 'between Dhuhr and ʿAṣr neither session is due');
+  ok(
+    Date.now() &&
+      mid.w.A.sessionNow() === null &&
+      Date.parse('2026-11-11T12:40:00Z') > t.dhuhr &&
+      Date.parse('2026-11-11T12:40:00Z') < t.asr,
+    'between Dhuhr and ʿAṣr neither session is due'
+  );
   ok(pm.w.A.sessionNow() === 'evening', 'after ʿAṣr is the time of the evening adhkār');
 }
 
@@ -1053,17 +1094,39 @@ ok(/Ramaḍān Mubārak/.test(rt), 'Ramaḍān greeting in Ramaḍān');
     A = env.w.A,
     d = env.w.document;
   const all = [];
-  A.COLS.forEach((c) => A.items(c.id, c.perPrayer ? 'fajr' : undefined).forEach((it, i) => { if (it.qs) all.push({ c, it, i }); }));
-  const ikh = all.find((x) => x.it.qs[0].s === 112), fat = all.find((x) => x.it.qs[0].s === 1);
-  const m1 = d.createElement('div'); m1.innerHTML = A.mushaf(ikh.it.qs, false);
-  ok(m1.querySelector('.bsm') && !/بِسْمِ/.test(m1.querySelector('.ayat').textContent), 'al-Ikhlāṣ: the basmalah is its own line, not part of the first āyah');
-  const m2 = d.createElement('div'); m2.innerHTML = A.mushaf(fat.it.qs, false);
-  ok(m2.querySelector('.ayat.bsm1') && m2.querySelectorAll('.ayat.bsm1 .am').length === 1 && !/بِسْمِ/.test(m2.querySelectorAll('.ayat')[1].textContent), 'al-Fātiḥah: its first āyah, the basmalah, has a line of its own');
-  const en = d.createElement('div'); en.innerHTML = A.txLines(ikh.it.en);
-  ok(en.firstChild.classList.contains('bsm-l') && en.querySelectorAll('.ln.v').length === 4, 'the translation opens with the basmalah alone, then the numbered āyāt');
+  A.COLS.forEach((c) =>
+    A.items(c.id, c.perPrayer ? 'fajr' : undefined).forEach((it, i) => {
+      if (it.qs) all.push({ c, it, i });
+    })
+  );
+  const ikh = all.find((x) => x.it.qs[0].s === 112),
+    fat = all.find((x) => x.it.qs[0].s === 1);
+  const m1 = d.createElement('div');
+  m1.innerHTML = A.mushaf(ikh.it.qs, false);
+  ok(
+    m1.querySelector('.bsm') && !/بِسْمِ/.test(m1.querySelector('.ayat').textContent),
+    'al-Ikhlāṣ: the basmalah is its own line, not part of the first āyah'
+  );
+  const m2 = d.createElement('div');
+  m2.innerHTML = A.mushaf(fat.it.qs, false);
+  ok(
+    m2.querySelector('.ayat.bsm1') &&
+      m2.querySelectorAll('.ayat.bsm1 .am').length === 1 &&
+      !/بِسْمِ/.test(m2.querySelectorAll('.ayat')[1].textContent),
+    'al-Fātiḥah: its first āyah, the basmalah, has a line of its own'
+  );
+  const en = d.createElement('div');
+  en.innerHTML = A.txLines(ikh.it.en);
+  ok(
+    en.firstChild.classList.contains('bsm-l') && en.querySelectorAll('.ln.v').length === 4,
+    'the translation opens with the basmalah alone, then the numbered āyāt'
+  );
   A.dailyDhikr = () => ikh;
   const today = visit(env, '#/');
-  ok(/class="card dod[\s\S]*class="bsm"[\s\S]*bsm-l/.test(today), "Today's dhikr of the day keeps the basmalah apart, in the Arabic and the translation");
+  ok(
+    /class="card dod[\s\S]*class="bsm"[\s\S]*bsm-l/.test(today),
+    "Today's dhikr of the day keeps the basmalah apart, in the Arabic and the translation"
+  );
   ok(!env.errors.length, 'basmalah views run cleanly ' + env.errors.join(' | '));
 }
 

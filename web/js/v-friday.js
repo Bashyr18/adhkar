@@ -89,9 +89,30 @@
 
   /* ---------- the Sunnahs of the day, each with the narration it rests on ---------- */
   var SUNNAH = [
-    { id: 'kahf', t: 'Read Sūrat al-Kahf', d: 'In the night or the day of Jumuʿah', ev: 'kahf', all: 1, href: '#/kahf' },
-    { id: 'salawat', t: 'Send abundant ṣalawāt', d: 'They are presented to the Prophet ﷺ', ev: 'abudawud:1047', all: 1, href: '#/tracker' },
-    { id: 'hour', t: 'Duʿāʾ in the hour of response', d: 'At the minbar, or the last hour before Maghrib', ev: 'hour', all: 1, href: '#/journal' },
+    {
+      id: 'kahf',
+      t: 'Read Sūrat al-Kahf',
+      d: 'In the night or the day of Jumuʿah',
+      ev: 'kahf',
+      all: 1,
+      href: '#/kahf'
+    },
+    {
+      id: 'salawat',
+      t: 'Send abundant ṣalawāt',
+      d: 'They are presented to the Prophet ﷺ',
+      ev: 'abudawud:1047',
+      all: 1,
+      href: '#/tracker'
+    },
+    {
+      id: 'hour',
+      t: 'Duʿāʾ in the hour of response',
+      d: 'At the minbar, or the last hour before Maghrib',
+      ev: 'hour',
+      all: 1,
+      href: '#/journal'
+    },
     { id: 'ghusl', t: 'Ghusl', d: 'Before going to the prayer', ev: 'bukhari:880' },
     { id: 'siwak', t: 'Siwāk and perfume', d: 'If you have it', ev: 'bukhari:880' },
     { id: 'early', t: 'Go early', d: 'The first hour is as offering a camel', ev: 'bukhari:881' },
@@ -179,11 +200,25 @@
   function state(f) {
     var now = Date.now();
     if (!f.on) return null;
-    if (f.now === 'last') return { k: 'last', t: 'The last hour · Maghrib in', d: 'Ask now: this is the hour to seek', at: f.last.to };
-    if (f.now === 'minbar') return { k: 'minbar', t: 'The hour at the minbar', d: 'Listen in silence; ask when the imam sits, and in the prayer', at: f.minbar.to };
-    if (f.phase === 'night') return { k: 'night', t: 'Fajr at', d: 'Read al-Kahf and send abundant ṣalawāt', at: f.t.fajr };
-    if (now < f.minbar.from) return { k: 'morning', t: 'Khuṭbah at', d: 'Ghusl, go early, and read al-Kahf', at: f.minbar.from };
-    return { k: 'after', t: 'The last hour begins at', d: 'Seek the hour of response with duʿāʾ before Maghrib', at: f.last.from };
+    if (f.now === 'last')
+      return { k: 'last', t: 'The last hour · Maghrib in', d: 'Ask now: this is the hour to seek', at: f.last.to };
+    if (f.now === 'minbar')
+      return {
+        k: 'minbar',
+        t: 'The hour at the minbar',
+        d: 'Listen in silence; ask when the imam sits, and in the prayer',
+        at: f.minbar.to
+      };
+    if (f.phase === 'night')
+      return { k: 'night', t: 'Fajr at', d: 'Read al-Kahf and send abundant ṣalawāt', at: f.t.fajr };
+    if (now < f.minbar.from)
+      return { k: 'morning', t: 'Khuṭbah at', d: 'Ghusl, go early, and read al-Kahf', at: f.minbar.from };
+    return {
+      k: 'after',
+      t: 'The last hour begins at',
+      d: 'Seek the hour of response with duʿāʾ before Maghrib',
+      at: f.last.from
+    };
   }
   function countdown(st) {
     var left = st.at - Date.now();
@@ -261,7 +296,11 @@
     var h =
       A.back('Back', '#/') +
       '<header class="top fr-top"><div class="tt"><div class="eyebrow">' +
-      esc(f.on ? A.T(f.phase === 'night' ? 'The night of Jumuʿah' : 'Yawm al-Jumuʿah') : A.T('Next Jumuʿah') + ' · ' + A.fmtDate(key, 'short')) +
+      esc(
+        f.on
+          ? A.T(f.phase === 'night' ? 'The night of Jumuʿah' : 'Yawm al-Jumuʿah')
+          : A.T('Next Jumuʿah') + ' · ' + A.fmtDate(key, 'short')
+      ) +
       '</div><h1>' +
       esc(A.T('Jumuʿah')) +
       ' <em lang="ar">الجمعة</em></h1></div></header>';
@@ -289,7 +328,9 @@
         '%;width:' +
         (x(ls.to) - x(ls.from)).toFixed(1) +
         '%"></span>' +
-        (f.on && f.phase === 'day' && now > a && now < b ? '<i class="fr-now" style="inset-inline-start:' + x(now).toFixed(1) + '%"></i>' : '') +
+        (f.on && f.phase === 'day' && now > a && now < b
+          ? '<i class="fr-now" style="inset-inline-start:' + x(now).toFixed(1) + '%"></i>'
+          : '') +
         '</div><div class="fr-ends"><span>' +
         esc(A.T('Fajr')) +
         ' ' +
@@ -357,7 +398,13 @@
       '<a class="card fr-kahf press" href="#/kahf"><div class="fr-kahf-a" lang="ar">الكهف</div><div class="grow"><div class="eyebrow">' +
       esc(A.T('Every Friday')) +
       '</div><div class="ttl">' +
-      esc(rec.kahf ? A.T('Al-Kahf read this Jumuʿah') : kp.page ? A.T('Continue al-Kahf from page') + ' ' + A.fmtN(293 + kp.page) : A.T('Read Sūrat al-Kahf')) +
+      esc(
+        rec.kahf
+          ? A.T('Al-Kahf read this Jumuʿah')
+          : kp.page
+            ? A.T('Continue al-Kahf from page') + ' ' + A.fmtN(293 + kp.page)
+            : A.T('Read Sūrat al-Kahf')
+      ) +
       '</div><div class="sub">' +
       esc(A.T('110 verses · 12 pages')) +
       (read ? ' · ' + A.fmtN(read) + ' ' + esc(A.T(read === 1 ? 'Jumuʿah read' : 'Jumuʿahs read')) : '') +
@@ -530,7 +577,11 @@
       '<div class="fr-ref"><b>' +
         esc(A.T('The ruling, in summary')) +
         '</b><span>' +
-        esc(A.T('Required of every adult Muslim man who is resident and well; not required of a woman, a child, or one who is ill')) +
+        esc(
+          A.T(
+            'Required of every adult Muslim man who is resident and well; not required of a woman, a child, or one who is ill'
+          )
+        ) +
         '</span><span>' +
         esc(A.T('Abū Dāwūd 1067 · Ṣaḥīḥ (al-Albānī)')) +
         '</span></div><p class="fr-note">' +
@@ -571,10 +622,13 @@
     return loaded[p];
   }
   function pageHTML(pg) {
-    var h = '<section class="kf-page" data-p="' + pg.p + '" style="font-family:kf' + pg.p + ',serif"><div class="kf-lines">';
+    var h =
+      '<section class="kf-page" data-p="' + pg.p + '" style="font-family:kf' + pg.p + ',serif"><div class="kf-lines">';
     if (pg.p === 293)
       h +=
-        '<div class="kf-ban"><span lang="ar">سورة الكهف</span></div><div class="kf-bism" lang="ar">' + esc(window.KAHF.bismillah) + '</div>';
+        '<div class="kf-ban"><span lang="ar">سورة الكهف</span></div><div class="kf-bism" lang="ar">' +
+        esc(window.KAHF.bismillah) +
+        '</div>';
     pg.lines.forEach(function (ln) {
       h +=
         '<div class="kf-l" data-l="' +
@@ -635,7 +689,9 @@
       esc(A.T(A.ar() ? 'Verses' : 'Translation')) +
       '</button></div></header>' +
       '<div class="kf-body">' +
-      (K.mode === 'mushaf' ? '<div class="kf-track" id="kfTrack" dir="rtl">' + KH.pages.map(pageHTML).join('') + '</div>' : '<div class="kf-tr" id="kfTr">' + trHTML() + '</div>') +
+      (K.mode === 'mushaf'
+        ? '<div class="kf-track" id="kfTrack" dir="rtl">' + KH.pages.map(pageHTML).join('') + '</div>'
+        : '<div class="kf-tr" id="kfTr">' + trHTML() + '</div>') +
       '</div>' +
       '<footer class="kf-foot"><div class="kf-au" data-au-tag="kahf"><button type="button" class="kf-play" data-a="kf-play" aria-label="' +
       esc(A.T('Listen')) +
@@ -693,7 +749,9 @@
     var setPg = function (i) {
       j.kahf.page = i;
       var p = 293 + i;
-      if (pg) pg.textContent = A.T('Page') + ' ' + A.fmtN(p) + ' · ' + A.T('Juzʾ') + ' ' + A.fmtN(firstVerse(i) >= 75 ? 16 : 15);
+      if (pg)
+        pg.textContent =
+          A.T('Page') + ' ' + A.fmtN(p) + ' · ' + A.T('Juzʾ') + ' ' + A.fmtN(firstVerse(i) >= 75 ? 16 : 15);
       A.save();
     };
     if (track) {
@@ -826,7 +884,16 @@
     }
     var have = [];
     try {
-      have = JSON.parse(A.N.call('audioHave', JSON.stringify(list.map(function (f) { return f.n; }))) || '[]');
+      have = JSON.parse(
+        A.N.call(
+          'audioHave',
+          JSON.stringify(
+            list.map(function (f) {
+              return f.n;
+            })
+          )
+        ) || '[]'
+      );
     } catch (e) {}
     if (have.length < list.length) {
       K.playing = false;
@@ -838,7 +905,15 @@
       });
       return;
     }
-    A.N.call('audioPlay', JSON.stringify(list.map(function (f) { return f.n; })), 1);
+    A.N.call(
+      'audioPlay',
+      JSON.stringify(
+        list.map(function (f) {
+          return f.n;
+        })
+      ),
+      1
+    );
     paintAu();
   }
   function webNext() {
@@ -887,7 +962,14 @@
   }
   A.acts['kf-play'] = function () {
     if (K.playing) stopKahf();
-    else playFrom(K.verse && K.verse < 110 ? K.verse : (window.KAHF.pages[J().kahf.page || 0] || {}).lines ? firstVerse(J().kahf.page || 0) : 1);
+    else
+      playFrom(
+        K.verse && K.verse < 110
+          ? K.verse
+          : (window.KAHF.pages[J().kahf.page || 0] || {}).lines
+            ? firstVerse(J().kahf.page || 0)
+            : 1
+      );
   };
   A.acts['kf-from'] = function (el) {
     A.closeSheets();
@@ -976,9 +1058,11 @@
       'A card on screen when the last hour begins': 'بطاقة على الشاشة حين تبدأ آخر ساعة',
       'These are for the night and day of Jumuʿah': 'هذه لليلة الجمعة ويومها',
       'Reading Sūrat al-Kahf on Jumuʿah': 'قراءة سورة الكهف يوم الجمعة',
-      'al-Ḥākim and al-Bayhaqī · Ṣaḥīḥ (al-Albānī, Ṣaḥīḥ al-Jāmiʿ 6470)': 'الحاكم والبيهقي · صحيح (الألباني، صحيح الجامع ٦٤٧٠)',
+      'al-Ḥākim and al-Bayhaqī · Ṣaḥīḥ (al-Albānī, Ṣaḥīḥ al-Jāmiʿ 6470)':
+        'الحاكم والبيهقي · صحيح (الألباني، صحيح الجامع ٦٤٧٠)',
       'And its first ten verses': 'وعشر آيات من أولها',
-      'Ibn al-Qayyim, in Zād al-Maʿād, held these two the strongest of the opinions on the hour.': 'ورجّح ابن القيم في زاد المعاد هذين القولين على سائر الأقوال في الساعة.',
+      'Ibn al-Qayyim, in Zād al-Maʿād, held these two the strongest of the opinions on the hour.':
+        'ورجّح ابن القيم في زاد المعاد هذين القولين على سائر الأقوال في الساعة.',
       Mushaf: 'المصحف',
       Verses: 'الآيات',
       'Listen · Mishary al-ʿAfāsī': 'استمع · مشاري العفاسي',
@@ -998,13 +1082,16 @@
       'Seek the hour of response with duʿāʾ before Maghrib': 'تحرَّ ساعة الإجابة بالدعاء قبل المغرب',
       'Ṣalāt al-Jumuʿah': 'صلاة الجمعة',
       'On a break from ṣalāh': 'في فترة انقطاع عن الصلاة',
-      'Not required of women: pray it with the imam, or Ẓuhr at home': 'لا تجب على المرأة: صلّيها مع الإمام، أو صلّي الظهر في البيت',
+      'Not required of women: pray it with the imam, or Ẓuhr at home':
+        'لا تجب على المرأة: صلّيها مع الإمام، أو صلّي الظهر في البيت',
       'Two rakʿahs after the khuṭbah, in congregation, in place of Ẓuhr': 'ركعتان بعد الخطبة في جماعة، بدل الظهر',
       'Who must attend Jumuʿah': 'على من تجب الجمعة',
       'The ruling, in summary': 'الحكم باختصار',
-      'Required of every adult Muslim man who is resident and well; not required of a woman, a child, or one who is ill': 'تجب على كل مسلم بالغ مقيم صحيح، ولا تجب على المرأة ولا الصبي ولا المريض',
+      'Required of every adult Muslim man who is resident and well; not required of a woman, a child, or one who is ill':
+        'تجب على كل مسلم بالغ مقيم صحيح، ولا تجب على المرأة ولا الصبي ولا المريض',
       'Abū Dāwūd 1067 · Ṣaḥīḥ (al-Albānī)': 'أبو داود ١٠٦٧ · صحيح (الألباني)',
-      'A woman who prays Jumuʿah with the imam need not pray Ẓuhr; Ibn al-Mundhir reports the scholars agreed on this. A traveller and one who is ill pray Ẓuhr.': 'المرأة إذا صلّت الجمعة مع الإمام أجزأتها عن الظهر، ونقل ابن المنذر الإجماع على ذلك. والمسافر والمريض يصلّيان الظهر.',
+      'A woman who prays Jumuʿah with the imam need not pray Ẓuhr; Ibn al-Mundhir reports the scholars agreed on this. A traveller and one who is ill pray Ẓuhr.':
+        'المرأة إذا صلّت الجمعة مع الإمام أجزأتها عن الظهر، ونقل ابن المنذر الإجماع على ذلك. والمسافر والمريض يصلّيان الظهر.',
       'Learn the Jumuʿah prayer': 'تعلّم صلاة الجمعة'
     });
 })();

@@ -61,7 +61,9 @@
         ];
     var disc = dawn ? ['#ffffff', '#fff3c9', '#ffd889'] : ['#ffeede', '#ffae86', '#e2654f'];
     var s =
-      '<svg class="scene" viewBox="0 0 180 ' + (HZ + 10) + '" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><defs>' +
+      '<svg class="scene" viewBox="0 0 180 ' +
+      (HZ + 10) +
+      '" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><defs>' +
       '<linearGradient id="' +
       g +
       's" x1="0" y1="0" x2="0" y2="1">' +
@@ -657,7 +659,9 @@
     /* the basmalah keeps its own line; the āyāt after it flow on */
     var keepBsm = function (x) {
       var p = String(x || '').split('\n');
-      return p.length > 1 && /^(بِسْمِ|In the Name of Allah,.*Most Merciful\.$)/.test(p[0].trim()) ? p[0] + '\n' + p.slice(1).join(' ') : p.join(' ');
+      return p.length > 1 && /^(بِسْمِ|In the Name of Allah,.*Most Merciful\.$)/.test(p[0].trim())
+        ? p[0] + '\n' + p.slice(1).join(' ')
+        : p.join(' ');
     };
     var ar = keepBsm(it.ar),
       en = keepBsm(it.en),
@@ -839,7 +843,9 @@
           return (
             (g.bsm ? '<div class="bsm">' + esc(window.DATA.basmala) + '</div>' : '') +
             (g.s === 1 && g.v[0] && g.v[0][0] === 1
-              ? '<p class="ayat bsm1"><span class="ay">' + esc(g.v[0][1]) + '</span> <span class="am" aria-label="āyah 1">۝١</span></p>'
+              ? '<p class="ayat bsm1"><span class="ay">' +
+                esc(g.v[0][1]) +
+                '</span> <span class="am" aria-label="āyah 1">۝١</span></p>'
               : '') +
             '<p class="ayat">' +
             g.v

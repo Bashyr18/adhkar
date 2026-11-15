@@ -252,7 +252,8 @@
     'Every recitation is on this computer': 'كل التلاوات على هذا الحاسوب',
     'Adhkār booklets and the prayer timetable': 'كتيّبات الأذكار وجدول مواقيت الصلاة',
     'Plan a fast': 'انوِ صيامًا',
-    'This day has not come yet, so it cannot be logged. Plan it, and you will be reminded at Maghrib the evening before, to make your intention and prepare for suhūr.': 'لم يأتِ هذا اليوم بعد، فلا يُسجَّل. خطِّط له، وسيأتيك تذكير عند مغرب الليلة السابقة لتنوي وتستعد للسحور.',
+    'This day has not come yet, so it cannot be logged. Plan it, and you will be reminded at Maghrib the evening before, to make your intention and prepare for suhūr.':
+      'لم يأتِ هذا اليوم بعد، فلا يُسجَّل. خطِّط له، وسيأتيك تذكير عند مغرب الليلة السابقة لتنوي وتستعد للسحور.',
     'Remove the plan': 'إزالة الخطة',
     'Planned. A reminder comes at Maghrib the evening before': 'تمّت الخطة. يأتيك تذكير عند مغرب الليلة السابقة',
     'Planned. It shows on Today the evening before': 'تمّت الخطة. تظهر في اليوم مساء الليلة السابقة',
@@ -1499,7 +1500,8 @@
       function (m) {
         return 'تنتهي أذكار الصباح قبل الظهر، وتبدأ أذكار المساء عند العصر، ' + m[1] + '.';
       }
-    ],    [
+    ],
+    [
       /^The evening adhkār begin at ʿAṣr, (.+)\.$/,
       function (m) {
         return 'تبدأ أذكار المساء عند العصر، ' + m[1] + '.';

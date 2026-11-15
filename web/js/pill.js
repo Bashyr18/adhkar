@@ -7,9 +7,9 @@
   'use strict';
   var A = window.A;
   if (!A) return;
-  var S = 2, /* drawn at twice the size, for sharp edges on any screen scale */
+  var S = 2 /* drawn at twice the size, for sharp edges on any screen scale */,
     W = 340,
-    M = 18, /* room for the shadow */
+    M = 18 /* room for the shadow */,
     HEAD = 68,
     ROW = 56,
     PADB = 10;
@@ -24,13 +24,14 @@
   var ready = null;
   function fonts() {
     if (ready) return ready;
-    ready = document.fonts && document.fonts.load
-      ? Promise.all([
-          document.fonts.load('700 18px Quicksand'),
-          document.fonts.load('600 12px Quicksand'),
-          document.fonts.load('400 16px Amiri', 'الظهر')
-        ]).catch(function () {})
-      : Promise.resolve();
+    ready =
+      document.fonts && document.fonts.load
+        ? Promise.all([
+            document.fonts.load('700 18px Quicksand'),
+            document.fonts.load('600 12px Quicksand'),
+            document.fonts.load('400 16px Amiri', 'الظهر')
+          ]).catch(function () {})
+        : Promise.resolve();
     return ready;
   }
   function tok(cs, n, fb) {
@@ -176,7 +177,8 @@
     }
     var name = live ? fr.title : info.name,
       nw = txt(c, fit(c, name, nf, compact ? 120 : 150), x0, base, nf, live ? T.gold2 : T.t1, false, ar);
-    if (!live && info.nameAr && !ar) txt(c, info.nameAr, x0 + nw + 7, base - 1, (compact ? '400 13.5px' : '400 15px') + ' Amiri', T.gold2, false, ar);
+    if (!live && info.nameAr && !ar)
+      txt(c, info.nameAr, x0 + nw + 7, base - 1, (compact ? '400 13.5px' : '400 15px') + ' Amiri', T.gold2, false, ar);
     /* the countdown itself is set by the Windows app, on the name's line */
     var out = { rows: [], cd: { x: ar ? W + 2 * M - right : right, base: base, ar: ar } };
     /* the day, opened: the Friday hours, the morning and evening adhkār, a fast you planned */
@@ -199,7 +201,16 @@
         badge(c, ar ? W + 2 * M - rx : rx, ry, 15, r.icon, T, r.frac, r.done);
         var tx = M + 16 + 32 + 14,
           lim = W - 32 - 14 - 16 - (r.right ? 86 : 20);
-        txt(c, fit(c, r.title, '700 13.5px Quicksand', lim), tx, ry - 2, '700 13.5px Quicksand', r.live ? T.gold2 : T.t1, false, ar);
+        txt(
+          c,
+          fit(c, r.title, '700 13.5px Quicksand', lim),
+          tx,
+          ry - 2,
+          '700 13.5px Quicksand',
+          r.live ? T.gold2 : T.t1,
+          false,
+          ar
+        );
         txt(c, fit(c, r.sub || '', '600 11.5px Quicksand', lim), tx, ry + 15, '600 11.5px Quicksand', T.t3, false, ar);
         if (r.right) {
           c.font = '700 11px Quicksand';
@@ -255,7 +266,11 @@
         live = !!(info.friday && info.friday.live),
         a = paint(info, false),
         b = paint(info, true),
-        at = atlas(info.lang === 'ar', live ? tok(cs, '--gold2', '#f1d59e') : tok(cs, '--t1', '#f5f0e7'), info.size === 'compact' ? 16.5 : 20);
+        at = atlas(
+          info.lang === 'ar',
+          live ? tok(cs, '--gold2', '#f1d59e') : tok(cs, '--t1', '#f5f0e7'),
+          info.size === 'compact' ? 16.5 : 20
+        );
       a.cd.top = a.cd.base - at.b;
       return {
         s: S,
