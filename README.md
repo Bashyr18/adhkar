@@ -1,360 +1,263 @@
 <div align="center">
 
-# Adhkār
+# Adhkār · أذكار
 
-**Remembrance for every moment.**
-A free Islamic app for Android and Windows: adhkār, prayer, Jumuʿah, Ramaḍān and the Hijri year, built as ṣadaqah jāriyah.
-No ads, no account, no tracking.
+**Remembrance for every moment: adhkār, prayer, Jumuʿah, Ramaḍān and the Hijri year.**<br>
+On Android and Windows. Works offline. No ads, no account, no tracking. Free and open source, built as ṣadaqah jāriyah.
 
-[![Download for Android](https://img.shields.io/badge/Download-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar.apk)
-[![Download for Windows](https://img.shields.io/badge/Download-Windows-0078D4?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar-Windows.exe)
-[![Read the illustrated guide](https://img.shields.io/badge/Read-the%20guide-d9b26f?style=for-the-badge&logo=readthedocs&logoColor=1a1206)](https://bashyr18.github.io/adhkar/guide/)
-[![The maker on LinkedIn](https://img.shields.io/badge/LinkedIn-the%20maker-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/bashirbadmus/)
+[![Download](https://img.shields.io/github/v/release/Bashyr18/adhkar?label=download&color=c79c52)](https://github.com/Bashyr18/adhkar/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/Bashyr18/adhkar/total?label=downloads&color=1f7fae)](https://bashyr18.github.io/adhkar/guide/#get)
+[![Tests](https://github.com/Bashyr18/adhkar/actions/workflows/test.yml/badge.svg)](https://github.com/Bashyr18/adhkar/actions/workflows/test.yml)
+[![Licence: GPL-3.0](https://img.shields.io/badge/licence-GPL--3.0-6b5a3e)](LICENSE)
 
-<br>
+[![Download for Android](https://img.shields.io/badge/Android-download%20APK-3ddc84?logo=android&logoColor=white)](https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar.apk)
+[![Download for Windows](https://img.shields.io/badge/Windows-download%20EXE-0078d4?logo=windows&logoColor=white)](https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar-Windows.exe)
+[![The illustrated guide](https://img.shields.io/badge/the%20guide-read%20online-c79c52)](https://bashyr18.github.io/adhkar/guide/)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Bashir%20Badmus-0a66c2?logo=linkedin&logoColor=white)](https://www.linkedin.com/in/bashirbadmus/)
 
-<img src="docs/guide/shots/dark/today.webp" width="200" alt="Today, in dark">&nbsp;
-<img src="docs/guide/shots/light/tracker.webp" width="200" alt="The Tracker, in light">&nbsp;
-<img src="docs/guide/shots/ramadan/today.webp" width="200" alt="Today during Ramaḍān">&nbsp;
-<img src="docs/guide/shots/ar/reader.webp" width="200" alt="The reader, in Arabic">
+[**Download**](#download) · [**Is it safe?**](#is-it-safe) · [**The guide**](#the-illustrated-guide) · [**How to use it**](#how-to-use-it) · [**Build it yourself**](#build-it-yourself) · [**The maker**](#the-maker)
 
-<sub>Today · the Tracker in light · Ramaḍān mode · the whole app in Arabic</sub>
+<img src="docs/screens/hero.webp" alt="Adhkār on a Windows computer, with the same day on a phone in front of it" width="100%">
 
 </div>
 
----
-
 ## Contents
 
-- [What it does](#what-it-does)
-- [Install](#install): [Android](#android) · [Windows](#windows)
+- [What it is](#what-it-is)
+- [Download](#download) · [Is it safe?](#is-it-safe) · [Updates](#updates)
 - [The illustrated guide](#the-illustrated-guide)
-- [A tour of the app](#a-tour-of-the-app): [Today](#today) · [Adhkār](#adhkār-and-the-reader) · [Counting](#counting-on-your-fingers) · [Tracker](#the-tracker) · [Ṣalāh](#ṣalāh) · [Duʿāʾ](#duʿāʾ) · [Ramaḍān](#ramaḍān) · [Jumuʿah](#jumuʿah) · [You and settings](#you-and-settings) · [Widgets](#on-your-home-screen) · [Themes and Arabic](#themes-and-arabic)
-- [Gestures](#gestures)
-- [Privacy and sources](#privacy-and-sources)
-- [For developers](#for-developers)
-- [Made by](#made-by)
+- [A look inside](#a-look-inside)
+- [How to use it](#how-to-use-it)
+- [Sources and privacy](#sources-and-privacy)
+- [Build it yourself](#build-it-yourself) · [Tests](#tests) · [Where things live](#where-things-live) · [Contributing](#contributing)
+- [The maker](#the-maker) · [Licence](#licence)
 
-## What it does
+## What it is
+
+One calm place for the whole day's remembrance. Today leads with what is due now: the morning adhkār after Fajr, the evening adhkār from ʿAṣr, the next prayer, and the times when duʿāʾ is answered. Every collection of Ḥiṣn al-Muslim is there, read in a reader set like a muṣḥaf, counted on your fingers as the Sunnah teaches.
+
+- **Religious text from verified sources only.** Arabic word for word from Ḥiṣn al-Muslim and the Qurʾān; translations labelled "Translation", verbatim; every hadith with its grade.
+- **The Sunnah shapes the design.** The app keeps the pace while your right hand keeps the count. The basmalah always stands on its own line. No music: only the human adhān.
+- **Through the week and the year.** A Jumuʿah mode from Thursday Maghrib with Sūrat al-Kahf, a Ramaḍān mode for the whole month, and the Hijri calendar with its Sunnah fasts.
+- **Private.** Prayer times are worked out on the device. Nothing needs an account, and nothing leaves the device unless you choose to download a recitation.
+
+## Download
 
 | | |
 |---|---|
-| **Remembrance** | Morning and evening adhkār, after ṣalāh, sleep, waking, the night, the adhān, worry and distress, and everyday duʿāʾs. |
-| **Prayer** | Prayer times calculated on the phone, the qibla, Ḍuḥā, qiyām, make-up prayers, iqāmah times, silence during ṣalāh, and a step-by-step guide to the prayer. |
-| **Practice** | A Tracker with the numbers the Sunnah sets, counting on the fingers with a guided pace, a duʿāʾ journal, and a quiz that brings back what you miss. |
-| **Jumuʿah** | A Friday mode from Thursday Maghrib to Friday Maghrib: its Sunnahs with their evidence, the two hours of response with an alert, and Sūrat al-Kahf to read and listen to. |
-| **On the phone** | Home-screen widgets, reminders at the minute, and the whole app in English or Arabic. |
+| **Android** 8 or newer | [**Download `Adhkar.apk`**](https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar.apk) (about 4 MB), open it on the phone and allow the install. |
+| **Windows** 10 or 11 | [**Download `Adhkar-Windows.exe`**](https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar-Windows.exe) (about 4 MB) and open it. It runs straight away with nothing to unpack, and installs itself to Start from **This computer** when you want it to. |
 
-Every Arabic text comes from a verified source, word for word. Translations are labelled "Translation", and every hadith carries its grade.
+Every file, with its SHA-256 checksum, is on the [releases page](https://github.com/Bashyr18/adhkar/releases/latest). The [guide](https://bashyr18.github.io/adhkar/guide/#install) shows each install screen, step by step.
 
-## Install
+### Is it safe?
 
-### Android
+Adhkār comes from this page, not an app store, so Android and Windows ask you to confirm before installing it. That warning appears for **every** app from outside a store, and for every new Windows program without a paid signing certificate. It is not a finding about Adhkār.
 
-1. On your Android phone (Android 8 or later), download **[Adhkar.apk](https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar.apk)**.
-2. Open the file. If your phone asks, allow installing apps from this source.
-3. Open Adhkār, choose your city or use your location, and you are ready.
-4. To update later, download the newest APK the same way. It installs over the old one and keeps everything you have recorded.
+- **Open source:** every line is here to read.
+- **Nothing taken:** no ads, no analytics, no account. It never reads your contacts, messages or files.
+- **Check it yourself:** compare the file's SHA-256 with the one on the release page, let Google Play Protect scan it, or upload it to [VirusTotal](https://www.virustotal.com/).
+- **On Android:** Android asks once to allow your browser to install apps, then **Install**. If Play Protect offers to scan it, let it; if it says it doesn't recognise the developer, choose **Install anyway**.
+- **On Windows:** if Windows says it protected your PC, click **More info**, check the name reads `Adhkar-Windows.exe`, then **Run anyway**.
 
-Every version is listed on the [releases page](https://github.com/Bashyr18/adhkar/releases), with what changed.
+<a href="https://bashyr18.github.io/adhkar/guide/#install"><img src="docs/screens/guide-install.webp" alt="Installing, step by step, in the guide: the screens you will see on a real phone" width="100%"></a>
 
-### Windows
+### Updates
 
-<p align="center"><img src="docs/readme/desk-today.webp" width="760" alt="Adhkār for Windows: Today, with the rail"></p>
-
-1. On Windows 10 or 11, download **[Adhkar-Windows.exe](https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar-Windows.exe)**. It is one file, with nothing else to install.
-2. Open it. Windows may say **"Windows protected your PC"** because the app is not yet signed: choose **More info › Run anyway**.
-3. To keep it, open **This computer** in the rail and choose **Install**: Adhkār joins Start and your desktop, for you only, with no administrator needed. Remove it any time from Settings › Apps; your record stays.
-
-What a computer adds:
-
-- **The whole day at a glance:** Today opens with the day from Fajr to the next Fajr as a sky, each prayer marked, the times of the morning and evening adhkār, Ḍuḥā and the last third laid on it, and now marked. Click any part to open it.
-- **The reader with its session beside it:** every remembrance of the session in a list with its count, the one you are on marked, any one a click away.
-- **A rail with the sky of the hour** and today's Hijri and calendar dates, and **Ctrl K** to reach any remembrance, hadith, page or setting.
-- **The keyboard:** Space taps the counting circle and holding it pauses, so counting on the fingers works as on the phone. ← and → move through the reader; F1 lists every shortcut.
-- **Layouts made for the screen:** Today, Ṣalāh, the Tracker and You in two columns, and the reader at a comfortable width.
-- **Print and PDF:** the morning and evening adhkār as a booklet with every source, and the month's prayer timetable, on A4.
-- **Reminders from the tray**, with the takbīr of the adhān.
-- **The pill:** a small capsule at the top of the screen, like a notch, that keeps the next prayer counting down while you work, even with Adhkār minimised. Rest the pointer on it to open the day: the Friday hours, the morning and evening adhkār, a fast you planned. Put it at the top, in a corner or anywhere, and choose its size and what it shows.
-- **Learn the prayer as a spread:** the posture large on one side, its words and evidence beside it.
-- **Backups:** one a day for 30 days, restorable, and a backup file dropped on the window comes in.
-
-<p align="center"><img src="docs/readme/desk-print.webp" width="380" alt="Print and PDF">&nbsp;<img src="docs/readme/desk-reader.webp" width="380" alt="The reader on a computer"></p>
-
-Phone and computer syncing over home Wi-Fi comes next. Read [the plan](docs/windows-plan.md).
+Open **You › About** and tap **Check now**, or turn on **Check once a week**. When a new version is out, a small gold **Update** key appears on Today (and in the rail on a computer). The file comes from the release page and is checked against its SHA-256 before anything changes; on Android, Android itself refuses an update not signed with the same key. Nothing is checked unless you ask. A copy from Google Play is updated by Play.
 
 ## The illustrated guide
 
-<p align="center"><a href="https://bashyr18.github.io/adhkar/guide/"><img src="docs/readme/guide-cover.webp" width="720" alt="The cover of the illustrated guide"></a></p>
+<a href="https://bashyr18.github.io/adhkar/guide/"><img src="docs/screens/guide.webp" alt="The illustrated guide to Adhkār, open in a browser" width="100%"></a>
 
-**[Open the guide](https://bashyr18.github.io/adhkar/guide/)**: every page of the app, step by step, in a magazine-style web page that works on a phone or a computer.
+**[Open the guide →](https://bashyr18.github.io/adhkar/guide/)**
 
-- **Numbered markers** on each screen, matched to the steps beside it.
-- **Walk me through** on any screen: it zooms to each part in turn and reads the step; **Take the guided tour** on the cover runs through the whole app.
-- **Dark or light, English or Arabic:** switch the guide's theme, and see each screen in Arabic where it exists.
-- **Tap any screen** to see it full size, then swipe or use the arrow keys to browse them all.
+Every screen of the app, on the phone and the computer, with each feature marked and explained step by step.
 
-## A tour of the app
-
-### Today
-
-<table><tr>
-<td width="240"><img src="docs/guide/shots/dark/today.webp" width="230" alt="Today"></td>
-<td>
-
-Everything that matters right now.
-
-1. **The sky card** shows the next prayer, a live countdown and the sun crossing the day. Today's five times sit beneath.
-2. **Your place:** tap the location chip to change your city. Times are calculated on your phone, offline.
-3. **Now, or Next** shows the one thing to do now, with a button to begin.
-4. **Log your prayers:** tap a circle once you have prayed.
-5. **The next time of acceptance**, from the Sunnah, live.
-
-</td>
-</tr></table>
-
-### Adhkār and the reader
-
-<p align="center">
-<img src="docs/guide/shots/dark/adhkar.webp" width="230" alt="The Adhkār library">&nbsp;
-<img src="docs/guide/shots/dark/reader.webp" width="230" alt="The reader">
-</p>
-
-1. **Morning and Evening** sit at the top and show which is due now.
-2. **Collections:** after ṣalāh, before sleep, the night, waking up and more.
-3. **Search** in English or Arabic, with or without ḥarakāt.
-4. **The reader** shows one remembrance at a time: the Arabic, then transliteration and translation.
-5. **Listen**, **save**, **share**, or tap the eye to **memorise** by hiding the words.
-
-### Counting on your fingers
-
-<table><tr>
-<td width="240"><img src="docs/guide/shots/dark/counting.webp" width="230" alt="Learning to count on the fingers"></td>
-<td>
-
-The Prophet ﷺ counted tasbīḥ on the fingers of his right hand, so the app never counts for you. It keeps the pace while you count.
-
-1. **Tap** the circle to begin, and count on your fingers.
-2. **Tap again** if you finish a count sooner; the pace follows you.
-3. **Hold** to pause; hold again to carry on.
-4. **Confirm** at the end; nothing is recorded until you say you have finished.
-
-A one-minute practice teaches this the first time you open the app.
-
-</td>
-</tr></table>
-
-### The Tracker
-
-<table><tr>
-<td width="240"><img src="docs/guide/shots/dark/tracker.webp" width="230" alt="The Tracker"></td>
-<td>
-
-Free remembrance, with the numbers the Sunnah sets.
-
-1. **Choose a phrase**, or add your own with the plus.
-2. **The gold tag** gives its Sunnah number; tap the line beneath for the hadith.
-3. **The circle:** tap to begin a round and count on your fingers.
-4. **Round size:** 100, or choose 33, 99 or 1,000.
-5. **Today** shows each Sunnah number filling as you go; the chart button opens your history.
-
-</td>
-</tr></table>
-
-### Ṣalāh
-
-<p align="center">
-<img src="docs/guide/shots/dark/salah.webp" width="230" alt="Prayer times">&nbsp;
-<img src="docs/guide/shots/dark/learn-fajr.webp" width="230" alt="Learning the prayer">
-</p>
-
-1. **Times for any day**, with the Hijri date and a countdown to the next prayer.
-2. **Reminders:** each bell turns a prayer's reminder on or off, with the takbīr from Masjid an-Nabawī.
-3. **Learn the prayer**, step by step from Fajr to Witr. Each act is marked as a pillar, an obligation or a sunnah, with its evidence.
-4. **The qibla**, by compass or by the sun.
-5. Also here: the month's timetable, the night, Ḍuḥā and make-up prayers.
-
-### Duʿāʾ
-
-<table><tr>
-<td width="240"><img src="docs/guide/shots/dark/journal.webp" width="230" alt="The duʿāʾ journal"></td>
-<td>
-
-1. **My duʿāʾs:** write what you are asking for, kept private, in any language.
-2. **The next time of answer**, with gentle reminders at those times.
-3. When Allah answers, tap **Answered** and note how.
-4. **Small deeds:** light acts with heavy rewards, each with its hadith.
-
-</td>
-</tr></table>
-
-### Ramaḍān
-
-<p align="center">
-<img src="docs/guide/shots/ramadan/today.webp" width="230" alt="Today in Ramaḍān">&nbsp;
-<img src="docs/guide/shots/ramadan/month.webp" width="230" alt="The Ramaḍān page">
-</p>
-
-For the whole month the app changes with it, by itself.
-
-1. **Lanterns and a night-indigo palette** across every tab.
-2. **Ifṭār counting down**, and after Maghrib the end of suhūr.
-3. **Fasts** fill in day by day; tap a day to change it.
-4. **Tarāwīḥ**, a **khatm** of the Qurʾān by juzʾ, and **the last ten nights**.
-5. Before the month, a countdown by the Umm al-Qurā calendar.
-
-### Jumuʿah
-
-<p align="center">
-<img src="docs/guide/shots/friday/today.webp" width="230" alt="Today on Friday">&nbsp;
-<img src="docs/guide/shots/friday/jumuah.webp" width="230" alt="The Jumuʿah page">&nbsp;
-<img src="docs/guide/shots/friday/kahf.webp" width="230" alt="Sūrat al-Kahf">
-</p>
-
-From Maghrib on Thursday to Maghrib on Friday the app wears an emerald night with gold arches.
-
-1. **Today leads with the day:** what comes next (the khuṭbah, the last hour, Fajr), al-Kahf and ṣalawāt.
-2. **The two hours of response:** from when the imam sits until the prayer ends (Muslim 853), and the last hour before Maghrib (Abū Dāwūd 1048). When the last hour begins, a card can appear over other apps.
-3. **The prayer:** Jumuʿah in place of Ẓuhr for a brother; for a sister, who is not required to attend, Jumuʿah with the imam or Ẓuhr at home.
-4. **The Sunnahs of the day,** each with its narration and grade: ghusl, siwāk and perfume, going early, listening in silence, abundant ṣalawāt, al-Kahf.
-5. **Sūrat al-Kahf** as printed in the Madinah Muṣḥaf, page by page; or verse by verse with The Clear Quran. Recited by Mishary al-ʿAfāsī, the reciting verse lit and the page turning with it.
-
-A day that has not come can't be logged as fasted: tap it in the calendar to **plan the fast**, with a reminder at Maghrib the evening before. And under You, **Print and PDF** puts the adhkār booklet and the timetable on paper from the phone too.
-
-### You and settings
-
-<table><tr>
-<td width="240"><img src="docs/guide/shots/dark/profile.webp" width="230" alt="Your profile"></td>
-<td>
-
-1. **Your figures:** streak, remembrances, sessions and active days, compared with no one.
-2. **Insights:** your remembrance by day, by time and by phrase.
-3. **Settings**, under You: appearance, reading, prayer times, reminders, widgets, and backup.
-4. **Backup and data:** export, import, or erase everything.
-
-</td>
-</tr></table>
-
-### On your home screen
-
-<p align="center"><img src="docs/guide/shots/extra/widgets.webp" width="420" alt="The home-screen widgets"></p>
-
-- **The prayer widget:** the next prayer with a live countdown. Tap a prayer you have prayed to log it.
-- **The Tracker widget:** tap **Finished 100**, then again to confirm, after a round on your fingers.
-- **Add them:** long-press your home screen, then Widgets › Adhkār. There is also a quick settings tile and app shortcuts.
-
-### Themes and Arabic
-
-<p align="center">
-<img src="docs/guide/shots/dark/today.webp" width="180" alt="Dark">&nbsp;
-<img src="docs/guide/shots/light/today.webp" width="180" alt="Light">&nbsp;
-<img src="docs/guide/shots/ar/today.webp" width="180" alt="Arabic">
-</p>
-
-- **Auto, Dark or Light** from the palette button on Today. Auto follows your phone.
-- **Five accents:** gold, emerald, sapphire, rose and pearl.
-- **The whole app in Arabic:** You › Appearance › Language › العربية. The layout turns right to left, and notifications and widgets follow.
-
-## Gestures
-
-| Gesture | What it does |
+| | |
 |---|---|
-| Tap the circle | Moves on at once when you finish a count early. |
-| Hold the circle | Pauses; hold again to carry on. |
-| Swipe sideways | Moves between Today, Adhkār, Tracker, Ṣalāh and You. |
-| Swipe from the edge | Goes back. |
+| **Thirteen chapters** | From Today to the home-screen widgets, in the order you meet them. |
+| **Guided tours** | Press **Walk me through** on any screen and the guide shows each step in turn. |
+| **Phone and computer** | Each chapter shows the phone screen and, beneath it, the same page laid out on a computer. |
+| **Day, night and Arabic** | The same pages in the light theme, the dark theme and in العربية. |
+| **Made for your phone too** | On a phone the screen stays pinned while its steps scroll beneath it; screens and steps swipe. |
 
-## Privacy and sources
+## A look inside
 
-- **Private:** no account, no analytics. Everything stays on your phone.
-- **Offline:** prayer times are calculated on the phone. The internet is used only for recitations you choose to download.
-- **Sources:** Arabic adhkār from Ḥiṣn al-Muslim; translations verbatim from sunnah.com and The Clear Quran; every hadith with its grade from sunnah.com. Sūrat al-Kahf's text, page layout and page fonts from the Quran.com API and the King Fahd Complex (QCF v2); its recitation from everyayah.com. Details are in [Content](#content) and [NOTICE.md](NOTICE.md).
+### Your day
 
----
+<table>
+<tr>
+<td width="33%"><img src="docs/guide/shots/dark/today.webp" alt="Today"></td>
+<td width="33%"><img src="docs/guide/shots/dark/reader.webp" alt="The reader"></td>
+<td width="33%"><img src="docs/guide/shots/dark/tracker.webp" alt="The Tracker"></td>
+</tr>
+<tr>
+<td><b>Today</b><br>The next prayer on the day's sky, what is due now, your prayers and the next time of acceptance.</td>
+<td><b>The reader</b><br>One remembrance at a time, set like a muṣḥaf, with its transliteration, translation and source.</td>
+<td><b>The Tracker</b><br>Free remembrance with the numbers the Sunnah sets, counted on your fingers.</td>
+</tr>
+</table>
 
-## For developers
+### Prayer
 
-### Principles
+<table>
+<tr>
+<td width="33%"><img src="docs/guide/shots/dark/salah.webp" alt="Ṣalāh"></td>
+<td width="33%"><img src="docs/guide/shots/dark/qibla.webp" alt="The qibla"></td>
+<td width="33%"><img src="docs/guide/shots/dark/learn-fajr.webp" alt="Learn the prayer"></td>
+</tr>
+<tr>
+<td><b>Ṣalāh</b><br>Prayer times anywhere, offline; Ḍuḥā and the last third; make-up prayers and iqāmah.</td>
+<td><b>The qibla</b><br>A compass that turns to the Kaʿbah, or the sun's direction when the compass can't be trusted.</td>
+<td><b>Learn the prayer</b><br>Step by step, as the Prophet ﷺ prayed, with the words and the evidence for each posture.</td>
+</tr>
+</table>
 
-Read these before changing anything. They are why the app is shaped the way it is.
+### Jumuʿah and Ramaḍān
 
-1. **Religious text is never typed by hand.** Arabic and translations come from verified sources, through the build scripts in `tools/`, verbatim. See [Content](#content).
-2. **Translations are labelled "Translation" and are verbatim:** sunnah.com for adhkār and hadith, The Clear Quran for the Qurʾān. Hadith carry their grade; only authentic narrations are used.
-3. **The Sunnah shapes the design.** For example, dhikr is counted on the fingers by default, so the app keeps the pace rather than counting for you.
-4. **Audio plays exactly what is on screen.** Where no recording of the exact words exists, the app says so.
-5. **Prove it works.** Every change runs the content tests and the interface tests; screens are checked on a device.
+<table>
+<tr>
+<td width="33%"><img src="docs/guide/shots/friday/today.webp" alt="Today on a Friday"></td>
+<td width="33%"><img src="docs/guide/shots/friday/kahf.webp" alt="Sūrat al-Kahf"></td>
+<td width="33%"><img src="docs/guide/shots/ramadan/today.webp" alt="Today in Ramaḍān"></td>
+</tr>
+<tr>
+<td><b>Every Friday</b><br>From Thursday Maghrib: its Sunnahs with their evidence, and the two hours of response.</td>
+<td><b>Sūrat al-Kahf</b><br>On the Madinah muṣḥaf's own pages, with the translation and Mishary al-ʿAfāsī's recitation.</td>
+<td><b>Ramaḍān, all month</b><br>Suḥūr and ifṭār, tarāwīḥ, the khatm and the last ten nights.</td>
+</tr>
+</table>
 
-### Layout
+### On the computer
+
+<table>
+<tr>
+<td width="50%"><img src="docs/guide/shots/desk/today.webp" alt="Today on a computer, with the day band"></td>
+<td width="50%"><img src="docs/guide/shots/desk/tracker.webp" alt="The Tracker on a computer"></td>
+</tr>
+<tr>
+<td><b>The whole day in one line</b><br>The day band runs from Fajr to the next Fajr: the morning adhkār until Dhuhr, the evening from ʿAṣr, Ḍuḥā and the last third.</td>
+<td><b>Laid out for a big screen</b><br>Every page in deliberate columns: the counter with this week's real counts, today's numbers beside it.</td>
+</tr>
+<tr>
+<td><img src="docs/guide/shots/desk/reader.webp" alt="The reader with its session beside it"></td>
+<td><img src="docs/guide/shots/desk/print.webp" alt="Print and PDF"></td>
+</tr>
+<tr>
+<td><b>The session beside the reader</b><br>Every remembrance of the session in a list. Space counts; the arrow keys move; Ctrl K finds anything.</td>
+<td><b>Print and PDF</b><br>The adhkār as an A4 booklet with every source, and the month's prayer timetable, white to the edge.</td>
+</tr>
+</table>
+
+Also on Windows: **the pill**, a small capsule at the top of the screen like a notch that keeps the next prayer counting down while you work, even with the app minimised; reminders from the tray with the takbīr; thirty days of backups; and text size from 90% to 150%.
+
+### By day, by night, and in Arabic
+
+<img src="docs/screens/themes.webp" alt="Today in light, the reader at night, Today in Arabic, Ramaḍān and Jumuʿah" width="100%">
+
+## How to use it
+
+A simple path for the first week. The [illustrated guide](https://bashyr18.github.io/adhkar/guide/) shows every step on every screen.
+
+1. **Install it** on your phone, your computer, or both ([Download](#download)).
+2. **Begin.** Choose English or العربية, tell it your name, and choose your city or use your location. Prayer times are worked out on the device from then on.
+3. **Learn to count on your fingers.** A practice of under a minute teaches the three gestures: tap to begin, tap to move on, hold to pause.
+4. **Follow Today.** After Fajr it leads with the morning adhkār; from ʿAṣr, the evening. Tap the play key to begin a session.
+5. **Log your prayers** by tapping each circle once you have prayed.
+6. **Ask, at the times of answer.** Write your duʿāʾs in **Duʿāʾ**; the app reminds you at the last third of the night and the last hour of Friday, if you wish.
+7. **Make it yours.** Under **You** are the theme and accent, Arabic size, prayer-time method, reminders, recitation downloads, backups and updates.
+
+## Sources and privacy
+
+- **Adhkār:** Arabic from the Ḥiṣn al-Muslim API (hisnmuslim.com); translation and transliteration from sunnah.com's Ḥiṣn al-Muslim.
+- **Qurʾān:** the Uthmani text from Quran.com; the translation is *The Clear Quran* (Dr Mustafa Khattab), used with permission. Sūrat al-Kahf's page layout and fonts from the Quran.com API and the King Fahd Complex (QCF v2).
+- **Hadith:** Arabic and the sunnah.com English from fawazahmed0/hadith-api, with grades as given on sunnah.com; only authentic narrations are used.
+- **Recitations:** Ḥiṣn al-Muslim recordings and Mishary al-ʿAfāsī (everyayah.com), downloaded only when you ask.
+- **Privacy:** no adverts, no analytics, no account. The only internet use is a recitation you choose to download, and the update check if you ask for it or turn it on.
+
+Details, with every font and asset's terms, are in [NOTICE.md](NOTICE.md).
+
+## Build it yourself
+
+**You need:**
+- JDK 17, Python 3, and Node 20 or newer;
+- the Android SDK with `build-tools/36.0.0` and `platforms/android-36`.
+
+```bash
+cd tools/.node && npm ci && cd ../..   # once: Prettier and jsdom at the versions in package-lock.json
+./build.sh                              # content, tests, bundle, then a signed dist/Adhkar.apk
+```
+
+`build.sh` runs, in order: the content builders, the content tests, the interface tests, the web bundle, then aapt2, javac, d8, zipalign and apksigner. It writes `dist/Adhkar.apk`, `dist/Adhkar.aab` for the Play Store (with `tools/.bin/bundletool.jar`; the bundle leaves out the self-update permission, since Play updates its own copies) and `dist/Adhkar.html`, the whole app in one file.
+
+The version lives in one place, [`VERSION`](VERSION): the first line is the name people see, the second the code Android compares. Raise both for every release.
+
+### Signing
+
+The first build creates a key in `keystore/`. That folder is private and is **never** committed. Every update must be signed with the same key (the in-app updater and Android both check it), so keep a backup somewhere safe.
+
+### Windows
+
+On Windows 10 or 11, with Python 3 and Pillow:
+
+```bash
+python -I tools/build_windows.py        # bundles web/ and compiles dist/Adhkar-Windows.exe with the C# compiler built into Windows
+```
+
+The first run fetches the WebView2 SDK from nuget.org into `tools/.bin/`. No Visual Studio or .NET SDK is needed. `WIN_OUT=<path>` builds elsewhere, for when the app is running.
+
+### The guide and these pictures
+
+```bash
+node tools/guide-shots.js               # every screenshot in the guide, from the app itself (phone, desktop, Friday, Ramaḍān)
+node tools/cdp.js tools/guide-preview.js build/preview   # pictures of the guide (CDP_ORIGIN=file:///…/docs/guide/index.html)
+python -I tools/readme_images.py        # docs/screens/*.webp, composed from those
+```
+
+### The promotional films
+
+```bash
+bash tools/promo/build.sh               # the films are code too: tools/promo/*.html drawn frame by frame, sound made in code
+```
+
+### Download counts
+
+Once a day, `.github/workflows/stats.yml` keeps GitHub's release download counts in `docs/guide/stats.json` (`tools/download_stats.py`), as a ledger by file so counts survive a replaced file. The guide shows them.
+
+## Tests
+
+| Command | What it proves |
+|---|---|
+| `node tools/test.js` | Content: every item against its source, hadith grades, Sūrat al-Kahf's pages, prayer times against references, the JavaScript and Java prayer engines to the minute |
+| `node tools/smoke.js` | The interface: boots the real app in jsdom in both languages, opens every screen and drives the actions |
+| `node tools/bridge-check.js` | Every bridge method the Android app has also exists in the Windows app |
+| `prettier --check` | Formatting, as the CI runs it |
+
+All of them run on every push and pull request.
+
+## Where things live
 
 | Path | What |
 |---|---|
 | `web/` | The app: plain HTML, CSS and JavaScript, no framework. It also runs in a browser. |
-| `web/js/core.js` | State, saved data, the catalogue of content, the bridge to Android. |
-| `web/js/ui.js` | Router, rendering, sheets, gestures, theme. |
-| `web/js/i18n.js` | The Arabic interface: formatters, the dictionary, number patterns. |
-| `web/js/v-*.js` | One file per area of screens. |
-| `web/js/pace.js`, `quiz.js`, `search.js`, `prayer.js`, `audio.js` | The engines. |
-| `web/js/data.js`, `web/js/hadith.js` | **Generated** religious text. Never edit these; edit the build scripts. |
-| `android/` | The native shell: a locked-down WebView, the bridge, reminders, widgets, the quick settings tile. No libraries. |
-| `tools/` | Content builders, fetchers, tests, packers. |
-| `docs/` | The illustrated user guide, published with GitHub Pages. |
-| `store/` | Play Store listing and privacy policy. |
+| `web/js/core.js`, `ui.js`, `i18n.js` | State and saving, the router and rendering, the Arabic interface |
+| `web/js/v-*.js` | One file per area of screens |
+| `web/js/pace.js`, `prayer.js`, `audio.js`, `quiz.js`, `search.js`, `update.js` | The engines |
+| `web/js/desk.js`, `web/desk.css` | The computer's layer: the rail, the day band, layouts, Ctrl K, print, the pill |
+| `web/js/data.js`, `hadith.js`, `kahf.js` | **Generated** religious text. Never edit these; edit the build scripts |
+| `android/` | The Android shell: a locked-down WebView, reminders, widgets, the tile, updates. No libraries |
+| `windows/` | The Windows shell: WebView2, files and backups, PDF, the tray, the pill, updates |
+| `docs/guide/` | The illustrated guide, published with GitHub Pages |
+| `tools/` | Content builders, tests, screenshots, packers; `tools/promo/` the films |
 
-`web/js/prayer.js` is mirrored in `android/src/com/adhkar/app/PrayerCalc.java` (reminders and widgets use the Java one). The tests compare the two to the minute; change both together.
+## Contributing
 
-### Build
+See [CONTRIBUTING.md](CONTRIBUTING.md). Read the principles first: religious text is never typed by hand, translations are verbatim and labelled "Translation", and the Sunnah shapes the design.
 
-```bash
-./build.sh
-```
+## The maker
 
-Needs JDK 17, Python 3, Node 20 or later, and the Android SDK (`build-tools/36.0.0`, `platforms/android-36`). The first time, install the Node tools:
-
-```bash
-cd tools/.node && npm ci
-```
-
-`build.sh` runs, in order: the content builders, the content tests, the interface tests, the web bundle, then aapt2, javac, d8, zipalign and apksigner. It writes:
-
-- `dist/Adhkar.apk`: the signed app.
-- `dist/Adhkar.aab`: the Play Store bundle (needs `tools/.bin/bundletool.jar`).
-- `dist/Adhkar.html`: the whole app in one file, for testing in a browser.
-
-The version lives in one place, the `VERSION` file: its first line is the name people see, the second is the code Android compares. Raise both for every release.
-
-**Signing.** The first build creates a key in `keystore/`. That folder is private and is never committed. Every update must be signed with the same key, so keep a backup of it somewhere safe.
-
-### Tests
-
-```bash
-node tools/test.js     # content: every item, hadith grades, prayer times against references, JS/Java parity
-node tools/smoke.js    # interface: boots the real app in jsdom, opens every screen, drives the actions
-```
-
-Both run on every build and on every pull request. Write a test for each behaviour you add, named as a sentence about what the person using the app experiences.
-
-### Content
-
-```
-tools/fetch_*.py      → tools/src/*.json            raw sources, kept as fetched
-tools/build_content.py → web/js/data.js             adhkār, Qurʾān passages, the Tracker phrases
-tools/build_hadith.py  → web/js/hadith.js           hadith, sliced verbatim between two markers
-```
-
-- **Adhkār:** Arabic from the Ḥiṣn al-Muslim API (hisnmuslim.com); translation and transliteration from sunnah.com's Ḥiṣn al-Muslim.
-- **Qurʾān:** the Uthmani text from Quran.com; the translation is The Clear Quran (Dr Mustafa Khattab), used with permission.
-- **Hadith:** Arabic and the sunnah.com English from fawazahmed0/hadith-api; grades as given on sunnah.com.
-- **Recitations:** Ḥiṣn al-Muslim recordings (hisnmuslim.com) and Mishary al-ʿAfāsī (everyayah.com), downloaded by the app on request.
-
-Every deliberate change to a source text is written down in code, with its reason: `FIX` (a correction) and `NOTE` (an explanation shown beside the text, never mixed into it) in `tools/build_hadith.py`.
-
-### Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## Made by
-
-Adhkār is made as ṣadaqah jāriyah. To get in touch, or to follow what comes next, find the maker on **[LinkedIn](https://www.linkedin.com/in/bashirbadmus/)**. Please remember the makers, and everyone whose work went into its sources, in your duʿāʾ.
+Made by **Bashir Badmus** as ṣadaqah jāriyah. Questions, ideas and corrections are welcome on [LinkedIn](https://www.linkedin.com/in/bashirbadmus/) or as a [GitHub issue](https://github.com/Bashyr18/adhkar/issues). Please remember the makers, and everyone whose work went into its sources, in your duʿāʾ.
 
 ## Licence
 

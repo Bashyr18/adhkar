@@ -1710,7 +1710,9 @@ function onScroll() {
   var idx = -1; chaps.forEach(function (c, i) { if (c.getBoundingClientRect().top < innerHeight * .4) idx = i; });
   rail.forEach(function (a, i) { a.classList.toggle('on', i === idx); a.classList.toggle('past', i < idx); }); $('#crail').classList.toggle('on', y > innerHeight * .9);
   if (T) placeCard();
-  if (idx >= 0) { var c = chaps[idx]; $('#chap b').textContent = c.dataset.n; $('#chap span').textContent = $('.h2', c).textContent; }
+  var ins = $('#install'), inInstall = ins && ins.getBoundingClientRect().top < innerHeight * .4 && ins.getBoundingClientRect().bottom > 0;
+  if (inInstall) { $('#chap b').textContent = '↓'; $('#chap span').textContent = 'Installing'; }
+  else if (idx >= 0) { var c = chaps[idx]; $('#chap b').textContent = c.dataset.n; $('#chap span').textContent = $('.h2', c).textContent; }
   $('#dprev').href = idx > 0 ? '#' + chaps[idx - 1].id : '#top'; $('#dnext').href = idx < chaps.length - 1 ? '#' + chaps[idx + 1].id : '#end';
 }
 addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true }); onScroll();
