@@ -64,7 +64,9 @@ java -jar "$BT/lib/apksigner.jar" verify --print-certs "$DIST/Adhkar.apk" | head
 # Play Store bundle (needs tools/.bin/bundletool.jar): same resources linked in proto format, signed with the upload key
 if [ -f tools/.bin/bundletool.jar ]; then
   echo "[aab] Play Store bundle"
-  "$BT/aapt2$EXE" link --proto-format -o "$OUT/proto.apk" -I "$AJ" --manifest android/AndroidManifest.xml     --min-sdk-version 26 --target-sdk-version 35 --version-code "$VCODE" --version-name "$VNAME" --auto-add-overlay "$OUT/res.zip"
+  # Play updates its own copies (and does not allow an app to install its own updates): the bundle leaves out that permission
+  grep -v "REQUEST_INSTALL_PACKAGES" android/AndroidManifest.xml > "$OUT/AndroidManifest.play.xml"
+  "$BT/aapt2$EXE" link --proto-format -o "$OUT/proto.apk" -I "$AJ" --manifest "$OUT/AndroidManifest.play.xml"     --min-sdk-version 26 --target-sdk-version 35 --version-code "$VCODE" --version-name "$VNAME" --auto-add-overlay "$OUT/res.zip"
   python tools/aab.py "$OUT/proto.apk" "$OUT/assets" build/dex/classes.dex "$OUT/base.zip" >/dev/null
   rm -f "$DIST/Adhkar.aab"
   java -jar tools/.bin/bundletool.jar build-bundle --modules="$OUT/base.zip" --output="$DIST/Adhkar.aab"

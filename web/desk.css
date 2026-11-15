@@ -1627,3 +1627,16 @@ html.is-desk [data-a='pin-widget'],
 html.is-desk a.set[href='#/settings/device'] {
   display: none;
 }
+
+/* the update key in the rail, above the next prayer */
+.rl-up {
+  padding: 0 14px 10px;
+}
+.rl-up .up-chip {
+  width: 100%;
+  justify-content: center;
+  height: 38px;
+}
+html.rail-mini .rl-up .up-chip span {
+  display: none;
+}

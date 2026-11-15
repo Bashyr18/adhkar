@@ -176,6 +176,9 @@
       '<span>' +
       esc(L('This computer', 'هذا الحاسوب')) +
       '</span></a></nav><div class="grow"></div>' +
+      '<div class="up-chip-slot rl-up">' +
+      (A.upd ? A.upd.chip() : '') +
+      '</div>' +
       '<div class="rl-next" id="rl-next"></div>' +
       '<div class="rl-foot"><button class="rl-tool" data-desk="theme" title="' +
       esc(L('Day or night', 'نهار أو ليل')) +

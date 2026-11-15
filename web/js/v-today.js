@@ -541,7 +541,9 @@
           : 'As-salāmu ʿalaykum') +
       '</div><h1>' +
       (name ? esc(name) : 'Welcome <em>back</em>') +
-      '</h1></div><div class="acts"><a class="ib ghost" href="#/search" aria-label="Search">' +
+      '</h1></div><div class="acts"><span class="up-chip-slot">' +
+      (A.upd ? A.upd.chip() : '') +
+      '</span><a class="ib ghost" href="#/search" aria-label="Search">' +
       ic('search', 's') +
       '</a><button type="button" class="ib ghost" data-a="theme" aria-label="Theme">' +
       ic('palette', 's') +

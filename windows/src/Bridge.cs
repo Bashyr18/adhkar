@@ -80,6 +80,11 @@ namespace Adhkar {
             f.Post("window.__native.onAudio&&__native.onAudio(" + Q(j) + ")");
         }
         public void audioCancel() { Store.Cancel = true; }
+
+        /* updates from the release page, when you ask (Update.cs) */
+        public string updateCan() { return Update.Can(); }
+        public void updateCheck() { Update.Check(f); }
+        public void updateGet() { Update.Get(f); }
         public void audioDeleteAll() { f.Post("window.Desk&&Desk.stopAudio&&Desk.stopAudio()"); foreach (var x in Directory.GetFiles(Store.AudioDir)) try { File.Delete(x); } catch { } }
         public void audioHold(bool on) { }
         public void volumeKeys(bool on) { }

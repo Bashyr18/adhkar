@@ -222,6 +222,7 @@ public class MainActivity extends Activity implements SensorEventListener {
     @Override
     protected void onNewIntent(Intent i) {
         super.onNewIntent(i);
+        if (Updater.ACTION.equals(i.getAction())) { updater().onStatus(i); return; }
         String r = routeOf(i);
         if (r == null) return;
         if (loaded) js("__native.onRoute(" + JSONObject.quote(r) + ")"); else pendingRoute = r;
@@ -289,6 +290,9 @@ public class MainActivity extends Activity implements SensorEventListener {
         }
         return super.dispatchKeyEvent(e);
     }
+
+    private Updater updater;
+    private Updater updater() { if (updater == null) updater = new Updater(this, this::js); return updater; }
 
     private void js(final String code) {
         if (web == null) return;
@@ -431,6 +435,10 @@ public class MainActivity extends Activity implements SensorEventListener {
         @JavascriptInterface public double audioUsage() { return audio().usage(); }
         @JavascriptInterface public void audioDownload(String json, String tag) { audio().download(json, tag); }
         @JavascriptInterface public void audioCancel() { audio().cancel(); }
+        /* updates from the release page, when the person asks (Updater) */
+        @JavascriptInterface public String updateCan() { return updater().can(); }
+        @JavascriptInterface public void updateCheck() { updater().check(); }
+        @JavascriptInterface public void updateGet() { updater().get(); }
         @JavascriptInterface public void audioDeleteAll() { audio().deleteAll(); }
         @JavascriptInterface public void audioPlay(String names, double rate) { ui.post(() -> audio().play(names, (float) rate)); }
         @JavascriptInterface public void audioPause() { ui.post(() -> audio().pause()); }

@@ -284,7 +284,9 @@
       saved: [],
       last: null,
       badges: {},
-      goals: { tasbih: 100 }
+      goals: { tasbih: 100 },
+      /* updates for the release-page copies: off until you turn on the weekly check */
+      upd: { auto: false, at: 0, v: '', size: 0, notes: '' }
     };
   }
   function merge(base, x) {

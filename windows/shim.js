@@ -72,7 +72,10 @@
     'exportFile',
     'importFile',
     'printPage',
-    'openSettings'
+    'openSettings',
+    'updateCan',
+    'updateCheck',
+    'updateGet'
   ];
   var B = {};
   names.forEach(function (n) {

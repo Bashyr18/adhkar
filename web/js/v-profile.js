@@ -747,6 +747,7 @@
           '<div class="serif" style="font-size:30px">Adhkār</div><div class="faint" style="font-size:12px;font-weight:700">Version ' +
           esc(A.N.has ? A.N.version() : (window.APP_VERSION || 'dev') + ' · web') +
           '</div><p class="muted" style="font-size:13.5px;line-height:1.6">Morning and evening adhkār, remembrance after prayer and before sleep, prayer times, qibla, the night and Ḍuḥā, beautifully, privately, offline.</p></div>' +
+          (A.upd ? A.upd.settings() : '') +
           group('Contact', [
             '<a class="set" href="mailto:bashyr18@gmail.com?subject=' +
               encodeURIComponent('Adhkār feedback (v' + (A.N.has ? A.N.version() : 'web') + ')') +
@@ -767,7 +768,7 @@
               ic('link', 's') +
               '</a>'
           ]) +
-          '<div class="card"><div class="eyebrow">Please note</div><p class="muted small" style="margin-top:8px">Transliteration and meanings are aids. Learn the wording from a teacher.</p></div>' +
+          '<div class="card"><div class="eyebrow">Please note</div><p class="muted small" style="margin-top:8px">Transliteration and translations are aids. Learn the wording from a teacher.</p></div>' +
           '<div class="card col"><div class="eyebrow">Privacy</div><p class="muted small">No accounts, ads or tracking. Everything stays on your phone.</p></div>'
       ];
     }

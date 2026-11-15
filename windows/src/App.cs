@@ -38,8 +38,10 @@ namespace Adhkar {
             Store.Init();
             var v = Assembly.GetExecutingAssembly().GetName().Version; Version = v.Major + "." + v.Minor;
             if (Array.IndexOf(args, "--uninstall") >= 0) { Shell.Uninstall(); return 0; }
+            Update.After(args);
             bool first; single = new Mutex(true, "Local\\" + PipeName, out first);
             if (!first) { Hand(args); return 0; }
+            Update.Tidy();
             try { Unpack(); }
             catch (Exception e) { MessageBox.Show("Adhkār could not start.\n\n" + e.Message, "Adhkār", MessageBoxButtons.OK, MessageBoxIcon.Error); return 1; }
             return Run(args);

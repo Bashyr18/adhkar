@@ -493,8 +493,8 @@
     'Ḥiṣn al-Muslim': 'حصن المسلم',
     'Please note': 'تنبيه',
     Privacy: 'الخصوصية',
-    'Transliteration and meanings are aids. Learn the wording from a teacher.':
-      'النطق والمعاني وسائل مساعدة، فتعلّم اللفظ من معلّم.',
+    'Transliteration and translations are aids. Learn the wording from a teacher.':
+      'النطق والترجمة وسائل مساعدة، فتعلّم اللفظ من معلّم.',
     'No accounts, ads or tracking. Everything stays on your phone.':
       'بلا حسابات ولا إعلانات ولا تتبّع. كل شيء يبقى على هاتفك.',
     Language: 'اللغة',
