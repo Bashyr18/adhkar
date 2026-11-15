@@ -1,0 +1,79 @@
+/* A bug sweep of the computer's layout: every screen in desktop mode (web/index.html?desk), in English and Arabic,
+   at the two sizes the desktop is checked at, collecting script errors and anything wider than the window.
+     CDP_ORIGIN=file:///…/web/index.html?desk node tools/cdp.js tools/desk-sweep.js build/sweep */
+const ROUTES = [
+  '#/',
+  '#/adhkar',
+  '#/c/morning',
+  '#/r/morning/0',
+  '#/r/morning/1',
+  '#/search',
+  '#/saved',
+  '#/counting',
+  '#/tracker',
+  '#/insights',
+  '#/salah',
+  '#/qibla',
+  '#/month',
+  '#/night',
+  '#/duha',
+  '#/qada',
+  '#/location',
+  '#/learn',
+  '#/learn/fajr',
+  '#/learn/quiz',
+  '#/journal',
+  '#/answered',
+  '#/deeds',
+  '#/modesty',
+  '#/profile',
+  '#/calendar',
+  '#/ramadan',
+  '#/jumuah',
+  '#/kahf',
+  '#/print',
+  '#/settings/appearance',
+  '#/settings/reading',
+  '#/settings/prayer',
+  '#/settings/notifications',
+  '#/settings/data',
+  '#/settings/about',
+  'rail:Print and PDF',
+  'rail:This computer'
+];
+module.exports = async (page) => {
+  const bad = [];
+  for (const ar of [false, true]) {
+    for (const [w, h] of [
+      [1333, 790],
+      [1600, 1000]
+    ]) {
+      await page.send('Page.addScriptToEvaluateOnNewDocument', {
+        source: `localStorage.setItem('adhkar.v10', JSON.stringify({v:10,profile:{name:'Test',onboarded:true,since:'2026-10-01'},loc:{lat:6.52,lng:3.38,name:'Lagos',city:'Lagos',country:'Nigeria',src:'city',tz:1},prefs:{theme:'dark',lang:${ar ? "'ar'" : 'null'}},hints:{counting:1,tracker:1,reader:1,today:1,'pace-tap':1,fingers:1}}))`
+      });
+      await page.size(w, h, 1);
+      await page.send('Page.navigate', { url: process.env.CDP_ORIGIN });
+      await page.wait(3000);
+      for (const r of ROUTES) {
+        const before = page.errs.length;
+        if (r.indexOf('rail:') === 0)
+          await page.eval(
+            `(function(){var a=[].slice.call(document.querySelectorAll('#rail a,#rail button')).filter(function(e){return e.textContent.indexOf(${JSON.stringify(r.slice(5))})>=0})[0];if(a)a.click();return 1})()`
+          );
+        else await page.eval(`location.hash=${JSON.stringify(r)};1`);
+        await page.wait(900);
+        const o = await page.eval(
+          `(function(){var W=innerWidth,out=[];document.querySelectorAll('#app *').forEach(function(e){var b=e.getBoundingClientRect();if(b.width&&(b.right>W+1||b.left<-1)&&getComputedStyle(e).position!=='fixed'&&!e.closest('.trk-chips,.fan,.rail,[style*="overflow"]'))out.push((e.className&&e.className.baseVal===undefined?e.className:e.tagName)+':'+Math.round(b.left)+'-'+Math.round(b.right))});return JSON.stringify({x:document.documentElement.scrollWidth>W+1,o:out.slice(0,3)})})()`
+        );
+        const res = JSON.parse(o);
+        const errs = page.errs.slice(before);
+        if (errs.length || res.x || res.o.length)
+          bad.push(
+            `${ar ? 'ar' : 'en'} ${w} ${r}: ${errs.join(' | ')} ${res.x ? 'PAGE SCROLLS SIDEWAYS ' : ''}${res.o.join(', ')}`
+          );
+      }
+      await page.send('Page.navigate', { url: 'about:blank' });
+    }
+  }
+  console.log(bad.length ? bad.join('\n') : 'clean: ' + ROUTES.length + ' screens x 2 languages x 2 sizes');
+};

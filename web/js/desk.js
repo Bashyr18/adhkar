@@ -265,9 +265,12 @@
       return v.querySelector('.lp-entry') ? direct(v, v.querySelector('.lp-entry')) : null;
     },
     /* the achievements under the profile; the settings on their own on the right */
+    /* the right column starts at Achievements or at Settings, whichever leaves the two columns closest in height:
+       a sister's break days make the left side long, so the achievements move across */
     profile: function (v) {
-      var m = v.querySelector('a.set');
-      return m ? direct(v, m).previousElementSibling : null;
+      var m = v.querySelector('.medals'),
+        st = v.querySelector('a.set');
+      return [m && direct(v, m).previousElementSibling, st && direct(v, st).previousElementSibling].filter(Boolean);
     },
     journal: function (v) {
       var n = v.querySelector('[data-a="dua-nudge"]');
@@ -277,27 +280,65 @@
   var across = function (e) {
     return e.matches('header.top, .back, .dk-day, .dk-span');
   };
+  /* of several places the right column could start, the one that leaves the two columns closest in height */
+  function balance(flat, cands) {
+    var hs = flat.map(function (e) {
+        return across(e) ? 0 : e.getBoundingClientRect().height + 14;
+      }),
+      best = null,
+      diff = Infinity,
+      sum = function (l) {
+        return l.reduce(function (x, y) {
+          return x + y;
+        }, 0);
+      };
+    cands.forEach(function (c) {
+      var i = flat.indexOf(c);
+      if (i < 0) return;
+      var d = Math.abs(sum(hs.slice(0, i)) - sum(hs.slice(i)));
+      if (d < diff) {
+        diff = d;
+        best = c;
+      }
+    });
+    return best;
+  }
   function lay(v, name) {
     var f = SPLIT[name],
       ca = v.querySelector(':scope > .dk-ca'),
       cb = v.querySelector(':scope > .dk-cb'),
       kids = [].slice.call(v.children);
+    /* a page without a split, never laid out in columns: nothing to do (and nothing to move, which would wake the
+       observer that called this) */
+    if (!f && !ca && !cb) return;
     var stray = kids.filter(function (e) {
       return e !== ca && e !== cb && !across(e);
     });
-    if (ca && cb && !stray.length) return;
     var flat = [];
     kids.forEach(function (e) {
       if (e === ca || e === cb) flat = flat.concat([].slice.call(e.children));
       else flat.push(e);
     });
+    if (ca && cb && !stray.length) {
+      /* already laid out: measured now in its final columns, move the split only if another balances better */
+      var c0 = f && f(v);
+      if (!c0 || c0.length === undefined) return;
+      var b0 = balance(flat, c0);
+      if (!b0 || b0 === cb.firstElementChild) return;
+    }
     if (ca) ca.remove();
     if (cb) cb.remove();
     v.classList.remove('dk-two');
+    /* every block back in the page, in order, so each can be measured (only those not already there) */
+    flat.forEach(function (e) {
+      if (e.parentElement !== v) v.appendChild(e);
+    });
     var split = f && f(v);
+    if (split && split.length !== undefined) split = b0 || balance(flat, split);
     if (!split) {
+      /* back to one flow, in the original order */
       flat.forEach(function (e) {
-        if (e.parentElement !== v) v.appendChild(e);
+        v.appendChild(e);
       });
       return;
     }
@@ -315,6 +356,7 @@
     v.appendChild(cb);
     v.classList.add('dk-two');
   }
+
   /* the Tracker, on a computer: the last seven days of remembrance under the counter, from the tracker's own record */
   var DAY_AR = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
   function dayName(k, short) {
@@ -500,6 +542,16 @@
         else trk.insertAdjacentHTML('afterend', html);
       }
     }
+    /* You: this week's remembrance under the Insights link, so the profile side carries real figures too */
+    if (name === 'profile') {
+      var ins = v.querySelector('a[href="#/insights"]'),
+        pw = v.querySelector('.dk-week'),
+        ph = ins ? week() : '';
+      if (ins && (!pw || pw.dataset.sig !== /data-sig="([^"]*)"/.exec(ph)[1])) {
+        if (pw) pw.outerHTML = ph;
+        else ins.insertAdjacentHTML('afterend', ph);
+      }
+    }
     if (name === 'journal') {
       var top = v.querySelector(':scope > header.top'),
         an = v.querySelector('.dk-ans'),
@@ -511,8 +563,22 @@
       }
     }
     lay(v, SPLIT[name] && COLS[name] ? name : '');
+    /* a second look once the page has settled (images, fonts, the entrance), when the heights are the real ones */
+    if (SPLIT[name] && COLS[name])
+      setTimeout(function () {
+        if ($('#app > .view') === v) lay(v, name);
+      }, 450);
     deal(v.querySelector('.dk-grid'));
   }
+  /* a window made wider or narrower: the columns are balanced again */
+  addEventListener('resize', function () {
+    clearTimeout(wide._r);
+    wide._r = setTimeout(function () {
+      var v = $('#app > .view'),
+        n = A.route().name;
+      if (v && SPLIT[n] && COLS[n]) lay(v, n);
+    }, 250);
+  });
   /* the times of answer move on through the day */
   setInterval(function () {
     if (A.route().name === 'journal') wide();

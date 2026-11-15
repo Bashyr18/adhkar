@@ -11,7 +11,8 @@ const EDGE = [
 const [script, out, portArg] = process.argv.slice(2),
   PORT = +(portArg || 9333),
   ORIGIN = process.env.CDP_ORIGIN || 'http://localhost:5178/';
-const prof = path.join(process.env.TEMP, 'adhkar-cdp');
+/* CDP_PROFILE gives a run its own browser profile, so two can run at once (a film rendering, a check beside it) */
+const prof = process.env.CDP_PROFILE || path.join(process.env.TEMP, 'adhkar-cdp');
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const getJson = (u) =>
   new Promise((ok, no) =>
