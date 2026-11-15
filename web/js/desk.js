@@ -61,6 +61,7 @@
   var IC = {
     search: '<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/>',
     pc: '<rect x="2.8" y="4" width="18.4" height="12" rx="2"/><path d="M8.5 20h7M12 16v4"/>',
+    check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
     print: '<path d="M7 9V3.5h10V9"/><rect x="3.5" y="9" width="17" height="8" rx="2"/><path d="M7 14h10v6.5H7z"/>',
     pdf: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 14h6M9 17h4"/>',
     folder: '<path d="M3 7.5a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
@@ -484,11 +485,22 @@
   /* This computer: its cards dealt into two columns by height, so neither column ends with a hole */
   function deal(g) {
     if (!g) return;
+    var want = g.clientWidth >= 1180 ? 3 : 2;
+    if (g.dataset.cols && +g.dataset.cols !== want) {
+      var back = [];
+      [].slice.call(g.querySelectorAll(':scope > .dk-gc')).forEach(function (c) {
+        back = back.concat([].slice.call(c.children));
+      });
+      g.innerHTML = '';
+      back.forEach(function (c) {
+        g.appendChild(c);
+      });
+    }
     var cols = g.querySelectorAll(':scope > .dk-gc'),
       stray = [].slice.call(g.children).filter(function (e) {
         return !e.classList.contains('dk-gc');
       });
-    if (cols.length === 2 && !stray.length) return;
+    if (cols.length === want && !stray.length) return;
     var cards = [];
     [].slice.call(g.children).forEach(function (e) {
       if (e.classList.contains('dk-gc')) cards = cards.concat([].slice.call(e.children));
@@ -498,22 +510,23 @@
       return c.offsetHeight;
     });
     g.innerHTML = '';
-    var a = document.createElement('div'),
-      b = document.createElement('div'),
-      ha = 0,
-      hb = 0;
-    a.className = b.className = 'dk-gc';
+    var col = [],
+      h = [];
+    for (var k = 0; k < want; k++) {
+      col.push(document.createElement('div'));
+      col[k].className = 'dk-gc';
+      h.push(0);
+    }
     cards.forEach(function (c, i) {
-      if (ha <= hb) {
-        a.appendChild(c);
-        ha += hs[i];
-      } else {
-        b.appendChild(c);
-        hb += hs[i];
-      }
+      var m = h.indexOf(Math.min.apply(null, h));
+      col[m].appendChild(c);
+      h[m] += hs[i];
     });
-    g.appendChild(a);
-    g.appendChild(b);
+    col.forEach(function (c) {
+      g.appendChild(c);
+    });
+    g.dataset.cols = want;
+    g.style.setProperty('--cols', want);
     g.classList.add('dealt');
   }
   function wide() {
@@ -577,15 +590,17 @@
       var v = $('#app > .view'),
         n = A.route().name;
       if (v && SPLIT[n] && COLS[n]) lay(v, n);
+      if (v) deal(v.querySelector('.dk-grid'));
     }, 250);
   });
   /* the times of answer move on through the day */
   setInterval(function () {
     if (A.route().name === 'journal') wide();
   }, 60000);
+  /* the page is laid out for the computer in the observer itself, which runs before the browser paints: a page
+     redrawn after a tap or a toggle is never shown for a frame in its phone layout first (that frame was a flash) */
   var screens = new MutationObserver(function () {
-    clearTimeout(screens._t);
-    screens._t = setTimeout(after, 16);
+    after();
   });
   var apply0 = A.applyTheme;
   A.applyTheme = function () {
@@ -1453,9 +1468,26 @@
   function pcPage() {
     var I = info(),
       backups = (I.backups || []).slice(0, 30);
+    /* what is true of this computer at a glance, before the settings */
+    var chip = function (icon, k, v) {
+      return (
+        '<span class="dk-st">' + ic(icon, 16) + '<span><small>' + esc(k) + '</small><b>' + esc(v) + '</b></span></span>'
+      );
+    };
+    var mb = function (b) {
+      return b ? (b / 1048576).toFixed(b > 1048576 * 10 ? 0 : 1) + (A.ar() ? ' م.ب' : ' MB') : L('None', 'لا شيء');
+    };
+    var strip =
+      '<div class="dk-status">' +
+      chip('pc', L('Version', 'الإصدار'), 'Adhkār ' + (I.version || '')) +
+      chip('folder', L('Running', 'التشغيل'), I.portable ? L('From the file', 'من الملف') : L('Installed', 'مثبّت')) +
+      chip('pdf', L('Backups', 'النسخ الاحتياطية'), String((I.backups || []).length)) +
+      chip('print', L('Recitations stored', 'التلاوات المحفوظة'), mb(I.audio)) +
+      '</div>';
     var html =
-      '<div class="view dk-page">' +
+      '<div class="view dk-page dk-pcpage">' +
       head(L('This computer', 'هذا الحاسوب'), L('Adhkār ', 'أذكار ') + (I.version || '')) +
+      strip +
       '<div class="dk-grid">' +
       '<section class="card dk-card"><h3>' +
       esc(L('On Windows', 'في ويندوز')) +
@@ -1505,9 +1537,11 @@
         L('Reminders arrive with the window closed', 'تصل التذكيرات والنافذة مغلقة')
       ) +
       '</section>' +
-      '<section class="card dk-card"><h3>' +
+      '<section class="card dk-card dk-pillcard"><h3>' +
       esc(L('The pill', 'الكبسولة')) +
       '</h3>' +
+      /* the pill itself, drawn by the same painter as the real one, so a change here shows at once */
+      '<div class="dk-pill-prev"><img id="dkPillPrev" alt=""></div>' +
       toggle(
         'next',
         I.next,
@@ -1602,6 +1636,13 @@
       title: L('This computer', 'هذا الحاسوب'),
       html: html,
       mount: function (el) {
+        var prev = $('#dkPillPrev', el),
+          now = A.now();
+        if (prev && A.paintPill && now.next && now.next.at)
+          A.paintPill(pillInfo(now)).then(function (o) {
+            prev.src = 'data:image/png;base64,' + o.open.img;
+            prev.style.width = o.open.w / o.s + 'px';
+          });
         /* #app stays across redraws: listen once, or each redraw adds a handler and one click acts several times */
         if (el._dkPc) return;
         el._dkPc = true;
@@ -1663,12 +1704,36 @@
     return A.print.sheets(what, month);
   }
   function printPage() {
+    var count = function (id) {
+      try {
+        return A.items(id).length;
+      } catch (e) {
+        return 0;
+      }
+    };
+    var nM = count('morning'),
+      nE = count('evening');
     var opts = [
-      ['morning', L('Morning adhkār', 'أذكار الصباح'), 'sunrise'],
-      ['evening', L('Evening adhkār', 'أذكار المساء'), 'moon'],
-      ['both', L('Morning and evening', 'الصباح والمساء'), 'book'],
-      ['times', L('Prayer timetable', 'جدول مواقيت الصلاة'), 'mosque']
+      ['morning', L('Morning adhkār', 'أذكار الصباح'), 'sunrise', A.fmtN(nM) + L(' adhkār', ' ذكرًا')],
+      ['evening', L('Evening adhkār', 'أذكار المساء'), 'moon', A.fmtN(nE) + L(' adhkār', ' ذكرًا')],
+      ['both', L('Morning and evening', 'الصباح والمساء'), 'book', L('One booklet', 'كتيّب واحد')],
+      ['times', L('Prayer timetable', 'جدول مواقيت الصلاة'), 'mosque', L('Every day of the month', 'كل أيام الشهر')]
     ];
+    var incl =
+      printWhat === 'times'
+        ? [
+            L(
+              'Fajr, sunrise, Dhuhr, ʿAṣr, Maghrib and ʿIshāʾ for each day',
+              'الفجر والشروق والظهر والعصر والمغرب والعشاء لكل يوم'
+            ),
+            L('Hijri and calendar dates side by side', 'التاريخ الهجري والميلادي معًا'),
+            L('Your place and calculation method', 'مدينتك وطريقة الحساب')
+          ]
+        : [
+            L('The Arabic, set as in the app', 'النص العربي كما في التطبيق'),
+            L('Transliteration and translation', 'النطق والترجمة'),
+            L('How many times, and every source', 'عدد المرات والمصادر كلها')
+          ];
     var html =
       '<div class="view dk-page dk-print">' +
       head(
@@ -1687,9 +1752,11 @@
             o[0] +
             '">' +
             A.icon(o[2], 's') +
-            '<span>' +
+            '<span><b>' +
             esc(o[1]) +
-            '</span></button>'
+            '</b><small>' +
+            esc(o[3]) +
+            '</small></span></button>'
           );
         })
         .join('') +
@@ -1715,6 +1782,15 @@
             .join('') +
           '</div>'
         : '') +
+      '<h3>' +
+      esc(L('On the paper', 'على الورق')) +
+      '</h3><ul class="dk-incl">' +
+      incl
+        .map(function (x) {
+          return '<li>' + ic('check', 14) + '<span>' + esc(x) + '</span></li>';
+        })
+        .join('') +
+      '</ul>' +
       '<div class="dk-pp-go"><button class="btn pri" data-print="paper">' +
       ic('print', 18) +
       '<span>' +
@@ -1725,27 +1801,43 @@
       esc(L('Save as PDF', 'احفظ PDF')) +
       '</span></button></div><p class="dk-note">' +
       esc(L('PDFs go to Documents › Adhkar.', 'تُحفظ ملفات PDF في المستندات › Adhkar.')) +
-      '</p></aside><div class="dk-preview" id="dk-preview"><div class="dk-paper-wrap">' +
+      '</p></aside><div class="dk-pp-view"><div class="dk-pp-bar"><span><b>' +
+      esc(
+        (opts.filter(function (o) {
+          return o[0] === printWhat;
+        })[0] || opts[0])[1]
+      ) +
+      '</b> · A4</span><div class="dk-zoom"><button class="dk-z' +
+      (Desk._ppFit !== 'page' ? ' on' : '') +
+      '" data-ppfit="width">' +
+      esc(L('Fit width', 'ملء العرض')) +
+      '</button><button class="dk-z' +
+      (Desk._ppFit === 'page' ? ' on' : '') +
+      '" data-ppfit="page">' +
+      esc(L('Whole page', 'الصفحة كاملة')) +
+      '</button></div></div><div class="dk-preview" id="dk-preview"><div class="dk-paper-wrap">' +
       sheetsFor(printWhat) +
-      '</div></div></div></div>';
+      '</div></div></div></div></div>';
     return {
       title: L('Print and PDF', 'الطباعة وPDF'),
       html: html,
       mount: function (el) {
         /* the paper is drawn at its real size, then scaled to fit the room beside the choices */
-        var fit = function () {
-          var box = $('#dk-preview', el),
+        var fit = (Desk._ppFitFn = function () {
+          var box = $('#dk-preview'),
             wrap = box && $('.dk-paper-wrap', box);
           if (!wrap || !box.clientWidth) return;
-          wrap.style.zoom = Math.min(0.9, (box.clientWidth - 54) / 794).toFixed(3);
-        };
+          /* the width of the room, or a whole A4 page (1123 px tall at full size) in the height there is */
+          var zw = (box.clientWidth - 60) / 794,
+            zp = (box.clientHeight - 60) / 1123;
+          wrap.style.zoom = Math.min(1.1, Desk._ppFit === 'page' ? Math.min(zw, zp) : zw).toFixed(3);
+        });
         fit();
         requestAnimationFrame(fit);
         if (!Desk._fit) {
           Desk._fit = true;
           addEventListener('resize', function () {
-            var b = $('#dk-preview .dk-paper-wrap');
-            if (b) b.style.zoom = Math.min(0.9, ($('#dk-preview').clientWidth - 54) / 794).toFixed(3);
+            if (Desk._ppFitFn) Desk._ppFitFn();
           });
         }
         if (el._dkPrint) return;
@@ -1755,6 +1847,12 @@
           var w = e.target.closest('[data-what]');
           if (w) {
             printWhat = w.dataset.what;
+            A.rerender();
+            return;
+          }
+          var zf = e.target.closest('[data-ppfit]');
+          if (zf) {
+            Desk._ppFit = zf.dataset.ppfit;
             A.rerender();
             return;
           }
