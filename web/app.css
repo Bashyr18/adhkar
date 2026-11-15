@@ -3206,3 +3206,6 @@ button.card:active,
   margin: 0;
   line-height: 1.5;
 }
+.up-notes li {
+  overflow-wrap: anywhere;
+}

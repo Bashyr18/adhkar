@@ -140,13 +140,22 @@
   }
   function sheetBody() {
     var going = U.busy === 'get' || U.busy === 'verifying' || U.busy === 'installing' || U.busy === 'restart';
+    /* the release notes as plain lines: links become their words, addresses and download lines are left out */
     var notes = (S.upd.notes || '')
       .split(/\r?\n/)
       .map(function (l) {
-        return l.replace(/^[#*\-\s]+/, '').trim();
+        return l
+          .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+          .replace(/https?:\/\/\S+/g, '')
+          .replace(/[*_`>#]+/g, '')
+          .replace(/^[\s\-•·]+/, '')
+          .replace(/\s+/g, ' ')
+          .trim();
       })
-      .filter(Boolean)
-      .slice(0, 5);
+      .filter(function (l) {
+        return l.length > 2 && !/^(download|the guide|android|windows)\b/i.test(l) && !/^[\s·:()\-]+$/.test(l);
+      })
+      .slice(0, 4);
     return (
       '<div class="up-sheet"><div class="up-v">' +
       A.rosette(56) +

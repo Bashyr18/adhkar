@@ -479,6 +479,8 @@
       name = A.route().name;
     if (!v) return;
     v.classList.toggle('dk-wide', !!COLS[name]);
+    /* the library: the two sessions side by side at a calmer height, the collections in a grid */
+    v.classList.toggle('dk-lib', name === 'adhkar');
     if (name === 'tracker') {
       /* the phrases go across the whole page under the header, where they fit on a line or two */
       var chips = v.querySelector('.trk .trk-chips'),

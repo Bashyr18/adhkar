@@ -1640,3 +1640,51 @@ html.is-desk a.set[href='#/settings/device'] {
 html.rail-mini .rl-up .up-chip span {
   display: none;
 }
+
+/* ---------- the Adhkār library on a computer ---------- */
+html.has-rail #app > .view.dk-lib {
+  max-width: 1240px;
+}
+html.has-rail .view.dk-lib .feature {
+  aspect-ratio: auto;
+  height: clamp(250px, 24vw, 320px);
+  min-height: 0;
+}
+html.has-rail .view.dk-lib .feature .fbody .t {
+  font-size: 30px;
+}
+html.has-rail .view.dk-lib > .col {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(360px, 100%), 1fr));
+  gap: 12px;
+  align-items: stretch;
+}
+html.has-rail .view.dk-lib > .col > .card {
+  margin: 0;
+  height: 100%;
+}
+html.has-rail .view.dk-lib > .grid2 {
+  gap: 14px;
+}
+html.has-rail .view.dk-lib .feature .fbody {
+  padding-top: 0;
+}
+html.has-rail .view.dk-lib .feature {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+html.has-rail .view.dk-lib .feature .fbody {
+  margin-top: auto;
+}
+html.has-rail .view.dk-lib .feature::after {
+  background:
+    linear-gradient(
+      0deg,
+      rgba(9, 8, 26, 0.96) 0,
+      rgba(9, 8, 26, 0.82) 30%,
+      rgba(9, 8, 26, 0.35) 52%,
+      rgba(9, 8, 26, 0) 66%
+    ),
+    linear-gradient(180deg, rgba(6, 8, 30, 0.45) 0, rgba(6, 8, 30, 0) 30%);
+}
