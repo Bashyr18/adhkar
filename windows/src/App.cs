@@ -37,11 +37,12 @@ namespace Adhkar {
             try { Native.SetProcessDpiAwareness(2); } catch { }
             Store.Init();
             var v = Assembly.GetExecutingAssembly().GetName().Version; Version = v.Major + "." + v.Minor;
-            if (Array.IndexOf(args, "--uninstall") >= 0) { Shell.Uninstall(); return 0; }
+            if (Array.IndexOf(args, "--uninstall") >= 0) { Shell.Uninstall(Array.IndexOf(args, "--quiet") >= 0); return 0; }
             Update.After(args);
             bool first; single = new Mutex(true, "Local\\" + PipeName, out first);
             if (!first) { Hand(args); return 0; }
             Update.Tidy();
+            Shell.Refresh();
             try { Unpack(); }
             catch (Exception e) { MessageBox.Show("Adhkār could not start.\n\n" + e.Message, "Adhkār", MessageBoxButtons.OK, MessageBoxIcon.Error); return 1; }
             return Run(args);
@@ -295,7 +296,9 @@ namespace Adhkar {
                             p.WaitForConnection();
                             var ms = new MemoryStream(); p.CopyTo(ms);
                             var args = Encoding.UTF8.GetString(ms.ToArray()).Split('\n');
-                            BeginInvoke(new Action(() => { Bring(); ParseArgs(args); }));
+                            /* the installer and the uninstaller ask the open window to close */
+                            if (Array.IndexOf(args, "--quit") >= 0) BeginInvoke(new Action(Quit));
+                            else BeginInvoke(new Action(() => { Bring(); ParseArgs(args); }));
                         }
                     } catch { Thread.Sleep(200); }
                 }

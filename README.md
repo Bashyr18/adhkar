@@ -11,7 +11,7 @@ On Android and Windows. Works offline. No ads, no account, no tracking. Free and
 [![Licence: GPL-3.0](https://img.shields.io/badge/licence-GPL--3.0-6b5a3e)](LICENSE)
 
 [![Download for Android](https://img.shields.io/badge/Android-download%20APK-3ddc84?logo=android&logoColor=white)](https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar.apk)
-[![Download for Windows](https://img.shields.io/badge/Windows-download%20EXE-0078d4?logo=windows&logoColor=white)](https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar-Windows.exe)
+[![Download for Windows](https://img.shields.io/badge/Windows-installer-0078d4?logo=windows&logoColor=white)](https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar-Setup.exe)
 [![The illustrated guide](https://img.shields.io/badge/the%20guide-read%20online-c79c52)](https://bashyr18.github.io/adhkar/guide/)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Bashir%20Badmus-0a66c2?logo=linkedin&logoColor=white)](https://www.linkedin.com/in/bashirbadmus/)
 
@@ -46,7 +46,7 @@ One calm place for the whole day's remembrance. Today leads with what is due now
 | | |
 |---|---|
 | **Android** 8 or newer | [**Download `Adhkar.apk`**](https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar.apk) (about 4 MB), open it on the phone and allow the install. |
-| **Windows** 10 or 11 | [**Download `Adhkar-Windows.exe`**](https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar-Windows.exe) (about 4 MB) and open it. It runs straight away with nothing to unpack, and installs itself to Start from **This computer** when you want it to. |
+| **Windows** 10 or 11 | [**Download `Adhkar-Setup.exe`**](https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar-Setup.exe) (about 4 MB), open it and choose **Install**. Adhkār goes in its own folder, in Start, on your desktop and in **Settings › Apps**, for you only with no administrator needed, and updates itself from inside the app. (`Adhkar-Windows.exe` on the release page is the same app as one file that runs without installing.) |
 
 Every file, with its SHA-256 checksum, is on the [releases page](https://github.com/Bashyr18/adhkar/releases/latest). The [guide](https://bashyr18.github.io/adhkar/guide/#install) shows each install screen, step by step.
 
@@ -58,7 +58,7 @@ Adhkār comes from this page, not an app store, so Android and Windows ask you t
 - **Nothing taken:** no ads, no analytics, no account. It never reads your contacts, messages or files.
 - **Check it yourself:** compare the file's SHA-256 with the one on the release page, let Google Play Protect scan it, or upload it to [VirusTotal](https://www.virustotal.com/).
 - **On Android:** Android asks once to allow your browser to install apps, then **Install**. If Play Protect offers to scan it, let it; if it says it doesn't recognise the developer, choose **Install anyway**.
-- **On Windows:** if Windows says it protected your PC, click **More info**, check the name reads `Adhkar-Windows.exe`, then **Run anyway**.
+- **On Windows:** if Windows says it protected your PC, click **More info**, check the name reads `Adhkar-Setup.exe`, then **Run anyway**.
 
 <a href="https://bashyr18.github.io/adhkar/guide/#install"><img src="docs/screens/guide-install.webp" alt="Installing, step by step, in the guide: the screens you will see on a real phone" width="100%"></a>
 
@@ -202,7 +202,7 @@ The first build creates a key in `keystore/`. That folder is private and is **ne
 On Windows 10 or 11, with Python 3 and Pillow:
 
 ```bash
-python -I tools/build_windows.py        # bundles web/ and compiles dist/Adhkar-Windows.exe with the C# compiler built into Windows
+python -I tools/build_windows.py        # bundles web/ and compiles dist/Adhkar-Windows.exe and dist/Adhkar-Setup.exe with the C# compiler built into Windows
 ```
 
 The first run fetches the WebView2 SDK from nuget.org into `tools/.bin/`. No Visual Studio or .NET SDK is needed. `WIN_OUT=<path>` builds elsewhere, for when the app is running.

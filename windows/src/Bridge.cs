@@ -181,7 +181,18 @@ namespace Adhkar {
             Directory.CreateDirectory(p); Shell.Open(p);
         }
         public string backup(string name) { return Store.ReadBackup(name); }
-        public void install() { f.BeginInvoke(new Action(() => { var ok = Shell.Install(); f.Post("window.Desk&&Desk.onInstalled&&Desk.onInstalled(" + (ok ? "true" : "false") + ")"); })); }
+        /* from the downloaded file: install (or find the installed copy), then hand over to it */
+        public void install() {
+            f.BeginInvoke(new Action(() => {
+                var ok = Shell.Install();
+                f.Post("window.Desk&&Desk.onInstalled&&Desk.onInstalled(" + (ok ? "true" : "false") + ")");
+                if (ok && !Shell.RunningInstalled()) {
+                    var t = new System.Windows.Forms.Timer { Interval = 1400 };
+                    t.Tick += delegate { t.Stop(); Shell.OpenInstalled(System.Diagnostics.Process.GetCurrentProcess().Id); f.Quit(); };
+                    t.Start();
+                }
+            }));
+        }
         public void quit() { f.BeginInvoke(new Action(() => f.Quit())); }
         /* Windows' own print dialog (not the browser's preview, which had no way back) */
         public void printPage(string name) {

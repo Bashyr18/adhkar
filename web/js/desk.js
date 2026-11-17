@@ -1371,7 +1371,7 @@
   Desk.onInstalled = function (ok) {
     A.toast(
       ok
-        ? L('Installed: Adhkār is in Start and on your desktop', 'ثُبّت: أذكار في قائمة ابدأ وعلى سطح المكتب')
+        ? L('Installed. Opening Adhkār from Start…', 'ثُبّت. يُفتح أذكار من قائمة ابدأ…')
         : L('Could not install', 'تعذّر التثبيت'),
       ok ? 'check' : null
     );
@@ -1569,26 +1569,39 @@
       '<section class="card dk-card"><h3>' +
       esc(L('On Windows', 'في ويندوز')) +
       '</h3>' +
-      (I.portable
+      (I.portable && I.installed
         ? '<div class="dk-row"><div class="grow"><b>' +
-          esc(L('Install Adhkār', 'ثبّت أذكار')) +
+          esc(L('Adhkār is installed', 'أذكار مثبّت')) +
           '</b><small>' +
           esc(
             L(
-              'You are running Adhkār from the file you downloaded. Install keeps it in your own folder and adds it to Start and your desktop, so it opens like any app and can start with Windows. For you only, no administrator needed; your record is the same either way.',
-              'أنت تشغّل أذكار من الملف الذي نزّلته. التثبيت يحفظه في مجلدك ويضيفه إلى قائمة ابدأ وسطح المكتب، فيُفتح كأي تطبيق ويمكن أن يبدأ مع ويندوز. لك وحدك ودون صلاحيات المسؤول، وسجلك هو نفسه في الحالتين.'
+              'This window is the file you downloaded. Open the installed app, from Start or your desktop, and this copy closes; you may delete the downloaded file.',
+              'هذه النافذة هي الملف الذي نزّلته. افتح التطبيق المثبّت، من قائمة ابدأ أو سطح المكتب، فتُغلق هذه النسخة، ولك أن تحذف الملف المنزّل.'
             )
           ) +
           '</small></div><button class="btn pri sm" data-dk="install">' +
-          esc(L('Install', 'ثبّت')) +
+          esc(L('Open it', 'افتحه')) +
           '</button></div>'
-        : '<div class="dk-row"><div class="grow"><b>' +
-          esc(L('Installed', 'مثبّت')) +
-          '</b><small>' +
-          esc(L('Remove it from Settings › Apps; your record stays.', 'أزله من الإعدادات › التطبيقات، ويبقى سجلك.')) +
-          '</small></div>' +
-          A.icon('check', 's') +
-          '</div>') +
+        : I.portable
+          ? '<div class="dk-row"><div class="grow"><b>' +
+            esc(L('Install Adhkār', 'ثبّت أذكار')) +
+            '</b><small>' +
+            esc(
+              L(
+                'This window is the file you downloaded. Install puts Adhkār in its own folder, in Start and on your desktop, and opens it from there, like any app. For you only, no administrator needed; your record is the same either way.',
+                'هذه النافذة هي الملف الذي نزّلته. التثبيت يضع أذكار في مجلده وفي قائمة ابدأ وعلى سطح المكتب ويفتحه من هناك، كأي تطبيق. لك وحدك ودون صلاحيات المسؤول، وسجلك هو نفسه في الحالتين.'
+              )
+            ) +
+            '</small></div><button class="btn pri sm" data-dk="install">' +
+            esc(L('Install', 'ثبّت')) +
+            '</button></div>'
+          : '<div class="dk-row"><div class="grow"><b>' +
+            esc(L('Installed', 'مثبّت')) +
+            '</b><small>' +
+            esc(L('Remove it from Settings › Apps; your record stays.', 'أزله من الإعدادات › التطبيقات، ويبقى سجلك.')) +
+            '</small></div>' +
+            A.icon('check', 's') +
+            '</div>') +
       '<div class="dk-row"><div class="grow"><b>' +
       esc(L('Adhkār on your phone', 'أذكار على هاتفك')) +
       '</b><small>' +

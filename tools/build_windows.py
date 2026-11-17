@@ -94,6 +94,29 @@ def main():
         sys.exit(r.returncode)
     print('dist/Adhkar-Windows.exe', name, '(%s)' % full, round(os.path.getsize(exe) / 1048576, 1), 'MB')
 
+    # the installer: the app inside it, installed per user like any Windows program (windows/setup/Setup.cs)
+    sinfo = os.path.join(OUT, 'SetupInfo.cs')
+    with open(sinfo, 'w', encoding='utf8') as f:
+        f.write('using System.Reflection;\n'
+                '[assembly: AssemblyTitle("Adhkar Setup")]\n[assembly: AssemblyProduct("Adhkar")]\n'
+                '[assembly: AssemblyDescription("Installs Adhkar, remembrance for every moment")]\n'
+                '[assembly: AssemblyCompany("Adhkar, open source")]\n[assembly: AssemblyCopyright("GPL-3.0")]\n'
+                '[assembly: AssemblyVersion("%s")]\n[assembly: AssemblyFileVersion("%s")]\n[assembly: AssemblyInformationalVersion("%s")]\n' % (full, full, name))
+    setup = os.environ.get('SETUP_OUT') or os.path.join(os.path.dirname(exe), 'Adhkar-Setup.exe')
+    sargs = [csc, '/nologo', '/optimize+', '/target:winexe', '/platform:x64', '/langversion:5', '/codepage:65001', '/utf8output',
+             '/out:' + setup, '/win32icon:' + ico, '/win32manifest:' + os.path.join(WIN, 'setup', 'setup.manifest'),
+             '/resource:' + exe + ',Adhkar.exe', '/resource:' + os.path.join(WIN, 'icon.png') + ',icon.png']
+    for ref in ('System.dll', 'System.Core.dll', 'System.Drawing.dll', 'System.Windows.Forms.dll', 'Microsoft.CSharp.dll'):
+        sargs.append('/r:' + os.path.join(fw, ref))
+    sargs += [sinfo, os.path.join(WIN, 'setup', 'Setup.cs')]
+    r = subprocess.run(sargs, capture_output=True, text=True, encoding='utf8', errors='replace')
+    out = (r.stdout + r.stderr).strip()
+    if out:
+        print(out[-6000:])
+    if r.returncode:
+        sys.exit(r.returncode)
+    print(os.path.relpath(setup, ROOT).replace(os.sep, '/'), name, round(os.path.getsize(setup) / 1048576, 1), 'MB')
+
 
 if __name__ == '__main__':
     main()
