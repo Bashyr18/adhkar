@@ -70,7 +70,9 @@
     if (!tab) tab = S.profile.gender === 'm' ? 'b' : 's';
     var list = tab === 's' ? SISTERS : BROTHERS;
     var h =
-      '<header class="top"><div class="tt"><div class="eyebrow">From the Qurʾān and Sunnah</div><h1>Dress &amp; <em>ʿawrah</em></h1></div><div class="acts"><button type="button" class="chip' +
+      '<header class="top"><div class="tt"><div class="eyebrow">From the Qurʾān and Sunnah</div><h1 class="no-tr">' +
+      (A.ar() ? 'ستر <em>العورة</em> واللباس' : 'Dress &amp; <em>ʿawrah</em>') +
+      '</h1></div><div class="acts"><button type="button" class="chip' +
       (showAr ? ' on' : '') +
       '" data-a="gd-ar" aria-pressed="' +
       showAr +

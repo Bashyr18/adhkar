@@ -127,9 +127,13 @@ body::after { content: ""; position: fixed; inset: 0; z-index: -1; pointer-event
 @keyframes sheen { 50% { background-position: 100% 0; } }
 .mast small { display: block; margin-top: 16px; font: 700 clamp(12px, 1.5vw, 15px)/1.3 var(--sans); letter-spacing: .32em; text-transform: uppercase; color: var(--t2); }
 .dek { max-width: 34ch; margin: 24px 0 0; font: 400 clamp(19px, 2.2vw, 24px)/1.45 var(--serif); color: var(--t2); }
-.ayah { margin-top: 32px; padding-top: 22px; border-top: 1px solid var(--line2); max-width: 30rem; }
-.ayah .q { font-size: clamp(26px, 3.4vw, 36px); line-height: 1.9; color: var(--gold2); text-align: right; }
-.ayah p { margin: 4px 0 0; font-size: 14px; color: var(--t3); }
+.ayah { margin: 32px 0 0; padding: 22px 0 0; border-top: 1px solid var(--line2); max-width: 32rem; }
+.ayah .q { font-size: clamp(28px, 3.4vw, 38px); line-height: 1.8; color: var(--gold2); text-align: left; }
+.ayah blockquote { margin: 6px 0 0; font: italic 400 clamp(16px, 1.6vw, 18px)/1.55 var(--serif); color: var(--t2); }
+.ayah figcaption { display: flex; align-items: center; gap: 10px; margin-top: 12px; font: 600 11.5px/1 var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--t3); }
+.ayah figcaption::before { content: ""; width: 26px; height: 1px; background: var(--gold); opacity: .7; }
+.ayah figcaption b { padding: 4px 8px; border-radius: 99px; border: 1px solid var(--gold-line); color: var(--gold2); letter-spacing: .04em; font-weight: 700; }
+@media (max-width: 700px) { .ayah { text-align: center; margin-inline: auto; } .ayah .q { text-align: center; } .ayah figcaption { justify-content: center; } }
 .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
 .stage { position: relative; height: min(720px, 86vw); perspective: 1600px; }
 .stage .phone { position: absolute; width: 46%; }
@@ -399,7 +403,19 @@ footer p { margin: 18px auto 0; max-width: 60ch; }
 /* ---------- reach: the download counts, from GitHub, refreshed daily ---------- */
 .dlp-v span:not(:empty)::before { content: " · "; }
 .reach { margin-top: clamp(28px, 4vw, 44px); padding: clamp(20px, 3vw, 32px); border-radius: 28px; background: var(--s1); border: 1px solid var(--line2); }
-.reach-h { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.reach-h { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; cursor: pointer; list-style: none; border-radius: 16px; }
+.reach-h::-webkit-details-marker { display: none; }
+.reach-h:focus-visible { outline: 2px solid var(--gold); outline-offset: 6px; }
+.reach-n { margin-inline-start: 8px; padding: 3px 10px; border-radius: 99px; background: var(--gold-soft); color: var(--gold2); font-size: .62em; vertical-align: middle; font-variant-numeric: tabular-nums; }
+.reach-up { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.reach-tg { display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 99px; border: 1px solid var(--line2); font-weight: 700; color: var(--t1); }
+.reach-tg i { width: 8px; height: 8px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: translateY(-2px) rotate(45deg); transition: transform .25s ease; }
+.reach[open] .reach-tg i { transform: translateY(2px) rotate(225deg); }
+.reach .reach-tg .c, .reach[open] .reach-tg .o { display: none; }
+.reach[open] .reach-tg .c { display: inline; }
+.reach:not([open]) { padding-block: clamp(16px, 2.4vw, 22px); }
+.reach[open] .reach-grid { animation: reachIn .35s ease both; }
+@keyframes reachIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
 .reach-h h3 { margin: 8px 0 0; font-size: clamp(22px, 2.6vw, 28px); font-weight: 700; letter-spacing: -.01em; }
 .reach-up { margin: 0; font-size: 12.5px; color: var(--t3); }
 .reach-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; margin-top: 22px; }
@@ -438,7 +454,7 @@ footer p { margin: 18px auto 0; max-width: 60ch; }
 .vr.latest span:first-child { color: var(--gold2); font-weight: 700; }
 .reach-note { margin: 18px 2px 0; font-size: 12.5px; line-height: 1.6; color: var(--t3); max-width: 760px; }
 @media (max-width: 900px) {
-  .reach-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .reach-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-flow: dense; }
   .rc-total, .rc-week { grid-column: span 1; }
   .rc-split, .rc-trend, .rc-vers { grid-column: span 2; }
 }
@@ -813,15 +829,15 @@ a.mon:hover { transform: translateY(-4px); box-shadow: 0 50px 90px -40px rgba(0,
     <svg class="orn" id="orn" viewBox="-100 -100 200 200" aria-hidden="true"></svg>
     <div class="wrap">
       <div class="rv">
-        <div class="issue"><span>The Guide</span><span>Edition 13.4</span><span>November 2026</span></div>
+        <div class="issue"><span>The Guide</span><span>Edition 13.5</span><span>November 2026</span></div>
         <h1 class="mast">Adh<em>kār</em><small>Remembrance for every moment</small></h1>
         <p class="dek">Every page of the app, every feature, and how to use it, step by step. Free, private, and made with care as ṣadaqah jāriyah.</p>
         <div class="dlp" role="region" aria-label="Download Adhkār">
-          <div class="dlp-h"><span class="dlp-k">Download Adhkār</span><span class="dlp-v"><span id="dlpVer">Version 13.4</span> · free<span id="dlpCount"></span></span></div>
+          <div class="dlp-h"><span class="dlp-k">Download Adhkār</span><span class="dlp-v"><span id="dlpVer">Version 13.5</span> · free<span id="dlpCount"></span></span></div>
           <div class="dlp-grid">
             <a class="dlp-card and" href="https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar.apk">
               <span class="dlp-ic"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7.2 9.4h9.6v7.4c0 .62-.5 1.12-1.12 1.12h-.9v2.42a1.18 1.18 0 0 1-2.36 0v-2.42h-.84v2.42a1.18 1.18 0 0 1-2.36 0v-2.42h-.9c-.62 0-1.12-.5-1.12-1.12zM4.8 9.3c.65 0 1.18.53 1.18 1.18v4.88a1.18 1.18 0 0 1-2.36 0v-4.88c0-.65.53-1.18 1.18-1.18zm14.4 0c.65 0 1.18.53 1.18 1.18v4.88a1.18 1.18 0 0 1-2.36 0v-4.88c0-.65.53-1.18 1.18-1.18zM15.3 4.2l1.1-1.6a.25.25 0 0 0-.41-.28l-1.13 1.65a6 6 0 0 0-5.72 0L8.01 2.32a.25.25 0 0 0-.41.28l1.1 1.6A4.9 4.9 0 0 0 7.2 8.6h9.6a4.9 4.9 0 0 0-1.5-4.4zM9.8 7a.6.6 0 1 1 0-1.2.6.6 0 0 1 0 1.2zm4.4 0a.6.6 0 1 1 0-1.2.6.6 0 0 1 0 1.2z"/></svg></span>
-              <span class="dlp-t"><b>Android</b><small>Android 8 and newer · APK · 3.6 MB</small></span>
+              <span class="dlp-t"><b>Android</b><small>Android 8+ · phones, tablets, foldables · 3.6 MB</small></span>
               <span class="dlp-go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10.5 12 15.5l5-5M5 20h14"/></svg>Download</span>
             </a>
             <a class="dlp-card win" href="https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar-Setup.exe">
@@ -832,10 +848,11 @@ a.mon:hover { transform: translateY(-4px); box-shadow: 0 50px 90px -40px rgba(0,
           </div>
           <div class="dlp-f"><span><i></i>No ads</span><span><i></i>No account</span><span><i></i>Works offline</span><a href="#get">How to install <span aria-hidden="true">→</span></a></div>
         </div>
-        <div class="ayah">
+        <figure class="ayah">
           <div class="q" lang="ar">أَلَا بِذِكْرِ ٱللَّهِ تَطْمَئِنُّ ٱلْقُلُوبُ</div>
-          <p>Unquestionably, by the remembrance of Allah hearts are assured. Ar-Raʿd 13:28</p>
-        </div>
+          <blockquote>Unquestionably, by the remembrance of Allah hearts are assured.</blockquote>
+          <figcaption><span>Sūrat ar-Raʿd</span><b>13:28</b></figcaption>
+        </figure>
         <div class="cta">
           <a class="btn" href="#contents">Begin the guide <span class="arr" aria-hidden="true">→</span></a>
           <a class="btn tour" id="tourAll" href="#ch-today"><span class="wi" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.4-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg></span>Take the guided tour</a>
@@ -868,8 +885,8 @@ a.mon:hover { transform: translateY(-4px); box-shadow: 0 50px 90px -40px rgba(0,
       <p class="get-dek rv">The same remembrance, prayer times and Friday, on the phone in your hand and the computer you work at. Both are free, need no account, and keep everything on the device.</p>
       <div class="get-grid">
         <article class="get-card rv">
-          <div class="gc-head"><span class="gc-ic"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7.2 9.4h9.6v7.4c0 .62-.5 1.12-1.12 1.12h-.9v2.42a1.18 1.18 0 0 1-2.36 0v-2.42h-.84v2.42a1.18 1.18 0 0 1-2.36 0v-2.42h-.9c-.62 0-1.12-.5-1.12-1.12zM4.8 9.3c.65 0 1.18.53 1.18 1.18v4.88a1.18 1.18 0 0 1-2.36 0v-4.88c0-.65.53-1.18 1.18-1.18zm14.4 0c.65 0 1.18.53 1.18 1.18v4.88a1.18 1.18 0 0 1-2.36 0v-4.88c0-.65.53-1.18 1.18-1.18zM15.3 4.2l1.1-1.6a.25.25 0 0 0-.41-.28l-1.13 1.65a6 6 0 0 0-5.72 0L8.01 2.32a.25.25 0 0 0-.41.28l1.1 1.6A4.9 4.9 0 0 0 7.2 8.6h9.6a4.9 4.9 0 0 0-1.5-4.4zM9.8 7a.6.6 0 1 1 0-1.2.6.6 0 0 1 0 1.2zm4.4 0a.6.6 0 1 1 0-1.2.6.6 0 0 1 0 1.2z"/></svg></span><div><h3>Adhkār for Android</h3><p>Android 8 and newer · about 4 MB</p></div></div>
-          <ul class="gc-list"><li>Widgets, reminders and the Madinah takbīr</li><li>Sūrat al-Kahf to read and to listen to</li><li>Print or save the adhkār and the timetable as PDF</li></ul>
+          <div class="gc-head"><span class="gc-ic"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7.2 9.4h9.6v7.4c0 .62-.5 1.12-1.12 1.12h-.9v2.42a1.18 1.18 0 0 1-2.36 0v-2.42h-.84v2.42a1.18 1.18 0 0 1-2.36 0v-2.42h-.9c-.62 0-1.12-.5-1.12-1.12zM4.8 9.3c.65 0 1.18.53 1.18 1.18v4.88a1.18 1.18 0 0 1-2.36 0v-4.88c0-.65.53-1.18 1.18-1.18zm14.4 0c.65 0 1.18.53 1.18 1.18v4.88a1.18 1.18 0 0 1-2.36 0v-4.88c0-.65.53-1.18 1.18-1.18zM15.3 4.2l1.1-1.6a.25.25 0 0 0-.41-.28l-1.13 1.65a6 6 0 0 0-5.72 0L8.01 2.32a.25.25 0 0 0-.41.28l1.1 1.6A4.9 4.9 0 0 0 7.2 8.6h9.6a4.9 4.9 0 0 0-1.5-4.4zM9.8 7a.6.6 0 1 1 0-1.2.6.6 0 0 1 0 1.2zm4.4 0a.6.6 0 1 1 0-1.2.6.6 0 0 1 0 1.2z"/></svg></span><div><h3>Adhkār for Android</h3><p>Android 8 and newer · phones, tablets, foldables · about 4 MB</p></div></div>
+          <ul class="gc-list"><li>Phones, tablets and foldables: opened out, it lays itself out wide</li><li>Widgets, reminders and the Madinah takbīr</li><li>Sūrat al-Kahf to read and to listen to</li><li>Print or save the adhkār and the timetable as PDF</li></ul>
           <a class="btn pri gc-btn" href="https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar.apk">Download the APK <span class="arr" aria-hidden="true">→</span></a>
           <ol class="gc-steps"><li><b>Download</b> the file above.</li><li><b>Open it</b> from your notifications or Downloads.</li><li>If asked, <b>allow installs</b> from your browser, then <b>Install</b>.</li></ol><a class="gc-more" href="#install">Every step, with pictures <span aria-hidden="true">→</span></a>
         </article>
@@ -880,8 +897,8 @@ a.mon:hover { transform: translateY(-4px); box-shadow: 0 50px 90px -40px rgba(0,
           <ol class="gc-steps"><li><b>Download</b> the installer and open it.</li><li>If Windows says it protected your PC, choose <b>More info</b>, then <b>Run anyway</b>.</li><li>Choose <b>Install</b>. Adhkār opens from Start and your desktop, like any app.</li></ol><a class="gc-more" href="#install" data-tab="w">Every step, with pictures <span aria-hidden="true">→</span></a>
         </article>
       </div>
-      <div class="reach" id="reach" hidden>
-        <div class="reach-h"><div><div class="kicker">Reach</div><h3>Downloads so far</h3></div><p class="reach-up" id="reachUp"></p></div>
+      <details class="reach" id="reach" hidden>
+        <summary class="reach-h"><div><div class="kicker">Reach</div><h3>Downloads so far <span class="reach-n" id="reachN"></span></h3></div><p class="reach-up"><span id="reachUp"></span><span class="reach-tg"><span class="o">Show the figures</span><span class="c">Hide</span><i aria-hidden="true"></i></span></p></summary>
         <div class="reach-grid">
           <div class="rc rc-total"><span class="rc-k">All downloads</span><b class="rc-n" id="rTotal">0</b><span class="rc-s" id="rSince"></span></div>
           <div class="rc rc-split"><span class="rc-k">By device</span>
@@ -892,7 +909,7 @@ a.mon:hover { transform: translateY(-4px); box-shadow: 0 50px 90px -40px rgba(0,
           <div class="rc rc-trend"><span class="rc-k">Each day, the last 30 days</span><div class="trend" id="rTrend"></div></div>
           <div class="rc rc-vers"><span class="rc-k">By version</span><div class="vers" id="rVers"></div></div>
         </div>
-      </div>
+      </details>
       <p class="get-foot rv">Every release, with its checksums and source, is on <a href="https://github.com/Bashyr18/adhkar/releases">GitHub</a>.</p>
     </div>
   </section>
@@ -953,7 +970,7 @@ a.mon:hover { transform: translateY(-4px); box-shadow: 0 50px 90px -40px rgba(0,
       <a href="https://www.linkedin.com/in/bashirbadmus/" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5.2 3.5a2.1 2.1 0 1 1 0 4.2 2.1 2.1 0 0 1 0-4.2zM3.4 9.2h3.6V20.5H3.4zM9.3 9.2h3.45v1.55h.05c.48-.9 1.65-1.85 3.4-1.85 3.63 0 4.3 2.39 4.3 5.5v6.1h-3.58v-5.4c0-1.29-.02-2.95-1.8-2.95-1.8 0-2.08 1.4-2.08 2.86v5.49H9.3z"/></svg>The maker on LinkedIn</a>
       <a href="https://github.com/Bashyr18/adhkar/releases">Releases</a>
     </nav>
-    <p>Adhkār · The Guide · Edition 13.4 · Every screen shown is from the app itself. Free and open source under GPL-3.0.</p>
+    <p>Adhkār · The Guide · Edition 13.5 · Every screen shown is from the app itself. Free and open source under GPL-3.0.</p>
   </footer>
 </main>
 
@@ -1292,8 +1309,13 @@ var GEST = [
   ['M4 4h7v7H4zM13 13h7v7h-7z', 'Cards that open', 'Tap a collection card and it grows into its page; going back, it returns to its place.']
 ];
 /* which screens exist in light and in Arabic; everything else is shown in dark, English */
-var HAS = { light: ['adhkar', 'collection', 'deeds', 'learn-fajr', 'profile', 'qibla', 'reader', 'salah', 'today', 'tracker'], ar: ['adhkar', 'learn-fajr', 'reader', 'salah', 'today', 'tracker'] };
-var MORE = { 'ramadan/today': { light: 'ramadan/today-light' }, 'ramadan/month': { light: 'ramadan/month-light' } };
+/* every phone screen exists dark, light and in Arabic (tools/guide-shots.js), so both switches change every picture */
+var ALL = ['today', 'adhkar', 'collection', 'reader', 'search', 'saved', 'counting', 'tracker', 'insights', 'salah', 'qibla', 'month', 'night', 'duha', 'qada', 'location', 'learn', 'learn-fajr', 'quiz', 'journal', 'answered', 'deeds', 'modesty', 'profile', 'calendar', 'plan-fast', 'print', 's-appearance', 's-reading', 's-prayer', 's-reminders', 's-data', 'settings', 'print-times'];
+var HAS = { light: ALL, ar: ALL };
+var MORE = {};
+['today', 'adhkar', 'salah', 'tracker', 'month'].forEach(function (n) { MORE['ramadan/' + n] = { light: 'ramadan/' + n + '-light', ar: 'ramadan/' + n + '-ar' }; });
+['today', 'jumuah', 'kahf'].forEach(function (n) { MORE['friday/' + n] = { light: 'friday/' + n + '-light', ar: 'friday/' + n + '-ar' }; });
+MORE['extra/theme-sheet'] = { light: 'extra/theme-sheet-light', ar: 'extra/theme-sheet-ar' };
 function variants(base) {
   var v = {}, m = /^dark\/(.+)$/.exec(base), k;
   for (k in MORE[base] || {}) v[k] = MORE[base][k];
@@ -1578,7 +1600,15 @@ function refresh(ph) {
   if (want === ph.dataset.shot) return;
   ph.dataset.shot = want;
   var cur = $('.scr img', ph), nx = new Image(); nx.className = 'next'; nx.alt = cur.alt; nx.decoding = 'async'; nx.src = 'shots/' + want + '.webp';
-  var go = function () { cur.parentNode.insertBefore(nx, cur.nextSibling); requestAnimationFrame(function () { requestAnimationFrame(function () { nx.classList.remove('next'); cur.style.opacity = 0; }); }); setTimeout(function () { cur.remove(); }, 650); };
+  /* switching quickly can start a second change before the first has landed: only the newest one lands, and it
+     clears every picture before it */
+  var go = function () {
+    if (ph.dataset.shot !== want) return;
+    var host = cur.parentNode || $('.zm', ph) || $('.scr', ph);
+    host.insertBefore(nx, cur.parentNode ? cur.nextSibling : host.firstChild);
+    requestAnimationFrame(function () { requestAnimationFrame(function () { nx.classList.remove('next'); $$('img', host).forEach(function (o) { if (o !== nx) o.style.opacity = 0; }); }); });
+    setTimeout(function () { $$('img', host).forEach(function (o) { if (o !== nx && ph.dataset.shot === want) o.parentNode.removeChild(o); }); }, 650);
+  };
   if (nx.complete) go(); else nx.onload = go;
 }
 function movePill(g) { var b = $('button[aria-pressed="true"]', g), p = $('.pill', g); if (b && p && b.offsetWidth) { p.style.left = b.offsetLeft + 'px'; p.style.width = b.offsetWidth + 'px'; } }
@@ -1738,6 +1768,7 @@ addEventListener('scroll', function () { if (!ticking) { ticking = true; request
     $('dlpCount').textContent = fmt(s.total) + ' downloads';
     $('reach').hidden = false;
     $('rTotal').textContent = fmt(s.total);
+    $('reachN').textContent = fmt(s.total);
     $('rSince').textContent = 'Counting daily since ' + day(s.since);
     $('rAnd').textContent = fmt(s.android);
     $('rWin').textContent = fmt(s.windows);

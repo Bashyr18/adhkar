@@ -50,14 +50,15 @@ module.exports = async (page) => {
     out = process.argv[3],
     list = process.env.ROUTES ? process.env.ROUTES.split(',') : ROUTES,
     langs = (process.env.LANGS || 'en,ar').split(','),
-    sizes = (process.env.SIZES || '1333,1600').split(',').map(Number),
+    /* SIZES="1333,1600" (the desktop's two) or any "WxH" list, e.g. the phone build on a foldable:
+       CDP_ORIGIN=file:///…/web/index.html SIZES="344x882,673x841" */
+    sizes = (process.env.SIZES || '1333,1600').split(','),
     bad = [];
   if (process.env.SHOTS) fs.mkdirSync(out, { recursive: true });
   for (const ar of langs.map((l) => l === 'ar')) {
-    for (const [w, h] of [
-      [1333, 790],
-      [1600, 1000]
-    ].filter((x) => sizes.indexOf(x[0]) >= 0)) {
+    for (const [w, h] of sizes.map((x) =>
+      x.indexOf('x') > 0 ? x.split('x').map(Number) : x === '1333' ? [1333, 790] : [1600, 1000]
+    )) {
       await page.send('Page.addScriptToEvaluateOnNewDocument', {
         source: `try{localStorage.setItem('adhkar.v10', JSON.stringify({v:10,profile:{name:'Test',onboarded:true,since:'2026-10-01'},loc:{lat:6.52,lng:3.38,name:'Lagos',city:'Lagos',country:'Nigeria',src:'city',tz:1},prefs:{theme:'dark',lang:${ar ? "'ar'" : 'null'}},hints:{counting:1,tracker:1,reader:1,today:1,'pace-tap':1,fingers:1}}))}catch(e){}`
       });

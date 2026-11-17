@@ -286,7 +286,9 @@
       last = S.learn.last,
       h = '';
     h +=
-      '<header class="top"><div class="tt"><div class="eyebrow">As the Prophet ﷺ prayed</div><h1>Learn the <em>prayer</em></h1></div></header>';
+      '<header class="top"><div class="tt"><div class="eyebrow">As the Prophet ﷺ prayed</div><h1 class="no-tr">' +
+      (A.ar() ? 'تعلّم <em>الصلاة</em>' : 'Learn the <em>prayer</em>') +
+      '</h1></div></header>';
     h +=
       '<div class="card col lp-lead"><img class="lp-lead-fig" src="' +
       img('takbir') +

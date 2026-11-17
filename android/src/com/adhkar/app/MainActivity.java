@@ -106,6 +106,7 @@ public class MainActivity extends Activity implements SensorEventListener {
     @Override
     protected void onCreate(Bundle saved) {
         super.onCreate(saved);
+        orient(getResources().getConfiguration());
         Scheduler.channels(this);
         getWindow().setStatusBarColor(Color.TRANSPARENT);
         getWindow().setNavigationBarColor(Color.TRANSPARENT);
@@ -206,7 +207,13 @@ public class MainActivity extends Activity implements SensorEventListener {
     @Override
     public void onConfigurationChanged(Configuration c) {
         super.onConfigurationChanged(c);
+        orient(c);
         if (loaded) js("A.applyTheme&&A.applyTheme()");
+    }
+    /* a phone stays upright; a tablet, or a foldable opened out, turns as it is held (the page lays itself out wide) */
+    private void orient(Configuration c) {
+        int want = c.smallestScreenWidthDp >= 600 ? android.content.pm.ActivityInfo.SCREEN_ORIENTATION_FULL_USER : android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+        if (getRequestedOrientation() != want) setRequestedOrientation(want);
     }
 
     /* ---------- routing ---------- */

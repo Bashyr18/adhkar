@@ -39,13 +39,14 @@ One calm place for the whole day's remembrance. Today leads with what is due now
 - **Religious text from verified sources only.** Arabic word for word from Ḥiṣn al-Muslim and the Qurʾān; translations labelled "Translation", verbatim; every hadith with its grade.
 - **The Sunnah shapes the design.** The app keeps the pace while your right hand keeps the count. The basmalah always stands on its own line. No music: only the human adhān.
 - **Through the week and the year.** A Jumuʿah mode from Thursday Maghrib with Sūrat al-Kahf, a Ramaḍān mode for the whole month, and the Hijri calendar with its Sunnah fasts.
+- **Every screen.** Phones from a flip's cover screen up; on a tablet or an opened foldable it turns with you and lays out beside a side rail in balanced columns, switching back the moment the phone is folded; on Windows, a desktop app of its own.
 - **Private.** Prayer times are worked out on the device. Nothing needs an account, and nothing leaves the device unless you choose to download a recitation.
 
 ## Download
 
 | | |
 |---|---|
-| **Android** 8 or newer | [**Download `Adhkar.apk`**](https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar.apk) (about 4 MB), open it on the phone and allow the install. |
+| **Android** 8 or newer, phones, tablets and foldables | [**Download `Adhkar.apk`**](https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar.apk) (about 4 MB), open it on the phone and allow the install. |
 | **Windows** 10 or 11 | [**Download `Adhkar-Setup.exe`**](https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar-Setup.exe) (about 4 MB), open it and choose **Install**. Adhkār goes in its own folder, in Start, on your desktop and in **Settings › Apps**, for you only with no administrator needed, and updates itself from inside the app. (`Adhkar-Windows.exe` on the release page is the same app as one file that runs without installing.) |
 
 Every file, with its SHA-256 checksum, is on the [releases page](https://github.com/Bashyr18/adhkar/releases/latest). The [guide](https://bashyr18.github.io/adhkar/guide/#install) shows each install screen, step by step.

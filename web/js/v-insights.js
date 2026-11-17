@@ -43,15 +43,16 @@
   }
   function delta(cur, prev) {
     if (!prev && !cur) return '<span class="dl">·</span>';
-    if (!prev) return '<span class="dl up">new</span>';
+    if (!prev) return '<span class="dl up">' + (A.ar() ? 'جديد' : 'new') + '</span>';
     var pc = Math.round(((cur - prev) / prev) * 100);
     return (
       '<span class="dl ' +
       (pc > 0 ? 'up' : pc < 0 ? 'dn' : '') +
       '">' +
       (pc > 0 ? '▲ ' : pc < 0 ? '▼ ' : '') +
-      Math.abs(pc) +
-      '% vs previous</span>'
+      A.fmtN(Math.abs(pc)) +
+      (A.ar() ? '% عن الفترة السابقة' : '% vs previous') +
+      '</span>'
     );
   }
 
@@ -106,7 +107,9 @@
     if (rate[0][1] > 0)
       out.push([
         'star',
-        'Most consistent: <b>' + esc(rate[0][0]) + '</b> on ' + Math.round(rate[0][1] * 100) + '% of days.'
+        A.ar()
+          ? 'الأثبت: <b>' + esc(A.T(rate[0][0])) + '</b> في ' + A.fmtN(Math.round(rate[0][1] * 100)) + '% من الأيام.'
+          : 'Most consistent: <b>' + esc(rate[0][0]) + '</b> on ' + Math.round(rate[0][1] * 100) + '% of days.'
       ]);
     var wd = [0, 0, 0, 0, 0, 0, 0],
       wc = [0, 0, 0, 0, 0, 0, 0];
@@ -117,17 +120,34 @@
     });
     var best = 0;
     for (var i = 1; i < 7; i++) if (wd[i] / (wc[i] || 1) > wd[best] / (wc[best] || 1)) best = i;
-    if (wd[best]) out.push(['cal', 'Your strongest day is <b>' + A.DOW[best] + '</b>.']);
+    if (wd[best])
+      out.push([
+        'cal',
+        A.ar() ? 'أقوى أيامك: <b>' + A.T(A.DOW[best]) + '</b>.' : 'Your strongest day is <b>' + A.DOW[best] + '</b>.'
+      ]);
     if (c.act)
       out.push([
         'chart',
-        'On active days you average <b>' + A.fmtN(Math.round(c.dhikr / c.act)) + '</b> remembrances.'
+        A.ar()
+          ? 'في أيام نشاطك تذكر في المتوسط <b>' + A.fmtN(Math.round(c.dhikr / c.act)) + '</b> مرة.'
+          : 'On active days you average <b>' + A.fmtN(Math.round(c.dhikr / c.act)) + '</b> remembrances.'
       ]);
     var weakest = rate[rate.length - 1];
     if (rate[0][1] > 0 && weakest[1] < 0.5)
-      out.push(['spark', 'A gentle aim: <b>' + esc(weakest[0]) + '</b>, even a little, consistently.']);
+      out.push([
+        'spark',
+        A.ar()
+          ? 'هدف لطيف: <b>' + esc(A.T(weakest[0])) + '</b>، ولو قليلًا، بانتظام.'
+          : 'A gentle aim: <b>' + esc(weakest[0]) + '</b>, even a little, consistently.'
+      ]);
     var st = A.streaks();
-    if (st.cur >= 3) out.push(['flame', 'You are on a <b>' + st.cur + '-day</b> streak. Keep going.']);
+    if (st.cur >= 3)
+      out.push([
+        'flame',
+        A.ar()
+          ? 'أنت في <b>' + A.fmtN(st.cur) + ' أيام</b> متتالية. واصل.'
+          : 'You are on a <b>' + st.cur + '-day</b> streak. Keep going.'
+      ]);
     return out.length
       ? '<div class="card col">' +
           out
@@ -135,7 +155,7 @@
               return (
                 '<div class="row" style="align-items:flex-start"><span class="badge s h-gold">' +
                 ic(x[0], 's') +
-                '</span><div class="grow small" style="padding-top:8px">' +
+                '</span><div class="grow small no-tr" style="padding-top:8px">' +
                 x[1] +
                 '</div></div>'
               );

@@ -827,7 +827,9 @@
       esc(A.fmtDate(nk, 'short')) +
       ' → ' +
       esc(A.fmtDate(A.shift(nk, 1), 'short')) +
-      '</div><h1>Qiyām <em>al-Layl</em></h1></div></header>';
+      '</div><h1 class="no-tr">' +
+      (A.ar() ? 'قيام <em>الليل</em>' : 'Qiyām <em>al-Layl</em>') +
+      '</h1></div></header>';
     var st = [
       ['Maghrib', 'The night begins', t.maghrib],
       ['ʿIshāʾ', 'Night prayer may follow ʿishāʾ', t.isha],
@@ -1045,7 +1047,9 @@
           : A.T('Opens tomorrow at') + ' ' + A.fmtTxt(A.pday(A.shift(k, 1)).duhaStart);
     var h =
       A.back('Ṣalāh', '#/salah') +
-      '<header class="top"><div class="tt"><div class="eyebrow">The forenoon prayer</div><h1>Ṣalāt <em>al-Ḍuḥā</em></h1></div></header>';
+      '<header class="top"><div class="tt"><div class="eyebrow">The forenoon prayer</div><h1 class="no-tr">' +
+      (A.ar() ? 'صلاة <em>الضحى</em>' : 'Ṣalāt <em>al-Ḍuḥā</em>') +
+      '</h1></div></header>';
     h +=
       '<div class="card col h-gold"><div class="spread" style="flex-wrap:wrap"><div style="font-weight:800">' +
       state +

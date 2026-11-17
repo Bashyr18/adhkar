@@ -118,9 +118,10 @@
       '</div>';
     h +=
       '<div class="calg">' +
-      ['S', 'M', 'T', 'W', 'T', 'F', 'S']
+      /* the days' initials; in Arabic the first letter of each name, as Arabic calendars print them */
+      (A.ar() ? ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س'] : ['S', 'M', 'T', 'W', 'T', 'F', 'S'])
         .map(function (x) {
-          return '<span class="dw">' + x + '</span>';
+          return '<span class="dw no-tr">' + x + '</span>';
         })
         .join('');
     for (var i = 0; i < lead; i++) h += '<span></span>';

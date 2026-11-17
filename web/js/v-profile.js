@@ -753,7 +753,7 @@
               encodeURIComponent('Adhkār feedback (v' + (A.N.has ? A.N.version() : 'web') + ')') +
               '" data-a="ext"><span class="badge h-gold">' +
               ic('mail', 's') +
-              '</span><div class="grow"><div class="t">Feedback and suggestions</div><div class="s">bashyr18@gmail.com</div></div>' +
+              '</span><div class="grow"><div class="t">Feedback and suggestions</div><div class="s no-tr" dir="ltr">bashyr18@gmail.com</div></div>' +
               ic('link', 's') +
               '</a>'
           ]) +
@@ -1066,7 +1066,11 @@
         A.rosette(150) +
         '</div><div class="mushaf" style="padding:0"><p class="ayat ob-ayah"><span class="ay">' +
         esc(W.ar) +
-        '</span></p></div><h1>Hearts find rest in the <em>remembrance</em> of Allah</h1><p class="faint small">Ar-Raʿd 13:28</p><div class="ob-pills"><span class="chip">' +
+        '</span></p></div><h1 class="no-tr">' +
+        /* in Arabic the verse itself stands above, from the verified text; the heading is the app's own line, never a
+           verse typed by hand */
+        (A.ar() ? 'ذكر <em>لكل لحظة</em>' : 'Hearts find rest in the <em>remembrance</em> of Allah') +
+        '</h1><p class="faint small">Ar-Raʿd 13:28</p><div class="ob-pills"><span class="chip">' +
         ic('book', 'xs') +
         'Adhkār</span><span class="chip">' +
         ic('mosque', 'xs') +

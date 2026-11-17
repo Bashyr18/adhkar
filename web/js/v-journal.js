@@ -92,7 +92,9 @@
       nx = nextAnswer();
     var h =
       A.back('Back') +
-      '<header class="top"><div class="tt"><div class="eyebrow">Journal</div><h1>My <em>duʿāʾs</em></h1></div><div class="acts"><button type="button" class="ib ghost" data-a="dua-add" aria-label="Add a duʿāʾ">' +
+      '<header class="top"><div class="tt"><div class="eyebrow">Journal</div><h1 class="no-tr">' +
+      (A.ar() ? '<em>أدعيتي</em>' : 'My <em>duʿāʾs</em>') +
+      '</h1></div><div class="acts"><button type="button" class="ib ghost" data-a="dua-add" aria-label="Add a duʿāʾ">' +
       ic('plus', 's') +
       '</button></div></header>';
     h += now

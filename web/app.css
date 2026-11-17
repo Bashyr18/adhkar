@@ -506,6 +506,13 @@ button.card:active,
   gap: 12px;
   min-width: 0;
 }
+/* the profile's two buttons keep their words on one line; on the narrowest screens they sit one above the other */
+.phead .row {
+  flex-wrap: wrap;
+}
+.phead .row .btn {
+  white-space: nowrap;
+}
 .row > *,
 .spread > * {
   min-width: 0;

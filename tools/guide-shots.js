@@ -43,28 +43,33 @@ const PHONE = {
   's-reading': '#/settings/reading',
   's-prayer': '#/settings/prayer',
   's-reminders': '#/settings/notifications',
-  's-data': '#/settings/data'
+  's-data': '#/settings/data',
+  settings: '#/settings',
+  'print-times': '#/print|[data-w="times"]'
 };
+/* Ramaḍān and Friday: the screens that change with them */
+const RAMADAN = { today: '#/', adhkar: '#/adhkar', salah: '#/salah', tracker: '#/tracker', month: '#/ramadan' };
+const FRIDAY = { today: '#/', jumuah: '#/jumuah', kahf: '#/kahf' };
+/* the theme sheet, opened from Today's palette button */
+const SHEET = { 'theme-sheet': '#/|[data-a="theme"]' };
 const GROUPS = {
+  /* every screen in all three: the guide's Day / Night and English / العربية switches change every picture */
   dark: { theme: 'dark', shots: Object.keys(PHONE) },
-  light: {
-    theme: 'light',
-    shots: ['today', 'adhkar', 'collection', 'reader', 'tracker', 'salah', 'qibla', 'profile', 'deeds', 'learn-fajr']
-  },
-  ar: { theme: 'dark', ar: true, shots: ['today', 'adhkar', 'reader', 'tracker', 'salah', 'learn-fajr'] },
+  light: { theme: 'light', shots: Object.keys(PHONE) },
+  ar: { theme: 'dark', ar: true, shots: Object.keys(PHONE) },
+  extra: { theme: 'dark', shots: SHEET },
+  'extra-light': { theme: 'light', dir: 'extra', suffix: '-light', shots: SHEET },
+  'extra-ar': { theme: 'dark', ar: true, dir: 'extra', suffix: '-ar', shots: SHEET },
   /* a Friday morning, and the first days of Ramaḍān 1448 */
-  friday: { theme: 'dark', at: '2026-11-20T09:30:00', shots: { today: '#/', jumuah: '#/jumuah', kahf: '#/kahf' } },
-  'friday-light': {
-    theme: 'light',
-    at: '2026-11-20T09:30:00',
-    dir: 'friday',
-    suffix: '-light',
-    shots: { today: '#/', kahf: '#/kahf' }
-  },
+  friday: { theme: 'dark', at: '2026-11-20T09:30:00', shots: FRIDAY },
+  'friday-light': { theme: 'light', at: '2026-11-20T09:30:00', dir: 'friday', suffix: '-light', shots: FRIDAY },
+  'friday-ar': { theme: 'dark', ar: true, at: '2026-11-20T09:30:00', dir: 'friday', suffix: '-ar', shots: FRIDAY },
+  'ramadan-light': { theme: 'light', at: '2027-02-18T15:20:00', dir: 'ramadan', suffix: '-light', shots: RAMADAN },
+  'ramadan-ar': { theme: 'dark', ar: true, at: '2027-02-18T15:20:00', dir: 'ramadan', suffix: '-ar', shots: RAMADAN },
   ramadan: {
     theme: 'dark',
     at: '2027-02-18T15:20:00',
-    shots: { today: '#/', adhkar: '#/adhkar', salah: '#/salah', tracker: '#/tracker', month: '#/ramadan' }
+    shots: RAMADAN
   },
   desk: {
     theme: 'dark',
@@ -175,6 +180,11 @@ async function run(page) {
   await page.send('Page.navigate', { url: ORIGIN + (g.desk ? '?desk' : '') });
   await page.wait(3500);
   const shots = Array.isArray(g.shots) ? Object.fromEntries(g.shots.map((s) => [s, PHONE[s]])) : g.shots;
+  /* GS_ONLY="answered,calendar" retakes only those */
+  if (process.env.GS_ONLY) {
+    const only = process.env.GS_ONLY.split(',');
+    Object.keys(shots).forEach((k) => only.indexOf(k) < 0 && delete shots[k]);
+  }
   /* start from Today so every page is reached the way a person reaches it */
   await page.eval("location.hash='#/';1");
   await page.wait(1200);
@@ -194,8 +204,13 @@ async function run(page) {
       );
       await page.wait(1600);
     } else {
-      await page.eval(`location.hash=${JSON.stringify(route)};1`);
+      const [hash, tap] = route.split('|');
+      await page.eval(`location.hash=${JSON.stringify(hash)};1`);
       await page.wait(1500);
+      if (tap) {
+        await page.eval(`(function(){var b=document.querySelector(${JSON.stringify(tap)});if(b)b.click();return 1})()`);
+        await page.wait(1100);
+      }
     }
     if (shot === 'plan-fast') {
       await page.eval(
@@ -218,11 +233,25 @@ if (process.env.GS_GROUP) module.exports = run;
 else {
   /* the runner: each group in its own browser, then every PNG to WebP (phone shots cropped to 720 x 1491) */
   const want = process.argv.slice(2).length ? process.argv.slice(2) : Object.keys(GROUPS);
+  /* headless Edge now and then stops answering mid-group: give each group six minutes, and one more try */
   for (const name of want) {
-    execFileSync(process.execPath, [path.join(__dirname, 'cdp.js'), __filename, path.join(ROOT, 'build', 'shots')], {
-      stdio: 'inherit',
-      env: Object.assign({}, process.env, { GS_GROUP: name, CDP_ORIGIN: ORIGIN })
-    });
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        execFileSync(
+          process.execPath,
+          [path.join(__dirname, 'cdp.js'), __filename, path.join(ROOT, 'build', 'shots')],
+          {
+            stdio: 'inherit',
+            timeout: 6 * 60 * 1000,
+            killSignal: 'SIGKILL',
+            env: Object.assign({}, process.env, { GS_GROUP: name, CDP_ORIGIN: ORIGIN })
+          }
+        );
+        break;
+      } catch (e) {
+        console.log(name, 'stopped answering' + (attempt === 1 ? '; once more' : '; skipped'));
+      }
+    }
   }
   execFileSync(
     'python',

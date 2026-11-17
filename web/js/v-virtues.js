@@ -273,7 +273,9 @@
       k = A.today();
     var h =
       A.back('Today', '#/') +
-      '<header class="top"><div class="tt"><div class="eyebrow">From the Sunnah</div><h1>When duʿāʾ is <em>answered</em></h1></div></header>';
+      '<header class="top"><div class="tt"><div class="eyebrow">From the Sunnah</div><h1 class="no-tr">' +
+      (A.ar() ? 'متى <em>يُستجاب</em> الدعاء' : 'When duʿāʾ is <em>answered</em>') +
+      '</h1></div></header>';
     if (!S.loc)
       h +=
         '<div class="card col"><p class="muted small">Set your location to see these times live.</p><a class="btn pri sm" href="#/location">Set location</a></div>';
@@ -562,7 +564,9 @@
     }
     var h =
       A.back('Adhkār', '#/adhkar') +
-      '<header class="top"><div class="tt"><div class="eyebrow">Little deeds, great rewards</div><h1>Small <em>deeds</em></h1></div></header>';
+      '<header class="top"><div class="tt"><div class="eyebrow">Little deeds, great rewards</div><h1 class="no-tr">' +
+      (A.ar() ? 'أعمال <em>يسيرة</em>' : 'Small <em>deeds</em>') +
+      '</h1></div></header>';
     h +=
       '<div class="card row h-rose" style="gap:16px">' +
       A.ring(n / DEEDS.length, 64, '<b style="font-size:16px;color:var(--t1)">' + n + '</b>', 'var(--rose)', 4) +

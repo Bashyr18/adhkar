@@ -5,7 +5,8 @@ const fs = require('fs'),
   path = require('path');
 module.exports = async (page) => {
   const out = process.argv[3];
-  const base = 'file:///' + path.join(__dirname, '..', 'windows', 'setup', 'art.html').replace(/\\/g, '/').replace(/ /g, '%20');
+  const base =
+    'file:///' + path.join(__dirname, '..', 'windows', 'setup', 'art.html').replace(/\\/g, '/').replace(/ /g, '%20');
   for (const q of ['dark', 'light', 'dark-ar', 'light-ar']) {
     await page.size(260, 470, 1);
     await page.send('Page.navigate', { url: base + '?' + q });
@@ -16,7 +17,10 @@ module.exports = async (page) => {
       } catch (e) {}
     }
     await page.wait(300);
-    const shot = await page.send('Page.captureScreenshot', { format: 'png', clip: { x: 0, y: 0, width: 260, height: 470, scale: 2 } });
+    const shot = await page.send('Page.captureScreenshot', {
+      format: 'png',
+      clip: { x: 0, y: 0, width: 260, height: 470, scale: 2 }
+    });
     fs.writeFileSync(path.join(out, 'art-' + q + '.png'), Buffer.from(shot.result.data, 'base64'));
     console.log('art-' + q + '.png');
   }

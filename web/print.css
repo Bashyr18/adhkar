@@ -181,7 +181,14 @@
   margin-bottom: 10px;
 }
 .pr-seg button {
-  flex: 1 1 0;
+  flex: 1 0 auto;
+  white-space: nowrap;
+}
+/* a small screen: the four choices keep their words and scroll, rather than running into each other */
+@media (max-width: 360px) {
+  .pr-seg button svg {
+    display: none;
+  }
 }
 .pr-prev {
   position: relative;

@@ -1,6 +1,9 @@
-/* Adhkār on a computer. Everything here runs only inside the Windows app (windows/shim.js sets ADHKAR_DESKTOP);
-   on a phone or in a browser this file does nothing. (For checking the layout in a browser, ?desk turns it on with a
-   stand-in bridge.)
+/* Adhkār on a computer, and on a tablet or an opened foldable. Inside the Windows app (windows/shim.js sets
+   ADHKAR_DESKTOP) all of it runs. On a phone, a tablet or in a browser only the wide layout runs, and only while the
+   screen is at least 600 wide: a tablet, a foldable opened out, a phone turned on its side stays a phone. Folding or
+   unfolding switches it as it happens. The computer's own parts (Print and PDF, This computer, the keys, the tray)
+   stay on the computer. (For checking the computer's layout in a browser, ?desk turns all of it on with a stand-in
+   bridge.)
 
    What a computer adds, decorating the shared screens rather than replacing them:
    - a side rail instead of the bottom bar: the five areas, the duʿāʾ journal, Print and This computer;
@@ -13,7 +16,11 @@
 (function () {
   'use strict';
   var dev = !window.ADHKAR_DESKTOP && /[?&]desk(=|&|$)/.test(location.search);
-  if (!window.ADHKAR_DESKTOP && !dev) return;
+  /* a tablet or foldable: the wide layout while the screen is wide enough, nothing of the computer's */
+  var tab = !window.ADHKAR_DESKTOP && !dev;
+  function roomy() {
+    return !tab || innerWidth >= 600;
+  }
   var A = window.A,
     S = A.S,
     $ = A.$,
@@ -49,7 +56,19 @@
       }
     );
   }
-  var B = window.DeskBridge;
+  /* on a tablet there is no Windows bridge: a silent stand-in, kept local so nothing else mistakes it for one */
+  var B = tab
+    ? new Proxy(
+        {},
+        {
+          get: function () {
+            return function () {
+              return '';
+            };
+          }
+        }
+      )
+    : window.DeskBridge;
   var Desk = (window.Desk = {});
   function info() {
     try {
@@ -138,7 +157,7 @@
       '<span>' +
       esc(L('Search or jump', 'ابحث أو انتقل')) +
       '</span>' +
-      kbd('Ctrl K') +
+      (tab ? '' : kbd('Ctrl K')) +
       '</button><nav class="rl-nav">' +
       NAV.map(function (n, i) {
         var on = n[5].indexOf(r.name) >= 0 || (r.name === 'r' && i === 1);
@@ -160,23 +179,27 @@
           '</span></a>'
         );
       }).join('') +
-      '</nav><div class="rl-sec">' +
-      esc(L('On this computer', 'على هذا الحاسوب')) +
-      '</div><nav class="rl-nav">' +
-      '<a class="rl-i' +
-      (r.raw === 'desk/print' ? ' on' : '') +
-      '" href="#/desk/print">' +
-      ic('print', 20) +
-      '<span>' +
-      esc(L('Print and PDF', 'الطباعة وPDF')) +
-      '</span></a>' +
-      '<a class="rl-i' +
-      (r.raw === 'desk/pc' ? ' on' : '') +
-      '" href="#/desk/pc">' +
-      ic('pc', 20) +
-      '<span>' +
-      esc(L('This computer', 'هذا الحاسوب')) +
-      '</span></a></nav><div class="grow"></div>' +
+      '</nav>' +
+      (tab
+        ? ''
+        : '<div class="rl-sec">' +
+          esc(L('On this computer', 'على هذا الحاسوب')) +
+          '</div><nav class="rl-nav">' +
+          '<a class="rl-i' +
+          (r.raw === 'desk/print' ? ' on' : '') +
+          '" href="#/desk/print">' +
+          ic('print', 20) +
+          '<span>' +
+          esc(L('Print and PDF', 'الطباعة وPDF')) +
+          '</span></a>' +
+          '<a class="rl-i' +
+          (r.raw === 'desk/pc' ? ' on' : '') +
+          '" href="#/desk/pc">' +
+          ic('pc', 20) +
+          '<span>' +
+          esc(L('This computer', 'هذا الحاسوب')) +
+          '</span></a></nav>') +
+      '<div class="grow"></div>' +
       '<div class="up-chip-slot rl-up">' +
       (A.upd ? A.upd.chip() : '') +
       '</div>' +
@@ -187,21 +210,32 @@
       ic(dark ? 'sun' : 'moon', 19) +
       '<span>' +
       esc(dark ? L('Day', 'نهار') : L('Night', 'ليل')) +
-      '</span></button><button class="rl-tool" data-desk="keys" title="' +
-      esc(L('Keyboard shortcuts', 'اختصارات لوحة المفاتيح')) +
-      ' · F1">' +
-      ic('kbd', 19) +
-      '<span>' +
-      esc(L('Keys', 'المفاتيح')) +
-      '</span></button></div>';
+      '</span></button>' +
+      (tab
+        ? ''
+        : '<button class="rl-tool" data-desk="keys" title="' +
+          esc(L('Keyboard shortcuts', 'اختصارات لوحة المفاتيح')) +
+          ' · F1">' +
+          ic('kbd', 19) +
+          '<span>' +
+          esc(L('Keys', 'المفاتيح')) +
+          '</span></button>') +
+      '</div>';
     paintNext();
   }
   function placeRail() {
-    var name = A.route().name;
-    var show = !BARE[name] && !!(S.profile && S.profile.onboarded);
+    var name = A.route().name,
+      root = document.documentElement,
+      wideOk = roomy();
+    var show = wideOk && !BARE[name] && !!(S.profile && S.profile.onboarded);
+    if (tab) {
+      root.classList.toggle('is-desk', wideOk);
+      root.classList.toggle('is-tab', wideOk);
+    }
     if (!rail.parentNode) document.body.insertBefore(rail, document.body.firstChild);
-    document.documentElement.classList.toggle('has-rail', show);
-    document.documentElement.classList.toggle('rail-mini', show && mini);
+    root.classList.toggle('has-rail', show);
+    /* a tablet in portrait or a foldable opened out keeps the rail to its icons, leaving the page the room */
+    root.classList.toggle('rail-mini', show && (mini || (tab && innerWidth < 1000)));
     if (show) drawRail();
   }
   rail.addEventListener('click', function (e) {
@@ -237,6 +271,7 @@
   };
   function after() {
     placeRail();
+    if (!roomy()) return;
     var r = A.route(),
       h1 = $('.view h1'),
       sub = TITLES[r.name] ? T(TITLES[r.name]) : h1 ? h1.textContent.trim() : '';
@@ -644,7 +679,16 @@
     deal(v.querySelector('.dk-grid'));
   }
   /* a window made wider or narrower: the columns are balanced again */
+  var wasRoomy = roomy(),
+    wasMini = innerWidth < 1000;
   addEventListener('resize', function () {
+    /* a foldable opened or closed, a tablet turned: the layout follows at once */
+    if (tab && (roomy() !== wasRoomy || innerWidth < 1000 !== wasMini)) {
+      wasRoomy = roomy();
+      wasMini = innerWidth < 1000;
+      A.rerender();
+      return;
+    }
     clearTimeout(wide._r);
     wide._r = setTimeout(function () {
       var v = $('#app > .view'),
@@ -1086,6 +1130,7 @@
       '</span></a>';
   }
   function nextToHost() {
+    if (tab) return; /* the tray, the pill and the reminders are the Windows app's */
     var n = A.now();
     if (!n.next || !n.next.at) return;
     try {
@@ -1190,6 +1235,7 @@
   }
   /* the next two days of reminders, from the same settings the phone uses */
   function schedule() {
+    if (tab) return; /* a phone or tablet rings its own reminders natively */
     var N = S.notif,
       out = [],
       now = Date.now();
@@ -2275,6 +2321,7 @@
     if (app) screens.observe(app, { childList: true });
     rdWatch.observe(document.body, { childList: true });
     after();
+    if (tab) return;
     schedule();
     nextToHost();
   }

@@ -538,7 +538,6 @@
     'Add the prayers you missed, then log each one as you pray it.': 'أضف الصلوات الفائتة، ثم سجّل كل صلاة عند قضائها.',
     'All made up, alḥamdulillāh': 'تم القضاء كله، الحمد لله',
     // onboarding
-    'Hearts find rest in the': 'ألا بذكر الله',
     'Bismillāh, let us begin': 'بسم الله، لنبدأ',
     'Restore a backup': 'استعادة نسخة',
     Name: 'الاسم',
@@ -1271,6 +1270,39 @@
     deeds: 'أعمال',
     answered: 'مستجاب',
     'When duʿāʾ is': 'متى يستجاب',
+    /* found by walking every screen in Arabic */
+    '+ 1 year': '+ سنة',
+    Calendar: 'التقويم',
+    'Layl · dark': 'ليل · داكن',
+    'Nahār · light': 'نهار · فاتح',
+    'Match system': 'كالنظام',
+    gold: 'ذهبي',
+    emerald: 'زمردي',
+    sapphire: 'ياقوتي',
+    rose: 'وردي',
+    pearl: 'لؤلئي',
+    'Open now': 'مفتوح الآن',
+    'khatm tracker all year': 'متابعة الختمة طوال العام',
+    Sunday: 'الأحد',
+    Monday: 'الاثنين',
+    Tuesday: 'الثلاثاء',
+    Wednesday: 'الأربعاء',
+    Thursday: 'الخميس',
+    Friday: 'الجمعة',
+    Saturday: 'السبت',
+    'Day streak': 'أيام متتالية',
+    Tomorrow: 'غدًا',
+    'Answered duʿāʾ': 'الدعاء المستجاب',
+    ʿĪd: 'العيد',
+    'Match your local moon sighting': 'طابِق رؤية الهلال في بلدك',
+    'tap the circles on the Ṣalāh tab to log': 'اضغط الدوائر في تبويب الصلاة لتسجيلها',
+    'Standard ʿaṣr': 'العصر القياسي',
+    'Turn until the Kaʿbah reaches the gold pointer.': 'أدِر حتى تبلغ الكعبة المؤشر الذهبي.',
+    /* the theme sheet */
+    Auto: 'تلقائي',
+    Dark: 'داكن',
+    Light: 'فاتح',
+    Accent: 'اللون',
     'Adhkār needs JavaScript.': 'يحتاج التطبيق إلى جافاسكربت.',
     London: 'لندن'
   };
@@ -1343,6 +1375,114 @@
       /^about (\d+) min$/,
       function (m) {
         return 'نحو ' + m[1] + ' د';
+      }
+    ],
+    [
+      /^(Fajr|Sunrise|Shurūq|Dhuhr|ʿAṣr|Maghrib|ʿIshāʾ|ʿIshā) (\d.*)$/,
+      function (m) {
+        return T(m[1]) + ' ' + T(m[2]);
+      }
+    ],
+    [
+      /^(.{1,24}\d.{0,12}) to (.{1,24}\d.{0,12})$/,
+      function (m) {
+        return T(m[1]) + ' إلى ' + T(m[2]);
+      }
+    ],
+    [
+      /^Ends \((\d+) min before (.+)\)$/,
+      function (m) {
+        return 'تنتهي (قبل ' + T(m[2]) + ' بـ' + m[1] + ' د)';
+      }
+    ],
+    [
+      /^(\d+) min before (.+)$/,
+      function (m) {
+        return 'قبل ' + T(m[2]) + ' بـ' + m[1] + ' د';
+      }
+    ],
+    [
+      /^([\d,]+) remembrances$/,
+      function (m) {
+        return m[1] + ' ذكرًا';
+      }
+    ],
+    [
+      /^(\d+)° from north$/,
+      function (m) {
+        return m[1] + '° من الشمال';
+      }
+    ],
+    [
+      /^qibla is (\d+)° (left|right) of it$/,
+      function (m) {
+        return 'القبلة ' + m[1] + '° ' + (m[2] === 'left' ? 'إلى يساره' : 'إلى يمينه');
+      }
+    ],
+    [
+      /^(\d+)-hour times$/,
+      function (m) {
+        return 'توقيت ' + m[1] + ' ساعة';
+      }
+    ],
+    [
+      /^The waking dhikr of (.+)$/,
+      function (m) {
+        return 'ذكر الاستيقاظ · ' + m[1];
+      }
+    ],
+    [
+      /^(.+), by the Umm al-Qurā calendar\. Local moon sighting may differ by a day\.$/,
+      function (m) {
+        return T(m[1]) + '، بحسب تقويم أم القرى. قد تختلف رؤية الهلال في بلدك بيوم.';
+      }
+    ],
+    [
+      /^Begins \(sunrise \+ (\d+) min\)$/,
+      function (m) {
+        return 'تبدأ (الشروق + ' + m[1] + ' د)';
+      }
+    ],
+    [
+      /^Begins in (.+)$/,
+      function (m) {
+        return 'يبدأ بعد ' + T(m[1]);
+      }
+    ],
+    [
+      /^Begins (.+)$/,
+      function (m) {
+        return 'يبدأ ' + T(m[1]);
+      }
+    ],
+    [
+      /^(\d+) min left$/,
+      function (m) {
+        return 'بقي ' + m[1] + ' د';
+      }
+    ],
+    [
+      /^(.+) left$/,
+      function (m) {
+        return 'بقي ' + T(m[1]);
+      }
+    ],
+    [
+      /^Last (\d+) weeks$/,
+      function (m) {
+        return 'آخر ' + m[1] + ' أسبوعًا';
+      }
+    ],
+    [
+      /^best (.+)$/,
+      function (m) {
+        return 'الأفضل ' + T(m[1]);
+      }
+    ],
+    [
+      /^(\d+) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)$/,
+      function (m) {
+        return m[1] + ' ' + T(m[2]);
       }
     ],
     [
@@ -1769,8 +1909,11 @@
   function T(s) {
     if (!s) return s;
     fromData();
-    var t = s.trim();
-    if (!t) return s;
+    var t0 = s.trim();
+    if (!t0) return s;
+    var t = t0.replace(/[\u0660-\u0669\u066c]/g, function (d) {
+      return d === '\u066c' ? ',' : String(d.charCodeAt(0) - 0x660);
+    });
     var out = D[t];
     if (out == null) {
       for (var i = 0; i < BOOK.length && out == null; i++) {
@@ -1782,14 +1925,27 @@
         if (m) out = PAT[j][1](m);
       }
       if (out == null && t.indexOf(' · ') > 0) {
+        /* the longest run of parts that is a phrase of its own, then the rest: "Grief · distress · anger · 8" is a
+           known phrase and a count, not four unknown words */
         var parts = t.split(' · '),
-          tr = parts.map(T);
-        if (
-          tr.some(function (x, k) {
-            return x !== parts[k];
-          })
-        )
-          out = tr.join(' · ');
+          tr = [],
+          changed = false;
+        for (var p = 0; p < parts.length;) {
+          var took = 1,
+            got = T(parts[p]);
+          for (var q = parts.length; q > p + 1; q--) {
+            var whole = parts.slice(p, q).join(' · ');
+            if (D[whole] != null) {
+              took = q - p;
+              got = D[whole];
+              break;
+            }
+          }
+          if (got !== parts.slice(p, p + took).join(' · ')) changed = true;
+          tr.push(got);
+          p += took;
+        }
+        if (changed) out = tr.join(' · ');
       }
       if (out == null && /^[^,]+(, [^,]+)+$/.test(t)) {
         var cp = t.split(', '),
@@ -1802,8 +1958,8 @@
           out = ct.join('، ');
       }
     }
-    if (out == null) out = t;
-    return s.replace(t, out);
+    if (out == null) return s;
+    return s.replace(t0, out);
   }
   A.T = function (s) {
     return A.ar() ? digits(T(s)) : s;

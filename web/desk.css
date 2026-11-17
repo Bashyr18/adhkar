@@ -31,7 +31,8 @@ html.has-rail #rail {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 18px 14px 14px;
+  /* on a tablet the status bar and the gesture bar lie over the screen's edges: keep clear of both */
+  padding: calc(18px + var(--sat, 0px)) 14px calc(14px + var(--sab, 0px));
   background: color-mix(in srgb, var(--s1) 70%, var(--bg));
   border-inline-end: 1px solid var(--line);
   overflow-y: auto;
@@ -330,8 +331,8 @@ html.rail-mini .rl-foot {
 /* the head of the rail: the sky of this moment of the day, with the two dates beneath the name */
 .rl-sky {
   position: relative;
-  margin: -18px -14px 12px;
-  padding: 18px 14px 14px;
+  margin: calc(-18px - var(--sat, 0px)) -14px 12px;
+  padding: calc(18px + var(--sat, 0px)) 14px 14px;
   border-bottom: 1px solid var(--line);
   isolation: isolate;
 }
@@ -387,7 +388,7 @@ html.has-rail #app {
   max-width: none;
   margin: 0;
   margin-inline-start: var(--rail);
-  padding: 30px var(--dk-gut) 56px;
+  padding: calc(30px + var(--sat, 0px)) var(--dk-gut) calc(56px + var(--sab, 0px));
 }
 html.has-rail #app > .view {
   max-width: 880px;
@@ -629,12 +630,16 @@ html.is-desk.dropping body::after {
     background 0.2s;
 }
 .db-w span {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
+  /* a block, so a window too short for its name ends in an ellipsis rather than a cut letter */
+  display: block;
+  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.db-w span svg {
+  vertical-align: -2px;
+  margin-inline-end: 5px;
 }
 .db-w:hover {
   color: var(--t1);
@@ -1631,8 +1636,8 @@ html.has-rail .view.dk-two > header.top .acts .ib[data-a='dua-add']::after {
 }
 
 /* phone-only controls have no place on a computer: home-screen widgets and the phone's own device settings */
-html.is-desk [data-a='pin-widget'],
-html.is-desk a.set[href='#/settings/device'] {
+html.is-desk:not(.is-tab) [data-a='pin-widget'],
+html.is-desk:not(.is-tab) a.set[href='#/settings/device'] {
   display: none;
 }
 
