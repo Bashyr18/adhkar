@@ -106,6 +106,8 @@ def main():
     sargs = [csc, '/nologo', '/optimize+', '/target:winexe', '/platform:x64', '/langversion:5', '/codepage:65001', '/utf8output',
              '/out:' + setup, '/win32icon:' + ico, '/win32manifest:' + os.path.join(WIN, 'setup', 'setup.manifest'),
              '/resource:' + exe + ',Adhkar.exe', '/resource:' + os.path.join(WIN, 'icon.png') + ',icon.png']
+    for art in ('dark', 'light', 'dark-ar', 'light-ar'):   # the brand panel, from tools/setup-art.js
+        sargs.append('/resource:' + os.path.join(WIN, 'setup', 'art-' + art + '.png') + ',art-' + art + '.png')
     for ref in ('System.dll', 'System.Core.dll', 'System.Drawing.dll', 'System.Windows.Forms.dll', 'Microsoft.CSharp.dll'):
         sargs.append('/r:' + os.path.join(fw, ref))
     sargs += [sinfo, os.path.join(WIN, 'setup', 'Setup.cs')]

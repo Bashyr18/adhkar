@@ -202,39 +202,55 @@ namespace AdhkarSetup {
         public static string T(string en, string ar) { return Ar ? ar : en; }
     }
 
-    /* ================= the window ================= */
+    /* ================= the window =================
+       Two panels: the brand on the left (windows/setup/art-*.png, drawn by tools/setup-art.js with the app's own
+       fonts and rosette), the task on the right. Everything is painted here at 96 dpi units, scaled for the screen
+       and mirrored for Arabic; pages slide in, progress eases, and every control can be reached with Tab. */
     class SetupForm : Form {
         [DllImport("dwmapi.dll")] static extern int DwmSetWindowAttribute(IntPtr h, int attr, ref int value, int size);
 
         enum Page { Welcome, Working, Done, Failed }
         Page page = Page.Welcome;
         bool desktop, startup, open = true, rtl = Installer.Ar;
-        int pct; string step = "", error = "", hot, down;
+        int pct; float shown; string error = "", hot, down, focus;
         string have = Installer.Installed(), mine = Installer.Version;
         float s = 1;
-        const int W = 640, H = 440;
+        const int W = 720, H = 470, ART = 260, PAD = 40;
+        int CX { get { return ART + PAD; } }            /* where the content starts */
+        int CW { get { return W - ART - PAD * 2; } }    /* and how wide it is */
 
         /* the app's own colours (web/app.css), dark or light as Windows is set */
         readonly bool dark;
-        Color Bg, S1, Line, T1, T2, T3, Gold, GoldDeep, Ink;
-        static readonly Image Logo = LoadLogo();
-        static Image LoadLogo() { using (var r = Assembly.GetExecutingAssembly().GetManifestResourceStream("icon.png")) return r == null ? null : Image.FromStream(new MemoryStream(ReadAll(r))); }
-        static byte[] ReadAll(Stream r) { var m = new MemoryStream(); r.CopyTo(m); return m.ToArray(); }
+        Color Bg, S1, S2, Line, T1, T2, T3, Gold, Gold2, GoldDeep, Ink;
+        Image art;
+        static Image Res(string n) {
+            using (var r = Assembly.GetExecutingAssembly().GetManifestResourceStream(n)) {
+                if (r == null) return null;
+                var m = new MemoryStream(); r.CopyTo(m); return Image.FromStream(m);
+            }
+        }
+
+        /* motion: a page arrives over 320 ms; progress eases toward the real figure; the working ring turns */
+        readonly System.Windows.Forms.Timer tick = new System.Windows.Forms.Timer { Interval = 15 };
+        readonly Stopwatch clock = Stopwatch.StartNew();
+        double pageAt, doneAt;
 
         public SetupForm() : this(SystemDark()) { }
         public SetupForm(bool dark) {
             this.dark = dark;
             Palette();
+            art = Res("art-" + (dark ? "dark" : "light") + (rtl ? "-ar" : "") + ".png");
             desktop = have == null || Installer.HasDesktopLink();
             startup = Installer.StartsWithWindows();
             Text = Installer.T("Adhkār Setup", "تثبيت أذكار");
             try { Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath); } catch { }
-            FormBorderStyle = FormBorderStyle.FixedSingle; MaximizeBox = false; MinimizeBox = true;
+            FormBorderStyle = FormBorderStyle.FixedSingle; MaximizeBox = false;
             StartPosition = FormStartPosition.CenterScreen;
             DoubleBuffered = true; KeyPreview = true; BackColor = Bg;
-            RightToLeftLayout = false;
             using (var g = CreateGraphics()) s = g.DpiX / 96f;
             ClientSize = new Size((int)(W * s), (int)(H * s));
+            tick.Tick += delegate { Invalidate(); if (!Moving()) tick.Stop(); };
+            Go(Page.Welcome);
         }
         static bool SystemDark() {
             try {
@@ -246,13 +262,13 @@ namespace AdhkarSetup {
         }
         void Palette() {
             if (dark) {
-                Bg = Color.FromArgb(7, 8, 13); S1 = Color.FromArgb(16, 19, 28); Line = Color.FromArgb(34, 240, 228, 206);
-                T1 = Color.FromArgb(245, 240, 231); T2 = Color.FromArgb(172, 167, 157); T3 = Color.FromArgb(138, 134, 124);
-                Gold = Color.FromArgb(217, 178, 111); GoldDeep = Color.FromArgb(176, 134, 66); Ink = Color.FromArgb(26, 20, 8);
+                Bg = Color.FromArgb(9, 10, 16); S1 = Color.FromArgb(17, 20, 30); S2 = Color.FromArgb(24, 28, 40); Line = Color.FromArgb(30, 240, 228, 206);
+                T1 = Color.FromArgb(245, 240, 231); T2 = Color.FromArgb(180, 175, 165); T3 = Color.FromArgb(140, 136, 126);
+                Gold = Color.FromArgb(217, 178, 111); Gold2 = Color.FromArgb(246, 223, 170); GoldDeep = Color.FromArgb(176, 134, 66); Ink = Color.FromArgb(26, 20, 8);
             } else {
-                Bg = Color.FromArgb(245, 241, 233); S1 = Color.FromArgb(255, 253, 249); Line = Color.FromArgb(40, 64, 46, 18);
-                T1 = Color.FromArgb(28, 24, 18); T2 = Color.FromArgb(92, 84, 72); T3 = Color.FromArgb(112, 104, 92);
-                Gold = Color.FromArgb(160, 116, 44); GoldDeep = Color.FromArgb(132, 92, 30); Ink = Color.FromArgb(255, 252, 245);
+                Bg = Color.FromArgb(250, 247, 241); S1 = Color.FromArgb(255, 255, 255); S2 = Color.FromArgb(243, 237, 226); Line = Color.FromArgb(34, 64, 46, 18);
+                T1 = Color.FromArgb(28, 24, 18); T2 = Color.FromArgb(88, 80, 68); T3 = Color.FromArgb(118, 110, 98);
+                Gold = Color.FromArgb(166, 120, 46); Gold2 = Color.FromArgb(201, 154, 69); GoldDeep = Color.FromArgb(132, 92, 30); Ink = Color.FromArgb(255, 252, 245);
             }
         }
         protected override void OnHandleCreated(EventArgs e) {
@@ -264,11 +280,22 @@ namespace AdhkarSetup {
             } catch { }
         }
 
-        /* ---------- drawing: everything at 96 dpi units, scaled, and mirrored for Arabic ---------- */
+        double Now { get { return clock.Elapsed.TotalMilliseconds; } }
+        bool Moving() { return Now - pageAt < 360 || page == Page.Working || Math.Abs(shown - pct) > .3f || (page == Page.Done && Now - doneAt < 700); }
+        void Go(Page p) {
+            page = p; pageAt = Now; if (p == Page.Done) doneAt = Now;
+            focus = null; hot = null;
+            tick.Start(); Invalidate();
+        }
+        static double Ease(double t) { t = Math.Max(0, Math.Min(1, t)); return 1 - Math.Pow(1 - t, 3); }
+
+        /* ---------- drawing helpers ---------- */
         readonly Dictionary<string, RectangleF> spots = new Dictionary<string, RectangleF>();
+        readonly List<string> order = new List<string>();
+        float dy;   /* the arriving page's offset */
         RectangleF R(float x, float y, float w, float h) {
             if (rtl) x = W - x - w;
-            return new RectangleF(x * s, y * s, w * s, h * s);
+            return new RectangleF(x * s, (y + dy) * s, w * s, h * s);
         }
         static readonly string Face = PickFace();
         static string PickFace() {
@@ -277,151 +304,219 @@ namespace AdhkarSetup {
             return "Segoe UI";
         }
         Font F(float size, FontStyle st) { return new Font(Face, size * s, st, GraphicsUnit.Pixel); }
-        void Say(Graphics g, string text, float size, FontStyle st, Color c, RectangleF r, bool centre = false, bool end = false) {
-            using (var f = F(size, st)) using (var b = new SolidBrush(c))
+        int alpha = 255;
+        Color A(Color c) { return Color.FromArgb(c.A * alpha / 255, c); }
+        void Say(Graphics g, string text, float size, FontStyle st, Color c, RectangleF r, bool centre = false, bool end = false, bool middle = false, bool path = false) {
+            using (var f = F(size, st)) using (var b = new SolidBrush(A(c)))
             using (var fmt = new StringFormat()) {
                 fmt.Alignment = centre ? StringAlignment.Center : end ? StringAlignment.Far : StringAlignment.Near;
-                fmt.LineAlignment = StringAlignment.Near;
+                fmt.LineAlignment = middle ? StringAlignment.Center : StringAlignment.Near;
                 if (rtl) fmt.FormatFlags |= StringFormatFlags.DirectionRightToLeft;
-                fmt.Trimming = StringTrimming.EllipsisWord;
+                fmt.Trimming = path ? StringTrimming.EllipsisPath : StringTrimming.EllipsisCharacter;
+                if (path) { fmt.FormatFlags |= StringFormatFlags.NoWrap; fmt.FormatFlags &= ~StringFormatFlags.DirectionRightToLeft; if (rtl) fmt.Alignment = StringAlignment.Far; }
                 g.DrawString(text, f, b, r, fmt);
             }
         }
         static GraphicsPath Round(RectangleF r, float rad) {
-            var p = new GraphicsPath(); float d = rad * 2;
+            var p = new GraphicsPath(); float d = Math.Min(rad * 2, Math.Min(r.Width, r.Height));
             p.AddArc(r.X, r.Y, d, d, 180, 90); p.AddArc(r.Right - d, r.Y, d, d, 270, 90);
             p.AddArc(r.Right - d, r.Bottom - d, d, d, 0, 90); p.AddArc(r.X, r.Bottom - d, d, d, 90, 90);
             p.CloseFigure(); return p;
         }
+        void Spot(string id, RectangleF r) { spots[id] = r; order.Add(id); }
+        void Ring(Graphics g, RectangleF r, float rad) {
+            var o = RectangleF.Inflate(r, 3 * s, 3 * s);
+            using (var p = Round(o, rad + 3)) using (var pen = new Pen(A(Color.FromArgb(200, Gold)), 2 * s)) g.DrawPath(pen, p);
+        }
         void Button(Graphics g, string id, string label, RectangleF r, bool primary) {
-            spots[id] = r;
+            Spot(id, r);
             bool h = hot == id, pr = down == id;
-            using (var p = Round(r, r.Height / 2)) {
+            using (var p = Round(r, 12 * s)) {
                 if (primary) {
-                    using (var b = new LinearGradientBrush(r, pr ? GoldDeep : ControlPaint.Light(Gold, h ? .25f : .12f), pr ? GoldDeep : Gold, 90f)) g.FillPath(b, p);
+                    using (var b = new LinearGradientBrush(r, A(pr ? GoldDeep : h ? Gold2 : Color.FromArgb(Gold.R + (255 - Gold.R) / 6, Gold.G + (255 - Gold.G) / 6, Gold.B + (255 - Gold.B) / 6)), A(pr ? GoldDeep : Gold), 90f)) g.FillPath(b, p);
+                    using (var pen = new Pen(A(Color.FromArgb(70, 255, 255, 255)), 1 * s)) g.DrawLine(pen, r.X + 12 * s, r.Y + 1 * s, r.Right - 12 * s, r.Y + 1 * s);
                 } else {
-                    using (var b = new SolidBrush(h ? Color.FromArgb(dark ? 22 : 14, T1) : Color.Transparent)) g.FillPath(b, p);
-                    using (var pen = new Pen(h ? Color.FromArgb(120, Gold) : Line, 1 * s)) g.DrawPath(pen, p);
+                    using (var b = new SolidBrush(A(h ? S2 : S1))) g.FillPath(b, p);
+                    using (var pen = new Pen(A(Line), 1 * s)) g.DrawPath(pen, p);
                 }
             }
-            using (var f = F(14, FontStyle.Bold)) using (var b = new SolidBrush(primary ? Ink : T1))
+            if (focus == id) Ring(g, r, 12 * s);
+            using (var f = F(14, FontStyle.Bold)) using (var b = new SolidBrush(A(primary ? Ink : T1)))
             using (var fmt = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center })
                 g.DrawString(label, f, b, r, fmt);
         }
-        void Check(Graphics g, string id, bool on, string label, string sub, float y) {
-            var box = R(40, y + 2, 20, 20);
-            spots[id] = R(32, y - 6, W - 64, sub == null ? 34 : 50);
-            if (hot == id) using (var p = Round(spots[id], 10 * s)) using (var b = new SolidBrush(Color.FromArgb(dark ? 14 : 10, T1))) g.FillPath(b, p);
-            using (var p = Round(box, 6 * s)) {
-                if (on) { using (var b = new SolidBrush(Gold)) g.FillPath(b, p); }
-                else using (var pen = new Pen(Color.FromArgb(140, T3), 1.5f * s)) g.DrawPath(pen, p);
+        /* a switch, as in the app's settings */
+        void Toggle(Graphics g, string id, bool on, string label, string sub, float y) {
+            var row = R(CX - 12, y - 10, CW + 24, sub == null ? 44 : 60);
+            Spot(id, row);
+            if (hot == id) using (var p = Round(row, 12 * s)) using (var b = new SolidBrush(A(S1))) g.FillPath(b, p);
+            if (focus == id) Ring(g, row, 12 * s);
+            var sw = R(CX + CW - 42, y + 1, 42, 24);
+            using (var p = Round(sw, 12 * s)) {
+                if (on) using (var b = new LinearGradientBrush(sw, A(Gold2), A(Gold), 90f)) g.FillPath(b, p);
+                else { using (var b = new SolidBrush(A(S2))) g.FillPath(b, p); using (var pen = new Pen(A(Line), 1 * s)) g.DrawPath(pen, p); }
             }
-            if (on) using (var pen = new Pen(Ink, 2.2f * s) { StartCap = LineCap.Round, EndCap = LineCap.Round, LineJoin = LineJoin.Round })
-                g.DrawLines(pen, new[] { new PointF(box.X + 5 * s, box.Y + 10.5f * s), new PointF(box.X + 8.5f * s, box.Y + 14 * s), new PointF(box.X + 15 * s, box.Y + 6.5f * s) });
-            Say(g, label, 14.5f, FontStyle.Bold, T1, R(72, y, W - 112, 24));
-            if (sub != null) Say(g, sub, 12.5f, FontStyle.Regular, T3, R(72, y + 22, W - 112, 20));
+            float kx = (on != rtl) ? sw.Right - 22 * s : sw.X + 2 * s;
+            var knob = new RectangleF(kx, sw.Y + 2 * s, 20 * s, 20 * s);
+            using (var b = new SolidBrush(A(on ? Ink : dark ? Color.FromArgb(150, 146, 136) : Color.White))) g.FillEllipse(b, knob);
+            if (!on && !dark) using (var pen = new Pen(A(Line), 1 * s)) g.DrawEllipse(pen, knob);
+            Say(g, label, 14.5f, FontStyle.Bold, T1, R(CX, y, CW - 60, 22));
+            if (sub != null) Say(g, sub, 12.5f, FontStyle.Regular, T3, R(CX, y + 22, CW - 60, 20));
         }
+        void Check(Graphics g, PointF c, float r, float t, Color fill, Color stroke) {
+            using (var b = new SolidBrush(A(fill))) g.FillEllipse(b, c.X - r, c.Y - r, r * 2, r * 2);
+            if (t <= 0) return;
+            var pts = new[] { new PointF(c.X - r * .42f, c.Y + r * .02f), new PointF(c.X - r * .1f, c.Y + r * .34f), new PointF(c.X + r * .45f, c.Y - r * .3f) };
+            using (var pen = new Pen(A(stroke), Math.Max(1.6f * s, r * .17f)) { StartCap = LineCap.Round, EndCap = LineCap.Round, LineJoin = LineJoin.Round }) {
+                /* drawn on, stroke by stroke */
+                float l1 = .45f;
+                if (t < l1) g.DrawLine(pen, pts[0], Lerp(pts[0], pts[1], t / l1));
+                else g.DrawLines(pen, new[] { pts[0], pts[1], Lerp(pts[1], pts[2], (t - l1) / (1 - l1)) });
+            }
+        }
+        static PointF Lerp(PointF a, PointF b, float t) { t = Math.Max(0, Math.Min(1, t)); return new PointF(a.X + (b.X - a.X) * t, a.Y + (b.Y - a.Y) * t); }
 
         protected override void OnPaint(PaintEventArgs e) { Draw(e.Graphics); }
         public void Draw(Graphics g) {
-            spots.Clear();
-            g.SmoothingMode = SmoothingMode.AntiAlias; g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+            spots.Clear(); order.Clear();
+            g.SmoothingMode = SmoothingMode.AntiAlias; g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
             g.InterpolationMode = InterpolationMode.HighQualityBicubic; g.PixelOffsetMode = PixelOffsetMode.HighQuality;
             g.Clear(Bg);
-            /* a soft light at the top, as at dawn */
-            var glow = new RectangleF(-W * .25f * s, -H * .9f * s, W * 1.5f * s, H * 1.35f * s);
-            using (var p = new GraphicsPath()) {
-                p.AddEllipse(glow);
-                using (var b = new PathGradientBrush(p) { CenterColor = Color.FromArgb(dark ? 46 : 60, Gold), SurroundColors = new[] { Color.FromArgb(0, Gold) } }) g.FillPath(b, p);
-            }
 
-            /* who we are */
-            if (Logo != null) g.DrawImage(Logo, R(36, 34, 60, 60));
-            Say(g, Installer.T("Adhkār", "أذكار"), 27, FontStyle.Bold, T1, R(112, 34, 300, 40));
-            Say(g, Installer.T("Remembrance for every moment", "ذكر لكل لحظة"), 14, FontStyle.Regular, T2, R(113, 72, 340, 24));
+            /* the brand panel, and a hairline where it meets the page */
+            alpha = 255; dy = 0;
+            var ar = R(0, 0, ART, H);
+            if (art != null) g.DrawImage(art, ar);
+            using (var pen = new Pen(Line, 1 * s)) { float x = rtl ? ar.X : ar.Right; g.DrawLine(pen, x, 0, x, H * s); }
+            /* the version, quietly at the foot of the panel */
             var chip = Installer.T("Version ", "الإصدار ") + mine;
-            using (var f = F(12, FontStyle.Bold)) {
+            using (var f = F(11.5f, FontStyle.Bold)) {
                 var w = g.MeasureString(chip, f).Width / s + 22;
-                var r = R(W - 36 - w, 44, w, 26);
-                using (var p = Round(r, 13 * s)) using (var pen = new Pen(Color.FromArgb(90, Gold), 1 * s)) g.DrawPath(pen, p);
-                Say(g, chip, 12, FontStyle.Bold, Gold, new RectangleF(r.X, r.Y + 4.5f * s, r.Width, r.Height), true);
+                var r = R((ART - w) / 2, H - 46, w, 24);
+                using (var p = Round(r, 12 * s)) {
+                    using (var b = new SolidBrush(Color.FromArgb(dark ? 120 : 150, dark ? Color.Black : Color.White))) g.FillPath(b, p);
+                    using (var pen = new Pen(Color.FromArgb(110, Gold), 1 * s)) g.DrawPath(pen, p);
+                }
+                Say(g, chip, 11.5f, FontStyle.Bold, dark ? Gold2 : GoldDeep, r, true, false, true);
             }
-            using (var pen = new Pen(Line, 1 * s)) g.DrawLine(pen, 36 * s, 120 * s, (W - 36) * s, 120 * s);
 
+            /* the page, arriving */
+            double t = Ease((Now - pageAt) / 320.0);
+            alpha = (int)(255 * t); dy = (float)(14 * (1 - t));
             if (page == Page.Welcome) Welcome(g);
             else if (page == Page.Working) Working(g);
             else if (page == Page.Done) Finished(g);
             else Failed(g);
         }
 
+        string Head() {
+            if (have == null) return Installer.T("Install Adhkār", "ثبّت أذكار");
+            return Installer.Newer(mine, have) ? Installer.T("Update Adhkār", "حدّث أذكار") : Installer.T("Reinstall Adhkār", "أعد تثبيت أذكار");
+        }
         void Welcome(Graphics g) {
-            string head, sub;
-            if (have == null) { head = Installer.T("Install Adhkār", "ثبّت أذكار"); sub = Installer.T("It opens like any app, from Start or your desktop.", "يُفتح كأي تطبيق، من قائمة ابدأ أو سطح المكتب."); }
-            else if (Installer.Newer(mine, have)) { head = Installer.T("Update Adhkār", "حدّث أذكار"); sub = Installer.T("From " + have + " to " + mine + ". Your record stays as it is.", "من " + have + " إلى " + mine + ". يبقى سجلك كما هو."); }
-            else { head = Installer.T("Reinstall Adhkār", "أعد تثبيت أذكار"); sub = Installer.T("Version " + have + " is installed. Your record stays as it is.", "الإصدار " + have + " مثبّت. يبقى سجلك كما هو."); }
-            Say(g, head, 20, FontStyle.Bold, T1, R(36, 140, W - 72, 30));
-            Say(g, sub, 14, FontStyle.Regular, T2, R(36, 172, W - 72, 22));
+            string sub = have == null ? Installer.T("It opens like any app, from Start or your desktop.", "يُفتح كأي تطبيق، من قائمة ابدأ أو سطح المكتب.")
+                : Installer.Newer(mine, have) ? Installer.T("From " + have + " to " + mine + ". Your record stays as it is.", "من " + have + " إلى " + mine + ". يبقى سجلك كما هو.")
+                : Installer.T("Version " + have + " is installed. Your record stays as it is.", "الإصدار " + have + " مثبّت. يبقى سجلك كما هو.");
+            Say(g, Head(), 24, FontStyle.Bold, T1, R(CX, 44, CW, 34));
+            Say(g, sub, 14, FontStyle.Regular, T2, R(CX, 82, CW, 40));
 
             /* where it goes */
-            var card = R(36, 206, W - 72, 58);
+            var card = R(CX, 128, CW, 70);
             using (var p = Round(card, 14 * s)) {
-                using (var b = new SolidBrush(S1)) g.FillPath(b, p);
-                using (var pen = new Pen(Line, 1 * s)) g.DrawPath(pen, p);
+                using (var b = new SolidBrush(A(S1))) g.FillPath(b, p);
+                using (var pen = new Pen(A(Line), 1 * s)) g.DrawPath(pen, p);
             }
-            Say(g, Installer.T("For you on this computer, no administrator needed", "لك على هذا الحاسوب، دون صلاحيات المسؤول"), 13.5f, FontStyle.Bold, T1, R(54, 215, W - 108, 20));
-            Say(g, Installer.Dir, 12.5f, FontStyle.Regular, T3, R(54, 236, W - 108, 20));
+            Folder(g, R(CX + 16, 147, 30, 30));
+            Say(g, Installer.T("For you only, no administrator needed", "لك وحدك، دون صلاحيات المسؤول"), 13.5f, FontStyle.Bold, T1, R(CX + 58, 142, CW - 74, 20));
+            Say(g, Installer.Dir.Replace(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "%USERPROFILE%"), 12, FontStyle.Regular, T3, R(CX + 58, 163, CW - 74, 20), false, false, false, true);
 
-            Check(g, "desktop", desktop, Installer.T("A shortcut on the desktop", "اختصار على سطح المكتب"), null, 282);
-            Check(g, "startup", startup, Installer.T("Start with Windows, quietly in the tray", "ابدأ مع ويندوز، بهدوء في شريط المهام"),
-                Installer.T("So reminders ring even before you open it.", "لتصلك التذكيرات قبل أن تفتحه."), 318);
+            Toggle(g, "desktop", desktop, Installer.T("Shortcut on the desktop", "اختصار على سطح المكتب"), null, 228);
+            Toggle(g, "startup", startup, Installer.T("Start with Windows", "ابدأ مع ويندوز"),
+                Installer.T("Quietly in the tray, so reminders ring on time.", "بهدوء في شريط المهام، لتصلك التذكيرات في وقتها."), 274);
 
-            Say(g, Installer.T("Free · No account · No ads", "مجاني · بلا حساب · بلا إعلانات"), 12.5f, FontStyle.Regular, T3, R(36, 398, 260, 20));
+            using (var pen = new Pen(A(Line), 1 * s)) { var l = R(CX, 386, CW, 0); g.DrawLine(pen, l.X, l.Y, l.Right, l.Y); }
             string go = have == null ? Installer.T("Install", "ثبّت") : Installer.Newer(mine, have) ? Installer.T("Update", "حدّث") : Installer.T("Reinstall", "أعد التثبيت");
-            Button(g, "go", go, R(W - 36 - 140, 386, 140, 40), true);
-            Button(g, "cancel", Installer.T("Cancel", "إلغاء"), R(W - 36 - 140 - 12 - 108, 386, 108, 40), false);
+            Say(g, Installer.T("Free · No account · No ads · Works offline", "مجاني · بلا حساب · بلا إعلانات · يعمل دون إنترنت"), 12, FontStyle.Regular, T3, R(CX, 356, CW, 20));
+            Button(g, "cancel", Installer.T("Cancel", "إلغاء"), R(CX + CW - 132 - 10 - 100, 404, 100, 42), false);
+            Button(g, "go", go, R(CX + CW - 132, 404, 132, 42), true);
         }
+        void Folder(Graphics g, RectangleF r) {
+            using (var p = Round(r, 9 * s)) using (var b = new SolidBrush(A(Color.FromArgb(dark ? 40 : 34, Gold)))) g.FillPath(b, p);
+            var i = RectangleF.Inflate(r, -8 * s, -9 * s);
+            using (var pen = new Pen(A(Gold), 1.6f * s) { LineJoin = LineJoin.Round }) {
+                var p = new GraphicsPath();
+                p.AddLines(new[] { new PointF(i.X, i.Bottom), new PointF(i.X, i.Y), new PointF(i.X + i.Width * .38f, i.Y), new PointF(i.X + i.Width * .5f, i.Y + i.Height * .2f), new PointF(i.Right, i.Y + i.Height * .2f), new PointF(i.Right, i.Bottom) });
+                p.CloseFigure(); g.DrawPath(pen, p);
+            }
+        }
+
+        static readonly string[][] Steps = {
+            new[] { "Closing Adhkār if it is open", "إغلاق أذكار إن كان مفتوحًا" },
+            new[] { "Copying the app", "نسخ التطبيق" },
+            new[] { "Adding it to Start and the desktop", "إضافته إلى قائمة ابدأ وسطح المكتب" },
+            new[] { "Adding it to Settings › Apps", "إضافته إلى الإعدادات › التطبيقات" }
+        };
+        int StepNow { get { return pct >= 100 ? 4 : pct >= 88 ? 3 : pct >= 76 ? 2 : pct >= 10 ? 1 : 0; } }
         void Working(Graphics g) {
-            Say(g, Installer.T("Installing Adhkār", "جارٍ تثبيت أذكار"), 20, FontStyle.Bold, T1, R(36, 140, W - 72, 30));
-            Say(g, step, 14, FontStyle.Regular, T2, R(36, 172, W - 72, 22));
-            var track = R(36, 230, W - 72, 10);
-            using (var p = Round(track, 5 * s)) using (var b = new SolidBrush(Color.FromArgb(dark ? 30 : 26, T1))) g.FillPath(b, p);
-            var fw = Math.Max(10, (W - 72) * pct / 100f);
-            var fill = R(36, 230, fw, 10);
-            using (var p = Round(fill, 5 * s)) using (var b = new LinearGradientBrush(new RectangleF(36 * s, 0, (W - 72) * s, 1), GoldDeep, Gold, rtl ? 180f : 0f)) g.FillPath(b, p);
-            Say(g, pct + "%", 13, FontStyle.Bold, Gold, R(36, 250, W - 72, 20), false, true);
-            Say(g, Installer.T("Your record is kept apart from the program, so nothing you have counted is touched.", "سجلك محفوظ بعيدًا عن البرنامج، فلا يُمسّ شيء مما عددته."), 12.5f, FontStyle.Regular, T3, R(36, 398, W - 72, 20));
+            Say(g, have == null ? Installer.T("Installing", "جارٍ التثبيت") : Installer.T("Updating", "جارٍ التحديث"), 24, FontStyle.Bold, T1, R(CX, 44, CW, 34));
+            Say(g, Installer.T("This takes a few seconds.", "يستغرق ذلك ثوانيَ معدودة."), 14, FontStyle.Regular, T2, R(CX, 82, CW, 22));
+            for (int i = 0; i < Steps.Length; i++) {
+                float y = 134 + i * 46;
+                var c = R(CX + 2, y, 26, 26); var cc = new PointF(c.X + c.Width / 2, c.Y + c.Height / 2);
+                if (i < StepNow) Check(g, cc, 13 * s, 1, Gold, Ink);
+                else if (i == StepNow) {
+                    using (var pen = new Pen(A(Color.FromArgb(50, Gold)), 2.4f * s)) g.DrawEllipse(pen, RectangleF.Inflate(c, -2 * s, -2 * s));
+                    using (var pen = new Pen(A(Gold), 2.4f * s) { StartCap = LineCap.Round, EndCap = LineCap.Round })
+                        g.DrawArc(pen, RectangleF.Inflate(c, -2 * s, -2 * s), (float)(Now * .36 % 360), 90);
+                } else using (var pen = new Pen(A(Line), 1.6f * s)) g.DrawEllipse(pen, RectangleF.Inflate(c, -2 * s, -2 * s));
+                Say(g, Installer.T(Steps[i][0], Steps[i][1]), 14, i == StepNow ? FontStyle.Bold : FontStyle.Regular, i <= StepNow ? T1 : T3, R(CX + 42, y + 3, CW - 42, 22));
+            }
+            shown += (pct - shown) * .14f;
+            var track = R(CX, 338, CW, 6);
+            using (var p = Round(track, 3 * s)) using (var b = new SolidBrush(A(S2))) g.FillPath(b, p);
+            var fw = Math.Max(6, CW * shown / 100f);
+            var fill = R(CX, 338, fw, 6);
+            using (var p = Round(fill, 3 * s)) using (var b = new LinearGradientBrush(new RectangleF(R(CX, 0, CW, 1).X, 0, CW * s, 1), A(GoldDeep), A(Gold2), rtl ? 180f : 0f)) g.FillPath(b, p);
+            Say(g, Math.Round(shown) + "%", 12.5f, FontStyle.Bold, Gold, R(CX, 352, CW, 20), false, true);
+            Say(g, Installer.T("Your record is kept apart from the program: nothing you have counted is touched.", "سجلك محفوظ بعيدًا عن البرنامج: لا يُمسّ شيء مما عددته."), 12, FontStyle.Regular, T3, R(CX, 414, CW, 36));
         }
         void Finished(Graphics g) {
-            var c = R(36, 142, 52, 52);
-            using (var b = new SolidBrush(Gold)) g.FillEllipse(b, c);
-            using (var pen = new Pen(Ink, 3.4f * s) { StartCap = LineCap.Round, EndCap = LineCap.Round, LineJoin = LineJoin.Round })
-                g.DrawLines(pen, new[] { new PointF(c.X + 15 * s, c.Y + 27 * s), new PointF(c.X + 23 * s, c.Y + 35 * s), new PointF(c.X + 38 * s, c.Y + 18 * s) });
-            Say(g, Installer.T("Adhkār is installed", "ثُبّت أذكار"), 20, FontStyle.Bold, T1, R(104, 144, W - 140, 30));
-            Say(g, Installer.T("Version " + mine + ", in your own Programs folder.", "الإصدار " + mine + "، في مجلد برامجك."), 14, FontStyle.Regular, T2, R(104, 174, W - 140, 22));
-            var lines = new[] {
-                Installer.T("Open it from Start" + (desktop ? " or your desktop" : "") + ".", "افتحه من قائمة ابدأ" + (desktop ? " أو سطح المكتب" : "") + "."),
-                Installer.T("It updates itself from inside the app when you ask it to.", "يحدّث نفسه من داخل التطبيق متى طلبت."),
-                Installer.T("Remove it any time from Settings › Apps; your record stays.", "أزله متى شئت من الإعدادات › التطبيقات، ويبقى سجلك.")
+            double t = Ease((Now - doneAt - 120) / 520.0);
+            var c = R(CX, 44, 52, 52); var cc = new PointF(c.X + c.Width / 2, c.Y + c.Height / 2);
+            float grow = (float)(.7 + .3 * Ease((Now - doneAt) / 260.0));
+            using (var b = new SolidBrush(A(Color.FromArgb(dark ? 40 : 30, Gold)))) g.FillEllipse(b, RectangleF.Inflate(c, 8 * s * grow, 8 * s * grow));
+            Check(g, cc, 26 * s * grow, (float)t, Gold, Ink);
+            Say(g, have == null ? Installer.T("Adhkār is installed", "ثُبّت أذكار") : Installer.T("Adhkār is up to date", "أذكار محدَّث"), 24, FontStyle.Bold, T1, R(CX + 68, 46, CW - 68, 34));
+            Say(g, Installer.T("Version " + mine + ", ready in Start.", "الإصدار " + mine + "، جاهز في قائمة ابدأ."), 14, FontStyle.Regular, T2, R(CX + 68, 80, CW - 68, 22));
+            var rows = new[] {
+                new[] { "Open it from Start" + (desktop ? " or the desktop" : ""), "افتحه من قائمة ابدأ" + (desktop ? " أو سطح المكتب" : "") },
+                new[] { "It updates itself when you ask it to", "يحدّث نفسه متى طلبت" },
+                new[] { "Remove it from Settings › Apps; your record stays", "أزله من الإعدادات › التطبيقات، ويبقى سجلك" }
             };
-            for (int i = 0; i < lines.Length; i++) {
-                var dot = R(40, 226 + i * 30 + 7, 6, 6);
-                using (var b = new SolidBrush(Gold)) g.FillEllipse(b, dot);
-                Say(g, lines[i], 13.5f, FontStyle.Regular, T2, R(58, 226 + i * 30, W - 94, 22));
+            for (int i = 0; i < rows.Length; i++) {
+                float y = 132 + i * 44;
+                var card = R(CX, y, CW, 36);
+                using (var p = Round(card, 10 * s)) using (var b = new SolidBrush(A(S1))) g.FillPath(b, p);
+                var d = R(CX + 14, y + 15, 6, 6);
+                using (var b = new SolidBrush(A(Gold))) g.FillEllipse(b, d);
+                Say(g, Installer.T(rows[i][0], rows[i][1]), 13.5f, FontStyle.Regular, T2, R(CX + 32, y + 9, CW - 44, 20));
             }
-            Check(g, "open", open, Installer.T("Open Adhkār now", "افتح أذكار الآن"), null, 330);
-            Button(g, "finish", Installer.T("Finish", "إنهاء"), R(W - 36 - 140, 386, 140, 40), true);
+            Toggle(g, "open", open, Installer.T("Open Adhkār now", "افتح أذكار الآن"), null, 288);
+            using (var pen = new Pen(A(Line), 1 * s)) { var l = R(CX, 386, CW, 0); g.DrawLine(pen, l.X, l.Y, l.Right, l.Y); }
+            Button(g, "finish", Installer.T("Finish", "إنهاء"), R(CX + CW - 132, 404, 132, 42), true);
         }
         void Failed(Graphics g) {
-            Say(g, Installer.T("Adhkār could not be installed", "تعذّر تثبيت أذكار"), 20, FontStyle.Bold, T1, R(36, 140, W - 72, 30));
-            Say(g, Installer.T("Nothing you have recorded was touched. What happened:", "لم يُمسّ شيء من سجلك. ما حدث:"), 14, FontStyle.Regular, T2, R(36, 172, W - 72, 22));
-            var card = R(36, 206, W - 72, 120);
+            Say(g, Installer.T("Adhkār could not be installed", "تعذّر تثبيت أذكار"), 24, FontStyle.Bold, T1, R(CX, 44, CW, 34));
+            Say(g, Installer.T("Nothing you have recorded was touched. What happened:", "لم يُمسّ شيء من سجلك. ما حدث:"), 14, FontStyle.Regular, T2, R(CX, 82, CW, 22));
+            var card = R(CX, 124, CW, 150);
             using (var p = Round(card, 14 * s)) {
-                using (var b = new SolidBrush(S1)) g.FillPath(b, p);
-                using (var pen = new Pen(Line, 1 * s)) g.DrawPath(pen, p);
+                using (var b = new SolidBrush(A(S1))) g.FillPath(b, p);
+                using (var pen = new Pen(A(Line), 1 * s)) g.DrawPath(pen, p);
             }
-            Say(g, error, 13, FontStyle.Regular, T1, R(54, 220, W - 108, 96));
-            Button(g, "go", Installer.T("Try again", "حاول مجددًا"), R(W - 36 - 140, 386, 140, 40), true);
-            Button(g, "cancel", Installer.T("Close", "إغلاق"), R(W - 36 - 140 - 12 - 108, 386, 108, 40), false);
+            Say(g, error, 13, FontStyle.Regular, T1, R(CX + 18, 140, CW - 36, 120));
+            using (var pen = new Pen(A(Line), 1 * s)) { var l = R(CX, 386, CW, 0); g.DrawLine(pen, l.X, l.Y, l.Right, l.Y); }
+            Button(g, "cancel", Installer.T("Close", "إغلاق"), R(CX + CW - 132 - 10 - 100, 404, 100, 42), false);
+            Button(g, "go", Installer.T("Try again", "حاول مجددًا"), R(CX + CW - 132, 404, 132, 42), true);
         }
 
         /* ---------- the mouse and the keys ---------- */
@@ -431,14 +526,25 @@ namespace AdhkarSetup {
             if (h != hot) { hot = h; Cursor = h == null ? Cursors.Default : Cursors.Hand; Invalidate(); }
         }
         protected override void OnMouseLeave(EventArgs e) { hot = null; down = null; Invalidate(); }
-        protected override void OnMouseDown(MouseEventArgs e) { down = At(e.Location); Invalidate(); }
+        protected override void OnMouseDown(MouseEventArgs e) { down = At(e.Location); focus = null; Invalidate(); }
         protected override void OnMouseUp(MouseEventArgs e) {
             var a = At(e.Location); var was = down; down = null; Invalidate();
             if (a != null && a == was) Act(a);
         }
+        protected override bool ProcessDialogKey(Keys k) {
+            if (k == Keys.Tab || k == (Keys.Tab | Keys.Shift)) {
+                if (order.Count == 0) return true;
+                int i = focus == null ? -1 : order.IndexOf(focus);
+                i = (k & Keys.Shift) != 0 ? (i <= 0 ? order.Count - 1 : i - 1) : (i + 1) % order.Count;
+                focus = order[i]; Invalidate(); return true;
+            }
+            return base.ProcessDialogKey(k);
+        }
         protected override void OnKeyDown(KeyEventArgs e) {
-            if (e.KeyCode == Keys.Enter) Act(page == Page.Done ? "finish" : page == Page.Working ? null : "go");
-            else if (e.KeyCode == Keys.Escape && page != Page.Working) Act(page == Page.Done ? "finish" : "cancel");
+            if (page == Page.Working) return;
+            if (e.KeyCode == Keys.Space && focus != null) Act(focus);
+            else if (e.KeyCode == Keys.Enter) Act(focus ?? (page == Page.Done ? "finish" : "go"));
+            else if (e.KeyCode == Keys.Escape) Act(page == Page.Done ? "finish" : "cancel");
         }
         protected override void OnFormClosing(FormClosingEventArgs e) {
             if (page == Page.Working) e.Cancel = true;   /* never half-installed */
@@ -451,22 +557,21 @@ namespace AdhkarSetup {
             else if (a == "open") open = !open;
             else if (a == "cancel") Close();
             else if (a == "finish") { if (open) Installer.Launch(); Close(); }
-            else if (a == "go") Go();
+            else if (a == "go") Install();
             Invalidate();
         }
-        void Go() {
-            page = Page.Working; pct = 0; step = ""; Invalidate();
+        void Install() {
+            pct = 0; shown = 0; Go(Page.Working);
             var c = new Installer.Choice { Desktop = desktop, Startup = startup };
-            var t = new Thread(() => {
-                var err = Installer.Run(c, (p, st) => BeginInvoke(new Action(() => { pct = p; step = st; Invalidate(); })));
-                Thread.Sleep(350);
+            var th = new Thread(() => {
+                var err = Installer.Run(c, (p, st) => BeginInvoke(new Action(() => { pct = p; tick.Start(); })));
+                Thread.Sleep(700);   /* long enough to see each step complete */
                 BeginInvoke(new Action(() => {
-                    if (err == null) page = Page.Done;
-                    else { page = Page.Failed; error = err; }
-                    Invalidate();
+                    if (err == null) Go(Page.Done);
+                    else { error = err; Go(Page.Failed); }
                 }));
             }) { IsBackground = true };
-            t.Start();
+            th.Start();
         }
 
         /* ---------- pictures for the guide ---------- */
@@ -476,9 +581,9 @@ namespace AdhkarSetup {
                 foreach (var dk in new[] { true, false }) {
                     Installer.Ar = ar;
                     var f = new SetupForm(dk); f.rtl = ar; f.s = 2; f.have = null; f.desktop = true; f.startup = false;
+                    f.art = Res("art-" + (dk ? "dark" : "light") + (ar ? "-ar" : "") + ".png");
                     foreach (Page p in Enum.GetValues(typeof(Page))) {
-                        if (p == Page.Failed) continue;
-                        f.page = p; f.pct = 64; f.step = ar ? "نسخ التطبيق" : "Copying the app";
+                        f.page = p; f.pageAt = f.doneAt = -100000; f.pct = 62; f.shown = 62; f.error = "Copying the app: access to the path is denied.";
                         using (var b = new Bitmap(W * 2, H * 2)) {
                             using (var g = Graphics.FromImage(b)) f.Draw(g);
                             b.Save(Path.Combine(dir, (ar ? "ar-" : "") + (dk ? "dark-" : "light-") + p.ToString().ToLowerInvariant() + ".png"));
