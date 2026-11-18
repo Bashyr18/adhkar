@@ -59,9 +59,19 @@ jobs:
           python tools/build_content.py
           python tools/build_hadith.py
           python tools/build_kahf.py
-      - name: Build the Windows app
+      # the Windows app is Rust (windows/): the runner already has rustup's stable MSVC toolchain and the Windows SDK
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            windows/target
+          key: cargo-${{ hashFiles('windows/Cargo.lock') }}
+      - name: Build the Windows app and its installer
         run: python -I tools/build_windows.py
       - uses: actions/upload-artifact@v4
         with:
           name: Adhkar-Windows
-          path: dist/Adhkar-Windows.exe
+          path: |
+            dist/Adhkar-Windows.exe
+            dist/Adhkar-Setup.exe

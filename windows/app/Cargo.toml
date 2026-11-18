@@ -1,0 +1,24 @@
+[package]
+name = "adhkar"
+version = "0.0.0"
+edition.workspace = true
+publish = false
+
+[[bin]]
+name = "Adhkar"
+path = "src/main.rs"
+
+[dependencies]
+adhkar-common = { path = "../common" }
+webview2-com.workspace = true
+windows.workspace = true
+windows-core.workspace = true
+serde_json.workspace = true
+zip = { version = "2", default-features = false, features = ["deflate"] }
+ureq = { version = "2", default-features = false, features = ["native-tls"] }
+native-tls = "0.2"
+sha2 = "0.10"
+base64 = "0.22"
+
+[build-dependencies]
+embed-resource = "3"

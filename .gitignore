@@ -22,3 +22,6 @@ __pycache__/
 
 # downloaded recordings kept out of the repository (only the clips the films use are kept)
 tools/src/adhan-dl/
+
+# Rust build output (windows/)
+windows/target/

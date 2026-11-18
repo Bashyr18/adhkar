@@ -1,36 +1,49 @@
 /* The web app talks to two native shells through one bridge (window.AndroidBridge). This check proves that every
-   method the Android app offers also exists in the Windows app (in windows/src/Bridge.cs, or in windows/shim.js for
-   what the page itself plays), so a page that works on the phone works on the computer.
+   method the Android app offers also exists in the Windows app (answered in windows/app/src/bridge.rs, or played by
+   windows/shim.js in the page itself), and that the shim forwards it, so a page that works on the phone works on the
+   computer. It also checks that every computer-only call desk.js and print.js make is answered.
    Run: node tools/bridge-check.js */
 const fs = require('fs'),
   path = require('path');
 const R = path.join(__dirname, '..');
 const java = fs.readFileSync(path.join(R, 'android/src/com/adhkar/app/MainActivity.java'), 'utf8');
-const cs = fs.readFileSync(path.join(R, 'windows/src/Bridge.cs'), 'utf8');
+const rs = fs.readFileSync(path.join(R, 'windows/app/src/bridge.rs'), 'utf8');
 const shim = fs.readFileSync(path.join(R, 'windows/shim.js'), 'utf8');
-const android = [...java.matchAll(/@JavascriptInterface\s+public\s+\S+\s+(\w+)\s*\(([^)]*)\)/g)].map((m) => ({
-  name: m[1],
-  argc: m[2].trim() ? m[2].split(',').length : 0
-}));
-const csMethods = {};
-for (const m of cs.matchAll(/public\s+(?:async\s+)?[\w<>,\[\]]+\s+(\w+)\s*\(([^)]*)\)\s*\{/g))
-  csMethods[m[1]] = m[2].trim() ? m[2].split(',').length : 0;
-/* the host methods the shim forwards, and the ones it plays itself */
-const listed = new Set(
-  [...(shim.match(/var names = \[([\s\S]*?)\];/) || ['', ''])[1].matchAll(/'(\w+)'/g)].map((m) => m[1])
-);
+const android = [...java.matchAll(/@JavascriptInterface\s+public\s+\S+\s+(\w+)\s*\(([^)]*)\)/g)].map((m) => m[1]);
+/* the names bridge.rs answers: each arm of its match, `"a" | "b" => ...` */
+const answered = new Set();
+for (const m of rs.matchAll(/^\s*((?:"\w+"\s*\|\s*)*"\w+")\s*=>/gm))
+  for (const n of m[1].matchAll(/"(\w+)"/g)) answered.add(n[1]);
+const list = (name) =>
+  new Set(
+    [...(shim.match(new RegExp('var ' + name + ' = \\[([\\s\\S]*?)\\];')) || ['', ''])[1].matchAll(/'(\w+)'/g)].map(
+      (m) => m[1]
+    )
+  );
+const forwarded = list('names'),
+  desk = list('desk');
 const inShim = new Set([...shim.matchAll(/B\.(\w+)\s*=\s*function/g)].map((m) => m[1]));
 const bad = [];
-android.forEach((m) => {
-  if (inShim.has(m.name)) return;
-  if (!(m.name in csMethods)) bad.push(m.name + ': missing in Bridge.cs');
-  else if (csMethods[m.name] !== m.argc)
-    bad.push(m.name + ': ' + m.argc + ' arguments on Android, ' + csMethods[m.name] + ' on Windows');
-  else if (!listed.has(m.name)) bad.push(m.name + ': not forwarded by shim.js');
+android.forEach((n) => {
+  if (inShim.has(n)) return;
+  if (!answered.has(n)) bad.push(n + ': not answered in bridge.rs');
+  else if (!forwarded.has(n)) bad.push(n + ': not forwarded by shim.js');
 });
-console.log('bridge: ' + android.length + ' Android methods; ' + (android.length - bad.length) + ' present on Windows');
+forwarded.forEach((n) => {
+  if (!answered.has(n) && !inShim.has(n)) bad.push(n + ': forwarded by shim.js but not answered in bridge.rs');
+});
+/* the computer's own calls, as the page makes them */
+const page = ['web/js/desk.js', 'web/js/print.js'].map((f) => fs.readFileSync(path.join(R, f), 'utf8')).join('\n');
+const used = new Set([...page.matchAll(/\b(?:B|DeskBridge)\.(\w+)\s*\(/g)].map((m) => m[1]));
+used.forEach((n) => {
+  if (!desk.has(n) && !forwarded.has(n)) bad.push(n + ': called by the page but not forwarded by shim.js');
+  else if (!answered.has(n)) bad.push(n + ': called by the page but not answered in bridge.rs');
+});
+console.log(
+  'bridge: ' + android.length + ' Android methods, ' + used.size + ' computer calls; all checked against bridge.rs'
+);
 if (bad.length) {
-  console.log('MISSING or DIFFERENT:\n  ' + bad.join('\n  '));
+  console.log('MISSING:\n  ' + bad.join('\n  '));
   process.exit(1);
 }
 console.log('ok: every page call has a home on both devices');

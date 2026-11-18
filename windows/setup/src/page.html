@@ -1,0 +1,233 @@
+<!doctype html>
+<!-- Adhkar-Setup.exe's window (windows/setup/src/main.rs): the brand on one side, the task on the other, in the app's
+     own fonts and colours, light or dark and English or Arabic as Windows is set. window.SETUP arrives first; the
+     program answers through Setup.progress, Setup.done and Setup.error. -->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+/*FONTS*/
+:root { --bg: #090a10; --s1: #11141e; --s2: #181c28; --line: rgba(240, 228, 206, .12); --t1: #f5f0e7; --t2: #b4afa5; --t3: #8c887e; --gold: #d9b26f; --gold2: #f6dfaa; --deep: #b08642; --ink: #1a1408; }
+:root.light { --bg: #faf7f1; --s1: #ffffff; --s2: #f3ede2; --line: rgba(64, 46, 18, .14); --t1: #1c1812; --t2: #585044; --t3: #6e675b; --gold: #a6782e; --gold2: #c99a45; --deep: #845c1e; --ink: #fffcf5; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--t1); font: 500 14px/1.45 'Quicksand', 'Segoe UI', sans-serif; overflow: hidden; user-select: none; -webkit-font-smoothing: antialiased; }
+:root.rtl body { font-family: 'Plex', 'Segoe UI', sans-serif; }
+body { display: grid; grid-template-columns: 260px 1fr; }
+:root.rtl body { direction: rtl; }
+
+/* the brand: a night sky with the app's rosette, its two names and a rising sun */
+.art { position: relative; overflow: hidden; border-inline-end: 1px solid var(--line); color: #f5f0e7;
+  background: radial-gradient(120% 60% at 20% 108%, rgba(222, 160, 90, .55), transparent 60%), radial-gradient(90% 40% at 50% 0%, rgba(90, 100, 190, .22), transparent 70%), linear-gradient(180deg, #06070e 0%, #0d1130 46%, #241f45 78%, #4a3448 100%); }
+:root.light .art { color: #1c1812; background: radial-gradient(120% 60% at 20% 108%, rgba(240, 170, 90, .55), transparent 60%), radial-gradient(90% 40% at 50% 0%, rgba(255, 255, 255, .8), transparent 70%), linear-gradient(180deg, #fbf7ef 0%, #f6ecda 50%, #f0dcba 80%, #eac48e 100%); }
+.art svg.bg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.brand { position: absolute; inset: 64px 0 auto; text-align: center; }
+.brand .ro { width: 96px; height: 96px; display: block; margin: 0 auto 18px; filter: drop-shadow(0 8px 26px rgba(241, 213, 158, .35)); animation: rise .9s cubic-bezier(.2, .8, .2, 1) both; }
+.brand .en { font: 700 34px/1 'Quicksand', sans-serif; letter-spacing: -.01em; animation: rise .9s .08s cubic-bezier(.2, .8, .2, 1) both; }
+.brand .ar { font: 700 40px/1.5 'Amiri', serif; direction: rtl; margin-top: 2px; background: linear-gradient(180deg, #f6dfaa, #b8873a); -webkit-background-clip: text; background-clip: text; color: transparent; animation: rise .9s .14s cubic-bezier(.2, .8, .2, 1) both; }
+:root.light .brand .ar { background-image: linear-gradient(180deg, #b8862f, #7d561a); }
+.brand .tag { margin: 10px 26px 0; font: 700 10px/1.6 'Quicksand', sans-serif; letter-spacing: .16em; text-transform: uppercase; opacity: .66; text-wrap: balance; animation: rise .9s .2s cubic-bezier(.2, .8, .2, 1) both; }
+:root.rtl .brand .tag { font: 600 13px/1.6 'Plex', sans-serif; letter-spacing: 0; text-transform: none; }
+.ver { position: absolute; inset: auto 0 22px; text-align: center; }
+.ver span { display: inline-block; padding: 4px 12px; border-radius: 99px; border: 1px solid rgba(217, 178, 111, .45); background: rgba(0, 0, 0, .45); color: #f6dfaa; font: 700 11.5px/1.3 'Quicksand', sans-serif; }
+:root.light .ver span { background: rgba(255, 255, 255, .6); color: #845c1e; }
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+/* the task */
+main { position: relative; padding: 40px 40px 0; display: flex; flex-direction: column; }
+section { display: flex; flex-direction: column; flex: 1; animation: in .32s cubic-bezier(.2, .8, .2, 1) both; }
+section[hidden] { display: none; }
+@keyframes in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+h1 { margin: 4px 0 6px; font-weight: 700; font-size: 24px; line-height: 1.25; }
+.sub { margin: 0; color: var(--t2); font-size: 14px; }
+.where { display: flex; gap: 14px; align-items: center; margin-top: 22px; padding: 14px 16px; border-radius: 14px; background: var(--s1); border: 1px solid var(--line); }
+.where i { flex: none; width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: color-mix(in srgb, var(--gold) 16%, transparent); color: var(--gold); }
+.where b { display: block; font-weight: 700; font-size: 13.5px; }
+.where small { display: block; color: var(--t3); font-size: 12px; direction: ltr; text-align: start; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+:root.rtl .where small { text-align: right; }
+.opt { display: flex; align-items: center; gap: 14px; width: calc(100% + 24px); margin: 14px -12px 0; padding: 10px 12px; border: 0; border-radius: 12px; background: none; color: inherit; font: inherit; text-align: start; cursor: pointer; }
+.opt + .opt { margin-top: 2px; }
+.opt:hover { background: var(--s1); }
+.opt:focus-visible, button:focus-visible { outline: 2px solid color-mix(in srgb, var(--gold) 70%, transparent); outline-offset: 3px; }
+.opt span { flex: 1; }
+.opt strong { display: block; font-size: 14.5px; }
+.opt small { display: block; color: var(--t3); font-size: 12.5px; margin-top: 1px; }
+.sw { position: relative; flex: none; width: 42px; height: 24px; border-radius: 99px; background: var(--s2); border: 1px solid var(--line); transition: background .2s; }
+.sw::after { content: ''; position: absolute; top: 2px; inset-inline-start: 2px; width: 18px; height: 18px; border-radius: 50%; background: var(--t3); transition: inset-inline-start .22s cubic-bezier(.2, .8, .2, 1), background .2s; }
+.opt[aria-checked='true'] .sw { background: linear-gradient(180deg, var(--gold2), var(--gold)); border-color: transparent; }
+.opt[aria-checked='true'] .sw::after { inset-inline-start: 20px; background: var(--ink); }
+.facts { margin-top: auto; padding-bottom: 14px; color: var(--t3); font-size: 12px; }
+.foot { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 0 22px; border-top: 1px solid var(--line); }
+button.b { min-width: 104px; height: 42px; padding: 0 20px; border-radius: 12px; border: 1px solid var(--line); background: var(--s1); color: var(--t1); font-family: inherit; font-weight: 700; font-size: 14px; line-height: 1; cursor: pointer; transition: background .15s, transform .15s; }
+button.b:hover { background: var(--s2); }
+button.b:active { transform: scale(.98); }
+button.b.pri { min-width: 132px; border: 0; color: var(--ink); background: linear-gradient(180deg, var(--gold2), var(--gold)); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), 0 8px 22px -12px var(--gold); }
+button.b.pri:hover { background: linear-gradient(180deg, color-mix(in srgb, var(--gold2) 80%, #fff), var(--gold)); }
+
+/* the copy: each step ticks off as it finishes */
+.steps { list-style: none; margin: 26px 0 0; padding: 0; display: flex; flex-direction: column; gap: 18px; }
+.steps li { display: flex; align-items: center; gap: 14px; color: var(--t3); font-size: 14px; transition: color .25s; }
+.steps li b { flex: none; width: 26px; height: 26px; border-radius: 50%; border: 1.6px solid var(--line); display: grid; place-items: center; font-size: 13px; color: transparent; transition: all .3s cubic-bezier(.2, .8, .2, 1); }
+.steps li.now { color: var(--t1); font-weight: 700; }
+.steps li.now b { border-color: color-mix(in srgb, var(--gold) 30%, transparent); border-top-color: var(--gold); animation: spin .8s linear infinite; }
+.steps li.did { color: var(--t1); }
+.steps li.did b { background: var(--gold); border-color: var(--gold); color: var(--ink); transform: scale(1.04); }
+@keyframes spin { to { transform: rotate(360deg); } }
+.bar { margin-top: 30px; height: 6px; border-radius: 99px; background: var(--s2); overflow: hidden; }
+.bar i { display: block; height: 100%; width: 2%; border-radius: 99px; background: linear-gradient(90deg, var(--deep), var(--gold2)); transition: width .35s ease-out; }
+:root.rtl .bar i { margin-inline-start: auto; background: linear-gradient(270deg, var(--deep), var(--gold2)); }
+.pc { margin-top: 8px; text-align: end; color: var(--gold); font-weight: 700; font-size: 12.5px; }
+.note { margin-top: auto; padding-bottom: 22px; color: var(--t3); font-size: 12px; }
+
+/* done */
+.done-h { display: flex; align-items: center; gap: 16px; }
+.tick { flex: none; width: 54px; height: 54px; border-radius: 50%; background: var(--gold); display: grid; place-items: center; box-shadow: 0 0 0 9px color-mix(in srgb, var(--gold) 16%, transparent); animation: pop .5s cubic-bezier(.2, 1.4, .4, 1) both; }
+.tick path { stroke-dasharray: 30; stroke-dashoffset: 30; animation: draw .45s .2s ease-out forwards; }
+@keyframes pop { from { transform: scale(.6); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+.rows { list-style: none; margin: 22px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.rows li { position: relative; padding: 9px 14px 9px 32px; border-radius: 10px; background: var(--s1); color: var(--t2); font-size: 13.5px; }
+:root.rtl .rows li { padding: 9px 32px 9px 14px; }
+.rows li::before { content: ''; position: absolute; inset-inline-start: 14px; top: 50%; width: 6px; height: 6px; margin-top: -3px; border-radius: 50%; background: var(--gold); }
+.err { margin-top: 18px; padding: 14px 16px; border-radius: 14px; background: var(--s1); border: 1px solid var(--line); font-size: 13px; color: var(--t1); min-height: 90px; white-space: pre-wrap; user-select: text; }
+</style>
+</head>
+<body>
+<aside class="art" aria-hidden="true">
+  <svg class="bg" viewBox="0 0 260 470" preserveAspectRatio="xMidYMid slice"><g id="stars"></g><g id="khatam" opacity=".07"></g>
+    <defs><linearGradient id="arc" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f1d59e" stop-opacity="0"/><stop offset=".45" stop-color="#f1d59e" stop-opacity=".75"/><stop offset="1" stop-color="#f1d59e" stop-opacity=".1"/></linearGradient>
+    <radialGradient id="sun"><stop offset="0" stop-color="#fff4d6"/><stop offset=".35" stop-color="#f1d59e"/><stop offset="1" stop-color="#f1d59e" stop-opacity="0"/></radialGradient></defs>
+    <path d="M-20 455 Q 130 300 280 455" fill="none" stroke="url(#arc)" stroke-width="1.4" stroke-dasharray="2 5"/>
+    <circle cx="62" cy="389" r="22" fill="url(#sun)"/><circle cx="62" cy="389" r="5.5" fill="#fff6dd"/></svg>
+  <div class="brand"><svg class="ro" id="ro" viewBox="0 0 120 120"></svg><div class="en">Adhkār</div><div class="ar">أذكار</div><div class="tag" id="tag"></div></div>
+  <div class="ver"><span id="ver"></span></div>
+</aside>
+<main>
+  <section id="start">
+    <h1 id="h"></h1><p class="sub" id="sub"></p>
+    <div class="where"><i><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 19V5h6l2 2.5h10V19z"/></svg></i><span><b id="whereT"></b><small id="path"></small></span></div>
+    <button class="opt" id="desk" role="switch"><span><strong></strong><small></small></span><i class="sw"></i></button>
+    <button class="opt" id="boot" role="switch"><span><strong></strong><small></small></span><i class="sw"></i></button>
+    <div class="facts" id="facts"></div>
+    <div class="foot"><button class="b" id="cancel"></button><button class="b pri" id="go"></button></div>
+  </section>
+  <section id="copy" hidden>
+    <h1 id="hc"></h1><p class="sub" id="subc"></p>
+    <ul class="steps" id="steps"></ul>
+    <div class="bar"><i id="bar"></i></div><div class="pc" id="pc">0%</div>
+    <p class="note" id="note"></p>
+  </section>
+  <section id="done" hidden>
+    <div class="done-h"><div class="tick"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><div><h1 id="hd"></h1><p class="sub" id="subd"></p></div></div>
+    <ul class="rows" id="rows"></ul>
+    <button class="opt" id="openNow" role="switch" aria-checked="true"><span><strong></strong><small></small></span><i class="sw"></i></button>
+    <div class="foot" style="margin-top:auto"><button class="b pri" id="finish"></button></div>
+  </section>
+  <section id="error" hidden>
+    <h1 id="he"></h1><p class="sub" id="sube"></p>
+    <div class="err" id="errText"></div>
+    <div class="foot" style="margin-top:auto"><button class="b" id="close"></button><button class="b pri" id="retry"></button></div>
+  </section>
+</main>
+<script>
+(function () {
+  var S = window.SETUP || {}, ar = !!S.ar;
+  var T = function (en, a) { return ar ? a : en; };
+  var $ = function (id) { return document.getElementById(id); };
+  var root = document.documentElement;
+  if (!S.dark) root.classList.add('light');
+  if (ar) { root.classList.add('rtl'); root.lang = 'ar'; }
+  var newer = function (a, b) { var x = String(a || '').split('.'), y = String(b || '').split('.'); for (var i = 0; i < Math.max(x.length, y.length); i++) { var p = +x[i] || 0, q = +y[i] || 0; if (p !== q) return p > q; } return false; };
+  var mode = !S.have ? 'install' : newer(S.version, S.have) ? 'update' : 'again';
+  var digits = function (s) { return ar ? String(s).replace(/[0-9]/g, function (d) { return '٠١٢٣٤٥٦٧٨٩'[d]; }) : String(s); };
+
+  /* the brand panel: the app's rosette (web/js/ui.js), a quiet sky, a faint khātam lattice */
+  function star(cx, cy, R, r) { var p = []; for (var i = 0; i < 16; i++) { var a = (Math.PI / 8) * i - Math.PI / 2, rr = i % 2 ? r : R; p.push((cx + rr * Math.cos(a)).toFixed(2) + ' ' + (cy + rr * Math.sin(a)).toFixed(2)); } return 'M' + p.join('L') + 'Z'; }
+  var g1 = S.dark ? '#f6dfaa' : '#c99a45', g2 = S.dark ? '#b8873a' : '#7d561a';
+  var ro = '<defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="' + g1 + '"/><stop offset="1" stop-color="' + g2 + '"/></linearGradient><radialGradient id="rgc"><stop offset="0" stop-color="rgba(241,213,158,.32)"/><stop offset="1" stop-color="rgba(241,213,158,0)"/></radialGradient></defs><circle cx="60" cy="60" r="58" fill="url(#rgc)"/>';
+  for (var i = 0; i < 3; i++) ro += '<path d="' + star(60, 60, 54 - i * 15, 42 - i * 12) + '" fill="none" stroke="url(#rg)" stroke-width="' + (1.6 - i * .3) + '" opacity="' + (1 - i * .22) + '"/>';
+  $('ro').innerHTML = ro + '<path d="' + star(60, 60, 13, 9) + '" fill="url(#rg)"/>';
+  var seed = 7, rnd = function () { seed = (seed * 16807) % 2147483647; return seed / 2147483647; }, st = '';
+  for (var k = 0; k < 46; k++) st += '<circle cx="' + (rnd() * 260).toFixed(1) + '" cy="' + (rnd() * 330).toFixed(1) + '" r="' + (rnd() * .9 + .3).toFixed(2) + '" fill="' + (S.dark ? '#f6dfaa' : '#a0742c') + '" opacity="' + (.25 + rnd() * .6).toFixed(2) + '"/>';
+  $('stars').innerHTML = st;
+  var kh = '';
+  for (var yy = -20; yy < 500; yy += 52) for (var xx = (yy / 52) % 2 ? 0 : 26; xx < 290; xx += 52) kh += '<path d="' + star(xx, yy, 20, 15) + '" fill="none" stroke="' + (S.dark ? '#f1d59e' : '#7d561a') + '" stroke-width=".8"/>';
+  $('khatam').innerHTML = kh;
+  $('tag').textContent = T('Remembrance for every moment', 'ذكر لكل لحظة');
+  $('ver').textContent = T('Version ', 'الإصدار ') + digits(S.version);
+
+  /* what will happen */
+  $('h').textContent = mode === 'install' ? T('Install Adhkār', 'ثبّت أذكار') : mode === 'update' ? T('Update Adhkār', 'حدّث أذكار') : T('Reinstall Adhkār', 'أعد تثبيت أذكار');
+  $('sub').textContent = mode === 'install' ? T('It opens like any app, from Start or your desktop.', 'يُفتح كأي تطبيق، من قائمة ابدأ أو سطح المكتب.')
+    : mode === 'update' ? T('From ' + S.have + ' to ' + S.version + '. Your record stays as it is.', 'من ' + digits(S.have) + ' إلى ' + digits(S.version) + '. يبقى سجلك كما هو.')
+    : T('Version ' + S.have + ' is installed. Your record stays as it is.', 'الإصدار ' + digits(S.have) + ' مثبّت. يبقى سجلك كما هو.');
+  $('whereT').textContent = T('For you only, no administrator needed', 'لك وحدك، دون صلاحيات المسؤول');
+  $('path').textContent = S.path || '';
+  function tog(id, on, t, sub) {
+    var b = $(id); b.setAttribute('aria-checked', String(!!on));
+    b.querySelector('strong').textContent = t; b.querySelector('small').textContent = sub || ''; if (!sub) b.querySelector('small').remove();
+    b.onclick = function () { b.setAttribute('aria-checked', String(b.getAttribute('aria-checked') !== 'true')); };
+  }
+  tog('desk', S.desktop !== false, T('Shortcut on the desktop', 'اختصار على سطح المكتب'));
+  tog('boot', !!S.boot, T('Start with Windows', 'ابدأ مع ويندوز'), T('Quietly in the tray, so reminders ring on time.', 'بهدوء في شريط المهام، لتصلك التذكيرات في وقتها.'));
+  tog('openNow', true, T('Open Adhkār now', 'افتح أذكار الآن'));
+  $('facts').textContent = T('Free · No account · No ads · Works offline', 'مجاني · بلا حساب · بلا إعلانات · يعمل دون إنترنت');
+  $('cancel').textContent = T('Cancel', 'إلغاء');
+  $('go').textContent = mode === 'install' ? T('Install', 'ثبّت') : mode === 'update' ? T('Update', 'حدّث') : T('Reinstall', 'أعد التثبيت');
+
+  /* the copy */
+  var steps = [T('Closing Adhkār if it is open', 'إغلاق أذكار إن كان مفتوحًا'), T('Copying the app', 'نسخ التطبيق'), T('Adding it to Start and the desktop', 'إضافته إلى قائمة ابدأ وسطح المكتب'), T('Adding it to Settings › Apps', 'إضافته إلى الإعدادات › التطبيقات')];
+  $('hc').textContent = mode === 'update' ? T('Updating', 'جارٍ التحديث') : T('Installing', 'جارٍ التثبيت');
+  $('subc').textContent = T('This takes a few seconds.', 'يستغرق ذلك ثوانيَ معدودة.');
+  $('note').textContent = T('Your record is kept apart from the program: nothing you have counted is touched.', 'سجلك محفوظ بعيدًا عن البرنامج: لا يُمسّ شيء مما عددته.');
+  function showStep(at) { $('steps').innerHTML = steps.map(function (n, i) { return '<li class="' + (i < at ? 'did' : i === at ? 'now' : '') + '"><b>' + (i < at ? '✓' : '') + '</b>' + n + '</li>'; }).join(''); }
+
+  /* done, or what went wrong */
+  $('hd').textContent = mode === 'update' ? T('Adhkār is up to date', 'أذكار محدَّث') : T('Adhkār is installed', 'ثُبّت أذكار');
+  $('subd').textContent = T('Version ' + S.version + ', ready in Start.', 'الإصدار ' + digits(S.version) + '، جاهز في قائمة ابدأ.');
+  $('finish').textContent = T('Finish', 'إنهاء');
+  $('he').textContent = T('Adhkār could not be installed', 'تعذّر تثبيت أذكار');
+  $('sube').textContent = T('Nothing you have recorded was touched. What happened:', 'لم يُمسّ شيء من سجلك. ما حدث:');
+  $('close').textContent = T('Close', 'إغلاق');
+  $('retry').textContent = T('Try again', 'حاول مجددًا');
+
+  var stage = 'start', at = 0;
+  function show(s) { stage = s; ['start', 'copy', 'done', 'error'].forEach(function (x) { $(x).hidden = x !== s; }); var f = { start: 'go', done: 'finish', error: 'retry' }[s]; if (f) setTimeout(function () { $(f).focus(); }, 30); }
+  var send = function (o) { chrome.webview.postMessage(JSON.stringify(o)); };
+  var on = function (id) { return $(id).getAttribute('aria-checked') === 'true'; };
+  function go() {
+    at = 0; showStep(0); $('bar').style.width = '2%'; $('pc').textContent = digits(0) + '%';
+    show('copy');
+    send({ do: 'install', desk: on('desk'), boot: on('boot') });
+  }
+  $('go').onclick = go; $('retry').onclick = go;
+  $('cancel').onclick = $('close').onclick = function () { send({ do: 'close' }); };
+  $('finish').onclick = function () {
+    $('rows').hidden = true;
+    send({ do: on('openNow') ? 'open' : 'close' });
+  };
+  addEventListener('keydown', function (e) { if (e.key === 'Escape' && stage !== 'copy') send({ do: 'close' }); });
+  addEventListener('contextmenu', function (e) { e.preventDefault(); });
+  window.Setup = {
+    progress: function (p) {
+      var n = p < 0.05 ? 0 : p < 0.9 ? 1 : p < 1 ? 2 : 3;
+      if (n !== at) { at = n; showStep(at); }
+      $('bar').style.width = Math.max(2, Math.round(p * 100)) + '%';
+      $('pc').textContent = digits(Math.round(p * 100)) + '%';
+    },
+    done: function () {
+      showStep(4); $('bar').style.width = '100%'; $('pc').textContent = digits(100) + '%';
+      var d = on('desk');
+      $('rows').innerHTML = [T('Open it from Start' + (d ? ' or the desktop' : ''), 'افتحه من قائمة ابدأ' + (d ? ' أو سطح المكتب' : '')), T('It updates itself when you ask it to', 'يحدّث نفسه متى طلبت'), T('Remove it from Settings › Apps; your record stays', 'أزله من الإعدادات › التطبيقات، ويبقى سجلك')].map(function (t) { return '<li>' + t + '</li>'; }).join('');
+      setTimeout(function () { show('done'); }, 650);
+    },
+    error: function (m) { $('errText').textContent = m || ''; show('error'); }
+  };
+  showStep(0);
+  show(S.stage || 'start');
+  if (S.stage === 'copy') Setup.progress(.62);
+  if (S.stage === 'done') Setup.done();
+  if (S.stage === 'error') Setup.error('Copying the app: access to the path is denied.');
+})();
+</script>
+</body>
+</html>

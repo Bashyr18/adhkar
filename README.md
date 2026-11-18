@@ -200,13 +200,13 @@ The first build creates a key in `keystore/`. That folder is private and is **ne
 
 ### Windows
 
-On Windows 10 or 11, with Python 3 and Pillow:
+On Windows 10 or 11, with Python 3 and Pillow, and Rust (rustup's stable MSVC toolchain, with the Visual Studio Build Tools' C++ linker):
 
 ```bash
-python -I tools/build_windows.py        # bundles web/ and compiles dist/Adhkar-Windows.exe and dist/Adhkar-Setup.exe with the C# compiler built into Windows
+python -I tools/build_windows.py        # bundles web/ and builds dist/Adhkar-Windows.exe and dist/Adhkar-Setup.exe from the Rust workspace in windows/
 ```
 
-The first run fetches the WebView2 SDK from nuget.org into `tools/.bin/`. No Visual Studio or .NET SDK is needed. `WIN_OUT=<path>` builds elsewhere, for when the app is running.
+The crates are pinned by `windows/Cargo.lock`. WebView2 is part of Windows; the app carries everything else in one file. `WIN_OUT=<path>` builds elsewhere, for when the app is running.
 
 ### The guide and these pictures
 
@@ -249,7 +249,7 @@ All of them run on every push and pull request.
 | `web/js/desk.js`, `web/desk.css` | The computer's layer: the rail, the day band, layouts, Ctrl K, print, the pill |
 | `web/js/data.js`, `hadith.js`, `kahf.js` | **Generated** religious text. Never edit these; edit the build scripts |
 | `android/` | The Android shell: a locked-down WebView, reminders, widgets, the tile, updates. No libraries |
-| `windows/` | The Windows shell: WebView2, files and backups, PDF, the tray, the pill, updates |
+| `windows/` | The Windows shell, in Rust: `app/` (WebView2, the record and backups, PDF, the tray, reminders, the pill, updates), `setup/` (the installer and its window), `common/` (installing, shared Windows plumbing), `shim.js` (the page's bridge) |
 | `docs/guide/` | The illustrated guide, published with GitHub Pages |
 | `tools/` | Content builders, tests, screenshots, packers; `tools/promo/` the films |
 

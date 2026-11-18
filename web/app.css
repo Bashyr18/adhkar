@@ -1337,6 +1337,11 @@ button.card:active,
 .li.done .x {
   color: var(--h, var(--gold));
 }
+/* 615 cities: rows off screen are not painted until they scroll near (the list was 57,000 px of work at once) */
+.li[data-a='pick-city'] {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 64px;
+}
 .lhead {
   position: sticky;
   top: 0;

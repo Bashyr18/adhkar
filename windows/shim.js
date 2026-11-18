@@ -1,17 +1,11 @@
-/* Adhkār for Windows: runs before the page's own scripts. It gives the page the same bridge the Android app gives
+/* Adhkār for Windows: runs before the page's own scripts (added by windows/app/src/web.rs). It gives the page the same bridge the Android app gives
    it, so the record, the recitations and every screen behave as on the phone, and it marks the page as running on a
    computer, which switches on web/js/desk.js. */
 (function () {
   'use strict';
   /* the app's own page only, never a frame inside it */
   if (location.origin !== 'https://adhkar.example' || window.top !== window) return;
-  var H = null;
-  try {
-    H = chrome.webview.hostObjects.sync.adhkar;
-  } catch (e) {
-    H = null;
-  }
-  if (!H) return;
+  if (!(window.chrome && chrome.webview)) return;
   window.ADHKAR_DESKTOP = true;
   /* the document may not exist yet at this point */
   var mark = function () {
@@ -19,9 +13,18 @@
   };
   if (document.documentElement) mark();
   else document.addEventListener('readystatechange', mark, { once: true });
+  /* every call goes to the program (windows/app/src/bridge.rs) as one small request and waits for its answer, as the
+     phone's does */
   function call(fn, args) {
     try {
-      return H[fn].apply(H, args || []);
+      var x = new XMLHttpRequest();
+      x.open('POST', '/__bridge/' + fn, false);
+      x.setRequestHeader('X-Adhkar', '1');
+      x.setRequestHeader('Content-Type', 'application/json');
+      x.send(JSON.stringify(args || []));
+      if (x.status !== 200) return undefined;
+      var o = JSON.parse(x.responseText);
+      return 'r' in o ? o.r : undefined;
     } catch (e) {
       console.warn('bridge ' + fn, e);
       return undefined;
@@ -77,9 +80,27 @@
     'updateCheck',
     'updateGet'
   ];
-  var B = {};
-  names.forEach(function (n) {
-    B[n] = function () {
+  /* what only a computer can do (web/js/desk.js, print.js) */
+  var desk = [
+    'deskInfo',
+    'deskSet',
+    'deskZoom',
+    'titleBar',
+    'deskSchedule',
+    'deskNext',
+    'deskPill',
+    'openFolder',
+    'backup',
+    'install',
+    'quit',
+    'savePdf',
+    'reveal',
+    'openPdf'
+  ];
+  var B = {},
+    D = {};
+  names.concat(desk).forEach(function (n) {
+    D[n] = B[n] = function () {
       return call(n, Array.prototype.slice.call(arguments));
     };
   });
@@ -203,7 +224,7 @@
     return true;
   };
   window.AndroidBridge = B;
-  window.DeskBridge = H;
+  window.DeskBridge = D;
   window.DeskAudio = { stop: stopEl };
 
   /* a backup file dropped anywhere on the window */
