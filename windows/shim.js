@@ -15,21 +15,58 @@
   else document.addEventListener('readystatechange', mark, { once: true });
   /* every call goes to the program (windows/app/src/bridge.rs) as one small request and waits for its answer, as the
      phone's does */
-  function call(fn, args) {
+  /* calls whose answer the page never uses go without waiting, so the page never pauses for them (a save, the title
+     bar's colours, the reminders handed over); the rest wait for their answer, as the phone's do. Answers that cannot
+     change while the app runs are kept after the first ask. */
+  var NOWAIT = {
+    saveState: 1,
+    titleBar: 1,
+    keepAwake: 1,
+    setCanBack: 1,
+    setSystemBars: 1,
+    volumeKeys: 1,
+    audioHold: 1,
+    haptic: 1,
+    sync: 1,
+    deskSchedule: 1,
+    deskNext: 1,
+    deskPill: 1,
+    startCompass: 1,
+    stopCompass: 1
+  };
+  var KEEP = { version: 1, updateCan: 1, overlayOk: 1, dndOk: 1, batteryOk: 1, notificationState: 1 },
+    kept = {},
+    seq = 0;
+  function call(fn, args, mustWait) {
+    if (KEEP[fn] && fn in kept) return kept[fn];
+    args = args || [];
+    /* saves carry a number, so an earlier one that arrives late never overwrites a later one */
+    if (fn === 'saveState') args = [args[0], ++seq];
     try {
-      var x = new XMLHttpRequest();
-      x.open('POST', '/__bridge/' + fn, false);
+      var wait = mustWait || !NOWAIT[fn],
+        x = new XMLHttpRequest();
+      x.open('POST', '/__bridge/' + fn, !wait);
       x.setRequestHeader('X-Adhkar', '1');
       x.setRequestHeader('Content-Type', 'application/json');
-      x.send(JSON.stringify(args || []));
+      x.send(JSON.stringify(args));
+      if (!wait) return undefined;
       if (x.status !== 200) return undefined;
-      var o = JSON.parse(x.responseText);
-      return 'r' in o ? o.r : undefined;
+      var o = JSON.parse(x.responseText),
+        r = 'r' in o ? o.r : undefined;
+      if (KEEP[fn]) kept[fn] = r;
+      return r;
     } catch (e) {
       console.warn('bridge ' + fn, e);
       return undefined;
     }
   }
+  /* the program is about to close: the record goes over now, and waits to be received */
+  window.__adhkarFlush = function () {
+    try {
+      if (window.A && A.S) call('saveState', [JSON.stringify(A.S)], true);
+    } catch (e) {}
+    return 1;
+  };
   var nat = function () {
     return window.__native || {};
   };

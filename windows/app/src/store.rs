@@ -39,28 +39,52 @@ pub fn load_state() -> Option<String> {
     let _g = STATE_LOCK.lock().unwrap();
     fs::read_to_string(state_file()).ok()
 }
-/* written whole to a side file, then swapped in, so a power cut never leaves half a record; off the window's thread */
-pub fn save_state(json: String) {
+/* written whole to a side file, then swapped in, so a power cut never leaves half a record. One writer, off the
+   window's thread, always writes the newest record it has been given: saves come quickly while counting, and one
+   thread per save could finish out of order and leave an older record on disk */
+static PENDING: Mutex<Option<(u64, String)>> = Mutex::new(None);
+static WRITING: AtomicBool = AtomicBool::new(false);
+static LAST_SEQ: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+pub fn save_state(json: String, seq: u64) {
     if json.len() < 2 || json.len() > 8_000_000 { return; }
-    std::thread::spawn(move || {
-        let _g = STATE_LOCK.lock().unwrap();
-        let f = state_file();
-        let tmp = f.with_extension("json.tmp");
-        let ok = (|| -> std::io::Result<()> {
-            let mut o = fs::File::create(&tmp)?;
-            o.write_all(json.as_bytes())?;
-            o.sync_all()?;
-            Ok(())
-        })().is_ok();
-        if !ok || fs::rename(&tmp, &f).is_err() { let _ = fs::remove_file(&tmp); return; }
-        let today = backup_dir().join(format!("{}.json", today()));
-        if !today.exists() {
-            let _ = fs::copy(&f, &today);
-            let mut all = names_with(&backup_dir(), ".json");
-            all.sort();
-            if all.len() > 30 { for n in &all[..all.len() - 30] { let _ = fs::remove_file(backup_dir().join(n)); } }
+    {
+        let mut p = PENDING.lock().unwrap();
+        /* a save that arrives after a newer one (the page numbers them) is already out of date */
+        if seq > 0 && seq < LAST_SEQ.load(Ordering::SeqCst) { return; }
+        if seq > 0 { LAST_SEQ.store(seq, Ordering::SeqCst); }
+        *p = Some((seq, json));
+    }
+    if WRITING.swap(true, Ordering::SeqCst) { return; }
+    std::thread::spawn(|| loop {
+        let next = PENDING.lock().unwrap().take();
+        match next {
+            Some((_, j)) => write_state(&j),
+            None => {
+                WRITING.store(false, Ordering::SeqCst);
+                /* a save may have arrived between the last look and letting go */
+                if PENDING.lock().unwrap().is_none() || WRITING.swap(true, Ordering::SeqCst) { break; }
+            }
         }
     });
+}
+fn write_state(json: &str) {
+    let _g = STATE_LOCK.lock().unwrap();
+    let f = state_file();
+    let tmp = f.with_extension("json.tmp");
+    let ok = (|| -> std::io::Result<()> {
+        let mut o = fs::File::create(&tmp)?;
+        o.write_all(json.as_bytes())?;
+        o.sync_all()?;
+        Ok(())
+    })().is_ok();
+    if !ok || fs::rename(&tmp, &f).is_err() { let _ = fs::remove_file(&tmp); return; }
+    let today = backup_dir().join(format!("{}.json", today()));
+    if !today.exists() {
+        let _ = fs::copy(&f, &today);
+        let mut all = names_with(&backup_dir(), ".json");
+        all.sort();
+        if all.len() > 30 { for n in &all[..all.len() - 30] { let _ = fs::remove_file(backup_dir().join(n)); } }
+    }
 }
 pub fn today() -> String {
     let t = unsafe { windows::Win32::System::SystemInformation::GetLocalTime() };

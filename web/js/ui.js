@@ -1054,6 +1054,13 @@
         '</div>';
       A.nameSwitches(app);
       built = { key: key, rev: A.rev, at: Date.now(), day: A.today() };
+      /* the cards rise in once, as the page arrives; afterwards a card redrawn in place (the updates card after a
+         check, the day band each minute, the recitation bar) simply changes, instead of fading in from nothing */
+      var arrived = app.querySelector('.view.in');
+      if (arrived)
+        setTimeout(function () {
+          arrived.classList.remove('in');
+        }, 700);
     }
     document.title = (v.title ? v.title + ' · ' : '') + 'Adhkār';
     /* a sub-page lights the tab you reached it from, so the bar always says where Back leads; a cold deep link uses the page's own tab */
@@ -1546,8 +1553,19 @@
       if (document.hidden) A.save(true);
       else if (!A.N.has) A.rerender();
     });
+    /* a minute without input: the decorative loops rest (app.css html.rest); any input wakes them */
+    var lastInput = Date.now(),
+      root = document.documentElement;
+    var woke = function () {
+      lastInput = Date.now();
+      if (root.classList.contains('rest')) root.classList.remove('rest');
+    };
+    ['pointerdown', 'pointermove', 'keydown', 'wheel', 'touchstart'].forEach(function (t) {
+      addEventListener(t, woke, { passive: true, capture: true });
+    });
     var day = A.today();
     setInterval(function () {
+      if (!root.classList.contains('rest') && Date.now() - lastInput > 60000) root.classList.add('rest');
       var d = A.today();
       if (d !== day) {
         day = d;

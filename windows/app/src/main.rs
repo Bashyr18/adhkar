@@ -66,6 +66,9 @@ pub struct App {
     pill: RefCell<Option<pill::Pill>>,
     next_at: Cell<f64>,
     pill_json: RefCell<String>,
+    /* closing: the record has been handed over */
+    flushing: Cell<bool>,
+    flushed: Cell<bool>,
 }
 thread_local! { static APP: RefCell<Option<Rc<App>>> = const { RefCell::new(None) }; }
 pub fn app() -> Option<Rc<App>> { APP.with(|a| a.borrow().clone()) }
@@ -286,8 +289,17 @@ extern "system" fn wndproc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM) -> LRES
                 return LRESULT(1);
             }
             WM_SIZE => {
-                if let Some(a) = app() { if let Some(w) = a.web.borrow().as_ref() { let _ = w.controller.SetBounds(ac::client_rect(hwnd)); } }
+                /* minimised, the page is told it is not seen, so it stops drawing (its animations and clocks rest);
+                   the C# control did this by itself, WebView2 under Rust has to be told */
+                if let Some(a) = app() { if let Some(w) = a.web.borrow().as_ref() {
+                    let _ = w.controller.SetIsVisible(wp.0 != SIZE_MINIMIZED as usize && IsWindowVisible(hwnd).as_bool());
+                    let _ = w.controller.SetBounds(ac::client_rect(hwnd));
+                } }
                 return LRESULT(0);
+            }
+            WM_SHOWWINDOW => {
+                /* hidden in the tray, likewise */
+                if let Some(a) = app() { if let Some(w) = a.web.borrow().as_ref() { let _ = w.controller.SetIsVisible(wp.0 != 0 && !IsIconic(hwnd).as_bool()); } }
             }
             WM_MOVE | WM_MOVING => { if let Some(a) = app() { if let Some(w) = a.web.borrow().as_ref() { let _ = w.controller.NotifyParentWindowPositionChanged(); } } }
             WM_EXITSIZEMOVE => { if let Some(a) = app() { a.keep_bounds(); } }
@@ -325,6 +337,21 @@ extern "system" fn wndproc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM) -> LRES
             }
             WM_COMMAND => { if let Some(a) = app() { a.command(wp.0 & 0xffff); } return LRESULT(0); }
             WM_CLOSE => {
+                /* closing for good: the page hands over its record first (it mirrors it only every second and a
+                   half), then the window closes; a page that does not answer within a second and a half is not waited for */
+                if let Some(a) = app() {
+                    let closing = a.quitting.get() || !store::flag("tray");
+                    if closing && !a.flushed.get() {
+                        if let Some(v) = a.view() {
+                            if !a.flushing.replace(true) {
+                                let done = || ac::later(|| if let Some(a) = app() { if !a.flushed.replace(true) { a.quitting.set(true); let _ = PostMessageW(Some(a.hwnd), WM_CLOSE, WPARAM(0), LPARAM(0)); } });
+                                ac::exec(&v, "window.__adhkarFlush&&__adhkarFlush()", Some(Box::new(move |_| done())));
+                                std::thread::spawn(move || { std::thread::sleep(std::time::Duration::from_millis(1500)); done(); });
+                            }
+                            return LRESULT(0);
+                        }
+                    }
+                }
                 if let Some(a) = app() {
                     if !a.quitting.get() && store::flag("tray") {
                         a.keep_bounds();
@@ -475,6 +502,7 @@ fn main() {
         before_full: Cell::new((0, RECT::default(), false)), pending_route: RefCell::new(None), pending_files: RefCell::new(vec![]),
         events: RefCell::new(vec![]), rung: RefCell::new(HashSet::new()), last_route: RefCell::new(None), tray_shown: Cell::new(false),
         tip: RefCell::new(ac::APP_NAME.to_string()), pill: RefCell::new(None), next_at: Cell::new(0.0), pill_json: RefCell::new("{}".into()),
+        flushing: Cell::new(false), flushed: Cell::new(false),
     });
     APP.with(|s| *s.borrow_mut() = Some(a.clone()));
     a.title_bar(dark);

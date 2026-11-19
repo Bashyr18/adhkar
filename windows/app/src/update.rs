@@ -125,12 +125,14 @@ fn swap(part: PathBuf) {
     let old = PathBuf::from(format!("{}.old", cur.display()));
     let _ = fs::remove_file(&old);
     if fs::rename(&cur, &old).is_err() { send(json!({ "state": "error", "step": "get", "why": "could not move the running file" })); BUSY.store(false, Ordering::SeqCst); return; }
-    if fs::rename(&part, &cur).is_err() {
+    /* the download lives beside the record; a copy run from another drive cannot be moved across, so it is copied */
+    if fs::rename(&part, &cur).is_err() && fs::copy(&part, &cur).is_err() {
         let _ = fs::rename(&old, &cur);
         send(json!({ "state": "error", "step": "get", "why": "could not put the new file in place" }));
         BUSY.store(false, Ordering::SeqCst);
         return;
     }
+    let _ = fs::remove_file(&part);
     send(json!({ "state": "done" }));
     let dir = cur.parent().map(|p| p.to_string_lossy().into_owned());
     ac::spawn(&cur.to_string_lossy(), &format!("--after-update {}", std::process::id()), dir.as_deref(), false);

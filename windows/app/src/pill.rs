@@ -320,6 +320,12 @@ extern "system" fn wndproc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM) -> LRES
                 LRESULT(0)
             }
             WM_MOUSEACTIVATE => LRESULT(MA_NOACTIVATE as isize),
+            /* dragged to a screen of another scale: drawn again at that scale */
+            WM_DPICHANGED => {
+                let dpi = (wp.0 & 0xffff) as f64;
+                with(|s| { s.k = dpi / 96.0; s.cache = None; s.atlas_cache = None; render(s); });
+                LRESULT(0)
+            }
             _ => DefWindowProcW(hwnd, msg, wp, lp),
         }
     }

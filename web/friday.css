@@ -571,6 +571,8 @@
   display: none;
 }
 .kf-page {
+  /* pages off screen are not laid out until they come near (the sūrah's twelve pages took seconds at once) */
+  content-visibility: auto;
   flex: 0 0 100%;
   scroll-snap-align: start;
   scroll-snap-stop: always;
@@ -792,4 +794,8 @@ html.has-rail .kf {
     padding: 0 10px;
     font-size: 12px;
   }
+}
+/* measuring a page's lines (v-friday.js fit): all at their natural width at once */
+.kf-lines.kf-measure .kf-l {
+  display: inline-flex !important;
 }

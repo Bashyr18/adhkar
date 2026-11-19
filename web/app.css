@@ -3221,3 +3221,20 @@ button.card:active,
 .up-notes li {
   overflow-wrap: anywhere;
 }
+
+/* resting: after a minute with no touch, key or pointer, the decorative loops hold still where they are (the sky's
+   stars, the scene cards' clouds, birds and rays, lanterns, glows), so an app left open costs the device nothing; any
+   input sets them going again. The counting cues, the pace and spinners are never held. (ui.js sets .rest) */
+html.rest .sky .stars i,
+html.rest .sky .arc .halo,
+html.rest .glowcard,
+html.rest .lanterns svg,
+html.rest .fanous *,
+html.rest .feature .scene *,
+html.rest .feature .fnow i,
+html.rest .ans-now .badge,
+html.rest .fr-flame,
+html.rest .pattern::before,
+html.rest .pattern::after {
+  animation-play-state: paused !important;
+}

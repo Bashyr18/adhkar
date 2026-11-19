@@ -715,32 +715,68 @@
       mount: mountKahf
     };
   };
+  /* the full lines of a Madani page share one width: size the font so the widest fills the page. Every page waiting
+     is fitted together, all measurements first and every change after, so the sūrah is laid out once or twice rather
+     than once per line of every page (each page's change used to re-lay the whole strip before the next was measured) */
   function fit(page) {
-    /* the full lines of a Madani page share one width: size the font so the widest fills the page */
-    var lines = $('.kf-lines', page),
-      ls = page.querySelectorAll('.kf-l');
-    if (!lines || !ls.length) return;
-    lines.style.setProperty('--kf', '40px');
-    var w = 0;
-    Array.prototype.forEach.call(ls, function (l) {
-      l.style.display = 'inline-flex';
-      w = Math.max(w, l.scrollWidth);
-      l.style.display = '';
+    fitAll([page]);
+  }
+  function fitAll(pages) {
+    var jobs = [];
+    pages.forEach(function (page) {
+      var lines = $('.kf-lines', page),
+        ls = page.querySelectorAll('.kf-l');
+      if (!lines || !ls.length) return;
+      lines.style.setProperty('--kf', '40px');
+      lines.style.width = '';
+      lines.classList.add('kf-measure');
+      jobs.push({ page: page, lines: lines, ls: ls });
     });
-    lines.style.width = '';
-    var cs = getComputedStyle(lines),
-      padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight),
-      padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom),
-      room = lines.clientWidth - padX;
-    if (!(w > 0 && room > 0)) return;
-    /* the page fits the screen both ways: by its width, and by the height its lines (and the sūrah's header) need */
-    var byW = ((40 * room) / w) * 0.985,
-      extra = page.dataset.p === '293' ? 4.6 : 0,
-      tall = page.clientHeight - padY - 46,
-      byH = tall / ((ls.length + extra) * 1.95),
-      f = Math.max(12, Math.min(byW, byH));
-    lines.style.setProperty('--kf', f + 'px');
-    if (byH < byW) lines.style.width = Math.ceil((w * f) / 40 / 0.985 + padX) + 'px';
+    /* read */
+    jobs.forEach(function (j) {
+      var w = 0;
+      Array.prototype.forEach.call(j.ls, function (l) {
+        w = Math.max(w, l.scrollWidth);
+      });
+      j.w = w;
+    });
+    jobs.forEach(function (j) {
+      j.lines.classList.remove('kf-measure');
+    });
+    jobs.forEach(function (j) {
+      var cs = getComputedStyle(j.lines);
+      j.padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+      j.padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+      j.room = j.lines.clientWidth - j.padX;
+      j.tall = j.page.clientHeight - j.padY - 46;
+    });
+    /* write */
+    jobs.forEach(function (j) {
+      j.page._fit = true;
+      if (!(j.w > 0 && j.room > 0)) return;
+      /* the page fits the screen both ways: by its width, and by the height its lines (and the sūrah's header) need */
+      var byW = ((40 * j.room) / j.w) * 0.985,
+        extra = j.page.dataset.p === '293' ? 4.6 : 0,
+        byH = j.tall / ((j.ls.length + extra) * 1.95),
+        f = Math.max(12, Math.min(byW, byH));
+      j.lines.style.setProperty('--kf', f + 'px');
+      if (byH < byW) j.lines.style.width = Math.ceil((j.w * f) / 40 / 0.985 + j.padX) + 'px';
+    });
+  }
+  /* pages whose fonts have arrived wait for the next frame, and are fitted together */
+  var waiting = [],
+    fitFrame = 0;
+  function fitSoon(page) {
+    if (waiting.indexOf(page) < 0) waiting.push(page);
+    if (fitFrame) return;
+    fitFrame = requestAnimationFrame(function () {
+      fitFrame = 0;
+      var list = waiting.filter(function (p) {
+        return p.isConnected;
+      });
+      waiting = [];
+      fitAll(list);
+    });
   }
   function mountKahf(el) {
     var j = J(),
@@ -756,12 +792,30 @@
     };
     if (track) {
       var pages = Array.prototype.slice.call(track.querySelectorAll('.kf-page'));
-      pages.forEach(function (p) {
-        fontFor(p.dataset.p).then(function () {
-          requestAnimationFrame(function () {
-            fit(p);
+      /* a page is fitted when its font has arrived and it is within a page of being seen: the pages further off are
+         not laid out at all until then (content-visibility in friday.css), which made opening the sūrah take seconds */
+      var near = new IntersectionObserver(
+        function (es) {
+          es.forEach(function (e) {
+            var p = e.target;
+            p._near = e.isIntersecting;
+            if (p._near) want(p);
+            if (p._near && p._font && !p._fit) fitSoon(p);
           });
+        },
+        { root: track, rootMargin: '0px 100%' }
+      );
+      /* each page's own font is fetched when the page comes near, not all twelve at once */
+      var want = function (p) {
+        if (p._asked) return;
+        p._asked = true;
+        fontFor(p.dataset.p).then(function () {
+          p._font = true;
+          if (p._near && !p._fit) fitSoon(p);
         });
+      };
+      pages.forEach(function (p) {
+        near.observe(p);
       });
       var io = new IntersectionObserver(
         function (es) {
@@ -781,7 +835,11 @@
       if (!K.resize) {
         K.resize = true;
         addEventListener('resize', function () {
-          Array.prototype.forEach.call(document.querySelectorAll('.kf-page'), fit);
+          /* a new size: the pages near are fitted again now, the rest when they come near */
+          Array.prototype.forEach.call(document.querySelectorAll('.kf-page'), function (p) {
+            p._fit = false;
+            if (p._near && p._font) fitSoon(p);
+          });
         });
       }
       /* a verse tapped shows its translation */

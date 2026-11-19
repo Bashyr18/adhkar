@@ -26,7 +26,7 @@ pub fn call(name: &str, body: &[u8]) -> Option<Value> {
         /* ---------- the same as the phone ---------- */
         "setCanBack" | "haptic" | "sync" | "audioHold" | "volumeKeys" | "openOverlay" | "openDndAccess" | "openBattery" | "startCompass" | "stopCompass" => None,
         "ready" => { ac::later(|| if let Some(a) = app() { a.on_ready() }); None }
-        "saveState" => { store::save_state(s(0)); None }
+        "saveState" => { store::save_state(s(0), n(1) as u64); None }
         "loadState" => Some(store::load_state().map(Value::String).unwrap_or(Value::Null)),
         "version" => Some(json!(VERSION)),
         "systemDark" => Some(json!(ac::system_dark())),
