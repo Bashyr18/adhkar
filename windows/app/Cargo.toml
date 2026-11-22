@@ -8,6 +8,10 @@ publish = false
 name = "Adhkar"
 path = "src/main.rs"
 
+[[bin]]
+name = "adhkar-sign"
+path = "src/bin/adhkar-sign.rs"
+
 [dependencies]
 adhkar-common = { path = "../common" }
 webview2-com.workspace = true
@@ -19,6 +23,7 @@ ureq = { version = "2", default-features = false, features = ["native-tls"] }
 native-tls = "0.2"
 sha2 = "0.10"
 base64 = "0.22"
+ed25519-dalek = { version = "2", default-features = false, features = ["fast"] }
 
 [build-dependencies]
 embed-resource = "3"

@@ -965,19 +965,66 @@
   A.acts.import = function () {
     A.N.importFile();
   };
+  function finishImport(text, mode) {
+    A.importJSON(text, mode);
+    S.profile.onboarded = true;
+    A.save(true);
+    A.applyTheme();
+    if (A.applyLang) A.applyLang();
+    A.toast(mode === 'merge' ? 'Backup merged' : 'Backup restored', 'check');
+    A.go('#/profile');
+    A.rerender();
+  }
   window.__native.onImport = function (text) {
     try {
-      A.importJSON(text);
-      S.profile.onboarded = true;
-      A.save(true);
-      A.applyTheme();
-      if (A.applyLang) A.applyLang();
-      A.toast('Backup restored', 'check');
-      A.go('#/profile');
-      A.rerender();
+      var parsed = JSON.parse(text);
+      if (
+        !parsed ||
+        typeof parsed !== 'object' ||
+        !(parsed.app === 'adhkar' || parsed.state || parsed.counts || parsed.done)
+      )
+        throw new Error('bad');
     } catch (e) {
       A.toast('That file is not an Adhkār backup');
+      return;
     }
+    var tot = A.totals(),
+      hasData = tot.dhikr > 0 || tot.sessions > 0 || tot.prayed > 0 || (S.journal && S.journal.items.length > 0);
+    if (!hasData) {
+      try {
+        finishImport(text, 'replace');
+      } catch (e) {
+        A.toast('That file is not an Adhkār backup');
+      }
+      return;
+    }
+    var sh = A.sheet(
+      'Import backup',
+      '<p class="muted" style="line-height:1.6">Keep your record here and add what is in the backup, or replace everything on this device.</p>' +
+        '<div class="col" style="gap:8px;margin-top:8px">' +
+        '<button type="button" class="btn pri wide" id="impMerge">Merge with this device</button>' +
+        '<button type="button" class="btn sec wide" id="impRep">Replace everything</button></div>',
+      {
+        mount: function (el) {
+          $('#impMerge', el).addEventListener('click', function () {
+            sh.close(true);
+            try {
+              finishImport(text, 'merge');
+            } catch (e) {
+              A.toast('That file is not an Adhkār backup');
+            }
+          });
+          $('#impRep', el).addEventListener('click', function () {
+            sh.close(true);
+            try {
+              finishImport(text, 'replace');
+            } catch (e) {
+              A.toast('That file is not an Adhkār backup');
+            }
+          });
+        }
+      }
+    );
   };
   window.__native.onExported = function (ok) {
     A.toast(ok ? 'Backup saved' : 'Backup not saved', ok ? 'download' : null);

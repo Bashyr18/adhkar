@@ -609,14 +609,11 @@
     pool.sort(function (a, b) {
       return a.k - b.k;
     });
-    return pool
-      .slice(0, n)
-      .map(function (x) {
+    return shuffle(
+      pool.slice(0, n).map(function (x) {
         return x.q[0];
       })
-      .sort(function () {
-        return Math.random() - 0.5;
-      });
+    );
   }
   function shuffle(a) {
     a = a.slice();

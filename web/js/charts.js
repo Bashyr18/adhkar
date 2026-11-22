@@ -75,6 +75,10 @@
   /* Area/line: data [{label, v, sub?}] — single series, so no legend box; the card title names it. */
   A.chart.area = function (root, data, opt) {
     opt = opt || {};
+    if (!data || !data.length) {
+      root.innerHTML = '';
+      return;
+    }
     var W = Math.max(240, root.clientWidth),
       H = opt.h || 170,
       padL = 30,
@@ -200,9 +204,13 @@
     var svg = root.querySelector('svg'),
       xh = svg.querySelector('.xh'),
       xd = svg.querySelector('.xd'),
-      tt = tip(root);
+      tt = tip(root),
+      hideT = 0;
     function move(e) {
-      var px = pointerX(e, svg) * (W / svg.getBoundingClientRect().width),
+      clearTimeout(hideT);
+      var rect = svg.getBoundingClientRect();
+      if (!rect.width) return;
+      var px = pointerX(e, svg) * (W / rect.width),
         i = Math.round((px - padL) / ((W - padL - padR) / Math.max(1, n - 1)));
       i = Math.max(0, Math.min(n - 1, i));
       var d = data[i];
@@ -212,12 +220,13 @@
       xd.setAttribute('cy', y(d.v));
       root.classList.add('hot');
       tt.show(
-        (x(i) * svg.getBoundingClientRect().width) / W,
+        (x(i) * rect.width) / W,
         d.title || d.label,
         [{ label: opt.unit || 'Count', value: A.fmtN(d.v) }].concat(d.extra || [])
       );
     }
     function out() {
+      clearTimeout(hideT);
       root.classList.remove('hot');
       tt.hide();
     }
@@ -225,7 +234,8 @@
     svg.addEventListener('pointerdown', move);
     svg.addEventListener('pointerleave', out);
     svg.addEventListener('touchend', function () {
-      setTimeout(out, 1600);
+      clearTimeout(hideT);
+      hideT = setTimeout(out, 1600);
     });
   };
 

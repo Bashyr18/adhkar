@@ -501,6 +501,11 @@
       'بلا حسابات ولا إعلانات ولا تتبّع. كل شيء يبقى على جهازك.',
     'Storage is full or blocked; export a backup to keep your record safe.':
       'التخزين ممتلئ أو محجوب؛ صدّر نسخة احتياطية لحفظ سجلك.',
+    'Backup merged': 'دُمجت النسخة الاحتياطية',
+    'Merge with this device': 'الدمج مع هذا الجهاز',
+    'Replace everything': 'استبدال كل شيء',
+    'Keep your record here and add what is in the backup, or replace everything on this device.':
+      'أبقِ سجلك هنا وأضف ما في النسخة الاحتياطية، أو استبدل كل شيء على هذا الجهاز.',
     'This computer': 'هذا الحاسوب',
     'Home-screen widgets, quick-settings tile, app shortcuts, volume-key counting and native phone controls come with the Android app.':
       'الأدوات على الشاشة الرئيسية ومربّع الإعدادات السريعة واختصارات التطبيق والعد بأزرار الصوت وإعدادات الهاتف الأصلية متاحة في تطبيق أندرويد.',

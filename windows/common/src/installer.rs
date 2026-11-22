@@ -299,3 +299,21 @@ pub fn shortcut(lnk: &Path, target: &Path, args: &str, about: &str) -> Result<()
     }
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{newer, valid_version};
+
+    #[test]
+    fn version_validation_and_ordering() {
+        assert!(valid_version("13.8"));
+        assert!(valid_version("13.10.2"));
+        assert!(!valid_version(""));
+        assert!(!valid_version("13."));
+        assert!(!valid_version("99.0/../../evil"));
+        assert!(!valid_version("13.8\\x"));
+        assert!(newer("13.10", "13.9"));
+        assert!(!newer("13.8", "13.8"));
+        assert!(!newer("99.0/../../evil", "13.7"));
+    }
+}

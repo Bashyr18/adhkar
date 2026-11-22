@@ -1261,6 +1261,50 @@ ok(/Ramaḍān Mubārak/.test(rt), 'Ramaḍān greeting in Ramaḍān');
     /<b>1<i>\/5<\/i><\/b>/.test(tenv.w.document.getElementById('dash').innerHTML),
     'dash-pray updates the X/5 prayed ring immediately'
   );
+
+  /* 8. History compaction rolls >1yr counts into archivedCounts without changing totals */
+  const cenv = boot('2026-11-13T10:00:00Z', settled);
+  const oldBk = JSON.parse(cenv.w.A.exportJSON());
+  oldBk.state.counts = { '2024-01-10|morning|m1': 33, '2024-01-10|morning|m2': 7, '2026-11-13|morning|m1': 3 };
+  cenv.w.A.importJSON(JSON.stringify(oldBk));
+  ok(
+    !cenv.w.A.S.counts['2024-01-10|morning|m1'] &&
+      cenv.w.A.S.archivedCounts['2024-01-10'] === 40 &&
+      cenv.w.A.S.counts['2026-11-13|morning|m1'] === 3 &&
+      cenv.w.A.totals().dhikr === 43 &&
+      cenv.w.A.totals().byDay['2024-01-10'] === 40,
+    'counts older than 365 days compact into archivedCounts with identical totals'
+  );
+
+  /* 9. Backup merge combines two devices without overwriting local settings or higher counts */
+  const menv = boot('2026-11-13T10:00:00Z', settled);
+  menv.w.A.S.prefs.accent = 'emerald';
+  menv.w.A.S.counts['2026-11-13|morning|m1'] = 10;
+  menv.w.A.S.prayed['2026-11-13'] = { fajr: 1 };
+  menv.w.A.S.journal.items = [{ id: 'j1', text: 'Local dua', since: '2026-11-10' }];
+  const other = JSON.parse(menv.w.A.exportJSON());
+  other.state.prefs.accent = 'rose';
+  other.state.counts = { '2026-11-13|morning|m1': 5, '2026-11-13|evening|e1': 12 };
+  other.state.prayed = { '2026-11-13': { dhuhr: 1 } };
+  other.state.journal.items = [
+    { id: 'j1', text: 'Dup', since: '2026-11-10' },
+    { id: 'j2', text: 'Phone dua', since: '2026-11-12' }
+  ];
+  menv.w.A.importJSON(JSON.stringify(other), 'merge');
+  ok(
+    menv.w.A.S.prefs.accent === 'emerald' &&
+      menv.w.A.S.counts['2026-11-13|morning|m1'] === 10 &&
+      menv.w.A.S.counts['2026-11-13|evening|e1'] === 12 &&
+      menv.w.A.S.prayed['2026-11-13'].fajr &&
+      menv.w.A.S.prayed['2026-11-13'].dhuhr &&
+      menv.w.A.S.journal.items.length === 2,
+    'backup merge keeps local prefs, takes max counts, and unions prayers and journal'
+  );
+
+  /* 10. A.chart.area handles empty data cleanly */
+  const box = menv.w.document.createElement('div');
+  menv.w.A.chart.area(box, [], {});
+  ok(box.innerHTML === '', 'A.chart.area handles empty data without throwing');
 }
 
 setTimeout(function () {

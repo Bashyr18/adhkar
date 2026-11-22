@@ -68,3 +68,16 @@ pub fn sha256(path: &Path) -> Option<String> {
     loop { let n = f.read(&mut buf).ok()?; if n == 0 { break; } h.update(&buf[..n]); }
     Some(h.finalize().iter().map(|b| format!("{:02x}", b)).collect())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::host_of;
+
+    #[test]
+    fn host_of_parses_and_rejects_userinfo() {
+        assert_eq!(host_of("https://api.github.com/repos/a/b"), "api.github.com");
+        assert_eq!(host_of("https://GITHUB.COM:443/path?x=1"), "github.com");
+        assert_eq!(host_of("https://evil.com\\@github.com/x"), "evil.com");
+        assert_eq!(host_of("https://github.com@evil.com/x"), "");
+    }
+}

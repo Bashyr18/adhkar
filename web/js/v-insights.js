@@ -427,15 +427,46 @@
       tab: 4,
       mount: function (el) {
         draw(el, c);
-        $('#heat', el).addEventListener('click', function (e) {
-          var i = e.target.closest('[data-d]');
-          if (!i) return;
+        var pickDay = function (i) {
           $$('.heat i.sel', el).forEach(function (x) {
             x.classList.remove('sel');
           });
           i.classList.add('sel');
           $('#heatInfo', el).textContent = dayDetail(i.dataset.d);
           A.N.haptic('tick');
+        };
+        var heat = $('#heat', el);
+        heat.addEventListener('click', function (e) {
+          var i = e.target.closest('[data-d]');
+          if (i) pickDay(i);
+        });
+        heat.addEventListener('keydown', function (e) {
+          var i = e.target.closest('[data-d]');
+          if (!i) return;
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            pickDay(i);
+            return;
+          }
+          var step =
+            e.key === 'ArrowRight'
+              ? 7
+              : e.key === 'ArrowLeft'
+                ? -7
+                : e.key === 'ArrowDown'
+                  ? 1
+                  : e.key === 'ArrowUp'
+                    ? -1
+                    : 0;
+          if (!step) return;
+          e.preventDefault();
+          var all = $$('#heat [data-d]', el),
+            idx = all.indexOf(i),
+            next = all[idx + step];
+          if (next) {
+            next.focus();
+            pickDay(next);
+          }
         });
         var onR = A.debounce(function () {
           if (document.body.contains(el) && $('#chTrend', el)) draw(el, c);

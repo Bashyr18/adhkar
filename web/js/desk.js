@@ -954,7 +954,7 @@
     pal.innerHTML =
       '<div class="dk-pal-bg"></div><div class="dk-pal-box"><label class="dk-pal-in">' +
       ic('search', 20) +
-      '<input id="pal-q" autocomplete="off" spellcheck="false" placeholder="' +
+      '<input id="pal-q" role="combobox" aria-expanded="true" aria-controls="pal-l" aria-autocomplete="list" autocomplete="off" spellcheck="false" placeholder="' +
       esc(L('Search adhkār, hadith, pages, settings…', 'ابحث في الأذكار والأحاديث والصفحات والإعدادات…')) +
       '">' +
       kbd('Esc') +
@@ -1013,7 +1013,9 @@
               last = e.g;
               return (
                 head +
-                '<button class="dk-pal-i' +
+                '<button id="pal-o-' +
+                i +
+                '" class="dk-pal-i' +
                 (i === sel ? ' on' : '') +
                 '" data-i="' +
                 i +
@@ -1031,7 +1033,10 @@
             .join('')
         : '<p class="dk-pal-none">' + esc(L('Nothing by that name', 'لا شيء بهذا الاسم')) + '</p>';
       var on = $('.dk-pal-i.on', list);
-      if (on) on.scrollIntoView({ block: 'nearest' });
+      if (on) {
+        q.setAttribute('aria-activedescendant', on.id);
+        on.scrollIntoView({ block: 'nearest' });
+      } else q.removeAttribute('aria-activedescendant');
     }
     function run(i) {
       var e = shown[i];

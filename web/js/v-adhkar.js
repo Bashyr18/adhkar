@@ -930,6 +930,12 @@
     if (S.prefs.wake) A.N.keepAwake(true);
     if (S.prefs.volKeys && !A.pace.on()) A.N.volumeKeys(true);
     bindGestures(el);
+    el.addEventListener('keydown', function (e) {
+      if ((e.key === 'Enter' || e.key === ' ') && e.target && e.target.classList && e.target.classList.contains('mw')) {
+        e.preventDefault();
+        A.acts['memo-peek'](e.target);
+      }
+    });
     paintPage(0);
   };
   A.closeReader = function (instant) {

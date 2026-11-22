@@ -240,6 +240,7 @@
         smart: true
       },
       counts: {},
+      archivedCounts: {},
       done: {},
       prayed: {},
       nights: {},
@@ -382,6 +383,9 @@
     Object.keys(s.counts).forEach(function (k) {
       if (!num(s.counts[k]) || s.counts[k] < 0) delete s.counts[k];
     });
+    Object.keys(s.archivedCounts).forEach(function (k) {
+      if (!ISO_RE.test(k) || !num(s.archivedCounts[k]) || s.archivedCounts[k] < 0) delete s.archivedCounts[k];
+    });
     Object.keys(s.prayed).forEach(function (k) {
       if (!s.prayed[k] || typeof s.prayed[k] !== 'object' || Array.isArray(s.prayed[k])) delete s.prayed[k];
     });
@@ -422,7 +426,7 @@
     }
     if (raw) {
       try {
-        return sane(merge(defaults(), JSON.parse(raw)));
+        return compactCounts(sane(merge(defaults(), JSON.parse(raw))));
       } catch (e) {
         try {
           localStorage.setItem(KEY + '.corrupt.' + Date.now(), raw);
@@ -554,18 +558,123 @@
   A.exportJSON = function () {
     return JSON.stringify({ app: 'adhkar', exported: new Date().toISOString(), state: S }, null, 1);
   };
-  A.importJSON = function (text) {
+  /* roll granular per-item counts older than 365 days into daily totals so multi-year use never fills storage */
+  function compactCounts(s) {
+    var cutoff = P.shiftKey(todayISO(), -365);
+    s.archivedCounts = s.archivedCounts || {};
+    Object.keys(s.counts).forEach(function (k) {
+      var d = k.slice(0, 10);
+      if (ISO_RE.test(d) && d < cutoff) {
+        s.archivedCounts[d] = (s.archivedCounts[d] || 0) + s.counts[k];
+        delete s.counts[k];
+      }
+    });
+    return s;
+  }
+  function mergeRecords(cur, inc) {
+    var maxMap = function (dst, src) {
+      Object.keys(src || {}).forEach(function (k) {
+        dst[k] = Math.max(dst[k] || 0, src[k] || 0);
+      });
+    };
+    var unionMap = function (dst, src) {
+      Object.keys(src || {}).forEach(function (k) {
+        if (!dst[k]) dst[k] = src[k];
+      });
+    };
+    maxMap(cur.counts, inc.counts);
+    maxMap(cur.archivedCounts, inc.archivedCounts);
+    unionMap(cur.done, inc.done);
+    Object.keys(inc.prayed || {}).forEach(function (d) {
+      cur.prayed[d] = cur.prayed[d] || {};
+      unionMap(cur.prayed[d], inc.prayed[d]);
+    });
+    Object.keys(inc.nights || {}).forEach(function (d) {
+      var a = cur.nights[d] || {},
+        b = inc.nights[d] || {};
+      cur.nights[d] = {
+        dhikr: !!(a.dhikr || b.dhikr),
+        pray: !!(a.pray || b.pray),
+        rak: Math.max(a.rak || 0, b.rak || 0),
+        witr: !!(a.witr || b.witr)
+      };
+    });
+    maxMap(cur.duha, inc.duha);
+    unionMap(cur.fasts, inc.fasts);
+    unionMap(cur.fastPlan, inc.fastPlan);
+    unionMap(cur.deeds, inc.deeds);
+    unionMap(cur.memo, inc.memo);
+    unionMap(cur.badges, inc.badges);
+    unionMap(cur.excused.days, inc.excused.days);
+    maxMap(cur.tasbih.days, inc.tasbih.days);
+    maxMap(cur.tasbih.per, inc.tasbih.per);
+    Object.keys(inc.tasbih.pd || {}).forEach(function (d) {
+      cur.tasbih.pd[d] = cur.tasbih.pd[d] || {};
+      maxMap(cur.tasbih.pd[d], inc.tasbih.pd[d]);
+    });
+    var daySum = Object.keys(cur.tasbih.days).reduce(function (a, d) {
+      return a + (cur.tasbih.days[d] || 0);
+    }, 0);
+    cur.tasbih.total = Math.max(cur.tasbih.total || 0, inc.tasbih.total || 0, daySum);
+    var cids = {};
+    cur.tasbih.custom.forEach(function (c) {
+      if (c && c.id) cids[c.id] = 1;
+    });
+    (inc.tasbih.custom || []).forEach(function (c) {
+      if (c && c.id && !cids[c.id]) {
+        cids[c.id] = 1;
+        cur.tasbih.custom.push(c);
+      }
+    });
+    maxMap(cur.ramadan.taraweeh, inc.ramadan.taraweeh);
+    unionMap(cur.ramadan.khatm.juz, inc.ramadan.khatm.juz);
+    cur.ramadan.khatm.done = Math.max(cur.ramadan.khatm.done || 0, inc.ramadan.khatm.done || 0);
+    Object.keys((inc.jumuah && inc.jumuah.days) || {}).forEach(function (d) {
+      cur.jumuah.days[d] = cur.jumuah.days[d] || {};
+      unionMap(cur.jumuah.days[d], inc.jumuah.days[d]);
+    });
+    if (inc.jumuah && inc.jumuah.kahf)
+      cur.jumuah.kahf.page = Math.max(cur.jumuah.kahf.page || 0, inc.jumuah.kahf.page || 0);
+    var jids = {};
+    cur.journal.items.forEach(function (d) {
+      if (d && d.id) jids[d.id] = 1;
+    });
+    (inc.journal.items || []).forEach(function (d) {
+      if (d && d.id && !jids[d.id]) {
+        jids[d.id] = 1;
+        cur.journal.items.push(d);
+      }
+    });
+    (inc.saved || []).forEach(function (u) {
+      if (cur.saved.indexOf(u) < 0) cur.saved.push(u);
+    });
+    unionMap(cur.learn.done, inc.learn.done);
+    Object.keys((inc.learn && inc.learn.quiz) || {}).forEach(function (k) {
+      var a = cur.learn.quiz[k],
+        b = inc.learn.quiz[k];
+      if (!a || (b && (b.b || 0) > (a.b || 0))) cur.learn.quiz[k] = b;
+    });
+    if (inc.profile && inc.profile.since && inc.profile.since < cur.profile.since)
+      cur.profile.since = inc.profile.since;
+    return compactCounts(cur);
+  }
+  A.importJSON = function (text, mode) {
     var r = JSON.parse(text),
       s = defaults();
     if (r && r.app === 'adhkar' && r.state && r.state.v === 10) sane(merge(s, r.state));
     else importV8(s, r);
     if (s.needsRebuild) rebuildDone(s);
-    Object.keys(S).forEach(function (k) {
-      delete S[k];
-    });
-    Object.assign(S, s);
+    compactCounts(s);
+    if (mode === 'merge') {
+      mergeRecords(S, s);
+    } else {
+      Object.keys(S).forEach(function (k) {
+        delete S[k];
+      });
+      Object.assign(S, s);
+    }
     A.rev++;
-    saveNow();
+    saveNow(true);
   };
 
   /* ================= time & location ================= */
@@ -1181,6 +1290,11 @@
       var n = S.counts[k];
       dhikr += n;
       var d = k.slice(0, 10);
+      byDay[d] = (byDay[d] || 0) + n;
+    });
+    Object.keys(S.archivedCounts || {}).forEach(function (d) {
+      var n = S.archivedCounts[d];
+      dhikr += n;
       byDay[d] = (byDay[d] || 0) + n;
     });
     Object.keys(S.tasbih.days).forEach(function (d) {

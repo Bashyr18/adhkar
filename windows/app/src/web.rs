@@ -294,3 +294,17 @@ pub fn open_file(a: &App, path: &Path) {
         });
     });
 }
+
+#[cfg(test)]
+mod tests {
+    use super::safe_app_file;
+
+    #[test]
+    fn safe_app_file_blocks_traversal_and_unc() {
+        assert!(safe_app_file("/\\Windows\\win.ini").is_none());
+        assert!(safe_app_file("/\\\\attacker\\share\\x").is_none());
+        assert!(safe_app_file("/../secret.txt").is_none());
+        assert!(safe_app_file("/C:/Windows/win.ini").is_none());
+        assert!(safe_app_file("/index.html\0.txt").is_none());
+    }
+}
