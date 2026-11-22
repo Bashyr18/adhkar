@@ -184,7 +184,7 @@
       }
       var s = A.dayDone(d).score,
         l = s >= 4 ? 4 : s >= 2.5 ? 3 : s >= 1.4 ? 2 : s > 0 ? 1 : 0;
-      cells += '<i class="l' + l + '" data-d="' + d + '" role="button" tabindex="-1" aria-label="' + d + '"></i>';
+      cells += '<i class="l' + l + '" data-d="' + d + '" role="button" tabindex="0" aria-label="' + d + '"></i>';
     }
     var mrow =
       '<div class="months" style="display:grid;grid-template-columns:repeat(' +

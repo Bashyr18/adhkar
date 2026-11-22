@@ -30,6 +30,8 @@ Bundled in `web/fonts/` and `docs/guide/fonts/`, each under the SIL Open Font Li
 - Amiri and Amiri Quran, by Khaled Hosny
 - IBM Plex Sans Arabic, by IBM
 
+The Madinah Muṣḥaf page fonts for Sūrat al-Kahf (`web/fonts/mushaf/p293.woff2`–`p304.woff2`) are the King Fahd Glorious Qurʾān Printing Complex (QCF v2) glyph fonts, served via Quran.com.
+
 ## Illustrations
 
 The prayer-posture illustrations in `web/img/pose/` are by the project's author.

@@ -25,14 +25,40 @@ static BUSY: AtomicBool = AtomicBool::new(false);
 struct Found { exe: String, sums: String, version: String, size: u64 }
 static FOUND: Mutex<Option<Found>> = Mutex::new(None);
 
-/* for testing only: ADHKAR_UPDATE_API points the check at another address (a local copy of a release) */
+/* for testing only (debug builds): ADHKAR_UPDATE_API points the check at another address */
+#[cfg(debug_assertions)]
 fn api() -> String { ac::env("ADHKAR_UPDATE_API").unwrap_or_else(|| API.into()) }
+#[cfg(not(debug_assertions))]
+fn api() -> String { API.into() }
+#[cfg(debug_assertions)]
 fn testing() -> bool { ac::env("ADHKAR_UPDATE_API").is_some() }
+#[cfg(not(debug_assertions))]
+fn testing() -> bool { false }
 fn host_ok(u: &str) -> bool {
     if testing() { return true; }
     if !u.starts_with("https://") { return false; }
     let h = net::host_of(u);
     h == "api.github.com" || h == "github.com" || h.ends_with(".githubusercontent.com")
+}
+fn fetch_latest() -> Result<(Option<Found>, String, String), String> {
+    let d: Value = serde_json::from_str(&net::text(net::open(&api(), &host_ok)?, 2_000_000)?).map_err(|e| e.to_string())?;
+    let version = d["tag_name"].as_str().unwrap_or("").trim_start_matches(['v', 'V']).to_string();
+    let (mut exe, mut sums, mut size) = (None, None, 0u64);
+    for a in d["assets"].as_array().cloned().unwrap_or_default() {
+        match a["name"].as_str() {
+            Some(ASSET) => { exe = a["browser_download_url"].as_str().map(String::from); size = a["size"].as_u64().unwrap_or(0); }
+            Some(SUMS) => sums = a["browser_download_url"].as_str().map(String::from),
+            _ => {}
+        }
+    }
+    let notes: String = d["body"].as_str().unwrap_or("").chars().take(600).collect();
+    let found = match (exe, sums) {
+        (Some(exe), Some(sums)) if installer::valid_version(&version) && installer::newer(&version, VERSION) => {
+            Some(Found { exe, sums, version: version.clone(), size })
+        }
+        _ => None,
+    };
+    Ok((found, version, notes))
 }
 fn send(o: Value) {
     let j = js(&o.to_string());
@@ -50,23 +76,18 @@ pub fn check() {
     if BUSY.swap(true, Ordering::SeqCst) { return; }
     std::thread::spawn(|| {
         let r = (|| -> Result<Value, String> {
-            let d: Value = serde_json::from_str(&net::text(net::open(&api(), &host_ok)?, 2_000_000)?).map_err(|e| e.to_string())?;
-            let version = d["tag_name"].as_str().unwrap_or("").trim_start_matches(['v', 'V']).to_string();
-            let (mut exe, mut sums, mut size) = (None, None, 0u64);
-            for a in d["assets"].as_array().cloned().unwrap_or_default() {
-                match a["name"].as_str() {
-                    Some(ASSET) => { exe = a["browser_download_url"].as_str().map(String::from); size = a["size"].as_u64().unwrap_or(0); }
-                    Some(SUMS) => sums = a["browser_download_url"].as_str().map(String::from),
-                    _ => {}
+            let (found, version, notes) = fetch_latest()?;
+            match found {
+                Some(f) => {
+                    let v = f.version.clone();
+                    let sz = f.size;
+                    *FOUND.lock().unwrap() = Some(f);
+                    Ok(json!({ "state": "found", "v": v, "size": sz, "notes": notes }))
                 }
-            }
-            let notes: String = d["body"].as_str().unwrap_or("").chars().take(600).collect();
-            match (exe, sums) {
-                (Some(exe), Some(sums)) if installer::newer(&version, VERSION) => {
-                    *FOUND.lock().unwrap() = Some(Found { exe, sums, version: version.clone(), size });
-                    Ok(json!({ "state": "found", "v": version, "size": size, "notes": notes }))
+                None => {
+                    *FOUND.lock().unwrap() = None;
+                    Ok(json!({ "state": "none", "v": version }))
                 }
-                _ => Ok(json!({ "state": "none", "v": version })),
             }
         })();
         send(r.unwrap_or_else(|e| json!({ "state": "error", "step": "check", "why": e })));
@@ -75,10 +96,22 @@ pub fn check() {
 }
 
 pub fn get() {
-    let f = FOUND.lock().unwrap().as_ref().map(|f| (f.exe.clone(), f.sums.clone(), f.version.clone(), f.size));
-    let Some((exe_url, sums_url, version, size)) = f else { send(json!({ "state": "error", "step": "get", "why": "check first" })); return };
     if BUSY.swap(true, Ordering::SeqCst) { return; }
     std::thread::spawn(move || {
+        /* after a restart, FOUND is empty even when S.upd.v still remembers a release: re-fetch its URLs automatically */
+        let mut f = FOUND.lock().unwrap().as_ref().map(|f| (f.exe.clone(), f.sums.clone(), f.version.clone(), f.size));
+        if f.is_none() {
+            match fetch_latest() {
+                Ok((Some(found), _, _)) => {
+                    f = Some((found.exe.clone(), found.sums.clone(), found.version.clone(), found.size));
+                    *FOUND.lock().unwrap() = Some(found);
+                }
+                Ok((None, _, _)) => { send(json!({ "state": "error", "step": "get", "why": "not newer" })); BUSY.store(false, Ordering::SeqCst); return; }
+                Err(e) => { send(json!({ "state": "error", "step": "get", "why": e })); BUSY.store(false, Ordering::SeqCst); return; }
+            }
+        }
+        let Some((exe_url, sums_url, version, size)) = f else { BUSY.store(false, Ordering::SeqCst); return };
+        if !installer::valid_version(&version) { send(json!({ "state": "error", "step": "get", "why": "invalid version" })); BUSY.store(false, Ordering::SeqCst); return; }
         let dir = store::root().join("update");
         let _ = fs::create_dir_all(&dir);
         let part = dir.join(format!("Adhkar-{}.exe.part", version));
@@ -96,7 +129,7 @@ pub fn get() {
                 got += n as u64;
                 if got > MAX_BYTES { return Err("too large".into()); }
                 o.write_all(&buf[..n]).map_err(|e| e.to_string())?;
-                let pc = if total > 0 { (got * 100 / total) as i64 } else { 0 };
+                let pc = (got.saturating_mul(100)).checked_div(total).unwrap_or(0) as i64;
                 if pc > last_pc && last_t.elapsed().as_millis() >= 150 { last_pc = pc; last_t = std::time::Instant::now(); send(json!({ "state": "progress", "got": got, "total": total })); }
             }
             drop(o);

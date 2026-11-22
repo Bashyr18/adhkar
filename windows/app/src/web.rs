@@ -28,10 +28,15 @@ pub fn outside(u: &str) {
     if matches!(scheme.as_str(), "https" | "http" | "mailto") { ac::shell_open(u); }
 }
 
+#[cfg(debug_assertions)]
+fn debug_port() -> Option<u16> { ac::env("ADHKAR_DEBUG_PORT").and_then(|p| p.parse::<u16>().ok()) }
+#[cfg(not(debug_assertions))]
+fn debug_port() -> Option<u16> { None }
+
 pub fn init(a: &Rc<App>) -> std::result::Result<(), String> {
     let mut args = "--autoplay-policy=no-user-gesture-required --disable-features=msSmartScreenProtection,ElasticOverscroll".to_string();
-    let dbg = ac::env("ADHKAR_DEBUG_PORT");
-    if let Some(p) = &dbg { args += &format!(" --remote-debugging-port={}", p); }
+    let dbg = debug_port();
+    if let Some(p) = dbg { args += &format!(" --remote-debugging-port={}", p); }
     let w = Rc::new(ac::create_web(a.hwnd, &store::root().join("webview").to_string_lossy(), &args)?);
     *a.web.borrow_mut() = Some(w.clone());
     a.title_bar(a.dark.get());
@@ -218,13 +223,26 @@ fn serve(env: &ICoreWebView2Environment, args: &ICoreWebView2WebResourceRequeste
             return;
         }
         let range = header(&req, "Range");
-        let file = if let Some(n) = path.strip_prefix("/rec/") { store::audio_file(n) } else {
-            let rel = path.trim_start_matches('/').replace('/', "\\");
-            if rel.contains("..") || rel.contains(':') { None } else { Some(store::app_dir().join(rel)) }
-        };
+        let file = if let Some(n) = path.strip_prefix("/rec/") { store::audio_file(n) } else { safe_app_file(&path) };
         let r = file_response(env, file.as_deref(), range);
         let _ = args.SetResponse(r.as_ref());
     }
+}
+fn safe_app_file(path: &str) -> Option<std::path::PathBuf> {
+    use std::path::Component;
+    if path.contains('\\') || path.contains('\0') || path.contains(':') { return None; }
+    let trimmed = path.trim_start_matches('/');
+    if trimmed.is_empty() { return None; }
+    let mut rel = std::path::PathBuf::new();
+    for c in Path::new(trimmed).components() {
+        match c {
+            Component::Normal(seg) => rel.push(seg),
+            _ => return None,
+        }
+    }
+    let root = std::fs::canonicalize(store::app_dir()).ok()?;
+    let full = std::fs::canonicalize(root.join(rel)).ok()?;
+    if full.starts_with(&root) && full.is_file() { Some(full) } else { None }
 }
 fn percent_decode(s: &str) -> String {
     let b = s.as_bytes();

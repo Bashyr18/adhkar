@@ -243,10 +243,10 @@
           '<a class="card focus press h-' +
           lc.hue +
           '" href="#/r/' +
-          last.c +
+          esc(last.c) +
           '/' +
           A.firstOpen(k, last.c, last.p) +
-          (last.p ? '/' + last.p : '') +
+          (last.p ? '/' + esc(last.p) : '') +
           '">' +
           A.ring(lp.frac, 50, Math.round(lp.frac * 100) + '%', 'var(--h)', 3.6) +
           '<div class="grow"><div class="eyebrow" style="color:var(--h)">Continue</div><div class="ttl">' +
@@ -914,7 +914,9 @@
     var el = document.createElement('div');
     el.className = 'reader h-' + c.hue;
     el.setAttribute('role', 'dialog');
+    el.setAttribute('aria-modal', 'true');
     el.setAttribute('aria-label', c.title);
+    R.prevFocus = document.activeElement;
     el.innerHTML =
       '<div class="rd-top"><button type="button" class="ib ghost" data-a="rd-close" aria-label="Close">' +
       ic('close') +
@@ -932,7 +934,8 @@
   };
   A.closeReader = function (instant) {
     if (!R) return;
-    var el = R.el;
+    var el = R.el,
+      pf = R.prevFocus;
     R = null;
     document.body.style.overflow = '';
     var v = A.cur();
@@ -947,8 +950,14 @@
         el.remove();
       }, 280);
     }
+    if (pf && pf.isConnected && typeof pf.focus === 'function') {
+      try {
+        pf.focus({ preventScroll: true });
+      } catch (e) {}
+    }
   };
   A.acts['rd-close'] = function () {
+    if (!R) return;
     A.goBack('#/c/' + R.cid + (R.prayer ? '/' + R.prayer : ''));
   };
 
@@ -1066,7 +1075,7 @@
             i = w++;
           var hide = !mark && (lv === 3 || (lv === 2 && i % 2 === 1) || (lv === 1 && i % 3 === 1));
           return hide
-            ? '<span class="mw" data-a="memo-peek" role="button" aria-label="Hidden word, tap to reveal">' +
+            ? '<span class="mw" data-a="memo-peek" role="button" tabindex="0" aria-label="Hidden word, tap to reveal">' +
                 esc(tok) +
                 '</span>'
             : esc(tok);

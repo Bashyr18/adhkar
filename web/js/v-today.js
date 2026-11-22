@@ -297,8 +297,14 @@
     A.save();
     A.N.haptic(on ? 'success' : 'tick');
     if (on) A.fx.click();
-    el.classList.toggle('on', on);
-    el.setAttribute('aria-pressed', on);
+    var box = document.getElementById('dash');
+    if (box) {
+      box.outerHTML = dash(k, A.now(), A.streaks());
+      if (A.localize) A.localize(document.getElementById('dash'));
+    } else {
+      el.classList.toggle('on', on);
+      el.setAttribute('aria-pressed', on);
+    }
     if (on && !A.progress(k, 'salah', p).complete) A.toast('Next: the adhkār after ' + P.NAMES[p], 'mosque');
   };
   function quick() {
@@ -539,7 +545,9 @@
             ? 'The night of Jumuʿah'
             : 'Yawm al-Jumuʿah'
           : 'As-salāmu ʿalaykum') +
-      '</div><h1>' +
+      '</div><h1' +
+      (name ? ' class="no-tr"' : '') +
+      '>' +
       (name ? esc(name) : 'Welcome <em>back</em>') +
       '</h1></div><div class="acts"><span class="up-chip-slot">' +
       (A.upd ? A.upd.chip() : '') +
@@ -589,7 +597,7 @@
     if (ll && ll.i > 0 && Date.now() - ll.at < 12 * 3600000)
       h +=
         '<a class="occ slim press h-gold" href="#/learn/' +
-        ll.p +
+        esc(ll.p) +
         '"><div class="badge s">' +
         ic('mosque', 's') +
         '</div><div class="grow"><div class="t">' +

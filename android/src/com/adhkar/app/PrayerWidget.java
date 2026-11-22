@@ -10,8 +10,9 @@ import android.os.Vibrator;
 public class PrayerWidget extends AppWidgetProvider {
     @Override
     public void onUpdate(Context c, AppWidgetManager m, int[] ids) {
-        for (int id : ids) m.updateAppWidget(id, Widgets.prayer(c));
-        Scheduler.run(c);
+        Widgets.updateAll(c);
+        final PendingResult pr = goAsync();
+        new Thread(() -> { try { Scheduler.run(c); } finally { pr.finish(); } }).start();
     }
 
     @Override

@@ -178,10 +178,7 @@
     el.querySelector('.face').innerHTML =
       '<span class="pc-ic">' + ic('check') + '</span><span class="of">' + esc(A.T('Tap when done')) + '</span>';
     el.setAttribute('aria-label', 'Confirm you have finished');
-    el.insertAdjacentHTML(
-      'beforeend',
-      '<span class="sr" aria-live="assertive">' + esc(A.T('Tap when done')) + '</span>'
-    );
+    say(el, A.T('Tap when done'));
     var rp = el.querySelector('.rep');
     if (rp) rp.style.strokeDashoffset = 0;
     A.N.haptic('click');
@@ -198,10 +195,11 @@
     var el = run.el,
       now = Date.now(),
       e = (run.paused ? run.pausedAt : now) - run.repStart;
-    /* the guide moves on by itself at the pace; a tap moves it on sooner */
+    /* the guide moves on by itself at the pace; a tap moves it on sooner (multi-rep jump after sleep catches up once) */
     if (!run.paused && e >= run.ms) {
-      run.done++;
-      run.repStart += run.ms;
+      var step = Math.max(1, Math.floor(e / run.ms));
+      run.done = Math.min(run.n, run.done + step);
+      run.repStart += step * run.ms;
       e = now - run.repStart;
       if (run.done < run.n) beat(el, run.done);
     }

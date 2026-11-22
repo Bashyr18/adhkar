@@ -762,22 +762,22 @@
       Desk.keys();
       return;
     }
-    if (k === 'F11') {
+    if (!tab && k === 'F11') {
       e.preventDefault();
       B.deskSet('full', !document.documentElement.classList.contains('dk-full'));
       return;
     }
-    if (ctrl && (k === '=' || k === '+')) {
+    if (!tab && ctrl && (k === '=' || k === '+')) {
       e.preventDefault();
       zoom(0.1);
       return;
     }
-    if (ctrl && k === '-') {
+    if (!tab && ctrl && k === '-') {
       e.preventDefault();
       zoom(-0.1);
       return;
     }
-    if (ctrl && k === '0') {
+    if (!tab && ctrl && k === '0') {
       e.preventDefault();
       B.deskZoom(1);
       return;
@@ -787,17 +787,17 @@
       theme();
       return;
     }
-    if (ctrl && (k === 'p' || k === 'P')) {
+    if (!tab && ctrl && (k === 'p' || k === 'P')) {
       e.preventDefault();
       A.go('#/desk/print');
       return;
     }
-    if (ctrl && k === ',') {
+    if (!tab && ctrl && k === ',') {
       e.preventDefault();
       A.go('#/desk/pc');
       return;
     }
-    if (ctrl && (k === 'q' || k === 'Q')) {
+    if (!tab && ctrl && (k === 'q' || k === 'Q')) {
       e.preventDefault();
       B.quit();
       return;
@@ -949,6 +949,7 @@
     pal = document.createElement('div');
     pal.className = 'dk-pal';
     pal.setAttribute('role', 'dialog');
+    pal.setAttribute('aria-modal', 'true');
     pal.setAttribute('aria-label', L('Search', 'بحث'));
     pal.innerHTML =
       '<div class="dk-pal-bg"></div><div class="dk-pal-box"><label class="dk-pal-in">' +
@@ -1227,25 +1228,36 @@
       });
     return o;
   }
-  function at(t, hm) {
-    var p = String(hm || '').split(':'),
-      d = new Date(t);
-    d.setHours(+p[0] || 0, +p[1] || 0, 0, 0);
-    return d.getTime();
+  /* wall-clock HH:MM on `key` in the selected location's timezone */
+  function at(key, hm) {
+    var p = String(hm || '22:30').split(':'),
+      hh = Math.max(0, Math.min(23, +p[0] || 0)),
+      mm = Math.max(0, Math.min(59, +p[1] || 0)),
+      a = key.split('-'),
+      guess = Date.UTC(+a[0], +a[1] - 1, +a[2], hh, mm, 0);
+    for (var i = 0; i < 2; i++) {
+      var got = A.parts(guess),
+        dayDiff = Date.UTC(+a[0], +a[1] - 1, +a[2]) - Date.UTC(got.y, got.m - 1, got.d),
+        minDiff = (hh - got.h) * 60 + (mm - got.min);
+      guess += dayDiff + minDiff * 60000;
+    }
+    return guess;
   }
   /* the next two days of reminders, from the same settings the phone uses */
   function schedule() {
     if (tab) return; /* a phone or tablet rings its own reminders natively */
     var N = S.notif,
       out = [],
-      now = Date.now();
+      now = Date.now(),
+      todayKey = A.today(),
+      exc = !!(S.excused && S.excused.on);
     if (!N || !S.loc) {
       try {
         B.deskSchedule('[]');
       } catch (e) {}
       return;
     }
-    [A.today(), A.shift(A.today(), 1)].forEach(function (key) {
+    [todayKey, A.shift(todayKey, 1)].forEach(function (key) {
       var t = A.pday(key);
       if (!t) return;
       var plan = S.fastPlan && S.fastPlan[A.shift(key, 1)];
@@ -1257,6 +1269,8 @@
           route: 'calendar'
         });
       if (!N.enabled) return;
+      var smart = N.smart !== false && key === todayKey,
+        dd = smart ? A.dayDone(key) : {};
       if (A.dow(key) === 5 && N.friday && N.friday.on) {
         var fr = (S.jumuah && S.jumuah.days && S.jumuah.days[key]) || {};
         if (!fr.kahf && isFinite(t.sunrise))
@@ -1275,57 +1289,86 @@
             hour: true
           });
       }
-      A.PRAYERS.forEach(function (p) {
-        if (!N.prayers || !N.prayers[p] || !isFinite(t[p])) return;
-        out.push({
-          t: t[p],
-          title: L('Time for ' + PN[p][0], 'حان وقت ' + PN[p][1]),
-          body: A.fmtTxt(t[p]),
-          takbir: !!N.adhan,
-          route: 'salah'
-        });
-        if (N.pre > 0)
+      if (!exc) {
+        A.PRAYERS.forEach(function (p) {
+          if (!N.prayers || !N.prayers[p] || !isFinite(t[p])) return;
           out.push({
-            t: t[p] - N.pre * 60000,
-            title: L(PN[p][0] + ' in ' + N.pre + ' min', PN[p][1] + ' بعد ' + A.fmtN(N.pre) + ' د'),
+            t: t[p],
+            title: L('Time for ' + PN[p][0], 'حان وقت ' + PN[p][1]),
             body: A.fmtTxt(t[p]),
+            takbir: !!N.adhan,
             route: 'salah'
           });
-      });
-      if (N.morning && N.morning.on && isFinite(t[N.morning.from]))
+          if (N.pre > 0)
+            out.push({
+              t: t[p] - N.pre * 60000,
+              title: L(PN[p][0] + ' in ' + N.pre + ' min', PN[p][1] + ' بعد ' + A.fmtN(N.pre) + ' د'),
+              body: A.fmtTxt(t[p]),
+              route: 'salah'
+            });
+        });
+      }
+      if (N.morning && N.morning.on && !(smart && dd.morning) && isFinite(t[N.morning.from]))
         out.push({
           t: t[N.morning.from] + (N.morning.after || 0) * 60000,
           title: L('Morning adhkār', 'أذكار الصباح'),
           body: L('The morning remembrance is open', 'حان وقت أذكار الصباح'),
           route: 'c/morning'
         });
-      if (N.evening && N.evening.on && isFinite(t[N.evening.from]))
+      if (N.evening && N.evening.on && !(smart && dd.evening) && isFinite(t[N.evening.from]))
         out.push({
           t: t[N.evening.from] + (N.evening.after || 0) * 60000,
           title: L('Evening adhkār', 'أذكار المساء'),
           body: L('The evening remembrance is open', 'حان وقت أذكار المساء'),
           route: 'c/evening'
         });
-      if (N.sleep && N.sleep.on)
+      if (N.sleep && N.sleep.on && !(smart && dd.sleep))
         out.push({
-          t: at(t.dhuhr, N.sleep.at),
+          t: at(key, N.sleep.at),
           title: L('Before sleep', 'قبل النوم'),
           body: L('The adhkār before sleeping', 'أذكار النوم'),
           route: 'c/sleep'
         });
+      if (N.duha && N.duha.on && !(smart && dd.duha) && isFinite(t.duhaStart))
+        out.push({
+          t: t.duhaStart,
+          title: L('Ḍuḥā time', 'وقت الضحى'),
+          body: L('Open until ', 'يمتد الوقت إلى ') + A.fmtTxt(t.duhaEnd),
+          route: 'duha'
+        });
+      var jn = (S.journal && S.journal.nudge) || {},
+        openDua = ((S.journal && S.journal.items) || []).filter(function (d) {
+          return d && !d.done && d.text;
+        })[0];
+      var jNight = !!(jn.night && openDua);
+      if (((N.night && N.night.on) || jNight) && isFinite(t.lastThird) && isFinite(t.nextFajr))
+        out.push({
+          t: Math.min(t.lastThird + ((N.night && N.night.off) || 0) * 60000, t.nextFajr - 15 * 60000),
+          title: L('The last third of the night', 'ثلث الليل الآخر'),
+          body: jNight ? openDua.text.slice(0, 120) : L('Call upon your Lord before Fajr', 'ادعُ ربك قبل الفجر'),
+          route: jNight ? 'journal' : 'night'
+        });
+      if (openDua && jn.adhan && isFinite(t[jn.adhan]))
+        out.push({
+          t: t[jn.adhan] + 2 * 60000,
+          title: L('Between adhān and iqāmah', 'بين الأذان والإقامة'),
+          body: openDua.text.slice(0, 120),
+          route: 'journal'
+        });
       if (A.isRamadan && A.isRamadan(key) && N.ramadan) {
-        if (N.ramadan.iftar && isFinite(t.maghrib))
+        if (N.ramadan.iftar && !exc && isFinite(t.maghrib))
           out.push({
             t: t.maghrib,
             title: L('Ifṭār', 'الإفطار'),
             body: L('Time to break your fast', 'حان وقت الإفطار'),
             route: 'ramadan'
           });
+        var imsakMs = (S.prefs.imsak || 0) * 60000;
         if (N.ramadan.suhoor && isFinite(t.fajr))
           out.push({
-            t: t.fajr - (N.ramadan.suhoorMin || 45) * 60000,
+            t: t.fajr - imsakMs - (N.ramadan.suhoorMin || 45) * 60000,
             title: L('Suhūr', 'السحور'),
-            body: L('Suhūr ends at ', 'ينتهي السحور ') + A.fmtTxt(t.fajr - (S.prefs.imsak || 0) * 60000),
+            body: L('Suhūr ends at ', 'ينتهي السحور ') + A.fmtTxt(t.fajr - imsakMs),
             route: 'ramadan'
           });
       }
@@ -1697,7 +1740,7 @@
           ? L('On, with the prayer times you chose', 'مفعّلة، بأوقات الصلاة التي اخترتها')
           : L('Off', 'متوقفة')
       ) +
-      '</small></div><a class="btn ghost sm" href="#/settings/reminders">' +
+      '</small></div><a class="btn ghost sm" href="#/settings/notifications">' +
       esc(L('Choose', 'اختر')) +
       '</a></div></section>' +
       '<section class="card dk-card"><h3>' +
@@ -2010,6 +2053,10 @@
   }
   Desk.onPdf = function (path) {
     document.documentElement.classList.remove('printing');
+    if (A.print && A.print._origTitle) {
+      document.title = A.print._origTitle;
+      A.print._origTitle = null;
+    }
     if (!path) {
       A.toast(L('The PDF could not be saved', 'تعذر حفظ ملف PDF'));
       return;
@@ -2241,9 +2288,9 @@
     }
     var cid = r.a[0],
       idx = +r.a[1] || 0,
-      prayer = r.a[2],
       c = A.col(cid);
     if (!c) return;
+    var prayer = c.perPrayer && A.PRAYERS.indexOf(r.a[2]) >= 0 ? r.a[2] : null;
     var items = A.items(cid, prayer),
       ck = A.colKey(cid, prayer),
       day = A.today(),
@@ -2259,10 +2306,10 @@
           (i === idx ? ' on' : '') +
           (full ? ' done' : '') +
           '" href="#/r/' +
-          cid +
+          esc(cid) +
           '/' +
           i +
-          (prayer ? '/' + prayer : '') +
+          (prayer ? '/' + esc(prayer) : '') +
           '"><span class="ss-n">' +
           (full ? A.icon('check', 'xs') : A.fmtN(i + 1)) +
           '</span><span class="grow"><b>' +

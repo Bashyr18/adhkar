@@ -30,6 +30,9 @@
       tr.days[k] = (tr.days[k] || 0) + n;
       tr.per = tr.per || {};
       tr.per[id] = (tr.per[id] || 0) + n;
+      tr.pd = tr.pd || {};
+      tr.pd[k] = tr.pd[k] || {};
+      tr.pd[k][id] = (tr.pd[k][id] || 0) + n;
       A.save();
     };
   function phrase() {
@@ -87,14 +90,18 @@
     requestAnimationFrame(function () {
       if (el) el.classList.add('in');
     });
-    var mine = el;
+    var mine = el,
+      counted = false;
     el.querySelector('.dn-main').addEventListener('click', function () {
+      if (counted) return;
+      counted = true;
       A.trkAddPhrase(p.id, 1);
       A.N.haptic('tick');
       if (A.fx && A.fx.click) A.fx.click();
       mine.classList.add('done');
       mine.querySelector('.dn-tr').textContent = A.T ? A.T('Counted') : 'Counted';
-      setTimeout(hide, 900);
+      clearTimeout(hideT);
+      hideT = setTimeout(hide, 900);
     });
     el.querySelector('.dn-go').addEventListener('click', function () {
       hide();

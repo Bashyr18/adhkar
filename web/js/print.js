@@ -61,9 +61,12 @@
     );
   }
   function timetable(off) {
-    var now = new Date(),
-      first = new Date(now.getFullYear(), now.getMonth() + off, 1),
-      days = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
+    var parts = A.parts(Date.now()),
+      base = new Date(Date.UTC(parts.y, parts.m - 1 + (off || 0), 1)),
+      y = base.getUTCFullYear(),
+      m = base.getUTCMonth() + 1,
+      days = new Date(Date.UTC(y, m, 0)).getUTCDate(),
+      loc = A.ar() ? 'ar' : 'en-GB';
     if (!S.loc)
       return (
         '<div class="pp-page"><p>' +
@@ -74,21 +77,22 @@
       today = A.today();
     var body = '';
     for (var d = 1; d <= days; d++) {
-      var dt = new Date(first.getFullYear(), first.getMonth(), d),
-        key = A.keyAt(dt.getTime()),
+      var key = window.Prayer.keyOf(y, m, d),
         t = A.pday(key),
         h = A.hijri(key),
-        fri = dt.getDay() === 5;
+        dow = A.dow(key),
+        fri = dow === 5,
+        wd = A.ar() ? A.T(A.DOW[dow]) : A.DOW[dow].slice(0, 3);
       body +=
         '<tr class="' +
         (fri ? 'fri' : '') +
         (key === today ? ' now' : '') +
         '"><td class="d"><b>' +
-        d +
+        A.fmtN(d) +
         '</b> ' +
-        esc(dt.toLocaleDateString('en-GB', { weekday: 'short' })) +
+        esc(wd) +
         '</td><td class="hj">' +
-        h.d +
+        A.fmtN(h.d) +
         '</td>' +
         cols
           .map(function (k) {
@@ -97,14 +101,20 @@
           .join('') +
         '</tr>';
     }
-    var place = (S.loc && (S.loc.name || S.loc.city)) || '';
+    var place = (S.loc && (S.loc.name || S.loc.city)) || '',
+      firstKey = window.Prayer.keyOf(y, m, 1),
+      mTitle = new Date(Date.UTC(y, m - 1, 15)).toLocaleDateString(loc, {
+        month: 'long',
+        year: 'numeric',
+        timeZone: 'UTC'
+      });
     return (
       '<div class="pp-page pp-tt"><header class="pp-h"><div><small>Adhkār · ' +
       esc(place) +
       '</small><h2>' +
-      esc(first.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })) +
+      esc(mTitle) +
       '</h2></div><p>' +
-      esc(A.hijriText ? A.hijriText(A.keyAt(first.getTime())) : '') +
+      esc(A.hijriText ? A.hijriText(firstKey) : '') +
       '</p></header><table class="pp-times"><thead><tr><th>Day</th><th>Hijri</th><th>Fajr</th><th>Sunrise</th><th>Dhuhr</th><th>ʿAṣr</th><th>Maghrib</th><th>ʿIshāʾ</th></tr></thead><tbody>' +
       body +
       '</tbody></table><footer class="pp-f">' +
@@ -115,11 +125,14 @@
     );
   }
   function fileName(what, month) {
+    var parts = A.parts(Date.now()),
+      base = new Date(Date.UTC(parts.y, parts.m - 1 + (month || 0), 15));
     return what === 'times'
       ? 'Prayer timetable ' +
-          new Date(new Date().getFullYear(), new Date().getMonth() + (month || 0), 1).toLocaleDateString('en-GB', {
+          base.toLocaleDateString('en-GB', {
             month: 'long',
-            year: 'numeric'
+            year: 'numeric',
+            timeZone: 'UTC'
           })
       : what === 'both'
         ? 'Morning and evening adhkar'
@@ -139,6 +152,7 @@
     paper.innerHTML = sheetsFor(what, month);
     var name = fileName(what, month),
       t = document.title;
+    A.print._origTitle = t;
     document.title = name;
     document.documentElement.classList.add('printing');
     setTimeout(function () {

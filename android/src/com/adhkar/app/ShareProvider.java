@@ -17,10 +17,18 @@ public class ShareProvider extends ContentProvider {
 
     private File fileFor(Uri u) throws FileNotFoundException {
         String name = u.getLastPathSegment();
-        if (name == null || !name.matches("[A-Za-z0-9._-]+")) throw new FileNotFoundException();
-        File f = new File(new File(getContext().getCacheDir(), "share"), name);
-        if (!f.exists()) throw new FileNotFoundException();
-        return f;
+        if (name == null || name.equals(".") || name.equals("..") || name.contains("..") || !name.matches("[A-Za-z0-9._-]+"))
+            throw new FileNotFoundException();
+        try {
+            File root = new File(getContext().getCacheDir(), "share").getCanonicalFile();
+            File f = new File(root, name).getCanonicalFile();
+            if (!f.getPath().startsWith(root.getPath() + File.separator) || !f.isFile()) throw new FileNotFoundException();
+            return f;
+        } catch (FileNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new FileNotFoundException();
+        }
     }
 
     @Override public boolean onCreate() { return true; }

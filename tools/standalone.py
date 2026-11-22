@@ -2,11 +2,12 @@
 Recitations stream from hisnmuslim.com and everyayah.com (the app downloads them instead); phone-only features
 (reminders, widgets, silencing, the floating dhikr) are simply absent in a browser.
 Usage: python tools/standalone.py <bundle dir> <out.html>"""
-import base64, os, re, sys, json
+import base64, hashlib, os, re, sys, json
 
 SRC, OUT = sys.argv[1], sys.argv[2]
 def read(p): return open(os.path.join(SRC, p), encoding='utf-8').read()
 def b64(p): return base64.b64encode(open(os.path.join(SRC, p), 'rb').read()).decode('ascii')
+def sha256_csp(text): return "'sha256-%s'" % base64.b64encode(hashlib.sha256(text.encode('utf-8')).digest()).decode('ascii')
 
 html, js, css = read('index.html'), read('app.js'), read('app.css')
 # fonts inside the stylesheet
@@ -19,14 +20,16 @@ for root, _, files in os.walk(os.path.join(SRC, 'img')):
         assets[rel] = 'data:image/%s;base64,%s' % (f.rsplit('.', 1)[1], b64(rel))
 icon = 'data:image/svg+xml;base64,' + b64('icon.svg')
 
-csp = ("default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; "
-       "media-src https://www.hisnmuslim.com https://everyayah.com; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'")
+boot_code = 'window.ADHKAR_WEB_AUDIO=true;window.ASSETS=' + json.dumps(assets) + ';'
+app_code = '\n' + js.replace('</script', '<\\/script') + '\n'
+csp = ("default-src 'none'; script-src %s %s; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; "
+       "media-src https://www.hisnmuslim.com https://everyayah.com; connect-src data:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'") % (sha256_csp(boot_code), sha256_csp(app_code))
 html = re.sub(r'<meta http-equiv="Content-Security-Policy" content="[^"]*">', '<meta http-equiv="Content-Security-Policy" content="%s">' % csp, html)
 html = re.sub(r'<link rel="preload"[^>]*>\n?', '', html)
 html = html.replace('<link rel="icon" href="icon.svg" type="image/svg+xml">', '<link rel="icon" href="%s" type="image/svg+xml">' % icon)
 html = html.replace('<link rel="stylesheet" href="app.css">', '<style>\n' + css + '\n</style>')
-boot = '<script>window.ADHKAR_WEB_AUDIO=true;window.ASSETS=' + json.dumps(assets) + ';</script>\n'
-html = html.replace('<script src="app.js"></script>', boot + '<script>\n' + js.replace('</script', '<\\/script') + '\n</script>')
+boot = '<script>' + boot_code + '</script>\n'
+html = html.replace('<script src="app.js"></script>', boot + '<script>' + app_code + '</script>')
 assert 'src="app.js"' not in html and 'href="app.css"' not in html
 open(OUT, 'w', encoding='utf-8').write(html)
 print('standalone: %s, %d KB' % (OUT, len(html.encode('utf-8')) // 1024))

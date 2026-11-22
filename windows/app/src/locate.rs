@@ -19,10 +19,14 @@ pub fn locate() {
             let g = Geolocator::new().map_err(|_| "fail")?;
             let _ = g.SetDesiredAccuracy(PositionAccuracy::Default);
             let op = g.GetGeopositionAsync().map_err(|_| "fail")?;
+            let cancel_op = op.clone();
             /* give up after 15 seconds rather than wait for ever */
             let (tx, rx) = std::sync::mpsc::channel();
             std::thread::spawn(move || { let _ = tx.send(op.get()); });
-            let pos = rx.recv_timeout(std::time::Duration::from_secs(15)).map_err(|_| "fail")?.map_err(|_| "fail")?;
+            let pos = match rx.recv_timeout(std::time::Duration::from_secs(15)) {
+                Ok(r) => r.map_err(|_| "fail")?,
+                Err(_) => { let _ = cancel_op.Cancel(); return Err("fail"); }
+            };
             let c = pos.Coordinate().map_err(|_| "fail")?;
             let p = c.Point().map_err(|_| "fail")?.Position().map_err(|_| "fail")?;
             let acc = c.Accuracy().unwrap_or(0.0);

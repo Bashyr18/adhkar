@@ -260,6 +260,7 @@
       fastPlan: {},
       deeds: {},
       ramadan: { skip: {}, taraweeh: {}, khatm: { juz: {}, done: 0 } },
+      jumuah: { days: {}, khutbah: 0, overlay: true, kahf: { page: 0, verse: 1 } },
       excused: {
         on: false,
         since: null,
@@ -289,10 +290,18 @@
       upd: { auto: false, at: 0, v: '', size: 0, notes: '' }
     };
   }
+  function cleanMap(v) {
+    var out = {};
+    Object.keys(v).forEach(function (k) {
+      if (k === '__proto__' || k === 'constructor' || k === 'prototype') return;
+      out[k] = v[k];
+    });
+    return out;
+  }
   function merge(base, x) {
     if (!x || typeof x !== 'object' || Array.isArray(x)) return base;
     Object.keys(base).forEach(function (k) {
-      if (!(k in x)) return;
+      if (!Object.prototype.hasOwnProperty.call(x, k)) return;
       var b = base[k],
         v = x[k];
       /* a stored or imported value is kept only when its shape matches the default: never null for an object, never an
@@ -303,25 +312,104 @@
       if (Array.isArray(b)) {
         if (Array.isArray(v)) base[k] = v;
       } else if (obj(b)) {
-        if (obj(v)) base[k] = Object.keys(b).length ? merge(b, v) : v;
+        if (obj(v)) base[k] = Object.keys(b).length ? merge(b, v) : cleanMap(v);
       } else if (b === null) {
         if (v !== undefined && !Array.isArray(v) && typeof v !== 'function') base[k] = v;
       } else if (typeof v === typeof b && (typeof v !== 'number' || isFinite(v))) base[k] = v;
     });
     return base;
   }
-  /* values whose default is null are checked by hand: a place needs real coordinates */
+  var ISO_RE = /^\d{4}-\d{2}-\d{2}$/,
+    HM_RE = /^(?:[01]\d|2[0-3]):[0-5]\d$/,
+    ACCENTS = { gold: 1, emerald: 1, sapphire: 1, rose: 1, pearl: 1 },
+    THEMES_OK = { auto: 1, dark: 1, light: 1 },
+    HIGHLATS = { angle: 1, mid: 1, seventh: 1, none: 1 },
+    PRAYER_SET = { fajr: 1, dhuhr: 1, asr: 1, maghrib: 1, isha: 1 };
+  /* values whose default is null, enums, dates and free-form maps/arrays are checked so a damaged or crafted backup
+     can neither crash a view nor freeze the app */
   function sane(s) {
+    var num = function (n) {
+      return typeof n === 'number' && isFinite(n);
+    };
     var l = s.loc;
-    if (
-      l &&
-      !(typeof l === 'object' && isFinite(l.lat) && isFinite(l.lng) && Math.abs(l.lat) <= 90 && Math.abs(l.lng) <= 180)
-    )
+    if (l && !(typeof l === 'object' && num(l.lat) && num(l.lng) && Math.abs(l.lat) <= 90 && Math.abs(l.lng) <= 180))
       s.loc = null;
     var h = s.travel.home;
-    if (h && !(typeof h === 'object' && isFinite(h.lat) && isFinite(h.lng))) s.travel.home = null;
-    if (s.learn.last && typeof s.learn.last.p !== 'string') s.learn.last = null;
+    if (h && !(typeof h === 'object' && num(h.lat) && num(h.lng) && Math.abs(h.lat) <= 90 && Math.abs(h.lng) <= 180))
+      s.travel.home = null;
+    if (!P.METHODS || !Object.prototype.hasOwnProperty.call(P.METHODS, s.calc.method)) s.calc.method = 'mwl';
+    if (s.calc.asr !== 'std' && s.calc.asr !== 'hanafi') s.calc.asr = 'std';
+    if (!Object.prototype.hasOwnProperty.call(HIGHLATS, s.calc.highLat)) s.calc.highLat = 'angle';
+    if (!Object.prototype.hasOwnProperty.call(THEMES_OK, s.prefs.theme)) s.prefs.theme = 'auto';
+    if (!Object.prototype.hasOwnProperty.call(ACCENTS, s.prefs.accent)) s.prefs.accent = 'gold';
+    s.prefs.ar = A.clamp(s.prefs.ar, 18, 54);
+    s.prefs.hijriAdj = A.clamp(Math.round(s.prefs.hijriAdj), -2, 2);
+    s.prefs.nudge.every = A.clamp(Math.round(s.prefs.nudge.every) || 20, 5, 180);
+    if (!ISO_RE.test(s.profile.since)) s.profile.since = todayISO();
+    if (!HM_RE.test(s.notif.sleep.at)) s.notif.sleep.at = '22:30';
+    if (
+      s.learn.last &&
+      (typeof s.learn.last !== 'object' || typeof s.learn.last.p !== 'string' || !/^[a-z]+$/.test(s.learn.last.p))
+    )
+      s.learn.last = null;
+    if (s.last) {
+      var la = s.last;
+      if (
+        typeof la !== 'object' ||
+        typeof la.c !== 'string' ||
+        !/^[a-z0-9-]+$/i.test(la.c) ||
+        !ISO_RE.test(la.d || '') ||
+        (la.p != null && !Object.prototype.hasOwnProperty.call(PRAYER_SET, la.p))
+      )
+        s.last = null;
+    }
     if (s.prefs.lang !== null && s.prefs.lang !== 'ar' && s.prefs.lang !== 'en') s.prefs.lang = null;
+    if (s.excused.since != null) {
+      var t0 = todayISO();
+      if (
+        typeof s.excused.since !== 'string' ||
+        !ISO_RE.test(s.excused.since) ||
+        s.excused.since < P.shiftKey(t0, -400) ||
+        s.excused.since > t0
+      ) {
+        s.excused.on = false;
+        s.excused.since = null;
+      }
+    } else if (s.excused.on) {
+      s.excused.on = false;
+    }
+    /* sanitize free-form map & array entries so totals and views never throw on damaged backups */
+    Object.keys(s.counts).forEach(function (k) {
+      if (!num(s.counts[k]) || s.counts[k] < 0) delete s.counts[k];
+    });
+    Object.keys(s.prayed).forEach(function (k) {
+      if (!s.prayed[k] || typeof s.prayed[k] !== 'object' || Array.isArray(s.prayed[k])) delete s.prayed[k];
+    });
+    Object.keys(s.nights).forEach(function (k) {
+      if (!s.nights[k] || typeof s.nights[k] !== 'object' || Array.isArray(s.nights[k])) delete s.nights[k];
+    });
+    Object.keys(s.tasbih.days).forEach(function (k) {
+      if (!num(s.tasbih.days[k]) || s.tasbih.days[k] < 0) delete s.tasbih.days[k];
+    });
+    Object.keys(s.tasbih.per).forEach(function (k) {
+      if (!num(s.tasbih.per[k]) || s.tasbih.per[k] < 0) delete s.tasbih.per[k];
+    });
+    s.tasbih.log = s.tasbih.log.filter(function (x) {
+      return x && typeof x === 'object' && num(x.t);
+    });
+    s.journal.items = s.journal.items
+      .filter(function (x) {
+        return x && typeof x === 'object' && typeof x.text === 'string';
+      })
+      .map(function (x, i) {
+        if (typeof x.id !== 'string' || !x.id) x.id = 'd' + i;
+        if (typeof x.since !== 'string' || !ISO_RE.test(x.since)) x.since = todayISO();
+        if (x.done && (typeof x.done !== 'string' || !ISO_RE.test(x.done))) x.done = null;
+        return x;
+      });
+    s.learn.qlog = s.learn.qlog.filter(function (x) {
+      return x && typeof x === 'object' && num(x.r) && num(x.n);
+    });
     return s;
   }
   A.storageOk = true;
@@ -413,34 +501,45 @@
   }
   A.S = load();
   var S = A.S;
-  var saveNow = function () {
+  var storageWarned = false;
+  var saveNow = function (flush) {
     var json = JSON.stringify(S);
     try {
       localStorage.setItem(KEY, json);
       A.storageOk = true;
     } catch (e) {
       A.storageOk = false;
+      if (!storageWarned && A.toast) {
+        storageWarned = true;
+        A.toast('Storage is full or blocked; export a backup to keep your record safe.', 'info');
+      }
     }
     A.N.sync();
-    mirrorSoon(json);
+    mirrorSoon(json, !!flush);
   };
   var mirrorJson = null,
     mirrorT = null;
-  function mirrorSoon(json) {
+  function mirrorPush() {
+    try {
+      if (mirrorJson && window.AndroidBridge && window.AndroidBridge.saveState)
+        window.AndroidBridge.saveState(mirrorJson);
+    } catch (e) {}
+  }
+  function mirrorSoon(json, immediate) {
     mirrorJson = json;
     clearTimeout(mirrorT);
-    mirrorT = setTimeout(function () {
-      try {
-        if (window.AndroidBridge && window.AndroidBridge.saveState) window.AndroidBridge.saveState(mirrorJson);
-      } catch (e) {}
-    }, 1500);
+    if (immediate) {
+      mirrorPush();
+      return;
+    }
+    mirrorT = setTimeout(mirrorPush, 1500);
   }
   var saveSoon = A.debounce(saveNow, 300);
   /* A.rev counts every change to the saved state; a screen kept alive is reused only if it was built at this count */
   A.rev = 0;
   A.save = function (now) {
     A.rev++;
-    if (now) saveNow();
+    if (now) saveNow(true);
     else saveSoon();
   };
   A.reset = function () {
@@ -488,7 +587,9 @@
     var a = key.split('-');
     return new Date(Date.UTC(+a[0], +a[1] - 1, +a[2])).getUTCDay();
   };
-  var dayCache = {};
+  var dayCache = {},
+    dayCacheSig = '',
+    dayCacheN = 0;
   function calcOpts() {
     return {
       lat: S.loc.lat,
@@ -506,6 +607,7 @@
       ? [
           S.loc.lat,
           S.loc.lng,
+          S.loc.tz || '',
           S.calc.method,
           S.calc.asr,
           S.calc.highLat,
@@ -517,11 +619,25 @@
   };
   A.pday = function (key) {
     if (!S.loc) return null;
-    var sig = A.calcSig() + '#' + key;
-    if (!dayCache[sig]) {
-      dayCache[sig] = P.day(key, calcOpts());
+    var cs = A.calcSig();
+    if (cs !== dayCacheSig || dayCacheN > 120) {
+      dayCache = {};
+      dayCacheSig = cs;
+      dayCacheN = 0;
     }
-    return dayCache[sig];
+    if (!dayCache[key]) {
+      var opts = calcOpts(),
+        t = P.day(key, opts);
+      /* across the International Date Line, civil date and longitude sign oppose: align noon to the requested civil day */
+      if (S.loc.tz && isFinite(t.dhuhr)) {
+        var dk = A.keyAt(t.dhuhr);
+        if (dk > key) t = P.day(P.shiftKey(key, -1), opts);
+        else if (dk < key) t = P.day(P.shiftKey(key, 1), opts);
+      }
+      dayCache[key] = t;
+      dayCacheN++;
+    }
+    return dayCache[key];
   };
   A.fmtT = function (ms, opt) {
     if (!isFinite(ms)) return '·';
@@ -659,7 +775,7 @@
   A.now = function () {
     var now = Date.now(),
       key = A.today();
-    if (!S.loc) return { key: key, now: now };
+    if (!S.loc) return { key: key, now: now, nightKey: key };
     var t = A.pday(key),
       y = A.pday(A.shift(key, -1)),
       tm = A.pday(A.shift(key, 1));
@@ -707,11 +823,11 @@
   A.COLS = D.collections;
   A.PRAYERS = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
   A.col = function (id) {
-    return COL[id];
+    return Object.prototype.hasOwnProperty.call(COL, id) ? COL[id] : null;
   };
   /* Resolved item list. For after-ṣalāh the prayer filters 'only' items. colKey is the tracking key. */
   A.items = function (cid, prayer) {
-    var c = COL[cid];
+    var c = A.col(cid);
     if (!c) return [];
     return c.items
       .filter(function (e) {
@@ -1013,8 +1129,9 @@
       /* Ramaḍān days already filled in as fasted are not fasts on a break: they become days to make up */
       for (var d0 = e.since; d0 <= t; d0 = A.shift(d0, 1)) if (S.fasts[d0] === 'ramadan') delete S.fasts[d0];
     } else if (!on && e.on) {
-      var d = e.since;
-      while (d && d <= t) {
+      var d = e.since,
+        guard = 0;
+      while (d && d <= t && guard++ < 400) {
         e.days[d] = 1;
         d = A.shift(d, 1);
       }
@@ -1039,8 +1156,10 @@
       seen[d] = 1;
     });
     if (e.on && e.since) {
-      var d = e.since;
-      while (d <= A.today()) {
+      var d = e.since,
+        t = A.today(),
+        guard = 0;
+      while (d <= t && guard++ < 400) {
         seen[d] = 1;
         d = A.shift(d, 1);
       }

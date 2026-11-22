@@ -746,6 +746,10 @@
       ym = a[0] && /^\d{4}-\d{2}$/.test(a[0]) ? a[0] : today.slice(0, 7),
       y = +ym.slice(0, 4),
       m = +ym.slice(5, 7);
+    if (m < 1 || m > 12) {
+      y = +today.slice(0, 4);
+      m = +today.slice(5, 7);
+    }
     var prev = m === 1 ? y - 1 + '-12' : y + '-' + String(m - 1).padStart(2, '0'),
       next = m === 12 ? y + 1 + '-01' : y + '-' + String(m + 1).padStart(2, '0');
     var days = new Date(Date.UTC(y, m, 0)).getUTCDate(),
@@ -795,7 +799,7 @@
       '</tbody></table></div>';
     h +=
       '<p class="faint small" style="text-align:center">' +
-      esc(P.METHODS[S.calc.method].name) +
+      esc((P.METHODS[S.calc.method] || P.METHODS.mwl).name) +
       (S.prefs.h24 ? '' : ' · 12-hour times') +
       '</p>';
     return {
@@ -1059,12 +1063,12 @@
       A.fmtTxt(t.duhaEnd) +
       '</span></div>';
     h +=
-      '<div class="window"><i style="left:' +
+      '<div class="window"><i style="inset-inline-start:' +
       X(t.duhaStart) +
       '%;width:' +
       (X(t.duhaEnd) - X(t.duhaStart)).toFixed(2) +
       '%"></i>' +
-      (now > t.sunrise && now < t.dhuhr ? '<b style="left:' + X(now) + '%"></b>' : '') +
+      (now > t.sunrise && now < t.dhuhr ? '<b style="inset-inline-start:' + X(now) + '%"></b>' : '') +
       '</div>';
     h +=
       '<div class="spread faint" style="font-size:11.5px;font-weight:700"><span>Sunrise ' +

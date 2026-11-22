@@ -85,7 +85,9 @@ public class MainActivity extends Activity implements SensorEventListener {
     private boolean loaded, volumeKeys;
     private volatile boolean audioHold;
     private android.media.MediaPlayer preview;
-    private void stopPreview() { if (preview != null) { try { preview.stop(); } catch (Exception ignored) { } preview.release(); preview = null; } }
+    private synchronized void stopPreview() { if (preview != null) { try { preview.stop(); } catch (Exception ignored) { } preview.release(); preview = null; } }
+    private final java.util.concurrent.ExecutorService stateExec = java.util.concurrent.Executors.newSingleThreadExecutor();
+    private final java.util.concurrent.ExecutorService syncExec = java.util.concurrent.Executors.newSingleThreadExecutor();
     private volatile boolean ready;
     static volatile boolean visible;
     private Audio audio;
@@ -332,11 +334,14 @@ public class MainActivity extends Activity implements SensorEventListener {
             pendingExport = null;
             js("__native.onExported&&__native.onExported(" + ok + ")");
         } else if (req == REQ_IMPORT && code == RESULT_OK && u != null) {
-            try (InputStream is = getContentResolver().openInputStream(u); BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
-                StringBuilder sb = new StringBuilder(); char[] buf = new char[8192]; int n;
-                while ((n = br.read(buf)) > 0) { sb.append(buf, 0, n); if (sb.length() > 20_000_000) break; }
-                js("__native.onImport(" + JSONObject.quote(sb.toString()) + ")");
-            } catch (Exception e) { toast(L.t("Could not read that file", "تعذّرت قراءة الملف")); }
+            final Uri uri = u;
+            new Thread(() -> {
+                try (InputStream is = getContentResolver().openInputStream(uri); BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+                    StringBuilder sb = new StringBuilder(); char[] buf = new char[8192]; int n;
+                    while ((n = br.read(buf)) > 0) { sb.append(buf, 0, n); if (sb.length() > 20_000_000) break; }
+                    js("__native.onImport(" + JSONObject.quote(sb.toString()) + ")");
+                } catch (Exception e) { toast(L.t("Could not read that file", "تعذّرت قراءة الملف")); }
+            }).start();
         }
     }
 
@@ -480,13 +485,13 @@ public class MainActivity extends Activity implements SensorEventListener {
         /* durable mirror of the web state, used if WebView storage is ever wiped */
         @JavascriptInterface public void saveState(final String json) {
             if (json == null || json.length() > 8_000_000) return;
-            new Thread(() -> {
+            stateExec.execute(() -> {
                 try {
                     File tmp = new File(getFilesDir(), "state.json.tmp"), dst = new File(getFilesDir(), "state.json");
                     try (FileOutputStream fo = new FileOutputStream(tmp)) { fo.write(json.getBytes(StandardCharsets.UTF_8)); fo.getFD().sync(); }
                     if (!tmp.renameTo(dst)) { dst.delete(); tmp.renameTo(dst); }
                 } catch (Exception ignored) { }
-            }).start();
+            });
         }
         @JavascriptInterface public String loadState() {
             File f = new File(getFilesDir(), "state.json");
@@ -556,7 +561,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         }
         @JavascriptInterface public void sync(String json) {
             Store.saveConfig(MainActivity.this, json);
-            new Thread(() -> Scheduler.run(MainActivity.this)).start();
+            syncExec.execute(() -> Scheduler.run(MainActivity.this));
         }
         @JavascriptInterface public String takeTrackerEvents() {
             JSONObject t = Store.config(MainActivity.this).optJSONObject("tasbih");
@@ -573,13 +578,15 @@ public class MainActivity extends Activity implements SensorEventListener {
         @JavascriptInterface public void audioHold(boolean on) { audioHold = on; }
         /** plays (or stops) the prayer-time takbīr so it can be heard in Settings */
         @JavascriptInterface public boolean previewAdhan() {
-            if (preview != null) { stopPreview(); return false; }
-            try {
-                preview = android.media.MediaPlayer.create(MainActivity.this, R.raw.adhan_takbir);
-                if (preview == null) return false;
-                preview.setOnCompletionListener(p -> { stopPreview(); js("__native.onAdhanEnd&&__native.onAdhanEnd()"); });
-                preview.start(); return true;
-            } catch (Exception e) { stopPreview(); return false; }
+            synchronized (MainActivity.this) {
+                if (preview != null) { stopPreview(); return false; }
+                try {
+                    preview = android.media.MediaPlayer.create(MainActivity.this, R.raw.adhan_takbir);
+                    if (preview == null) return false;
+                    preview.setOnCompletionListener(p -> { stopPreview(); js("__native.onAdhanEnd&&__native.onAdhanEnd()"); });
+                    preview.start(); return true;
+                } catch (Exception e) { stopPreview(); return false; }
+            }
         }
         @JavascriptInterface public void startCompass() { ui.post(MainActivity.this::startCompass); }
         @JavascriptInterface public void stopCompass() { ui.post(MainActivity.this::stopCompass); }

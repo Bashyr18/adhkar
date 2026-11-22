@@ -518,6 +518,7 @@ fn main() {
     /* the pill is on unless you closed it: it stays on screen when Adhkār is minimised or in the tray */
     if store::get("next").and_then(|v| v.as_bool()).unwrap_or(true) { a.show_pill(true); }
     let code = ac::pump();
+    store::flush_state();
     let _ = mutex;
     std::process::exit(code);
 }

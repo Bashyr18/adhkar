@@ -1143,6 +1143,126 @@ ok(/Ramaḍān Mubārak/.test(rt), 'Ramaḍān greeting in Ramaḍān');
   global.__arEnv = env;
 }
 
+/* audit regression suite: persistence, sanitization, timezone math, prototype safety, and cleanup */
+{
+  /* 1. S.jumuah survives reload and backup import */
+  const jst = JSON.parse(JSON.stringify(settled));
+  jst.jumuah = {
+    days: { '2026-11-13': { kahf: 1700000000000, ghusl: 1 } },
+    khutbah: 15,
+    overlay: false,
+    kahf: { page: 5, verse: 42 }
+  };
+  const jenv = boot('2026-11-13T10:00:00Z', jst);
+  ok(
+    jenv.w.A.S.jumuah &&
+      jenv.w.A.S.jumuah.kahf.page === 5 &&
+      jenv.w.A.S.jumuah.days['2026-11-13'].kahf === 1700000000000 &&
+      jenv.w.A.S.jumuah.khutbah === 15,
+    'S.jumuah survives app restart'
+  );
+  const exported = jenv.w.A.exportJSON();
+  jenv.w.A.reset();
+  jenv.w.A.importJSON(exported);
+  ok(
+    jenv.w.A.S.jumuah && jenv.w.A.S.jumuah.kahf.page === 5 && jenv.w.A.S.jumuah.overlay === false,
+    'S.jumuah survives backup export and import'
+  );
+
+  /* 2. Damaged / crafted backup JSON is sanitized and escaped cleanly */
+  const bad = {
+    app: 'adhkar',
+    state: {
+      v: 10,
+      loc: { lat: null, lng: null, name: 'Bad' },
+      calc: { method: 'bogus', asr: 'bad', highLat: 'bad' },
+      prefs: { theme: 'bad', accent: '"><img src=x>', ar: 999, hijriAdj: 99, nudge: { on: true, every: -5 } },
+      profile: { name: 'May', since: '"><script>1</script>', onboarded: true },
+      notif: { enabled: true, sleep: { on: true, at: '"><svg>' } },
+      excused: { on: true, since: '0001-01-01', days: {} },
+      counts: { '2026-11-13|morning|a': '999' },
+      prayed: { '2026-11-13': null },
+      nights: { '2026-11-13': null },
+      journal: { items: [{ id: '"><img src=x>', text: 'Dua', since: 'bad' }] },
+      learn: { last: { p: '"><img', i: 1, n: 5, at: Date.now() }, qlog: [{ r: '1', n: '2' }] },
+      last: { c: 'morning', d: '2026-11-13', p: '"><img' }
+    }
+  };
+  const senv = boot('2026-11-13T10:00:00Z', settled);
+  senv.w.A.importJSON(JSON.stringify(bad));
+  const BS = senv.w.A.S;
+  ok(
+    BS.loc === null && BS.calc.method === 'mwl' && BS.prefs.theme === 'auto' && BS.prefs.accent === 'gold',
+    'invalid loc and enums fall back safely'
+  );
+  ok(
+    BS.notif.sleep.at === '22:30' && BS.excused.on === false && BS.excused.since === null,
+    'invalid sleep time and ancient excused.since are cleared'
+  );
+  ok(BS.prefs.ar === 54 && BS.prefs.hijriAdj === 2 && BS.prefs.nudge.every === 5, 'numeric prefs are clamped');
+  ok(
+    BS.learn.last === null && BS.last === null && BS.learn.qlog.length === 0,
+    'invalid last/learn pointers and qlog are dropped'
+  );
+  ok(typeof senv.w.A.totals().dhikr === 'number', 'totals() never throws or concatenates strings on damaged maps');
+  const jhtml = visit(senv, '#/journal');
+  ok(!jhtml.includes('"><img src=x>'), 'journal id is HTML-escaped');
+  const phtml = visit(senv, '#/settings/notifications');
+  ok(!phtml.includes('"><svg>') && !senv.errors.length, 'settings and profile render cleanly after damaged import');
+
+  /* 3. A.trkAddPhrase credits daily Sunnah phrase counts (pd) */
+  const nenv = boot('2026-11-13T10:00:00Z', settled);
+  nenv.w.A.trkAddPhrase('subhanbihamdih', 3);
+  ok(
+    nenv.w.A.S.tasbih.pd[nenv.w.A.today()] && nenv.w.A.S.tasbih.pd[nenv.w.A.today()].subhanbihamdih === 3,
+    'trkAddPhrase updates today per-phrase Sunnah progress'
+  );
+
+  /* 4. Timetable print aligns to location timezone, not device midnight */
+  const ny = JSON.parse(JSON.stringify(settled));
+  ny.loc = { name: 'New York', lat: 40.7128, lng: -74.006, tz: 'America/New_York', cc: 'US' };
+  const penv = boot('2026-11-15T12:00:00Z', ny);
+  const sheet = penv.w.A.print.sheets('times', 0);
+  const nov1Fajr = penv.w.A.fmtTxt(penv.w.A.pday('2026-11-01').fajr);
+  ok(
+    sheet.includes('<td>' + nov1Fajr + '</td>'),
+    'printed timetable uses location civil date (not shifted by device TZ)'
+  );
+
+  /* 5. Kahf view exposes unmount; !S.loc provides nightKey; Object.prototype keys safe */
+  const kenv = boot('2026-11-13T10:00:00Z', settled);
+  ok(typeof kenv.w.A.V.kahf().unmount === 'function', 'A.V.kahf defines unmount to release observers and audio');
+  kenv.w.A.S.loc = null;
+  ok(kenv.w.A.now().nightKey === kenv.w.A.today(), 'A.now().nightKey falls back to today when location is unset');
+  kenv.w.A.S.prefs.lang = 'ar';
+  ok(kenv.w.A.T('constructor') === 'constructor', 'i18n lookup ignores Object.prototype keys');
+  visit(kenv, '#/toString');
+  visit(kenv, '#/c/toString');
+  visit(kenv, '#/settings/toString');
+  visit(kenv, '#/learn/toString');
+  ok(!kenv.errors.length, 'Object.prototype route names never crash router or views');
+
+  /* 6. International Date Line location aligns noon to civil date */
+  const idl = JSON.parse(JSON.stringify(settled));
+  idl.loc = { name: 'Apia', lat: -13.8333, lng: -171.75, tz: 'Pacific/Apia', cc: 'WS' };
+  const idlEnv = boot('2026-11-22T00:00:00Z', idl);
+  const apiaDay = idlEnv.w.A.pday('2026-11-22');
+  ok(
+    idlEnv.w.A.keyAt(apiaDay.dhuhr) === '2026-11-22',
+    'IDL location (Pacific/Apia) dhuhr falls on requested civil day'
+  );
+
+  /* 7. Logging a prayer on Today refreshes the prayed ring */
+  const tenv = boot('2026-11-13T10:00:00Z', settled);
+  visit(tenv, '#/');
+  const fbtn = tenv.w.document.querySelector('[data-a="dash-pray"][data-p="fajr"]');
+  tenv.w.A.acts['dash-pray'](fbtn);
+  ok(
+    /<b>1<i>\/5<\/i><\/b>/.test(tenv.w.document.getElementById('dash').innerHTML),
+    'dash-pray updates the X/5 prayed ring immediately'
+  );
+}
+
 setTimeout(function () {
   ok(global.__arEnv.w.__arCheck(), 'the reader is translated in Arabic mode');
   console.log('smoke: ' + pass + ' passed, ' + fail + ' failed');

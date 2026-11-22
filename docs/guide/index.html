@@ -953,11 +953,11 @@ a.mon:hover { transform: translateY(-4px); box-shadow: 0 50px 90px -40px rgba(0,
     <div class="wrap">
       <div class="kicker rv">Why it is free</div>
       <h2 class="h2 rv">Made as ṣadaqah jāriyah</h2>
-      <p class="rv">No adverts, no account, no tracking. Everything you do stays on your phone. If it helps you remember Allah even once, that is the reward hoped for. Please remember the makers, and everyone whose work went into its sources, in your duʿāʾ.</p>
+      <p class="rv">No adverts, no account, no tracking. Everything you do stays on your device. If it helps you remember Allah even once, that is the reward hoped for. Please remember the makers, and everyone whose work went into its sources, in your duʿāʾ.</p>
       <div class="pillars rv">
         <div><b>Verified sources</b><span>Arabic from Ḥiṣn al-Muslim and the Qurʾān; translations verbatim from sunnah.com and The Clear Quran; every hadith with its grade.</span></div>
         <div><b>The Sunnah first</b><span>Count on your fingers, at the times the Sunnah gives, with the numbers it sets.</span></div>
-        <div><b>Private</b><span>No account and no analytics. The internet is used only for recitations you choose to download.</span></div>
+        <div><b>Private</b><span>No account and no analytics. The internet is used only for recitations you download and updates you ask for.</span></div>
         <div><b>Open source</b><span>The code is public, so anyone can check it, learn from it and help improve it.</span></div>
       </div>
     </div>
@@ -1817,9 +1817,10 @@ addEventListener('scroll', function () { if (!ticking) { ticking = true; request
       t.addEventListener('pointerleave', function () { tip.classList.remove('on'); });
     }
     var vs = (s.versions || []).slice(0, 5), vmax = Math.max.apply(null, vs.map(function (v) { return v[1] + v[2]; })) || 1;
+    var escV = function (x) { return String(x).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
     $('rVers').innerHTML = vs.map(function (v) {
       var n = v[1] + v[2];
-      return '<div class="vr' + (v[0] === s.latest ? ' latest' : '') + '"><span>' + v[0] + '</span><span class="vb"><i style="width:' + Math.max(2, (n / vmax) * 100) + '%"></i></span><b>' + fmt(n) + '</b></div>';
+      return '<div class="vr' + (v[0] === s.latest ? ' latest' : '') + '"><span>' + escV(v[0]) + '</span><span class="vb"><i style="width:' + Math.max(2, (n / vmax) * 100) + '%"></i></span><b>' + fmt(n) + '</b></div>';
     }).join('');
     $('reachUp').textContent = 'Updated ' + day((s.updated || '').slice(0, 10));
   }).catch(function () {});

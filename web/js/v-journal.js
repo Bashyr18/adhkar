@@ -183,12 +183,12 @@
       (d.done
         ? ''
         : '<button type="button" class="chip" data-a="dua-done" data-id="' +
-          d.id +
+          esc(d.id) +
           '">' +
           ic('check', 'xs') +
           'Answered</button>') +
       '<button type="button" class="ib ghost sm" data-a="dua-edit" data-id="' +
-      d.id +
+      esc(d.id) +
       '" aria-label="Edit">' +
       ic('edit', 's') +
       '</button></div></div>' +
@@ -206,7 +206,7 @@
     d = d || { text: '', tag: '' };
     var sh = A.sheet(
       isNew ? 'Add a duʿāʾ' : 'Edit duʿāʾ',
-      '<div class="field"><label>What are you asking for?</label><textarea class="input" id="duT" rows="4" maxlength="600" placeholder="In your own words, in any language">' +
+      '<div class="field"><label for="duT">What are you asking for?</label><textarea class="input" id="duT" rows="4" maxlength="600" placeholder="In your own words, in any language">' +
         esc(d.text) +
         '</textarea></div>' +
         '<div class="field"><label>About</label><div class="row" style="flex-wrap:wrap;gap:8px" id="duG">' +
@@ -223,7 +223,7 @@
         }).join('') +
         '</div></div>' +
         (d.done
-          ? '<div class="field"><label>How it was answered (optional)</label><input class="input" id="duN" maxlength="200" value="' +
+          ? '<div class="field"><label for="duN">How it was answered (optional)</label><input class="input" id="duN" maxlength="200" value="' +
             esc(d.note || '') +
             '"></div>'
           : '') +

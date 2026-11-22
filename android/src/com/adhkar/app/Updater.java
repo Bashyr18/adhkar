@@ -39,6 +39,7 @@ final class Updater {
     private static final String API = "https://api.github.com/repos/Bashyr18/adhkar/releases/latest";
     private static final String ASSET = "Adhkar.apk", SUMS = "SHA256SUMS.txt";
     private static final long MAX = 200L * 1024 * 1024;
+    private static final int MAX_TEXT = 2 * 1024 * 1024;
 
     interface Sink { void send(String js); }
 
@@ -85,9 +86,30 @@ final class Updater {
     }
     private static String text(String url) throws Exception {
         HttpURLConnection h = open(url);
-        try (BufferedReader r = new BufferedReader(new InputStreamReader(h.getInputStream(), "UTF-8"))) {
-            StringBuilder b = new StringBuilder(); String l; while ((l = r.readLine()) != null) b.append(l).append('\n'); return b.toString();
+        try (InputStreamReader r = new InputStreamReader(h.getInputStream(), "UTF-8")) {
+            StringBuilder b = new StringBuilder();
+            char[] buf = new char[8192];
+            int n;
+            while ((n = r.read(buf)) > 0) {
+                if (b.length() + n > MAX_TEXT) throw new Exception("too large");
+                b.append(buf, 0, n);
+            }
+            return b.toString();
         } finally { h.disconnect(); }
+    }
+
+    private String fetchLatest() throws Exception {
+        JSONObject d = new JSONObject(text(API));
+        version = d.optString("tag_name", "").replaceFirst("^[vV]", "");
+        apkUrl = sumsUrl = null; size = 0;
+        JSONArray as = d.optJSONArray("assets");
+        if (as != null) for (int i = 0; i < as.length(); i++) {
+            JSONObject x = as.getJSONObject(i);
+            if (ASSET.equals(x.optString("name"))) { apkUrl = x.optString("browser_download_url"); size = x.optLong("size"); }
+            if (SUMS.equals(x.optString("name"))) sumsUrl = x.optString("browser_download_url");
+        }
+        String notes = d.optString("body", "");
+        return notes.length() > 600 ? notes.substring(0, 600) : notes;
     }
 
     void check() {
@@ -95,17 +117,7 @@ final class Updater {
         busy = true;
         new Thread(() -> {
             try {
-                JSONObject d = new JSONObject(text(API));
-                version = d.optString("tag_name", "").replaceFirst("^[vV]", "");
-                apkUrl = sumsUrl = null; size = 0;
-                JSONArray as = d.optJSONArray("assets");
-                if (as != null) for (int i = 0; i < as.length(); i++) {
-                    JSONObject x = as.getJSONObject(i);
-                    if (ASSET.equals(x.optString("name"))) { apkUrl = x.optString("browser_download_url"); size = x.optLong("size"); }
-                    if (SUMS.equals(x.optString("name"))) sumsUrl = x.optString("browser_download_url");
-                }
-                String notes = d.optString("body", "");
-                if (notes.length() > 600) notes = notes.substring(0, 600);
+                String notes = fetchLatest();
                 boolean found = apkUrl != null && sumsUrl != null && newer(version, current());
                 send(found ? new JSONObject().put("state", "found").put("v", version).put("size", size).put("notes", notes)
                            : new JSONObject().put("state", "none").put("v", version));
@@ -116,7 +128,7 @@ final class Updater {
     }
 
     void get() {
-        if (busy || apkUrl == null || sumsUrl == null) { err("check first"); return; }
+        if (busy) return;
         if (Build.VERSION.SDK_INT >= 26 && !a.getPackageManager().canRequestPackageInstalls()) {
             try { send(new JSONObject().put("state", "permission")); } catch (Exception ignored) { }
             a.runOnUiThread(() -> { try { a.startActivity(new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:" + a.getPackageName()))); } catch (Exception ignored) { } });
@@ -127,6 +139,10 @@ final class Updater {
             File dir = new File(a.getCacheDir(), "update"); dir.mkdirs();
             File f = new File(dir, "Adhkar.apk");
             try {
+                if (apkUrl == null || sumsUrl == null) {
+                    fetchLatest();
+                    if (apkUrl == null || sumsUrl == null || !newer(version, current())) throw new Exception("not newer");
+                }
                 HttpURLConnection h = open(apkUrl);
                 long total = h.getContentLengthLong() > 0 ? h.getContentLengthLong() : size, got = 0, last = 0;
                 try (InputStream in = h.getInputStream(); OutputStream out = new FileOutputStream(f)) {
@@ -147,6 +163,7 @@ final class Updater {
                 verifyPackage(f);
                 send(new JSONObject().put("state", "installing"));
                 install(f);
+                f.delete();
             } catch (Exception e) {
                 f.delete();
                 err(String.valueOf(e.getMessage()));
@@ -205,7 +222,8 @@ final class Updater {
         try { return a.getPackageManager().getPackageInfo(a.getPackageName(), 0).versionName; } catch (Exception e) { return "0"; }
     }
     static boolean newer(String x, String y) {
-        String[] p = (x == null ? "" : x).split("\\."), q = (y == null ? "" : y).split("\\.");
+        if (x == null || !x.matches("\\d+(\\.\\d+)*")) return false;
+        String[] p = x.split("\\."), q = (y == null ? "" : y).split("\\.");
         for (int i = 0; i < Math.max(p.length, q.length); i++) {
             int m = 0, n = 0;
             try { if (i < p.length) m = Integer.parseInt(p[i]); } catch (Exception ignored) { }

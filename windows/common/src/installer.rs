@@ -20,8 +20,15 @@ pub const ABOUT: &str = "Remembrance for every moment";
 const RUN_KEY: &str = r"Software\Microsoft\Windows\CurrentVersion\Run";
 
 /* ADHKAR_INSTALL_ROOT=<folder> puts the program and its shortcuts in that folder (Programs\Adhkar, Start, Desktop) and
-   uses a Settings line of its own, so installing can be tested without touching the computer's real Adhkār */
+   uses a Settings line of its own, so installing can be tested without touching the computer's real Adhkār (debug only) */
+#[cfg(debug_assertions)]
 fn test() -> Option<String> { crate::env("ADHKAR_INSTALL_ROOT") }
+#[cfg(not(debug_assertions))]
+fn test() -> Option<String> { None }
+#[cfg(debug_assertions)]
+fn test_data() -> Option<String> { crate::env("ADHKAR_DATA") }
+#[cfg(not(debug_assertions))]
+fn test_data() -> Option<String> { None }
 fn uninst_key() -> String { format!(r"Software\Microsoft\Windows\CurrentVersion\Uninstall\{}", if test().is_some() { "Adhkar-Test" } else { "Adhkar" }) }
 fn run_name() -> &'static str { if test().is_some() { "Adhkar-Test" } else { "Adhkar" } }
 
@@ -30,7 +37,7 @@ fn run_name() -> &'static str { if test().is_some() { "Adhkar-Test" } else { "Ad
    old copy and a new one still recognise each other while one replaces the other. */
 pub fn instance() -> String {
     let base = "Adhkar.Desktop.v1".to_string();
-    match crate::env("ADHKAR_DATA") {
+    match test_data() {
         None => base,
         Some(d) => {
             let mut hh: i32 = 17;
@@ -49,7 +56,7 @@ fn base(id: &GUID, test_sub: &str) -> PathBuf { match test() { Some(t) => Path::
 
 pub fn dir() -> PathBuf { match test() { Some(t) => Path::new(&t).join("Programs").join("Adhkar"), None => known(&FOLDERID_LocalAppData).join("Programs").join("Adhkar") } }
 pub fn exe() -> PathBuf { dir().join("Adhkar.exe") }
-pub fn data_dir() -> PathBuf { crate::env("ADHKAR_DATA").map(PathBuf::from).unwrap_or_else(|| known(&FOLDERID_LocalAppData).join("Adhkar")) }
+pub fn data_dir() -> PathBuf { test_data().map(PathBuf::from).unwrap_or_else(|| known(&FOLDERID_LocalAppData).join("Adhkar")) }
 pub fn start_link() -> PathBuf { base(&FOLDERID_Programs, "Start").join(format!("{}.lnk", APP_NAME)) }
 pub fn desktop_link() -> PathBuf { base(&FOLDERID_Desktop, "Desktop").join(format!("{}.lnk", APP_NAME)) }
 /* the earlier app's scripting shell wrote "Adhkar.lnk", losing the ā: tidied whenever the real one is written */
@@ -74,14 +81,19 @@ pub fn file_version(p: &Path) -> Option<String> {
         GetFileVersionInfoW(windows::core::PCWSTR(w.as_ptr()), None, n, buf.as_mut_ptr() as _).ok()?;
         let mut p: *mut std::ffi::c_void = std::ptr::null_mut();
         let mut len = 0u32;
-        if !VerQueryValueW(buf.as_ptr() as _, &h("\\"), &mut p, &mut len).as_bool() || p.is_null() { return None; }
+        if !VerQueryValueW(buf.as_ptr() as _, &h("\\"), &mut p, &mut len).as_bool() || p.is_null() || (len as usize) < std::mem::size_of::<VS_FIXEDFILEINFO>() { return None; }
         let f = &*(p as *const VS_FIXEDFILEINFO);
         Some(format!("{}.{}", f.dwFileVersionMS >> 16, f.dwFileVersionMS & 0xffff))
     }
 }
+/* strictly numeric dot-separated version strings only ("13.10"), never paths or traversal tokens */
+pub fn valid_version(v: &str) -> bool {
+    !v.is_empty() && v.len() <= 32 && v.split('.').all(|p| !p.is_empty() && p.bytes().all(|b| b.is_ascii_digit()))
+}
 /* "13.10" is newer than "13.9": part by part, as numbers */
 pub fn newer(a: &str, b: &str) -> bool {
-    let x: Vec<i64> = a.split('.').map(|p| p.trim().parse().unwrap_or(0)).collect();
+    if !valid_version(a) { return false; }
+    let x: Vec<i64> = a.split('.').map(|p| p.parse().unwrap_or(0)).collect();
     let y: Vec<i64> = b.split('.').map(|p| p.trim().parse().unwrap_or(0)).collect();
     for i in 0..x.len().max(y.len()) {
         let (p, q) = (x.get(i).copied().unwrap_or(0), y.get(i).copied().unwrap_or(0));
@@ -180,17 +192,17 @@ pub fn remove() {
     if let Ok(rd) = fs::read_dir(data_dir()) {
         for e in rd.flatten() { if e.file_name().to_string_lossy().starts_with("app-") { let _ = fs::remove_dir_all(e.path()); } }
     }
-    /* a running program cannot delete its own folder: a hidden command waits a moment, then removes the whole folder,
-       trying again for a while if anything still holds a file (ping is the pause; timeout needs a console) */
-    let d = dir().to_string_lossy().into_owned();
-    let mut c = String::from("/d /c \"");
-    for i in 0..15 {
-        if i > 0 { c.push_str(" & "); }
-        c.push_str(&format!("ping -n 2 127.0.0.1 >nul & if exist \"{d}\" rmdir /s /q \"{d}\" 2>nul"));
-    }
-    c.push('"');
-    let cmd = std::env::var("ComSpec").unwrap_or_else(|_| r"C:\Windows\System32\cmd.exe".into());
-    crate::spawn(&cmd, &c, Some(&std::env::temp_dir().to_string_lossy()), true);
+    /* a running program cannot delete its own folder: a hidden helper waits a moment, then removes the whole folder,
+       passing the path via an environment variable with -LiteralPath so no username or path character is ever parsed */
+    use std::os::windows::process::CommandExt;
+    let d = dir();
+    let script = "$p=$env:ADHKAR_RM_DIR; if($p){ for($i=0;$i -lt 15;$i++){ Start-Sleep -Milliseconds 700; if(Test-Path -LiteralPath $p){ Remove-Item -LiteralPath $p -Recurse -Force -ErrorAction SilentlyContinue } else { break } } }";
+    let _ = std::process::Command::new("powershell.exe")
+        .args(["-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden", "-Command", script])
+        .env("ADHKAR_RM_DIR", &d)
+        .current_dir(std::env::temp_dir())
+        .creation_flags(CREATE_NO_WINDOW.0)
+        .spawn();
 }
 
 /* every running Adhkar.exe started from the installed file, apart from this process */

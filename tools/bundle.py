@@ -1,7 +1,7 @@
 """Release web bundle: one minified script and one minified stylesheet, fonts preloaded.
 Usage: python tools/bundle.py <web dir> <out dir>
 The dev page (web/index.html) keeps its separate files; only the APK ships the bundle."""
-import os, re, sys, shutil, subprocess
+import json, os, re, sys, shutil, subprocess
 
 WEB, OUT = sys.argv[1], sys.argv[2]
 VERSION = sys.argv[3] if len(sys.argv) > 3 else 'dev'
@@ -27,7 +27,7 @@ def read(p):
 
 
 # each file is its own IIFE or global assignment, so plain concatenation keeps document order and behaviour
-js = "window.APP_VERSION='%s';" % VERSION + esbuild(';\n'.join(read(p) for p in scripts), 'js')
+js = 'window.APP_VERSION=%s;' % json.dumps(VERSION) + esbuild(';\n'.join(read(p) for p in scripts), 'js')
 css = esbuild('\n'.join(read(p) for p in styles), 'css')
 os.makedirs(OUT, exist_ok=True)
 open(os.path.join(OUT, 'app.js'), 'w', encoding='utf-8').write(js)

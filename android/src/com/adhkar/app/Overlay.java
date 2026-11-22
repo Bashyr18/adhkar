@@ -55,7 +55,7 @@ final class Overlay {
         ar.setText(p.optString("ar")); ar.setTextColor(0xFFF1D59E); ar.setTextSize(20); ar.setSingleLine(true);
         ar.setTextDirection(View.TEXT_DIRECTION_RTL);
         final TextView tr = new TextView(c);
-        tr.setText(p.optString("tr") + "  ·  tap to count"); tr.setTextColor(0xB3F5F0E7); tr.setTextSize(12); tr.setTypeface(Typeface.DEFAULT_BOLD);
+        tr.setText(p.optString("tr") + "  ·  " + L.t("tap to count", "اضغط للعد")); tr.setTextColor(0xB3F5F0E7); tr.setTextSize(12); tr.setTypeface(Typeface.DEFAULT_BOLD);
         col.addView(ar); col.addView(tr);
         pill.addView(col, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
 

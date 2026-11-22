@@ -80,6 +80,7 @@ fn scaled(p: &Pic, w: u32, hh: u32) -> Option<Img> {
     }
 }
 /* one picture over another, both premultiplied */
+#[allow(clippy::too_many_arguments)]
 fn over(dst: &mut Img, src: &Img, sx: i32, sy: i32, sw: i32, shh: i32, dx: i32, dy: i32) {
     for y in 0..shh {
         let (yy, ty) = (sy + y, dy + y);

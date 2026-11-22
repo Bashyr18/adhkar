@@ -172,7 +172,10 @@ fn main() {
     ac::caption(hwnd, dark, bg, if dark { 0xf5f0e7 } else { 0x1c1812 });
 
     let data = std::env::temp_dir().join("Adhkar-Setup-webview");
-    let dbg = ac::env("ADHKAR_DEBUG_PORT").map(|p| format!(" --remote-debugging-port={}", p)).unwrap_or_default();
+    #[cfg(debug_assertions)]
+    let dbg = ac::env("ADHKAR_DEBUG_PORT").and_then(|p| p.parse::<u16>().ok()).map(|p| format!(" --remote-debugging-port={}", p)).unwrap_or_default();
+    #[cfg(not(debug_assertions))]
+    let dbg = String::new();
     let web = match ac::create_web(hwnd, &data.to_string_lossy(), &format!("--disable-features=msSmartScreenProtection{}", dbg)) {
         Ok(w) => w,
         Err(_) => { unsafe { let _ = DestroyWindow(hwnd); } plain(); return; }
@@ -217,6 +220,8 @@ fn main() {
     *s.web.borrow_mut() = Some(web);
     unsafe { let _ = ShowWindow(hwnd, SW_SHOWNORMAL); let _ = UpdateWindow(hwnd); }
     let code = ac::pump();
+    if let Some(w) = s.web.borrow_mut().take() { unsafe { let _ = w.controller.Close(); } }
+    let _ = std::fs::remove_dir_all(&data);
     let _ = DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2;
     std::process::exit(code);
 }

@@ -18,7 +18,11 @@
      links to it becomes its header. Going back: the header becomes the card that links to it again. */
   var HERO = /^#\/c\//;
   function cardFor(hash) {
-    var a = app.querySelector('.view a[href="' + hash + '"]');
+    var a = null;
+    try {
+      var q = window.CSS && CSS.escape ? CSS.escape(hash) : String(hash).replace(/["\\]/g, '\\$&');
+      a = app.querySelector('.view a[href="' + q + '"]');
+    } catch (e) {}
     return a ? a.closest('.feature, .coll, .jr, .focus, .card') || a : null;
   }
   function heroPair(from, to) {
@@ -198,7 +202,7 @@
     }
     return (
       '<a class="back" href="' +
-      (href || '#/') +
+      esc(href || '#/') +
       '" data-a="back"><span class="back-ic">' +
       ic('left', 's') +
       '</span><span class="back-t">' +
@@ -352,17 +356,46 @@
   };
 
   /* ================= sheet ================= */
-  var sheetStack = [];
+  var sheetStack = [],
+    sheetSeq = 0;
+  function trapFocus(root, e) {
+    if (e.key !== 'Tab') return;
+    var els = Array.prototype.slice
+      .call(
+        root.querySelectorAll(
+          'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      )
+      .filter(function (x) {
+        return x.offsetParent !== null;
+      });
+    if (!els.length) return;
+    var first = els[0],
+      last = els[els.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
   A.sheet = function (title, body, opts) {
     opts = opts || {};
-    var scrim = document.createElement('div'),
+    var prevFocus = document.activeElement,
+      tid = 'sh-t-' + ++sheetSeq,
+      scrim = document.createElement('div'),
       sh = document.createElement('div');
     scrim.className = 'scrim';
     sh.className = 'sheet';
     sh.setAttribute('role', 'dialog');
     sh.setAttribute('aria-modal', 'true');
+    sh.setAttribute('aria-labelledby', tid);
+    sh.setAttribute('tabindex', '-1');
     sh.innerHTML =
-      '<div class="grab"></div><div class="sh-h"><h3>' +
+      '<div class="grab"></div><div class="sh-h"><h3 id="' +
+      tid +
+      '">' +
       esc(title) +
       '</h3><button type="button" class="ib ghost" data-a="sheet-close" aria-label="Close">' +
       ic('close', 's') +
@@ -371,11 +404,16 @@
       '</div>';
     document.body.appendChild(scrim);
     document.body.appendChild(sh);
+    var onKey = function (e) {
+      trapFocus(sh, e);
+    };
+    sh.addEventListener('keydown', onKey);
     var o = {
       el: sh,
       close: function (silent) {
         if (o.closed) return;
         o.closed = true;
+        sh.removeEventListener('keydown', onKey);
         sheetStack.splice(sheetStack.indexOf(o), 1);
         A.syncBack();
         scrim.classList.add('out');
@@ -384,6 +422,11 @@
           scrim.remove();
           sh.remove();
         }, 260);
+        if (prevFocus && prevFocus.isConnected && typeof prevFocus.focus === 'function') {
+          try {
+            prevFocus.focus({ preventScroll: true });
+          } catch (e) {}
+        }
         if (opts.onClose && !silent) opts.onClose();
       }
     };
@@ -394,6 +437,12 @@
     sheetStack.push(o);
     A.syncBack();
     if (opts.mount) opts.mount(sh, o);
+    if (!sh.contains(document.activeElement)) {
+      var auto = sh.querySelector('input, textarea, button:not([data-a="sheet-close"])') || sh;
+      try {
+        auto.focus({ preventScroll: true });
+      } catch (e) {}
+    }
     return o;
   };
   function dragClose(sh, o) {
@@ -990,7 +1039,7 @@
     A.syncBack();
   };
   function paint(r, opts) {
-    var fn = A.V[r.name] || A.V.today,
+    var fn = Object.prototype.hasOwnProperty.call(A.V, r.name) ? A.V[r.name] : A.V.today,
       key = r.name + '/' + r.a.join('/');
     var same = lastKey === key,
       y = window.scrollY;
@@ -1553,19 +1602,12 @@
       if (document.hidden) A.save(true);
       else if (!A.N.has) A.rerender();
     });
-    /* a minute without input: the decorative loops rest (app.css html.rest); any input wakes them */
-    var lastInput = Date.now(),
-      root = document.documentElement;
-    var woke = function () {
-      lastInput = Date.now();
-      if (root.classList.contains('rest')) root.classList.remove('rest');
-    };
+    /* ambient motion wakes on any input and rests cleanly after REST_MS (one timer) */
     ['pointerdown', 'pointermove', 'keydown', 'wheel', 'touchstart'].forEach(function (t) {
-      addEventListener(t, woke, { passive: true, capture: true });
+      addEventListener(t, A.wake, { passive: true, capture: true });
     });
     var day = A.today();
     setInterval(function () {
-      if (!root.classList.contains('rest') && Date.now() - lastInput > 60000) root.classList.add('rest');
       var d = A.today();
       if (d !== day) {
         day = d;

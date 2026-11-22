@@ -112,7 +112,6 @@
     time: ['مرة', 'مرتان', 'مرات'],
     week: ['أسبوع', 'أسبوعان', 'أسابيع'],
     fast: ['صيام', 'صيامان', 'أيام صيام'],
-    rakʿah: ['ركعة', 'ركعتان', 'ركعات'],
     deed: ['عمل', 'عملان', 'أعمال']
   };
   A.plural = function (n, one, many) {
@@ -498,6 +497,13 @@
       'النطق والترجمة وسائل مساعدة، فتعلّم اللفظ من معلّم.',
     'No accounts, ads or tracking. Everything stays on your phone.':
       'بلا حسابات ولا إعلانات ولا تتبّع. كل شيء يبقى على هاتفك.',
+    'No accounts, ads or tracking. Everything stays on your device.':
+      'بلا حسابات ولا إعلانات ولا تتبّع. كل شيء يبقى على جهازك.',
+    'Storage is full or blocked; export a backup to keep your record safe.':
+      'التخزين ممتلئ أو محجوب؛ صدّر نسخة احتياطية لحفظ سجلك.',
+    'This computer': 'هذا الحاسوب',
+    'Home-screen widgets, quick-settings tile, app shortcuts, volume-key counting and native phone controls come with the Android app.':
+      'الأدوات على الشاشة الرئيسية ومربّع الإعدادات السريعة واختصارات التطبيق والعد بأزرار الصوت وإعدادات الهاتف الأصلية متاحة في تطبيق أندرويد.',
     Language: 'اللغة',
     English: 'English',
     العربية: 'العربية',
@@ -1914,7 +1920,10 @@
     var t = t0.replace(/[\u0660-\u0669\u066c]/g, function (d) {
       return d === '\u066c' ? ',' : String(d.charCodeAt(0) - 0x660);
     });
-    var out = D[t];
+    var hasD = function (k) {
+      return Object.prototype.hasOwnProperty.call(D, k);
+    };
+    var out = hasD(t) ? D[t] : null;
     if (out == null) {
       for (var i = 0; i < BOOK.length && out == null; i++) {
         var b = t.match(BOOK[i][0]);
@@ -1935,7 +1944,7 @@
             got = T(parts[p]);
           for (var q = parts.length; q > p + 1; q--) {
             var whole = parts.slice(p, q).join(' · ');
-            if (D[whole] != null) {
+            if (hasD(whole) && D[whole] != null) {
               took = q - p;
               got = D[whole];
               break;
@@ -1959,14 +1968,17 @@
       }
     }
     if (out == null) return s;
-    return s.replace(t0, out);
+    return s.replace(t0, function () {
+      return out;
+    });
   }
   A.T = function (s) {
     return A.ar() ? digits(T(s)) : s;
   };
   /* a feature module brings its own Arabic strings; an entry already here wins */
   A.addAr = function (o) {
-    for (var k in o) if (o.hasOwnProperty(k) && D[k] == null) D[k] = o[k];
+    for (var k in o)
+      if (Object.prototype.hasOwnProperty.call(o, k) && !Object.prototype.hasOwnProperty.call(D, k)) D[k] = o[k];
   };
   A.toAr = function (s) {
     var t = T(s);

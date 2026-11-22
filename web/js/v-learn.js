@@ -276,8 +276,10 @@
   /* ================= setup ================= */
   A.V.learn = function (a) {
     if (a[0] === 'quiz' && A.V.learnQuiz)
-      return A.V.learnQuiz(a[1] === 'review' ? 'review' : a[1] && A.quizTopics[a[1]] ? a[1] : null);
-    if (a[0] && PR[a[0]]) return player(a[0]);
+      return A.V.learnQuiz(
+        a[1] === 'review' ? 'review' : a[1] && Object.prototype.hasOwnProperty.call(A.quizTopics, a[1]) ? a[1] : null
+      );
+    if (a[0] && Object.prototype.hasOwnProperty.call(PR, a[0])) return player(a[0]);
     if (!O.p) O.p = defaultPrayer();
     if (O.short == null) O.short = shortDefault(O.p);
     var p = O.p,
@@ -465,7 +467,7 @@
             log
               .map(function (x) {
                 var f = x.n ? x.r / x.n : 0;
-                return '<i style="--f:' + f.toFixed(2) + '" title="' + x.r + '/' + x.n + '"></i>';
+                return '<i style="--f:' + f.toFixed(2) + '" title="' + esc(x.r + '/' + x.n) + '"></i>';
               })
               .join('') +
             '<span>' +
@@ -795,8 +797,9 @@
       { passive: true }
     );
     keyH = function (e) {
-      if (e.key === 'ArrowRight') go(1);
-      else if (e.key === 'ArrowLeft') go(-1);
+      var rtl = document.documentElement.dir === 'rtl';
+      if (e.key === 'ArrowRight') go(rtl ? -1 : 1);
+      else if (e.key === 'ArrowLeft') go(rtl ? 1 : -1);
     };
     document.addEventListener('keydown', keyH);
     if (S.prefs.wake) A.N.keepAwake(true);

@@ -111,21 +111,28 @@ final class Scheduler {
         }
         JSONObject m = n.optJSONObject("morning");
         if (m != null && m.optBoolean("on") && !(smart && today.optBoolean("morning")))
-            out.add("sunrise".equals(m.optString("from")) ? new Ev("m-" + key, d.sunrise + m.optInt("after", 20) * MIN, CH_ADHKAR, "Morning adhkār",
+            out.add("sunrise".equals(m.optString("from")) ? new Ev("m-" + key, d.sunrise + m.optInt("after", 20) * MIN, CH_ADHKAR, L.t("Morning adhkār", "أذكار الصباح"),
                     L.t("Begin the day with remembrance.", "ابدأ يومك بذكر الله."), "#/c/morning", L.t("Begin", "ابدأ"), "#/r/morning/0", true)
                 : new Ev("m-" + key, d.fajr + m.optInt("after", 20) * MIN, CH_ADHKAR, L.t("Morning adhkār", "أذكار الصباح"),
                     L.t("Begin the day with remembrance. Before sunrise at " + Store.fmtTime(cfg, o, d.sunrise) + " is best.", "ابدأ يومك بذكر الله، والأفضل قبل الشروق " + Store.fmtTime(cfg, o, d.sunrise) + "."), "#/c/morning", L.t("Begin", "ابدأ"), "#/r/morning/0", true));
         JSONObject e = n.optJSONObject("evening");
         if (e != null && e.optBoolean("on") && !(smart && today.optBoolean("evening")))
-            out.add("maghrib".equals(e.optString("from")) ? new Ev("e-" + key, d.maghrib + e.optInt("after", 30) * MIN, CH_ADHKAR, "Evening adhkār",
+            out.add("maghrib".equals(e.optString("from")) ? new Ev("e-" + key, d.maghrib + e.optInt("after", 30) * MIN, CH_ADHKAR, L.t("Evening adhkār", "أذكار المساء"),
                     L.t("Protect your night with remembrance.", "احفظ ليلتك بذكر الله."), "#/c/evening", L.t("Begin", "ابدأ"), "#/r/evening/0", true)
                 : new Ev("e-" + key, d.asr + e.optInt("after", 30) * MIN, CH_ADHKAR, L.t("Evening adhkār", "أذكار المساء"),
                     L.t("Protect your evening with remembrance. Maghrib is at " + Store.fmtTime(cfg, o, d.maghrib) + ".", "احفظ مساءك بذكر الله. المغرب " + Store.fmtTime(cfg, o, d.maghrib) + "."), "#/c/evening", L.t("Begin", "ابدأ"), "#/r/evening/0", true));
         JSONObject sl = n.optJSONObject("sleep");
         if (sl != null && sl.optBoolean("on") && !(smart && today.optBoolean("sleep"))) {
+            int sh = 22, sm = 30;
             String[] hm = sl.optString("at", "22:30").split(":");
+            if (hm.length >= 2) {
+                try {
+                    int h0 = Integer.parseInt(hm[0].trim()), m0 = Integer.parseInt(hm[1].trim());
+                    if (h0 >= 0 && h0 <= 23 && m0 >= 0 && m0 <= 59) { sh = h0; sm = m0; }
+                } catch (NumberFormatException ignored) { }
+            }
             Calendar cal = Calendar.getInstance(PrayerCalc.zone(o)); cal.clear();
-            cal.set(d.y, d.m - 1, d.d, Integer.parseInt(hm[0]), Integer.parseInt(hm[1]), 0);
+            cal.set(d.y, d.m - 1, d.d, sh, sm, 0);
             out.add(new Ev("s-" + key, cal.getTimeInMillis(), CH_ADHKAR, L.t("Before you sleep", "قبل النوم"), L.t("The three Quls, Āyat al-Kursī and the adhkār of sleep.", "المعوذات وآية الكرسي وأذكار النوم."), "#/c/sleep", L.t("Begin", "ابدأ"), "#/r/sleep/0", true));
         }
         JSONObject du = n.optJSONObject("duha");

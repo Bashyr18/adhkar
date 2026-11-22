@@ -66,7 +66,11 @@ pub fn copy_text(owner: HWND, text: &str) {
             if !p.is_null() {
                 std::ptr::copy_nonoverlapping(w.as_ptr(), p, w.len());
                 let _ = GlobalUnlock(g);
-                let _ = SetClipboardData(CF_UNICODETEXT.0 as u32, Some(HANDLE(g.0)));
+                if SetClipboardData(CF_UNICODETEXT.0 as u32, Some(HANDLE(g.0))).is_err() {
+                    let _ = GlobalFree(Some(g));
+                }
+            } else {
+                let _ = GlobalFree(Some(g));
             }
         }
         let _ = CloseClipboard();

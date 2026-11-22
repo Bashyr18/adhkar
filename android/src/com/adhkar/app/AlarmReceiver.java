@@ -26,7 +26,8 @@ public class AlarmReceiver extends BroadcastReceiver {
             NotificationManager nm = c.getSystemService(NotificationManager.class);
             if (nm != null && id != null) nm.cancel(id.replaceAll("-\\d{4}-\\d{2}-\\d{2}$", "").hashCode());
             Intent s = new Intent(i).setClass(c, AlarmReceiver.class).setAction(Scheduler.ACTION_SNOOZED);
-            PendingIntent pi = PendingIntent.getBroadcast(c, 7, s, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            int rc = id == null ? 7 : (7000 + (id.hashCode() & 0x0fffffff));
+            PendingIntent pi = PendingIntent.getBroadcast(c, rc, s, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
             AlarmManager am = c.getSystemService(AlarmManager.class);
             long at = System.currentTimeMillis() + 15 * 60000L;
             if (am != null) {

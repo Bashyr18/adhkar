@@ -6,6 +6,7 @@ pub mod installer;
 pub mod registry;
 
 use std::collections::VecDeque;
+use std::sync::atomic::{AtomicIsize, Ordering};
 use std::sync::Mutex;
 
 use webview2_com::Microsoft::Web::WebView2::Win32::*;
@@ -96,7 +97,7 @@ pub fn app_icon(size: i32) -> HICON {
     use windows::Win32::System::LibraryLoader::GetModuleHandleW;
     unsafe {
         let m = GetModuleHandleW(None).unwrap_or_default();
-        LoadImageW(Some(m.into()), PCWSTR(1 as _), IMAGE_ICON, size, size, LR_DEFAULTCOLOR).map(|h| HICON(h.0)).unwrap_or_default()
+        LoadImageW(Some(m.into()), PCWSTR(1 as _), IMAGE_ICON, size, size, LR_DEFAULTCOLOR | LR_SHARED).map(|h| HICON(h.0)).unwrap_or_default()
     }
 }
 
@@ -106,9 +107,9 @@ pub fn app_icon(size: i32) -> HICON {
 pub const WM_APP_RUN: u32 = WM_APP + 1;
 type Job = Box<dyn FnOnce() + Send>;
 static JOBS: Mutex<VecDeque<Job>> = Mutex::new(VecDeque::new());
-static mut UI: isize = 0;
-pub fn set_ui(hwnd: HWND) { unsafe { UI = hwnd.0 as isize; } }
-pub fn ui() -> HWND { unsafe { HWND(UI as _) } }
+static UI: AtomicIsize = AtomicIsize::new(0);
+pub fn set_ui(hwnd: HWND) { UI.store(hwnd.0 as isize, Ordering::SeqCst); }
+pub fn ui() -> HWND { HWND(UI.load(Ordering::SeqCst) as _) }
 pub fn post(f: impl FnOnce() + Send + 'static) {
     JOBS.lock().unwrap().push_back(Box::new(f));
     unsafe { let _ = PostMessageW(Some(ui()), WM_APP_RUN, WPARAM(0), LPARAM(0)); }

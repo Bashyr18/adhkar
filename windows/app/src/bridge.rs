@@ -170,8 +170,16 @@ pub fn call(name: &str, body: &[u8]) -> Option<Value> {
         "install" => { ac::later(install); None }
         "quit" => { ac::later(|| if let Some(a) = app() { a.quit() }); None }
         "savePdf" => { let nm = s(0); ac::later(move || save_pdf(nm)); None }
-        "reveal" => { let p = s(0); if in_documents(&p) { ac::reveal(&p); } None }
-        "openPdf" => { let p = s(0); if in_documents(&p) { ac::shell_open(&p); } None }
+        "reveal" => { let p = s(0); if let Some(c) = in_documents(&p) { ac::reveal(&c.to_string_lossy()); } None }
+        "openPdf" => {
+            let p = s(0);
+            if let Some(c) = in_documents(&p) {
+                if c.extension().and_then(|e| e.to_str()).map(|e| e.eq_ignore_ascii_case("pdf")).unwrap_or(false) {
+                    ac::shell_open(&c.to_string_lossy());
+                }
+            }
+            None
+        }
         _ => None,
     }
 }
@@ -179,8 +187,11 @@ fn report(tag: &str, state: &str, done: usize, total: usize) {
     let j = json!({ "tag": tag, "state": state, "done": done, "total": total }).to_string();
     post(format!("window.__native.onAudio&&__native.onAudio({})", js(&j)));
 }
-fn in_documents(p: &str) -> bool {
-    !p.is_empty() && !p.contains("..") && Path::new(p).is_file() && p.to_lowercase().starts_with(&dialogs::documents().to_string_lossy().to_lowercase())
+fn in_documents(p: &str) -> Option<PathBuf> {
+    if p.is_empty() { return None; }
+    let root = std::fs::canonicalize(dialogs::documents()).ok()?;
+    let canon = std::fs::canonicalize(Path::new(p)).ok()?;
+    if canon.starts_with(&root) && canon.is_file() { Some(canon) } else { None }
 }
 fn keep_awake(on: bool) {
     use windows::Win32::System::Power::*;

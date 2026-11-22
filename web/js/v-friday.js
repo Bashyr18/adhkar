@@ -712,7 +712,8 @@
       html: h,
       title: A.T('Sūrat al-Kahf'),
       bare: true,
-      mount: mountKahf
+      mount: mountKahf,
+      unmount: unmountKahf
     };
   };
   /* the full lines of a Madani page share one width: size the font so the widest fills the page. Every page waiting
@@ -817,6 +818,7 @@
       pages.forEach(function (p) {
         near.observe(p);
       });
+      K.near = near;
       var io = new IntersectionObserver(
         function (es) {
           es.forEach(function (e) {
@@ -828,6 +830,7 @@
       pages.forEach(function (p) {
         io.observe(p);
       });
+      K.io = io;
       var start = pages[Math.min(pages.length - 1, j.kahf.page || 0)];
       requestAnimationFrame(function () {
         if (start) start.scrollIntoView({ block: 'nearest', inline: 'start' });
@@ -987,10 +990,23 @@
     web.el.onerror = endKahf;
     web.el.play().catch(endKahf);
   }
+  function unmountKahf() {
+    stopKahf();
+    if (K.near) {
+      K.near.disconnect();
+      K.near = null;
+    }
+    if (K.io) {
+      K.io.disconnect();
+      K.io = null;
+    }
+  }
   function stopKahf() {
     if (!K.playing) return;
     K.playing = false;
     if (web.el) {
+      web.el.onended = null;
+      web.el.onerror = null;
       web.el.pause();
       web.el = null;
     } else A.N.call('audioStop');

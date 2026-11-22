@@ -67,6 +67,14 @@ pub fn save_state(json: String, seq: u64) {
         }
     });
 }
+/* called before exit: waits for any active disk write and flushes the newest pending snapshot synchronously */
+pub fn flush_state() {
+    if let Some((_, j)) = PENDING.lock().unwrap().take() {
+        write_state(&j);
+    } else {
+        let _g = STATE_LOCK.lock().unwrap();
+    }
+}
 fn write_state(json: &str) {
     let _g = STATE_LOCK.lock().unwrap();
     let f = state_file();
@@ -119,9 +127,12 @@ fn with_desk<T>(f: impl FnOnce(&mut Map<String, Value>) -> T) -> T {
 pub fn get(k: &str) -> Option<Value> { with_desk(|m| m.get(k).cloned()).filter(|v| !v.is_null()) }
 pub fn flag(k: &str) -> bool { get(k).and_then(|v| v.as_bool()).unwrap_or(false) }
 pub fn set(k: &str, v: Value) {
-    let text = with_desk(|m| { m.insert(k.to_string(), v); Value::Object(m.clone()).to_string() });
-    let tmp = desk_file().with_extension("json.tmp");
-    if fs::write(&tmp, text).is_ok() { let _ = fs::rename(&tmp, desk_file()); }
+    with_desk(|m| {
+        m.insert(k.to_string(), v);
+        let text = Value::Object(m.clone()).to_string();
+        let tmp = desk_file().with_extension("json.tmp");
+        if fs::write(&tmp, text).is_ok() { let _ = fs::rename(&tmp, desk_file()); }
+    });
 }
 
 /* a plain file name, never a path */

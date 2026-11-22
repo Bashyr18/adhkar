@@ -104,17 +104,24 @@
     },
     missing: function () {
       if (WEB) return [];
+      if (missingCache) return missingCache;
       var l = AU.all(),
         h = have(l);
-      return l.filter(function (f) {
+      missingCache = l.filter(function (f) {
         return h.indexOf(f.n) < 0;
       });
+      return missingCache;
     }
   });
+  var missingCache = null;
+  AU.invalidate = function () {
+    missingCache = null;
+  };
   /* the bar on screen redraws itself whenever a download lands, so it never shows Download for audio you have */
   AU.refresh = function () {
     var b = document.getElementById('aubar');
-    if (b && P.it && !P.playing && !P.round) b.outerHTML = AU.bar(P.it, b.dataset.cid || '');
+    if (b && P.it && !P.playing && !P.round && b.dataset.state !== 'paused')
+      b.outerHTML = AU.bar(P.it, b.dataset.cid || '');
   };
 
   /* ---------- downloads ---------- */
@@ -146,12 +153,13 @@
     if (all && r.tag === 'all') {
       var pi = all.querySelector('i');
       if (pi) pi.style.width = (r.total ? (r.done / r.total) * 100 : 0) + '%';
-      var tt = all.querySelector('[data-au-all-t]');
+      var tt = document.querySelector('[data-au-all-t]');
       if (tt)
         tt.textContent =
           r.state === 'progress' ? A.T('Downloading') + ' ' + A.fmtN(r.done) + ' / ' + A.fmtN(r.total) : '';
     }
     if (r.state === 'progress') return;
+    missingCache = null;
     var cb = jobs[r.tag];
     delete jobs[r.tag];
     if (r.state === 'error') A.toast('Could not download. Check your connection and try again.', 'info');
@@ -228,6 +236,7 @@
         W.el.pause();
       } catch (e) {}
       W.el.onended = null;
+      W.el.onerror = null;
       W.el = null;
     }
   }
@@ -477,6 +486,7 @@
       function () {
         AU.stop();
         A.N.call('audioDeleteAll');
+        missingCache = null;
         A.rerender();
       },
       true

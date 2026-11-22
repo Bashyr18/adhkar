@@ -20,6 +20,7 @@ pub fn agent_no_redirect() -> &'static ureq::Agent {
 pub fn open(url: &str, ok: &dyn Fn(&str) -> bool) -> Result<ureq::Response, String> {
     let mut u = url.to_string();
     for _ in 0..5 {
+        if u.contains('\\') || u.bytes().any(|b| b <= 0x20 || b == 0x7f) { return Err("invalid url".into()); }
         if !ok(&u) { return Err(format!("host not allowed: {}", host_of(&u))); }
         let r = match agent_no_redirect().get(&u).set("Accept", "application/vnd.github+json, application/octet-stream, */*").call() {
             Ok(r) => r,
@@ -28,8 +29,19 @@ pub fn open(url: &str, ok: &dyn Fn(&str) -> bool) -> Result<ureq::Response, Stri
         };
         let code = r.status();
         if (300..400).contains(&code) {
-            let loc = r.header("Location").ok_or("redirect without a place")?.to_string();
-            u = if loc.starts_with("http") { loc } else { format!("https://{}{}", host_of(&u), loc) };
+            let loc = r.header("Location").ok_or("redirect without a place")?.trim().to_string();
+            if loc.is_empty() || loc.contains('\\') || loc.bytes().any(|b| b <= 0x20 || b == 0x7f) { return Err("invalid redirect".into()); }
+            u = if loc.starts_with("https://") || loc.starts_with("http://") {
+                loc
+            } else if let Some(rest) = loc.strip_prefix("//") {
+                format!("https://{}", rest)
+            } else if loc.starts_with('/') {
+                format!("https://{}{}", host_of(&u), loc)
+            } else {
+                let base = u.split(['?', '#']).next().unwrap_or(&u);
+                let dir = base.rsplit_once('/').map(|x| x.0).unwrap_or(base);
+                format!("{}/{}", dir, loc)
+            };
             continue;
         }
         if code != 200 { return Err(format!("http {}", code)); }
@@ -39,7 +51,9 @@ pub fn open(url: &str, ok: &dyn Fn(&str) -> bool) -> Result<ureq::Response, Stri
 }
 pub fn host_of(u: &str) -> String {
     let rest = u.split_once("://").map(|x| x.1).unwrap_or("");
-    rest.split(['/', '?', '#']).next().unwrap_or("").rsplit('@').next().unwrap_or("").split(':').next().unwrap_or("").to_lowercase()
+    let auth = rest.split(['/', '\\', '?', '#']).next().unwrap_or("");
+    if auth.contains('@') { return String::new(); }
+    auth.split(':').next().unwrap_or("").to_lowercase()
 }
 pub fn text(r: ureq::Response, max: u64) -> Result<String, String> {
     let mut s = String::new();

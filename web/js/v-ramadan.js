@@ -213,7 +213,7 @@
         cells +
         '</div><div class="legend"><span><i style="background:var(--goldh)"></i>Fasted</span><span><i style="background:color-mix(in srgb,var(--rose) 45%,var(--s3))"></i>Break</span><span><i style="background:var(--s3)"></i>Not fasted</span></div><p class="faint small">Days fill in on their own. Tap a day to change it.</p></div>';
     /* taraweeh */
-    var nk = A.now().nightKey,
+    var nk = A.now().nightKey || k,
       tw = r.taraweeh[nk] || 0,
       nights = Object.keys(r.taraweeh).filter(function (x) {
         return x >= A.shift(info.start, -1) && r.taraweeh[x];
@@ -272,7 +272,9 @@
       var ten = '';
       for (var n = 21; n <= info.len; n += 2) {
         var eve = A.shift(info.start, n - 2),
-          past = A.shift(eve, 1) <= k;
+          nextDay = A.shift(eve, 1),
+          tk = S.loc ? A.pday(k) : null,
+          past = nextDay < k || (nextDay === k && (!tk || Date.now() >= tk.fajr));
         ten +=
           '<div class="li"><span class="badge s h-indigo">' +
           ic('moonstar', 's') +
@@ -347,7 +349,7 @@
   };
   A.acts['rm-tw'] = function (el) {
     var r = R(),
-      nk = A.now().nightKey,
+      nk = A.now().nightKey || A.today(),
       v = +el.dataset.v;
     if (r.taraweeh[nk] === v) delete r.taraweeh[nk];
     else r.taraweeh[nk] = v;

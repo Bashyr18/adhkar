@@ -10,8 +10,9 @@
     ic = A.icon;
 
   function sinceText() {
-    var a = S.profile.since.split('-');
-    return A.MONTHS[+a[1] - 1] + ' ' + a[0];
+    var a = String(S.profile.since || '').split('-'),
+      m = A.MONTHS[+a[1] - 1];
+    return m && a[0] ? m + ' ' + a[0] : '';
   }
   /* 14-day sparkline for the Insights preview */
   function spark(tot) {
@@ -56,10 +57,12 @@
     var h =
       '<div class="phead">' +
       A.avatar(96) +
-      '<h1>' +
+      '<h1' +
+      (S.profile.name ? ' class="no-tr"' : '') +
+      '>' +
       esc(S.profile.name || 'Your profile') +
       '</h1><div class="s">Striving since ' +
-      sinceText() +
+      esc(sinceText()) +
       (S.loc ? ' · ' + esc(S.loc.name) : '') +
       '</div><div class="row" style="justify-content:center;margin-top:6px"><button type="button" class="btn sec sm" data-a="edit-profile">' +
       ic('edit', 's') +
@@ -192,7 +195,7 @@
       'Edit profile',
       '<div style="display:grid;place-items:center" id="epA">' +
         A.avatar(84) +
-        '</div><div class="field"><label>Your name</label><input class="input" id="epN" maxlength="40" value="' +
+        '</div><div class="field"><label for="epN">Your name</label><input class="input" id="epN" maxlength="40" value="' +
         esc(S.profile.name) +
         '" autocomplete="given-name"></div><div class="field"><label>Colour</label><div class="row" style="flex-wrap:wrap;gap:10px">' +
         hues
@@ -330,11 +333,15 @@
               '" class="no-tr">العربية</button></div>'
           ),
           '<button type="button" class="set" data-a="theme"><div class="grow"><div class="t">Theme and accent</div><div class="s">' +
-            THEMES.filter(function (x) {
-              return x.v === S.prefs.theme;
-            })[0].t +
+            esc(
+              (
+                THEMES.filter(function (x) {
+                  return x.v === S.prefs.theme;
+                })[0] || THEMES[0]
+              ).t
+            ) +
             ' · ' +
-            (S.prefs.accent || 'gold') +
+            esc(S.prefs.accent || 'gold') +
             '</div></div><span class="faint">' +
             ic('right', 's') +
             '</span></button>',
@@ -366,7 +373,7 @@
             row('Auto-advance', 'Move to the next remembrance when a count is complete', swPref('autoNext')),
             row('Keep screen on', 'While reading and counting', swPref('wake')),
             row('Haptics', 'A gentle tick on every count', swPref('haptics')),
-            A.N.has && S.prefs.count === 'tap'
+            A.N.has && !window.ADHKAR_DESKTOP && S.prefs.count === 'tap'
               ? row('Volume keys count', 'In the reader and the tracker', swPref('volKeys'))
               : ''
           ].filter(Boolean)
@@ -420,16 +427,18 @@
             ic('right', 's') +
             '</a>',
           row('Choose method automatically', 'From your country', A.sw(S.calc.auto, 'calc-auto')),
-          row('Calculation method', '', pick('pick-method', P.METHODS[S.calc.method].name)),
+          row('Calculation method', '', pick('pick-method', (P.METHODS[S.calc.method] || P.METHODS.mwl).name)),
           row('ʿAṣr', 'Shadow length', pick('pick-asr', S.calc.asr === 'hanafi' ? 'Ḥanafī (×2)' : 'Standard (×1)')),
           row(
             'High latitudes',
             'For places where twilight persists',
             pick(
               'pick-highlat',
-              HIGHLAT.filter(function (x) {
-                return x.v === S.calc.highLat;
-              })[0].t
+              (
+                HIGHLAT.filter(function (x) {
+                  return x.v === S.calc.highLat;
+                })[0] || HIGHLAT[0]
+              ).t
             )
           ),
           row(
@@ -529,9 +538,9 @@
             ),
             row(
               'Before sleep',
-              'At ' + N.sleep.at,
+              'At ' + esc(N.sleep.at),
               '<input type="time" class="input time" value="' +
-                N.sleep.at +
+                esc(N.sleep.at) +
                 '" data-sleep-at aria-label="Sleep reminder time">' +
                 A.sw(N.sleep.on, 'notif-on', ' data-k="sleep"')
             ),
@@ -615,7 +624,7 @@
                       ic('right', 's') +
                       '</button>'
                   ].concat(
-                    A.N.has
+                    A.N.has && !window.ADHKAR_DESKTOP
                       ? [
                           row(
                             'Also over other apps',
@@ -630,32 +639,34 @@
                 : []
             )
           ) +
-          group(
-            'During ṣalāh',
-            A.N.has
-              ? [
-                  row('Silence my phone', 'From the iqāmah. Alarms still ring.', A.sw(S.silence.on, 'silence-on'))
-                ].concat(
-                  S.silence.on
-                    ? [
-                        A.N.call('dndOk') === false
-                          ? '<button type="button" class="set" data-a="dnd-access"><span class="badge h-sand">' +
-                            ic('shield', 's') +
-                            '</span><div class="grow"><div class="t">Allow Do Not Disturb access</div><div class="s">One-time permission</div></div>' +
-                            ic('right', 's') +
-                            '</button>'
-                          : '',
-                        row('For', 'Minutes from the iqāmah', A.stepper(S.silence.min, 'silence-min')),
-                        row(
-                          'On Friday at Ḍhuhr',
-                          'Jumuʿah: khuṭbah and prayer',
-                          A.stepper(S.silence.jumuah, 'silence-jum')
-                        )
-                      ].filter(Boolean)
-                    : []
-                )
-              : [row('Silence my phone', 'Available in the Android app', '')]
-          ) +
+          (window.ADHKAR_DESKTOP
+            ? ''
+            : group(
+                'During ṣalāh',
+                A.N.has
+                  ? [
+                      row('Silence my phone', 'From the iqāmah. Alarms still ring.', A.sw(S.silence.on, 'silence-on'))
+                    ].concat(
+                      S.silence.on
+                        ? [
+                            A.N.call('dndOk') === false
+                              ? '<button type="button" class="set" data-a="dnd-access"><span class="badge h-sand">' +
+                                ic('shield', 's') +
+                                '</span><div class="grow"><div class="t">Allow Do Not Disturb access</div><div class="s">One-time permission</div></div>' +
+                                ic('right', 's') +
+                                '</button>'
+                              : '',
+                            row('For', 'Minutes from the iqāmah', A.stepper(S.silence.min, 'silence-min')),
+                            row(
+                              'On Friday at Ḍhuhr',
+                              'Jumuʿah: khuṭbah and prayer',
+                              A.stepper(S.silence.jumuah, 'silence-jum')
+                            )
+                          ].filter(Boolean)
+                        : []
+                    )
+                  : [row('Silence my phone', 'Available in the Android app', '')]
+              )) +
           group('Sunnah', [
             row('Ḍuḥā window opens', '', A.sw(N.duha.on, 'notif-on', ' data-k="duha"')),
             row(
@@ -672,12 +683,16 @@
       ];
     },
     device: function () {
-      if (!A.N.has)
+      if (!A.N.has || window.ADHKAR_DESKTOP)
         return [
           'Widgets & device',
           '<div class="empty card"><div class="badge h-teal">' +
             ic('widget') +
-            '</div><h3>Available in the Android app</h3><p>Home-screen widgets, quick-settings tile, app shortcuts, volume-key counting and native reminders come with the installed app.</p></div>'
+            '</div><h3>Available in the Android app</h3><p>Home-screen widgets, quick-settings tile, app shortcuts, volume-key counting and native phone controls come with the Android app.</p>' +
+            (window.ADHKAR_DESKTOP
+              ? '<a class="btn pri sm" href="#/desk/pc" style="margin-top:10px">This computer</a>'
+              : '') +
+            '</div>'
         ];
       return [
         'Widgets & device',
@@ -769,12 +784,12 @@
               '</a>'
           ]) +
           '<div class="card"><div class="eyebrow">Please note</div><p class="muted small" style="margin-top:8px">Transliteration and translations are aids. Learn the wording from a teacher.</p></div>' +
-          '<div class="card col"><div class="eyebrow">Privacy</div><p class="muted small">No accounts, ads or tracking. Everything stays on your phone.</p></div>'
+          '<div class="card col"><div class="eyebrow">Privacy</div><p class="muted small">No accounts, ads or tracking. Everything stays on your device.</p></div>'
       ];
     }
   });
   A.V.settings = function (a) {
-    var sec = SECTIONS[a[0]] ? a[0] : 'appearance',
+    var sec = Object.prototype.hasOwnProperty.call(SECTIONS, a[0]) ? a[0] : 'appearance',
       r = SECTIONS[sec]();
     return {
       html:
