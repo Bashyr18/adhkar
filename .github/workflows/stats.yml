@@ -22,10 +22,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # a release run would check out its tag (no branch to commit to): always work on main
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: main
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - name: Count the downloads
