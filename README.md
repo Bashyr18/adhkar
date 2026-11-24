@@ -208,6 +208,16 @@ python -I tools/build_windows.py        # bundles web/ and builds dist/Adhkar-Wi
 
 The crates are pinned by `windows/Cargo.lock`. WebView2 is part of Windows; the app carries everything else in one file. `WIN_OUT=<path>` builds elsewhere, for when the app is running.
 
+### iOS
+
+On macOS with Xcode, XcodeGen (`brew install xcodegen`), `ffmpeg`, Python 3 with Pillow, and the Node tools (`tools/.node`):
+
+```bash
+python -I tools/build_ios.py --test     # stages web/, generates ios/Adhkar.xcodeproj, runs AdhkarTests, builds dist/Adhkar-iOS-unsigned.ipa
+```
+
+You can also run `python -I tools/build_ios.py --stage-only` on Windows or Linux to stage the web bundle, icon and notification sounds, or let the `ios` job in `.github/workflows/test.yml` compile and test it on a GitHub Actions macOS runner and publish `Adhkar-iOS-unsigned.ipa` as a build artifact.
+
 ### The guide and these pictures
 
 ```bash
@@ -249,6 +259,7 @@ All of them run on every push and pull request.
 | `web/js/desk.js`, `web/desk.css` | The computer's layer: the rail, the day band, layouts, Ctrl K, print, the pill |
 | `web/js/data.js`, `hadith.js`, `kahf.js` | **Generated** religious text. Never edit these; edit the build scripts |
 | `android/` | The Android shell: a locked-down WebView, reminders, widgets, the tile, updates. No libraries |
+| `ios/` | The iOS shell, in Swift: `WKWebView` over a custom scheme, `UNUserNotificationCenter` prayer reminders, CoreLocation + Qibla compass, `AVAudioPlayer` recitations, backup import/export, `shim.js` (the page's bridge), `project.yml` (XcodeGen) |
 | `windows/` | The Windows shell, in Rust: `app/` (WebView2, the record and backups, PDF, the tray, reminders, the pill, updates), `setup/` (the installer and its window), `common/` (installing, shared Windows plumbing), `shim.js` (the page's bridge) |
 | `docs/guide/` | The illustrated guide, published with GitHub Pages |
 | `tools/` | Content builders, tests, screenshots, packers; `tools/promo/` the films |

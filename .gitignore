@@ -25,3 +25,10 @@ tools/src/adhan-dl/
 
 # Rust build output (windows/)
 windows/target/
+
+# Generated Xcode project (rebuilt from ios/project.yml by tools/build_ios.py)
+ios/Adhkar.xcodeproj/
+ios/*.xcworkspace/
+
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+/graft/

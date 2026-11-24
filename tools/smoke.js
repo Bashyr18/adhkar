@@ -1479,6 +1479,100 @@ ok(/Ramaḍān Mubārak/.test(rt), 'Ramaḍān greeting in Ramaḍān');
   w.close();
 }
 
+{
+  /* iOS shim & UI: boots the app with ios/shim.js under adhkar-app://app and verifies bridge calls and iOS-specific settings */
+  const iosShimSrc = fs.readFileSync(path.join(ROOT, 'ios/shim.js'), 'utf8');
+  const html = fs.readFileSync(path.join(WEB, 'index.html'), 'utf8').replace(/<script src="[^"]+"><\/script>\n/g, '');
+  const posted = [],
+    prompted = [];
+  const dom = new JSDOM(html, {
+    runScripts: 'outside-only',
+    pretendToBeVisual: true,
+    url: 'adhkar-app://app/index.html#/'
+  });
+  const w = dom.window;
+  w.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {} });
+  w.IntersectionObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+  w.ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+  w.HTMLElement.prototype.scrollIntoView = function () {};
+  w.scrollTo = () => {};
+  w.HTMLCanvasElement.prototype.getContext = () => null;
+  w.webkit = {
+    messageHandlers: {
+      adhkar: {
+        postMessage(msg) {
+          posted.push(msg);
+        }
+      }
+    }
+  };
+  w.prompt = (key, def) => {
+    prompted.push([key, def]);
+    if (key === '__adhkar__:version') return JSON.stringify({ r: '13.8' });
+    if (key === '__adhkar__:updateCan') return JSON.stringify({ r: '' });
+    if (key === '__adhkar__:notificationState')
+      return JSON.stringify({ r: '{"granted":true,"exact":true,"nextAt":0}' });
+    if (key === '__adhkar__:audioHave') return JSON.stringify({ r: '[]' });
+    if (key === '__adhkar__:audioUsage') return JSON.stringify({ r: 0 });
+    if (key === '__adhkar__:overlayOk' || key === '__adhkar__:dndOk' || key === '__adhkar__:batteryOk')
+      return JSON.stringify({ r: true });
+    return JSON.stringify({ r: null });
+  };
+  const mem = {};
+  Object.defineProperty(w, 'localStorage', {
+    value: {
+      getItem: (k) => (k in mem ? mem[k] : null),
+      setItem: (k, v) => {
+        mem[k] = String(v);
+      },
+      removeItem: (k) => {
+        delete mem[k];
+      }
+    }
+  });
+  w.localStorage.setItem('adhkar.v10', JSON.stringify(settled));
+  w.eval(iosShimSrc);
+  const order = [
+    ...fs.readFileSync(path.join(WEB, 'index.html'), 'utf8').matchAll(/<script src="([^"]+)"><\/script>/g)
+  ].map((m) => m[1]);
+  for (const src of order) w.eval(fs.readFileSync(path.join(WEB, src), 'utf8'));
+  w.A.S.notif.enabled = true;
+  w.A.S.prefs.nudge.on = true;
+  const reading = w.A.V.settings(['reading']).html;
+  const notifs = w.A.V.settings(['notifications']).html;
+  const device = w.A.V.settings(['device']).html;
+  const fri = w.A.V.jumuah().html;
+  ok(
+    w.ADHKAR_IOS === true && w.document.documentElement.classList.contains('is-ios'),
+    'iOS shim marks the page as iOS'
+  );
+  ok(w.A.N.version() === '13.8', 'iOS shim resolves synchronous version via prompt bridge');
+  ok(!/Volume keys count/.test(reading), 'iOS hides Android volume-key counting option');
+  ok(
+    !/Also over other apps/.test(notifs) && !/Silence my phone/.test(notifs),
+    'iOS hides Android overlay and DND controls'
+  );
+  ok(
+    /Test haptics/.test(device) && !/Quick settings tile/.test(device),
+    'iOS device settings show haptics without Android tiles'
+  );
+  ok(!/The hour, over other apps/.test(fri), 'iOS Jumuʿah screen hides Android overlay toggle');
+  w.A.N.haptic('tick');
+  ok(
+    posted.some((m) => m.fn === 'haptic'),
+    'iOS async bridge calls go through WKScriptMessageHandler'
+  );
+  w.close();
+}
+
 setTimeout(function () {
   ok(global.__arEnv.w.__arCheck(), 'the reader is translated in Arabic mode');
   console.log('smoke: ' + pass + ' passed, ' + fail + ' failed');
