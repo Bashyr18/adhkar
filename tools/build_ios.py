@@ -133,12 +133,13 @@ def pick_simulator_destination():
             continue
         for dev in devices:
             if dev.get('isAvailable') and 'iPhone' in dev.get('name', ''):
-                candidates.append((runtime, dev['udid'], dev['name']))
+                # Prefer iOS-18 runtime when present (matches Xcode 16 SDK & boots fastest on Intel)
+                pref = 0 if 'iOS-18' in runtime else 1
+                candidates.append((pref, runtime, dev['udid'], dev['name']))
     if not candidates:
         return 'generic/platform=iOS Simulator'
-    # Prefer newest iOS runtime
-    candidates.sort(key=lambda x: x[0], reverse=True)
-    _, udid, name = candidates[0]
+    candidates.sort(key=lambda x: (x[0], x[1]))
+    _, _, udid, name = candidates[0]
     print('simulator:', name, f'({udid})')
     return f'platform=iOS Simulator,id={udid}'
 
@@ -160,6 +161,7 @@ def run_tests(vname, vcode):
         '-configuration', 'Debug',
         '-destination', dest,
         '-derivedDataPath', derived,
+        '-parallel-testing-enabled', 'NO',
         f'MARKETING_VERSION={vname}',
         f'CURRENT_PROJECT_VERSION={vcode}',
         'CODE_SIGN_IDENTITY=-',

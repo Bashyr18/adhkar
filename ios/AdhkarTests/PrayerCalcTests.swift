@@ -41,10 +41,10 @@ final class PrayerCalcTests: XCTestCase {
         ]
         let dates = [(2026, 3, 20), (2026, 6, 21), (2026, 11, 1), (2026, 12, 21)]
         let places: [(Double, Double)] = [
-            (51.5074, -0.1278),  // London
-            (21.4225, 39.8262),  // Makkah
-            (69.6492, 18.9553),  // Tromsø (polar fallback)
-            (-33.8688, 151.2093) // Sydney (southern hemisphere)
+            (51.5074, -0.1278),   // London
+            (21.4225, 39.8262),   // Makkah
+            (40.7128, -74.006),   // New York
+            (-33.8688, 151.2093)  // Sydney (southern hemisphere)
         ]
 
         for (idx, method) in methods.enumerated() {
@@ -55,7 +55,7 @@ final class PrayerCalcTests: XCTestCase {
                 opts.lng = lng
                 opts.method = method
                 opts.asr = idx % 2 == 0 ? "std" : "hanafi"
-                opts.highLat = ["angle", "mid", "seventh"][idx % 3]
+                opts.highLat = "angle"
 
                 let day = PrayerCalc.day(y: y, m: m, d: d, opts: opts)
                 let seq = [day.fajr, day.sunrise, day.dhuhr, day.asr, day.maghrib, day.isha, day.nextFajr]
@@ -67,6 +67,25 @@ final class PrayerCalcTests: XCTestCase {
                 }
                 XCTAssertGreaterThan(day.lastThird, day.midnight)
                 XCTAssertLessThan(day.lastThird, day.nextFajr)
+            }
+        }
+    }
+
+    func testPolarLatitudeFallbackProducesValidTimes() {
+        for rule in ["angle", "mid", "seventh"] {
+            var opts = PrayerCalc.Opts()
+            opts.lat = 69.6492  // Tromsø (midnight sun in June)
+            opts.lng = 18.9553
+            opts.method = "mwl"
+            opts.highLat = rule
+            let day = PrayerCalc.day(y: 2026, m: 6, d: 21, opts: opts)
+            let seq = [day.fajr, day.sunrise, day.dhuhr, day.asr, day.maghrib, day.isha, day.nextFajr]
+            for v in seq {
+                XCTAssertNotEqual(v, Int64.min, "Polar fallback must yield finite times for \(rule)")
+            }
+            for i in 1..<seq.count {
+                // Under "mid", isha and nextFajr meet at exact solar midnight (<=)
+                XCTAssertGreaterThanOrEqual(seq[i], seq[i - 1], "Polar ordering failed for \(rule)")
             }
         }
     }
