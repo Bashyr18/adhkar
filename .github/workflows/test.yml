@@ -82,7 +82,7 @@ jobs:
             dist/Adhkar-Setup.exe
 
   ios:
-    runs-on: macos-latest
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
