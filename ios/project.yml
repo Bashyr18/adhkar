@@ -1,0 +1,64 @@
+name: Adhkar
+options:
+  bundleIdPrefix: com.adhkar
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+  defaultConfig: Release
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    IPHONEOS_DEPLOYMENT_TARGET: "16.0"
+    TARGETED_DEVICE_FAMILY: "1,2"
+    SUPPORTS_MACCATALYST: NO
+    CLANG_ENABLE_MODULES: YES
+    ENABLE_USER_SCRIPT_SANDBOXING: NO
+
+targets:
+  Adhkar:
+    type: application
+    platform: iOS
+    sources:
+      - path: Adhkar/Sources
+      - path: Adhkar/Assets.xcassets
+      - path: Adhkar/LaunchScreen.storyboard
+      - path: shim.js
+        buildPhase: resources
+      - path: ../build/ios/www
+        type: folder
+        buildPhase: resources
+      - path: ../build/ios/resources/adhan_takbir.caf
+        buildPhase: resources
+      - path: ../build/ios/resources/tap.caf
+        buildPhase: resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.adhkar.app
+        PRODUCT_NAME: Adhkar
+        DISPLAY_NAME: Adhkār
+        INFOPLIST_FILE: Adhkar/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        MARKETING_VERSION: "13.8"
+        CURRENT_PROJECT_VERSION: "40"
+        DEAD_CODE_STRIPPING: YES
+      configs:
+        Debug:
+          ENABLE_TESTABILITY: YES
+    scheme:
+      testTargets:
+        - AdhkarTests
+
+  AdhkarTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: AdhkarTests
+    dependencies:
+      - target: Adhkar
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: com.adhkar.app.tests
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Adhkar.app/Adhkar"
+        BUNDLE_LOADER: "$(TEST_HOST)"

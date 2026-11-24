@@ -373,7 +373,7 @@
             row('Auto-advance', 'Move to the next remembrance when a count is complete', swPref('autoNext')),
             row('Keep screen on', 'While reading and counting', swPref('wake')),
             row('Haptics', 'A gentle tick on every count', swPref('haptics')),
-            A.N.has && !window.ADHKAR_DESKTOP && S.prefs.count === 'tap'
+            A.N.has && !window.ADHKAR_DESKTOP && !window.ADHKAR_IOS && S.prefs.count === 'tap'
               ? row('Volume keys count', 'In the reader and the tracker', swPref('volKeys'))
               : ''
           ].filter(Boolean)
@@ -645,7 +645,7 @@
                       ic('right', 's') +
                       '</button>'
                   ].concat(
-                    A.N.has && !window.ADHKAR_DESKTOP
+                    A.N.has && !window.ADHKAR_DESKTOP && !window.ADHKAR_IOS
                       ? [
                           row(
                             'Also over other apps',
@@ -660,7 +660,7 @@
                 : []
             )
           ) +
-          (window.ADHKAR_DESKTOP
+          (window.ADHKAR_DESKTOP || window.ADHKAR_IOS
             ? ''
             : group(
                 'During ṣalāh',
@@ -704,6 +704,17 @@
       ];
     },
     device: function () {
+      if (window.ADHKAR_IOS)
+        return [
+          'Widgets & device',
+          group('Feedback', [
+            row('Haptics', '', swPref('haptics')),
+            row('Keep screen on', 'While reading and counting', swPref('wake')),
+            '<button type="button" class="set" data-a="haptic-test"><div class="grow"><div class="t">Test haptics</div></div>' +
+              ic('vib', 's') +
+              '</button>'
+          ])
+        ];
       if (!A.N.has || window.ADHKAR_DESKTOP)
         return [
           'Widgets & device',

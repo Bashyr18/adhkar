@@ -495,13 +495,16 @@
       '</div></div><div class="ctl">' +
       A.sw(N.enabled && N.friday && N.friday.on, 'fr-notif') +
       '</div></div>' +
-      '<div class="set"><div class="grow"><div class="t">' +
-      esc(A.T('The hour, over other apps')) +
-      '</div><div class="s">' +
-      esc(A.T('A card on screen when the last hour begins')) +
-      '</div></div><div class="ctl">' +
-      A.sw(j.overlay, 'fr-ov') +
-      '</div></div></div></div>';
+      (window.ADHKAR_IOS
+        ? ''
+        : '<div class="set"><div class="grow"><div class="t">' +
+          esc(A.T('The hour, over other apps')) +
+          '</div><div class="s">' +
+          esc(A.T('A card on screen when the last hour begins')) +
+          '</div></div><div class="ctl">' +
+          A.sw(j.overlay, 'fr-ov') +
+          '</div></div>') +
+      '</div></div>';
     return {
       html: h,
       title: A.T('Jumuʿah'),

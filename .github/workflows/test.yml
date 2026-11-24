@@ -6,6 +6,7 @@ on:
     paths-ignore:
       - 'docs/guide/stats.json'
   pull_request:
+  workflow_dispatch:
 
 jobs:
   test:
@@ -25,7 +26,7 @@ jobs:
       - name: Install the Node tools
         run: cd tools/.node && npm ci
       - name: Formatting
-        run: tools/.node/node_modules/.bin/prettier --check "web/js/*.js" "web/*.css" "tools/*.js"
+        run: tools/.node/node_modules/.bin/prettier --check "web/js/*.js" "web/*.css" "tools/*.js" "ios/shim.js"
       - name: Build the content
         run: |
           python tools/build_content.py
@@ -35,7 +36,7 @@ jobs:
         run: node tools/test.js
       - name: Interface tests
         run: node tools/smoke.js
-      - name: Android and Windows bridges match
+      - name: Android, Windows and iOS bridges match
         run: node tools/bridge-check.js
 
   windows:
@@ -79,3 +80,33 @@ jobs:
           path: |
             dist/Adhkar-Windows.exe
             dist/Adhkar-Setup.exe
+
+  ios:
+    runs-on: macos-15-intel
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install the tools
+        run: |
+          cd tools/.node
+          npm ci
+          cd ../..
+          pip install pillow
+          brew install xcodegen ffmpeg
+      - name: Build the content
+        run: |
+          python tools/build_content.py
+          python tools/build_hadith.py
+          python tools/build_kahf.py
+      - name: Build and test the iOS app
+        run: python -I tools/build_ios.py --test
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Adhkar-iOS
+          path: |
+            dist/Adhkar-iOS-unsigned.ipa
