@@ -1514,9 +1514,10 @@ ok(/Ramaḍān Mubārak/.test(rt), 'Ramaḍān greeting in Ramaḍān');
       }
     }
   };
+  const curVer = fs.readFileSync(path.join(ROOT, 'VERSION'), 'utf8').trim().split(/\r?\n/)[0];
   w.prompt = (key, def) => {
     prompted.push([key, def]);
-    if (key === '__adhkar__:version') return JSON.stringify({ r: '13.8' });
+    if (key === '__adhkar__:version') return JSON.stringify({ r: curVer });
     if (key === '__adhkar__:updateCan') return JSON.stringify({ r: '' });
     if (key === '__adhkar__:notificationState')
       return JSON.stringify({ r: '{"granted":true,"exact":true,"nextAt":0}' });
@@ -1554,7 +1555,7 @@ ok(/Ramaḍān Mubārak/.test(rt), 'Ramaḍān greeting in Ramaḍān');
     w.ADHKAR_IOS === true && w.document.documentElement.classList.contains('is-ios'),
     'iOS shim marks the page as iOS'
   );
-  ok(w.A.N.version() === '13.8', 'iOS shim resolves synchronous version via prompt bridge');
+  ok(w.A.N.version() === curVer, 'iOS shim resolves synchronous version via prompt bridge');
   ok(!/Volume keys count/.test(reading), 'iOS hides Android volume-key counting option');
   ok(
     !/Also over other apps/.test(notifs) && !/Silence my phone/.test(notifs),

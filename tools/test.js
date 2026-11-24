@@ -34,14 +34,19 @@ const mins = (s) => +s.slice(0, 2) * 60 + +s.slice(3);
   });
 }
 /* the version is defined once */
-ok(
-  /^\d+\.\d+\n\d+\n?$/.test(fs.readFileSync(path.join(ROOT, 'VERSION'), 'utf8').replace(/\r/g, '')),
-  'VERSION holds a name and a code'
-);
+const [vName, vCode] = fs.readFileSync(path.join(ROOT, 'VERSION'), 'utf8').replace(/\r/g, '').trim().split('\n');
+ok(/^\d+\.\d+$/.test(vName) && /^\d+$/.test(vCode), 'VERSION holds a name and a code');
 ok(
   !/versionCode|versionName/.test(fs.readFileSync(path.join(ROOT, 'android/AndroidManifest.xml'), 'utf8')),
   'the manifest does not carry its own version'
 );
+{
+  const yml = fs.readFileSync(path.join(ROOT, 'ios/project.yml'), 'utf8');
+  ok(
+    yml.includes('MARKETING_VERSION: "' + vName + '"') && yml.includes('CURRENT_PROJECT_VERSION: "' + vCode + '"'),
+    'ios/project.yml matches VERSION (' + vName + ' / ' + vCode + ')'
+  );
+}
 /* the Arabic dictionary has one entry per English string */
 {
   const src = fs.readFileSync(path.join(ROOT, 'web/js/i18n.js'), 'utf8'),
