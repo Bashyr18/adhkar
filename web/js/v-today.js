@@ -34,10 +34,11 @@
       return out[0] || null;
     }
     var t = n.t,
-      now = n.now;
+      now = n.now,
+      starts = A.sessionStarts(t);
     if (!A.isExcused(k) && n.cur && n.prev.key === k && now - t[n.cur] < 40 * MIN && now - t[n.cur] > 4 * MIN)
       sess('salah', n.cur, 'The remembrance after the obligatory prayer');
-    if (now >= t.fajr && now < t.dhuhr)
+    if (now >= starts.morning && now < t.dhuhr)
       sess('morning', null, now < t.sunrise ? 'The best time is now, before sunrise at ' + A.fmtTxt(t.sunrise) : null);
     if (now >= t.duhaStart && now < t.duhaEnd && !S.duha[k])
       out.push({
@@ -48,7 +49,7 @@
         icon: 'sun',
         frac: 0
       });
-    if (now >= t.asr && now < t.isha)
+    if (now >= starts.evening && now < t.isha)
       sess('evening', null, now < t.maghrib ? 'Before sunset, ' + A.fmtDur(t.maghrib - now, true) + ' left' : null);
     var nk = n.nightKey,
       nn = n.night;
@@ -83,9 +84,10 @@
         href: href || '#/c/' + cid
       };
     };
-    if (now >= t.dhuhr && now < t.asr) return open('evening', t.asr, 'dusk', 'sunset');
+    var starts = A.sessionStarts(t);
+    if (now >= t.dhuhr && now < starts.evening) return open('evening', starts.evening, 'dusk', 'sunset');
     if (now >= t.isha && now < t.isha + 30 * MIN) return open('sleep', t.isha + 30 * MIN, 'night', 'bed');
-    if (now < t.fajr && now >= t.fajr - 60 * MIN) return open('morning', t.fajr, 'dawn', 'sunrise');
+    if (now < starts.morning && now >= t.fajr - 60 * MIN) return open('morning', starts.morning, 'dawn', 'sunrise');
     return null;
   }
 
@@ -242,7 +244,8 @@
         '<div class="eyebrow" style="margin-bottom:10px">Today’s prayers</div><div class="pdots">' +
         A.PRAYERS.map(function (p) {
           var due = n.t && n.t[p] <= n.now,
-            on = !!pr[p];
+            on = !!pr[p],
+            name = A.pName(p, k);
           return (
             '<button type="button" class="pdot' +
             (on ? ' on' : due ? ' due' : ' later') +
@@ -251,16 +254,28 @@
             '" aria-pressed="' +
             on +
             '" aria-label="' +
-            P.NAMES[p] +
+            esc(name) +
             (on ? ' prayed' : '') +
             '"><b>' +
             ic('check', 'xs') +
             '</b><span>' +
-            P.NAMES[p] +
+            esc(name) +
             '</span></button>'
           );
         }).join('') +
         '</div>';
+      var recent = A.PRAYERS.reduce(function (latest, p) {
+        return (pr[p] || 0) > (pr[latest] || 0) ? p : latest;
+      }, '');
+      if (recent && n.now >= pr[recent] && n.now - pr[recent] < 20 * MIN && !d.salah[recent])
+        h +=
+          '<a class="btn sec sm" style="margin-top:10px" href="#/r/salah/' +
+          A.firstOpen(k, 'salah', recent) +
+          '/' +
+          recent +
+          '">' +
+          esc(A.T('Start after-prayer adhkār')) +
+          '</a>';
     } else {
       h +=
         '<div style="font-weight:700;font-size:16px">' +
@@ -305,7 +320,6 @@
       el.classList.toggle('on', on);
       el.setAttribute('aria-pressed', on);
     }
-    if (on && !A.progress(k, 'salah', p).complete) A.toast('Next: the adhkār after ' + P.NAMES[p], 'mosque');
   };
   function quick() {
     var items = [

@@ -1262,23 +1262,30 @@
       } catch (e) {}
       return;
     }
-    [todayKey, A.shift(todayKey, 1)].forEach(function (key) {
+    [A.shift(todayKey, -1), todayKey, A.shift(todayKey, 1)].forEach(function (key) {
       var t = A.pday(key);
       if (!t) return;
-      var plan = S.fastPlan && S.fastPlan[A.shift(key, 1)];
-      if (plan && isFinite(t.maghrib))
+      if (!N.enabled) return;
+      var tomorrow = A.shift(key, 1),
+        plan = S.fastPlan && S.fastPlan[tomorrow];
+      if (plan && !exc && !A.noFastDay(A.hijri(tomorrow)) && isFinite(t.maghrib))
         out.push({
           t: t.maghrib,
           title: L('Tomorrow you plan to fast', 'غدًا تنوي الصيام'),
           body: L('Make your intention tonight, and eat suhūr before Fajr', 'انوِ الليلة، وتسحّر قبل الفجر'),
           route: 'calendar'
         });
-      if (!N.enabled) return;
-      var smart = N.smart !== false && key === todayKey,
-        dd = smart ? A.dayDone(key) : {};
-      if (A.dow(key) === 5 && N.friday && N.friday.on) {
+      var smart = N.smart !== false && key <= todayKey,
+        dd = smart ? A.dayDone(key) : {},
+        jn = S.journal.nudge,
+        openDua = S.journal.items.find(function (d) {
+          return d && !d.done && d.text;
+        }),
+        jFri = !!(openDua && jn.friday),
+        friday = !!(N.friday && N.friday.on);
+      if (A.dow(key) === 5 && (friday || jFri)) {
         var fr = (S.jumuah && S.jumuah.days && S.jumuah.days[key]) || {};
-        if (!fr.kahf && isFinite(t.sunrise))
+        if (friday && !fr.kahf && isFinite(t.sunrise))
           out.push({
             t: t.sunrise + 120 * 60000,
             title: L('Yawm al-Jumuʿah', 'يوم الجمعة'),
@@ -1289,8 +1296,10 @@
           out.push({
             t: t.maghrib - 60 * 60000,
             title: L('The hour of response', 'ساعة الإجابة'),
-            body: L('The last hour before Maghrib on Friday. Make duʿāʾ.', 'آخر ساعة قبل مغرب الجمعة، فادعُ الله.'),
-            route: 'jumuah',
+            body: jFri
+              ? openDua.text.slice(0, 120)
+              : L('The last hour before Maghrib on Friday. Make duʿāʾ.', 'آخر ساعة قبل مغرب الجمعة، فادعُ الله.'),
+            route: jFri ? 'journal' : 'jumuah',
             hour: true
           });
       }
@@ -1341,10 +1350,6 @@
           body: L('Open until ', 'يمتد الوقت إلى ') + A.fmtTxt(t.duhaEnd),
           route: 'duha'
         });
-      var jn = (S.journal && S.journal.nudge) || {},
-        openDua = ((S.journal && S.journal.items) || []).filter(function (d) {
-          return d && !d.done && d.text;
-        })[0];
       var jNight = !!(jn.night && openDua);
       if (((N.night && N.night.on) || jNight) && isFinite(t.lastThird) && isFinite(t.nextFajr))
         out.push({
@@ -1369,7 +1374,7 @@
             route: 'ramadan'
           });
         var imsakMs = (S.prefs.imsak || 0) * 60000;
-        if (N.ramadan.suhoor && isFinite(t.fajr))
+        if (N.ramadan.suhoor && !exc && isFinite(t.fajr))
           out.push({
             t: t.fajr - imsakMs - (N.ramadan.suhoorMin || 45) * 60000,
             title: L('Suhūr', 'السحور'),
@@ -1444,17 +1449,7 @@
 
   /* ================= files: a backup dropped on the window ================= */
   Desk.onFile = function (text) {
-    A.confirm(
-      L('Bring in this backup?', 'استيراد هذه النسخة؟'),
-      L(
-        'Your record on this computer is replaced by the one in the file. Today’s copy stays in Backups.',
-        'يُستبدل سجلك على هذا الحاسوب بما في الملف. وتبقى نسخة اليوم في النسخ الاحتياطية.'
-      ),
-      L('Bring it in', 'استورد'),
-      function () {
-        window.__native.onImport(text);
-      }
-    );
+    window.__native.onImport(text);
   };
   Desk.onFull = function (on) {
     document.documentElement.classList.toggle('dk-full', on);
@@ -1866,18 +1861,8 @@
           if (f) return B.openFolder(f.dataset.folder);
           var r = e.target.closest('[data-restore]');
           if (r) {
-            var name = r.dataset.restore;
-            A.confirm(
-              L('Restore this copy?', 'استعادة هذه النسخة؟'),
-              L('Your record goes back to how it was on ', 'يعود سجلك إلى ما كان عليه في ') +
-                A.fmtDate(name, 'long') +
-                L('. Today’s copy stays in Backups.', '. وتبقى نسخة اليوم في النسخ الاحتياطية.'),
-              L('Restore', 'استعد'),
-              function () {
-                var t = B.backup(name);
-                if (t) window.__native.onImport(t);
-              }
-            );
+            var t = B.backup(r.dataset.restore);
+            if (t) window.__native.onImport(t);
           }
         });
       }

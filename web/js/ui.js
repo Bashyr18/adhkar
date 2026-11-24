@@ -358,7 +358,7 @@
   /* ================= sheet ================= */
   var sheetStack = [],
     sheetSeq = 0;
-  function trapFocus(root, e) {
+  A.trapFocus = function (root, e) {
     if (e.key !== 'Tab') return;
     var els = Array.prototype.slice
       .call(
@@ -372,14 +372,14 @@
     if (!els.length) return;
     var first = els[0],
       last = els[els.length - 1];
-    if (e.shiftKey && document.activeElement === first) {
+    if (e.shiftKey && (document.activeElement === first || document.activeElement === root)) {
       e.preventDefault();
       last.focus();
     } else if (!e.shiftKey && document.activeElement === last) {
       e.preventDefault();
       first.focus();
     }
-  }
+  };
   A.sheet = function (title, body, opts) {
     opts = opts || {};
     var prevFocus = document.activeElement,
@@ -405,7 +405,11 @@
     document.body.appendChild(scrim);
     document.body.appendChild(sh);
     var onKey = function (e) {
-      trapFocus(sh, e);
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopPropagation();
+        o.close();
+      } else A.trapFocus(sh, e);
     };
     sh.addEventListener('keydown', onKey);
     var o = {
@@ -1285,8 +1289,14 @@
   /* only what is on top can be reached by a screen reader: the page and the bar step back behind a sheet or the
      reader, and the bar steps out on full-screen pages */
   A.syncLayers = function () {
-    var over = !!sheetStack.length || A.readerOpen(),
+    var reader = $('.reader:not(.out)'),
+      over = !!sheetStack.length || A.readerOpen(),
       bare = nav.classList.contains('hide');
+    if (reader) {
+      reader.inert = !!sheetStack.length;
+      if (reader.inert) reader.setAttribute('aria-hidden', 'true');
+      else reader.removeAttribute('aria-hidden');
+    }
     app.inert = over;
     nav.inert = over || bare;
     if (over || bare) nav.setAttribute('aria-hidden', 'true');

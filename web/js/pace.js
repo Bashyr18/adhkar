@@ -319,6 +319,9 @@
     say(el, A.T('Paused'));
     emit('pause');
   }
+  P.pause = function () {
+    if (run && !run.paused) pause(run.el);
+  };
   /* after a pause you begin again at the normal pace: the speed your taps had built up is let go, and only what
      you tap from here on teaches the pace. The current count starts afresh. */
   function resume(el) {

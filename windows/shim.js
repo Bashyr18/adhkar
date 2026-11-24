@@ -34,7 +34,7 @@
     startCompass: 1,
     stopCompass: 1
   };
-  var KEEP = { version: 1, updateCan: 1, overlayOk: 1, dndOk: 1, batteryOk: 1, notificationState: 1 },
+  var KEEP = { version: 1, updateCan: 1, overlayOk: 1, dndOk: 1, batteryOk: 1 },
     kept = {},
     seq = 0;
   function call(fn, args, mustWait) {
@@ -109,6 +109,7 @@
     'requestLocation',
     'requestNotifications',
     'notificationState',
+    'testReminder',
     'exportFile',
     'importFile',
     'printPage',

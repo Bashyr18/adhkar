@@ -75,17 +75,29 @@ final class Store {
         } catch (Throwable t) { return ""; }
     }
 
-    /** Hijri month (1–12) of a civil date, with the user's adjustment */
-    static int hijriMonth(JSONObject cfg, int y, int m, int d) {
-        try {
+    private static android.icu.util.IslamicCalendar hijriDate(JSONObject cfg, int y, int m, int d) {
             android.icu.util.IslamicCalendar ic = new android.icu.util.IslamicCalendar();
             ic.setCalculationType(android.icu.util.IslamicCalendar.CalculationType.ISLAMIC_UMALQURA);
             ic.setTimeZone(android.icu.util.TimeZone.getTimeZone("UTC"));
             android.icu.util.Calendar g = android.icu.util.Calendar.getInstance(android.icu.util.TimeZone.getTimeZone("UTC"));
             g.clear(); g.set(y, m - 1, d, 12, 0, 0); g.add(android.icu.util.Calendar.DATE, cfg.optInt("hijriAdj", 0));
             ic.setTimeInMillis(g.getTimeInMillis());
-            return ic.get(android.icu.util.Calendar.MONTH) + 1;
+            return ic;
+    }
+
+    /** Hijri month (1–12) of a civil date, with the user's adjustment */
+    static int hijriMonth(JSONObject cfg, int y, int m, int d) {
+        try {
+            return hijriDate(cfg, y, m, d).get(android.icu.util.Calendar.MONTH) + 1;
         } catch (Throwable t) { return 0; }
+    }
+
+    static boolean noFastDay(JSONObject cfg, int y, int m, int d) {
+        try {
+            android.icu.util.IslamicCalendar h = hijriDate(cfg, y, m, d);
+            int month = h.get(android.icu.util.Calendar.MONTH) + 1, day = h.get(android.icu.util.Calendar.DAY_OF_MONTH);
+            return (month == 10 && day == 1) || (month == 12 && day >= 10 && day <= 13);
+        } catch (Throwable t) { return false; }
     }
 
     static String todayKey(PrayerCalc.Opts o) {

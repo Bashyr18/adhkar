@@ -241,6 +241,7 @@
       },
       counts: {},
       archivedCounts: {},
+      archivedItems: {},
       done: {},
       prayed: {},
       nights: {},
@@ -366,12 +367,13 @@
     }
     if (s.prefs.lang !== null && s.prefs.lang !== 'ar' && s.prefs.lang !== 'en') s.prefs.lang = null;
     if (s.excused.since != null) {
-      var t0 = todayISO();
+      var lp = P.partsIn(Date.now(), (s.loc && s.loc.tz) || ''),
+        t0 = P.keyOf(lp.y, lp.m, lp.d);
       if (
         typeof s.excused.since !== 'string' ||
         !ISO_RE.test(s.excused.since) ||
         s.excused.since < P.shiftKey(t0, -400) ||
-        s.excused.since > t0
+        s.excused.since > P.shiftKey(t0, 2)
       ) {
         s.excused.on = false;
         s.excused.since = null;
@@ -386,6 +388,17 @@
     Object.keys(s.archivedCounts).forEach(function (k) {
       if (!ISO_RE.test(k) || !num(s.archivedCounts[k]) || s.archivedCounts[k] < 0) delete s.archivedCounts[k];
     });
+    Object.keys(s.archivedItems).forEach(function (d) {
+      var row = s.archivedItems[d];
+      if (!ISO_RE.test(d) || !row || typeof row !== 'object' || Array.isArray(row)) {
+        delete s.archivedItems[d];
+        return;
+      }
+      row = s.archivedItems[d] = cleanMap(row);
+      Object.keys(row).forEach(function (k) {
+        if (!num(row[k]) || row[k] < 0) delete row[k];
+      });
+    });
     Object.keys(s.prayed).forEach(function (k) {
       if (!s.prayed[k] || typeof s.prayed[k] !== 'object' || Array.isArray(s.prayed[k])) delete s.prayed[k];
     });
@@ -397,6 +410,22 @@
     });
     Object.keys(s.tasbih.per).forEach(function (k) {
       if (!num(s.tasbih.per[k]) || s.tasbih.per[k] < 0) delete s.tasbih.per[k];
+    });
+    Object.keys(s.tasbih.pd).forEach(function (d) {
+      var row = s.tasbih.pd[d];
+      if (!row || typeof row !== 'object' || Array.isArray(row)) {
+        delete s.tasbih.pd[d];
+        return;
+      }
+      row = s.tasbih.pd[d] = cleanMap(row);
+      Object.keys(row).forEach(function (k) {
+        if (!num(row[k]) || row[k] < 0) delete row[k];
+      });
+    });
+    Object.keys(s.deeds).forEach(function (d) {
+      var row = s.deeds[d];
+      if (row && typeof row === 'object' && !Array.isArray(row)) s.deeds[d] = cleanMap(row);
+      else delete s.deeds[d];
     });
     s.tasbih.log = s.tasbih.log.filter(function (x) {
       return x && typeof x === 'object' && num(x.t);
@@ -440,7 +469,7 @@
         var m = JSON.parse(mirror);
         if (m && m.v === 10) {
           A.restoredFromMirror = true;
-          return sane(merge(defaults(), m));
+          return compactCounts(sane(merge(defaults(), m)));
         }
       }
     } catch (e) {}
@@ -558,16 +587,26 @@
   A.exportJSON = function () {
     return JSON.stringify({ app: 'adhkar', exported: new Date().toISOString(), state: S }, null, 1);
   };
-  /* roll granular per-item counts older than 365 days into daily totals so multi-year use never fills storage */
+  function sumCounts(row) {
+    return Object.keys(row).reduce(function (sum, k) {
+      return sum + row[k];
+    }, 0);
+  }
+  /* Remove repeated dates from old count keys while keeping the detail needed to merge a backup. */
   function compactCounts(s) {
     var cutoff = P.shiftKey(todayISO(), -365);
-    s.archivedCounts = s.archivedCounts || {};
     Object.keys(s.counts).forEach(function (k) {
       var d = k.slice(0, 10);
-      if (ISO_RE.test(d) && d < cutoff) {
-        s.archivedCounts[d] = (s.archivedCounts[d] || 0) + s.counts[k];
+      if (ISO_RE.test(d) && (d < cutoff || s.archivedCounts[d] != null || s.archivedItems[d])) {
+        var row = (s.archivedItems[d] = s.archivedItems[d] || Object.create(null)),
+          item = k.slice(10);
+        row[item] = Math.max(row[item] || 0, s.counts[k]);
         delete s.counts[k];
       }
+    });
+    Object.keys(s.archivedItems).forEach(function (d) {
+      // shortcut: a legacy daily total has no item breakdown, keep the larger supported total until an older detailed backup is available.
+      s.archivedCounts[d] = Math.max(s.archivedCounts[d] || 0, sumCounts(s.archivedItems[d]));
     });
     return s;
   }
@@ -584,6 +623,10 @@
     };
     maxMap(cur.counts, inc.counts);
     maxMap(cur.archivedCounts, inc.archivedCounts);
+    Object.keys(inc.archivedItems).forEach(function (d) {
+      var row = (cur.archivedItems[d] = cur.archivedItems[d] || Object.create(null));
+      maxMap(row, inc.archivedItems[d]);
+    });
     unionMap(cur.done, inc.done);
     Object.keys(inc.prayed || {}).forEach(function (d) {
       cur.prayed[d] = cur.prayed[d] || {};
@@ -602,7 +645,10 @@
     maxMap(cur.duha, inc.duha);
     unionMap(cur.fasts, inc.fasts);
     unionMap(cur.fastPlan, inc.fastPlan);
-    unionMap(cur.deeds, inc.deeds);
+    Object.keys(inc.deeds).forEach(function (d) {
+      cur.deeds[d] = cur.deeds[d] || {};
+      unionMap(cur.deeds[d], inc.deeds[d]);
+    });
     unionMap(cur.memo, inc.memo);
     unionMap(cur.badges, inc.badges);
     unionMap(cur.excused.days, inc.excused.days);
@@ -612,10 +658,22 @@
       cur.tasbih.pd[d] = cur.tasbih.pd[d] || {};
       maxMap(cur.tasbih.pd[d], inc.tasbih.pd[d]);
     });
-    var daySum = Object.keys(cur.tasbih.days).reduce(function (a, d) {
-      return a + (cur.tasbih.days[d] || 0);
-    }, 0);
-    cur.tasbih.total = Math.max(cur.tasbih.total || 0, inc.tasbih.total || 0, daySum);
+    Object.keys(cur.tasbih.pd).forEach(function (d) {
+      cur.tasbih.days[d] = Math.max(cur.tasbih.days[d] || 0, sumCounts(cur.tasbih.pd[d]));
+    });
+    cur.tasbih.total = Math.max(
+      cur.tasbih.total,
+      inc.tasbih.total,
+      sumCounts(cur.tasbih.days),
+      sumCounts(cur.tasbih.per)
+    );
+    cur.tasbih.log = mergeList(cur.tasbih.log, inc.tasbih.log, function (x) {
+      return JSON.stringify([x.t, x.id, x.n]);
+    })
+      .sort(function (a, b) {
+        return b.t - a.t;
+      })
+      .slice(0, 200);
     var cids = {};
     cur.tasbih.custom.forEach(function (c) {
       if (c && c.id) cids[c.id] = 1;
@@ -626,6 +684,8 @@
         cur.tasbih.custom.push(c);
       }
     });
+    if (!Object.values(cur.qada).some(Boolean)) Object.assign(cur.qada, inc.qada);
+    unionMap(cur.ramadan.skip, inc.ramadan.skip);
     maxMap(cur.ramadan.taraweeh, inc.ramadan.taraweeh);
     unionMap(cur.ramadan.khatm.juz, inc.ramadan.khatm.juz);
     cur.ramadan.khatm.done = Math.max(cur.ramadan.khatm.done || 0, inc.ramadan.khatm.done || 0);
@@ -658,16 +718,49 @@
       cur.profile.since = inc.profile.since;
     return compactCounts(cur);
   }
-  A.importJSON = function (text, mode) {
+  function mergeList(a, b, key) {
+    var seen = new Set();
+    return a.concat(b).filter(function (x) {
+      var k = key(x);
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
+  }
+  A.readBackup = function (text) {
     var r = JSON.parse(text),
-      s = defaults();
-    if (r && r.app === 'adhkar' && r.state && r.state.v === 10) sane(merge(s, r.state));
+      s = defaults(),
+      raw = r && r.app === 'adhkar' ? r.state : r;
+    if (
+      raw &&
+      raw.v === 10 &&
+      (r.app === 'adhkar' ||
+        (raw.profile &&
+          typeof raw.profile === 'object' &&
+          !Array.isArray(raw.profile) &&
+          raw.counts &&
+          typeof raw.counts === 'object' &&
+          !Array.isArray(raw.counts)))
+    )
+      s = sane(merge(s, raw));
     else importV8(s, r);
+    return s;
+  };
+  A.hasLocalBackupData = function () {
+    var empty = defaults();
+    empty.profile.since = S.profile.since;
+    return Object.keys(empty).some(function (k) {
+      return JSON.stringify(S[k]) !== JSON.stringify(empty[k]);
+    });
+  };
+  A.importJSON = function (text, mode, requireStorage) {
+    var s = A.readBackup(text);
     if (s.needsRebuild) rebuildDone(s);
-    compactCounts(s);
     if (mode === 'merge') {
       mergeRecords(S, s);
     } else {
+      compactCounts(s);
+      if (requireStorage) localStorage.setItem(KEY, JSON.stringify(s));
       Object.keys(S).forEach(function (k) {
         delete S[k];
       });
@@ -1238,6 +1331,7 @@
       /* Ramaḍān days already filled in as fasted are not fasts on a break: they become days to make up */
       for (var d0 = e.since; d0 <= t; d0 = A.shift(d0, 1)) if (S.fasts[d0] === 'ramadan') delete S.fasts[d0];
     } else if (!on && e.on) {
+      if (e.since > t) t = e.since;
       var d = e.since,
         guard = 0;
       while (d && d <= t && guard++ < 400) {
@@ -1539,14 +1633,25 @@
     return A.fmtTxt(t.lastThird) + ' → ' + A.fmtTxt(t.nextFajr);
   };
   /* adhkār have their times: a quiet word when a collection is opened outside its own */
+  A.sessionStarts = function (t) {
+    return {
+      morning: S.notif.morning.from === 'sunrise' ? t.sunrise : t.fajr,
+      evening: S.notif.evening.from === 'maghrib' ? t.maghrib : t.asr
+    };
+  };
   A.timeNote = function (cid, prayer) {
     if (!S.loc) return '';
     var k = A.today(),
       t = A.pday(k),
       now = Date.now(),
-      ses = A.sessionNow();
+      ses = A.sessionNow(),
+      starts = A.sessionStarts(t);
     if (cid === 'salah' && prayer && !A.canLog(k, prayer))
       return P.NAMES[prayer] + ' begins at ' + A.fmtTxt(t[prayer]) + '. These are said after the prayer.';
+    if (cid === 'morning' && S.notif.morning.from === 'sunrise' && now < starts.morning)
+      return A.T('Your morning session starts at sunrise.') + ' ' + A.fmtTxt(starts.morning);
+    if (cid === 'evening' && S.notif.evening.from === 'maghrib' && now >= t.fajr && now < starts.evening)
+      return A.T('Your evening session starts at Maghrib.') + ' ' + A.fmtTxt(starts.evening);
     if (cid === 'morning' && ses !== 'morning')
       return now < t.fajr
         ? 'The morning adhkār begin at Fajr, ' + A.fmtTxt(t.fajr) + '.'
@@ -1562,13 +1667,14 @@
     var k = A.today(),
       t = A.pday(k),
       now = Date.now(),
-      N = S.notif;
-    var ms = N.morning && N.morning.from === 'sunrise' ? t.sunrise : t.fajr,
-      es = N.evening && N.evening.from === 'maghrib' ? t.maghrib : t.asr;
+      starts = A.sessionStarts(t);
     /* the morning adhkār end before Dhuhr, as the sun reaches its height; the evening ones begin at ʿAṣr */
-    if (now >= ms && now < t.dhuhr) return 'morning';
-    if (now >= es && now < t.isha + 90 * 60000) return 'evening';
+    if (now >= starts.morning && now < t.dhuhr) return 'morning';
+    if (now >= starts.evening && now < t.isha + 90 * 60000) return 'evening';
     return null;
+  };
+  A.noFastDay = function (h) {
+    return (h.m === 10 && h.d === 1) || (h.m === 12 && h.d >= 10 && h.d <= 13);
   };
   A.occasion = function (key, evening) {
     var h = A.hijri(key),
@@ -1643,7 +1749,7 @@
         t: 'The Day of ʿArafah',
         d: 'Fasting it expiates two years of sins (Muslim 1162). Best of duʿāʾ is on this day.'
       });
-    else if (h.m === 12 && h.d <= 10)
+    else if (h.m === 12 && h.d < 9)
       out.push({
         h: 'goldh',
         ic: 'spark',
@@ -1671,14 +1777,14 @@
         t: 'Jumuʿah',
         d: 'Read Sūrat al-Kahf, send abundant ṣalawāt, and seek the hour of response before Maghrib.'
       });
-    if (hn.d >= 13 && hn.d <= 15 && hn.m !== 9 && !(hn.m === 12 && hn.d === 13))
+    if (hn.d >= 13 && hn.d <= 15 && hn.m !== 9 && !A.noFastDay(hn))
       out.push({
         h: 'sand',
         ic: 'moon',
         t: 'Tomorrow is a White Day (' + hn.d + ' ' + hn.name + ')',
         d: 'Fasting the 13th, 14th and 15th is like fasting the whole month.'
       });
-    else if ((dw === 0 || dw === 3) && h.m !== 9)
+    else if ((dw === 0 || dw === 3) && h.m !== 9 && hn.m !== 9 && !A.noFastDay(hn))
       out.push({
         h: 'sand',
         ic: 'cal',

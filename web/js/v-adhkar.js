@@ -391,6 +391,7 @@
       '</div>';
     if (c.track) h += '<div class="bar"><i style="width:' + (p.frac * 100).toFixed(1) + '%"></i></div>';
     h += '</section>';
+    if (A.audio) h += A.audio.collectionButton(cid);
     var when = A.timeNote(cid, prayer);
     if (when) h += '<div class="rd-note when-note">' + ic('clock', 's') + '<div>' + esc(when) + '</div></div>';
     if (c.perPrayer) {
@@ -931,18 +932,28 @@
     if (S.prefs.volKeys && !A.pace.on()) A.N.volumeKeys(true);
     bindGestures(el);
     el.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopPropagation();
+        A.acts['rd-close']();
+        return;
+      }
+      A.trapFocus(el, e);
       if ((e.key === 'Enter' || e.key === ' ') && e.target && e.target.classList && e.target.classList.contains('mw')) {
         e.preventDefault();
         A.acts['memo-peek'](e.target);
       }
     });
     paintPage(0);
+    A.syncLayers();
+    $('[data-a="rd-close"]', el).focus({ preventScroll: true });
   };
   A.closeReader = function (instant) {
     if (!R) return;
     var el = R.el,
       pf = R.prevFocus;
     R = null;
+    el.inert = true;
     document.body.style.overflow = '';
     var v = A.cur();
     if (!v || !v.bare) $('.nav').classList.remove('hide');
@@ -956,6 +967,7 @@
         el.remove();
       }, 280);
     }
+    A.syncLayers();
     if (pf && pf.isConnected && typeof pf.focus === 'function') {
       try {
         pf.focus({ preventScroll: true });

@@ -502,6 +502,29 @@
     'Storage is full or blocked; export a backup to keep your record safe.':
       'التخزين ممتلئ أو محجوب؛ صدّر نسخة احتياطية لحفظ سجلك.',
     'Backup merged': 'دُمجت النسخة الاحتياطية',
+    'Restore pre-import copy': 'استعادة نسخة ما قبل الاستيراد',
+    'Could not save a recovery copy. Free storage before replacing your record.':
+      'تعذّر حفظ نسخة للاستعادة. أفرغ مساحة من التخزين قبل استبدال سجلك.',
+    'Could not save the imported record. Free storage and try again.':
+      'تعذّر حفظ السجل المستورد. أفرغ مساحة من التخزين وحاول مجددًا.',
+    'Reminders may be delayed without exact timing.': 'قد تتأخر التذكيرات دون السماح بالتوقيت الدقيق.',
+    'Keep your record here and add what is in the backup, or replace everything on this device. Before replacing, Adhkār saves a recovery copy in Backup & data.':
+      'احتفظ بسجلك وأضف ما في النسخة الاحتياطية، أو استبدل كل شيء على هذا الجهاز. قبل الاستبدال، يحفظ أذكار نسخة للاستعادة في قسم النسخ الاحتياطي والبيانات.',
+    'System notifications are blocked.': 'إشعارات النظام محجوبة.',
+    'Blocked by system': 'محجوبة في إعدادات النظام',
+    'Open settings': 'فتح الإعدادات',
+    'Send a test reminder': 'إرسال تذكير تجريبي',
+    'Next scheduled reminder': 'التذكير المجدول التالي',
+    'Test reminder': 'تذكير تجريبي',
+    'Adhkār can send reminders on this device.': 'يمكن لأذكار إرسال التذكيرات على هذا الجهاز.',
+    'Could not send a test reminder. Check system notification settings.':
+      'تعذّر إرسال تذكير تجريبي. تحقّق من إعدادات إشعارات النظام.',
+    'Change calculation method': 'تغيير طريقة الحساب',
+    'Enter coordinates': 'إدخال الإحداثيات',
+    'Start after-prayer adhkār': 'ابدأ أذكار ما بعد الصلاة',
+    'Your morning session starts at sunrise.': 'تبدأ جلستك الصباحية عند الشروق.',
+    'Your evening session starts at Maghrib.': 'تبدأ جلستك المسائية عند المغرب.',
+    'Download this collection': 'تنزيل هذه المجموعة',
     'Merge with this device': 'الدمج مع هذا الجهاز',
     'Replace everything': 'استبدال كل شيء',
     'Keep your record here and add what is in the backup, or replace everything on this device.':

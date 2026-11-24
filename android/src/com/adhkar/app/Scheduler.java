@@ -32,9 +32,12 @@ final class Scheduler {
     static final String ACTION_PRAYED_N = "com.adhkar.app.PRAYED_FROM_NOTIFICATION";
     static final class Ev {
         final String id, ch, title, text, route, action, actionRoute; final long at; final boolean snooze;
+        long expires;
         Ev(String id, long at, String ch, String title, String text, String route, String action, String actionRoute, boolean snooze) {
             this.id = id; this.at = at; this.ch = ch; this.title = title; this.text = text; this.route = route; this.action = action; this.actionRoute = actionRoute; this.snooze = snooze;
+            this.expires = at + 15 * MIN;
         }
+        Ev through(long end) { if (end > at) expires = end; return this; }
     }
 
     static void channels(Context c) {
@@ -78,19 +81,19 @@ final class Scheduler {
     static List<Ev> events(Context c, JSONObject cfg, PrayerCalc.Opts o, int off) {
         List<Ev> out = new ArrayList<>();
         JSONObject n = cfg.optJSONObject("notif");
+        if (n == null || !n.optBoolean("enabled", false)) return out;
         long now = System.currentTimeMillis();
         PrayerCalc.Day d = PrayerCalc.dayAt(now, off, o);
         String key = PrayerCalc.key(d), place = Store.locName(cfg);
         org.json.JSONArray plan = cfg.optJSONArray("fastPlan");
-        if (plan != null) {
+        if (plan != null && !cfg.optBoolean("excused", false)) {
             PrayerCalc.Day tm = PrayerCalc.dayAt(now, off + 1, o);
             String tk = PrayerCalc.key(tm);
             for (int i = 0; i < plan.length(); i++)
-                if (tk.equals(plan.optString(i)))
+                if (tk.equals(plan.optString(i)) && !Store.noFastDay(cfg, tm.y, tm.m, tm.d))
                     out.add(new Ev("fp-" + key, d.maghrib, CH_SUNNAH, L.t("Tomorrow you plan to fast", "غدًا تنوي الصيام"),
                             L.t("Make your intention tonight, and eat suhūr before Fajr at " + Store.fmtTime(cfg, o, tm.fajr) + ".", "انوِ الليلة، وتسحّر قبل الفجر " + Store.fmtTime(cfg, o, tm.fajr) + "."), "#/calendar", null, null, false));
         }
-        if (n == null || !n.optBoolean("enabled", false)) return out;
         JSONObject today = cfg.optJSONObject("today");
         boolean smart = n.optBoolean("smart", true) && today != null && key.equals(today.optString("key"));
         JSONObject pr = cfg.optBoolean("excused", false) ? null : n.optJSONObject("prayers"); // paused during a break from ṣalāh
@@ -112,15 +115,15 @@ final class Scheduler {
         JSONObject m = n.optJSONObject("morning");
         if (m != null && m.optBoolean("on") && !(smart && today.optBoolean("morning")))
             out.add("sunrise".equals(m.optString("from")) ? new Ev("m-" + key, d.sunrise + m.optInt("after", 20) * MIN, CH_ADHKAR, L.t("Morning adhkār", "أذكار الصباح"),
-                    L.t("Begin the day with remembrance.", "ابدأ يومك بذكر الله."), "#/c/morning", L.t("Begin", "ابدأ"), "#/r/morning/0", true)
+                    L.t("Begin the day with remembrance.", "ابدأ يومك بذكر الله."), "#/c/morning", L.t("Begin", "ابدأ"), "#/r/morning/0", true).through(d.dhuhr)
                 : new Ev("m-" + key, d.fajr + m.optInt("after", 20) * MIN, CH_ADHKAR, L.t("Morning adhkār", "أذكار الصباح"),
-                    L.t("Begin the day with remembrance. Before sunrise at " + Store.fmtTime(cfg, o, d.sunrise) + " is best.", "ابدأ يومك بذكر الله، والأفضل قبل الشروق " + Store.fmtTime(cfg, o, d.sunrise) + "."), "#/c/morning", L.t("Begin", "ابدأ"), "#/r/morning/0", true));
+                    L.t("Begin the day with remembrance. Before sunrise at " + Store.fmtTime(cfg, o, d.sunrise) + " is best.", "ابدأ يومك بذكر الله، والأفضل قبل الشروق " + Store.fmtTime(cfg, o, d.sunrise) + "."), "#/c/morning", L.t("Begin", "ابدأ"), "#/r/morning/0", true).through(d.dhuhr));
         JSONObject e = n.optJSONObject("evening");
         if (e != null && e.optBoolean("on") && !(smart && today.optBoolean("evening")))
             out.add("maghrib".equals(e.optString("from")) ? new Ev("e-" + key, d.maghrib + e.optInt("after", 30) * MIN, CH_ADHKAR, L.t("Evening adhkār", "أذكار المساء"),
-                    L.t("Protect your night with remembrance.", "احفظ ليلتك بذكر الله."), "#/c/evening", L.t("Begin", "ابدأ"), "#/r/evening/0", true)
+                    L.t("Protect your night with remembrance.", "احفظ ليلتك بذكر الله."), "#/c/evening", L.t("Begin", "ابدأ"), "#/r/evening/0", true).through(d.isha)
                 : new Ev("e-" + key, d.asr + e.optInt("after", 30) * MIN, CH_ADHKAR, L.t("Evening adhkār", "أذكار المساء"),
-                    L.t("Protect your evening with remembrance. Maghrib is at " + Store.fmtTime(cfg, o, d.maghrib) + ".", "احفظ مساءك بذكر الله. المغرب " + Store.fmtTime(cfg, o, d.maghrib) + "."), "#/c/evening", L.t("Begin", "ابدأ"), "#/r/evening/0", true));
+                    L.t("Protect your evening with remembrance. Maghrib is at " + Store.fmtTime(cfg, o, d.maghrib) + ".", "احفظ مساءك بذكر الله. المغرب " + Store.fmtTime(cfg, o, d.maghrib) + "."), "#/c/evening", L.t("Begin", "ابدأ"), "#/r/evening/0", true).through(d.isha));
         JSONObject sl = n.optJSONObject("sleep");
         if (sl != null && sl.optBoolean("on") && !(smart && today.optBoolean("sleep"))) {
             int sh = 22, sm = 30;
@@ -137,7 +140,7 @@ final class Scheduler {
         }
         JSONObject du = n.optJSONObject("duha");
         if (du != null && du.optBoolean("on") && !(smart && today.optBoolean("duha")))
-            out.add(new Ev("d-" + key, d.duhaStart, CH_SUNNAH, L.t("Ḍuḥā time", "وقت الضحى"), L.t("The window is open until " + Store.fmtTime(cfg, o, d.duhaEnd) + ". Two rakʿahs suffice.", "يمتد الوقت إلى " + Store.fmtTime(cfg, o, d.duhaEnd) + "، وتكفي ركعتان."), "#/duha", null, null, false));
+            out.add(new Ev("d-" + key, d.duhaStart, CH_SUNNAH, L.t("Ḍuḥā time", "وقت الضحى"), L.t("The window is open until " + Store.fmtTime(cfg, o, d.duhaEnd) + ". Two rakʿahs suffice.", "يمتد الوقت إلى " + Store.fmtTime(cfg, o, d.duhaEnd) + "، وتكفي ركعتان."), "#/duha", null, null, false).through(d.duhaEnd));
         JSONObject cy = cfg.optJSONObject("cycle");
         if (cy != null) {
             /* worded so nothing private shows on a lock screen */
@@ -152,7 +155,7 @@ final class Scheduler {
         boolean jNight = jn != null && jn.optBoolean("night") && !dua.isEmpty(), jFri = jn != null && jn.optBoolean("friday") && !dua.isEmpty();
         JSONObject ni = n.optJSONObject("night");
         if ((ni != null && ni.optBoolean("on")) || jNight)
-            out.add(new Ev("n-" + key, Math.min(d.lastThird + (ni == null ? 0 : ni.optInt("off", 0)) * MIN, d.nextFajr - 15 * MIN), CH_SUNNAH, L.t("The last third of the night", "ثلث الليل الآخر"), L.t("It lasts until Fajr at " + Store.fmtTime(cfg, o, d.nextFajr) + ". Call upon your Lord.", "يمتد إلى الفجر " + Store.fmtTime(cfg, o, d.nextFajr) + "، فادعُ ربك.") + (jNight ? yours : ""), jNight ? "#/journal" : "#/night", null, null, false));
+            out.add(new Ev("n-" + key, Math.min(d.lastThird + (ni == null ? 0 : ni.optInt("off", 0)) * MIN, d.nextFajr - 15 * MIN), CH_SUNNAH, L.t("The last third of the night", "ثلث الليل الآخر"), L.t("It lasts until Fajr at " + Store.fmtTime(cfg, o, d.nextFajr) + ". Call upon your Lord.", "يمتد إلى الفجر " + Store.fmtTime(cfg, o, d.nextFajr) + "، فادعُ ربك.") + (jNight ? yours : ""), jNight ? "#/journal" : "#/night", null, null, false).through(d.nextFajr));
         String ja = jn == null ? "" : jn.optString("adhan", "");
         if (!dua.isEmpty() && !ja.isEmpty() && d.get(ja) > 0)
             out.add(new Ev("ja-" + key, d.get(ja) + 2 * MIN, CH_SUNNAH, L.t("Between adhān and iqāmah", "بين الأذان والإقامة"), L.t("Duʿāʾ now is not rejected.", "الدعاء الآن لا يُرد.") + yours, "#/journal", null, null, false));
@@ -160,7 +163,7 @@ final class Scheduler {
         if (rm != null) {
             PrayerCalc.Day nx = PrayerCalc.dayAt(now, off + 1, o);
             long imsak = cfg.optInt("imsak", 0) * MIN;
-            if (rm.optBoolean("suhoor", true) && Store.hijriMonth(cfg, nx.y, nx.m, nx.d) == 9)
+            if (rm.optBoolean("suhoor", true) && !cfg.optBoolean("excused", false) && Store.hijriMonth(cfg, nx.y, nx.m, nx.d) == 9)
                 out.add(new Ev("rs-" + key, nx.fajr - imsak - rm.optInt("suhoorMin", 45) * MIN, CH_ADHKAR, L.t("Suhūr", "السحور"),
                         L.t("Eat before " + Store.fmtTime(cfg, o, nx.fajr - imsak) + ". There is blessing in suhūr.", "تسحّر قبل " + Store.fmtTime(cfg, o, nx.fajr - imsak) + "، فإن في السحور بركة."), "#/ramadan", null, null, false));
             if (rm.optBoolean("iftar", true) && Store.hijriMonth(cfg, d.y, d.m, d.d) == 9 && !cfg.optBoolean("excused", false))
@@ -173,7 +176,7 @@ final class Scheduler {
         JSONObject ju = cfg.optJSONObject("jumuah");
         boolean kahfRead = ju != null && key.equals(ju.optString("kahf"));
         if (fr != null && fr.optBoolean("on") && friday && !kahfRead)
-            out.add(new Ev("fk-" + key, d.sunrise + 120 * MIN, CH_SUNNAH, L.t("Yawm al-Jumuʿah", "يوم الجمعة"), L.t("Read Sūrat al-Kahf and send abundant ṣalawāt upon the Prophet ﷺ.", "اقرأ سورة الكهف وأكثر من الصلاة على النبي ﷺ."), "#/kahf", L.t("Read al-Kahf", "اقرأ الكهف"), "#/kahf", false));
+            out.add(new Ev("fk-" + key, d.sunrise + 120 * MIN, CH_SUNNAH, L.t("Yawm al-Jumuʿah", "يوم الجمعة"), L.t("Read Sūrat al-Kahf and send abundant ṣalawāt upon the Prophet ﷺ.", "اقرأ سورة الكهف وأكثر من الصلاة على النبي ﷺ."), "#/kahf", L.t("Read al-Kahf", "اقرأ الكهف"), "#/kahf", false).through(d.maghrib));
         if (friday && ((fr != null && fr.optBoolean("on")) || jFri))
             out.add(new Ev("fh-" + key, d.maghrib - 60 * MIN, CH_SUNNAH, L.t("The hour of response", "ساعة الإجابة"), L.t("The last hour before Maghrib on Friday, until " + Store.fmtTime(cfg, o, d.maghrib) + ". Make duʿāʾ.", "آخر ساعة قبل مغرب الجمعة، حتى " + Store.fmtTime(cfg, o, d.maghrib) + "، فادعُ الله.") + (jFri ? yours : ""), jFri ? "#/journal" : "#/jumuah", L.t("Your duʿāʾ list", "قائمة دعائك"), "#/journal", false));
         return out;
@@ -188,7 +191,7 @@ final class Scheduler {
         boolean ours = sp.getBoolean("dndOurs", false), granted = nm != null && nm.isNotificationPolicyAccessGranted();
         boolean on = si != null && si.optBoolean("on") && !cfg.optBoolean("excused", false) && granted;
         long next = Long.MAX_VALUE, until = 0;
-        if (on) for (int off = 0; off <= 1; off++) {
+        if (on) for (int off = -1; off <= 1; off++) {
             PrayerCalc.Day d = PrayerCalc.dayAt(now, off, o);
             Calendar dw = Calendar.getInstance(PrayerCalc.zone(o)); dw.setTimeInMillis(d.dhuhr);
             boolean fri = dw.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY;
@@ -196,8 +199,8 @@ final class Scheduler {
                 long start = d.get(k) + ((iq != null && iq.optBoolean("on")) ? iq.optInt(k, 15) : 10) * MIN - MIN;
                 long end = start + ((fri && k.equals("dhuhr")) ? si.optInt("jumuah", 50) : si.optInt("min", 20)) * MIN;
                 if (now >= start && now < end) until = Math.max(until, end);
-                if (start > now + 5000) next = Math.min(next, start);
-                if (end > now + 5000) next = Math.min(next, end);
+                if (start > now) next = Math.min(next, start);
+                if (end > now) next = Math.min(next, end);
             }
         }
         try {
@@ -249,19 +252,24 @@ final class Scheduler {
         Widgets.updateAll(c);
         AlarmManager am = c.getSystemService(AlarmManager.class);
         PendingIntent tick = PendingIntent.getBroadcast(c, 1, new Intent(c, AlarmReceiver.class).setAction(ACTION_TICK), PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        if (o == null) { if (am != null) am.cancel(tick); return; }
+        if (o == null) {
+            Store.prefs(c).edit().remove("nextReminderAt").apply();
+            if (am != null) am.cancel(tick);
+            return;
+        }
         long now = System.currentTimeMillis(), last = Store.prefs(c).getLong("lastFired", now - 2 * MIN);
         List<Ev> evs = new ArrayList<>();
         for (int off = -1; off <= 1; off++) evs.addAll(events(c, cfg, o, off));
-        for (Ev e : evs) if (e.at > last && e.at <= now + 5000 && now - e.at < 15 * MIN) {
+        for (Ev e : evs) if (e.at > last && e.at <= now + 5000 && now < e.expires) {
             post(c, e);
             JSONObject ju = cfg.optJSONObject("jumuah");
             if (e.id.startsWith("fh-") && ju != null && ju.optBoolean("overlay", true) && !MainActivity.visible && !Store.prefs(c).getBoolean("dndOurs", false))
                 Overlay.hour(c, e.text, e.route);
         }
-        Store.prefs(c).edit().putLong("lastFired", now + 5000).apply();
         long next = Long.MAX_VALUE;
         for (Ev e : evs) if (e.at > now + 5000 && e.at < next) next = e.at;
+        Store.prefs(c).edit().putLong("lastFired", now + 5000)
+                .putLong("nextReminderAt", next == Long.MAX_VALUE ? 0 : next).apply();
         for (int off = 0; off <= 1; off++) {
             PrayerCalc.Day d = PrayerCalc.dayAt(now, off, o);
             for (String k : PrayerCalc.ORDER) { long t = d.get(k); if (t > now + 5000 && t < next) next = t; }
@@ -284,9 +292,11 @@ final class Scheduler {
         return PendingIntent.getActivity(c, req, i, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
-    static void post(Context c, Ev e) {
+    static boolean post(Context c, Ev e) {
         NotificationManager nm = c.getSystemService(NotificationManager.class);
-        if (nm == null) return;
+        if (nm == null || !nm.areNotificationsEnabled()) return false;
+        NotificationChannel channel = nm.getNotificationChannel(e.ch);
+        if (channel == null || channel.getImportance() == NotificationManager.IMPORTANCE_NONE) return false;
         int id = e.id.replaceAll("-\\d{4}-\\d{2}-\\d{2}$", "").hashCode();
         Notification.Builder b = new Notification.Builder(c, e.ch)
                 .setSmallIcon(R.drawable.ic_notif).setColor(0xFFD9B26F)
@@ -306,6 +316,6 @@ final class Scheduler {
                     .putExtra("action", e.action).putExtra("actionRoute", e.actionRoute);
             b.addAction(new Notification.Action.Builder(null, L.t("In 15 min", "بعد ١٥ دقيقة"), PendingIntent.getBroadcast(c, id + 2, s, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE)).build());
         }
-        try { nm.notify(id, b.build()); } catch (SecurityException ignored) { }
+        try { nm.notify(id, b.build()); return true; } catch (SecurityException ignored) { return false; }
     }
 }

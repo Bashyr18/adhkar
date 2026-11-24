@@ -1455,7 +1455,7 @@
     );
     A.N.haptic('success');
     if (el.dataset.ob) {
-      A.obNext && A.obNext();
+      A.rerender();
       return;
     }
     A.goBack('#/salah');

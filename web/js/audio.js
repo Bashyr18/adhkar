@@ -63,14 +63,15 @@
       return f.length > 0 && (WEB || have(f).length === f.length);
     },
     collection: function (cid) {
-      var seen = {},
+      var seen = new Set(),
         out = [];
-      A.items(cid, cid === 'salah' ? 'fajr' : undefined).forEach(function (it) {
-        files(it).forEach(function (f) {
-          if (!seen[f.n]) {
-            seen[f.n] = 1;
+      (cid === 'salah' ? A.PRAYERS : [undefined]).forEach(function (p) {
+        A.items(cid, p).forEach(function (it) {
+          files(it).forEach(function (f) {
+            if (seen.has(f.n)) return;
+            seen.add(f.n);
             out.push(f);
-          }
+          });
         });
       });
       return out;
@@ -82,13 +83,11 @@
       var seen = {},
         out = [];
       window.DATA.collections.forEach(function (c) {
-        A.items(c.id, c.perPrayer ? 'fajr' : undefined).forEach(function (it) {
-          files(it).forEach(function (f) {
-            if (!seen[f.n]) {
-              seen[f.n] = 1;
-              out.push(f);
-            }
-          });
+        AU.collection(c.id).forEach(function (f) {
+          if (!seen[f.n]) {
+            seen[f.n] = 1;
+            out.push(f);
+          }
         });
       });
       return out;
@@ -116,6 +115,50 @@
   var missingCache = null;
   AU.invalidate = function () {
     missingCache = null;
+  };
+  function collectionMissing(cid) {
+    if (WEB || !AU.ok()) return [];
+    var names = new Set(
+      AU.collection(cid).map(function (f) {
+        return f.n;
+      })
+    );
+    return AU.missing().filter(function (f) {
+      return names.has(f.n);
+    });
+  }
+  AU.collectionButton = function (cid) {
+    var list = collectionMissing(cid);
+    if (!list.length) return '';
+    return (
+      '<button type="button" class="btn ghost sm" data-a="au-get-collection" data-c="' +
+      esc(cid) +
+      '">' +
+      ic('download', 's') +
+      esc(A.T('Download this collection')) +
+      ' · ' +
+      esc(AU.mb(AU.bytes(list))) +
+      '</button>'
+    );
+  };
+  A.acts['au-get-collection'] = function (el) {
+    var cid = el.dataset.c,
+      list = collectionMissing(cid),
+      tag = 'collection-' + cid;
+    if (!list.length || Object.prototype.hasOwnProperty.call(jobs, tag)) return;
+    A.confirm(
+      'Download this collection',
+      A.plural(list.length, 'recording') + ' · ' + AU.mb(AU.bytes(list)),
+      'Download',
+      function () {
+        el.disabled = true;
+        AU.download(list, tag, function (ok) {
+          el.disabled = false;
+          if (ok) A.toast('Recitations downloaded', 'check');
+          if (A.route().name === 'c') A.rerender();
+        });
+      }
+    );
   };
   /* the bar on screen redraws itself whenever a download lands, so it never shows Download for audio you have */
   AU.refresh = function () {
@@ -241,6 +284,7 @@
     }
   }
   function playIt() {
+    A.pace.pause();
     hold(true);
     P.playing = true;
     setBar('play', 0);
@@ -394,6 +438,7 @@
       return;
     }
     if (st === 'paused') {
+      A.pace.pause();
       P.playing = true;
       if (WEB) {
         if (W.el) W.el.play().catch(function () {});
@@ -432,7 +477,7 @@
       if (P.it !== it) return;
       if (ok) {
         var b = document.getElementById('aubar');
-        if (b) b.outerHTML = AU.bar(it, '');
+        if (b) b.outerHTML = AU.bar(it, b.dataset.cid || '');
         playIt();
       } else el.disabled = false;
     });

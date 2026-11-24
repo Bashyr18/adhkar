@@ -18,7 +18,7 @@ const ok = (c, msg) => {
   }
 };
 
-function boot(nowISO, state) {
+function boot(nowISO, state, setup) {
   const errors = [];
   const vc = new VirtualConsole();
   vc.on('error', (...a) => errors.push(a.join(' ')));
@@ -65,6 +65,7 @@ function boot(nowISO, state) {
   w.scrollTo = () => {};
   w.HTMLCanvasElement.prototype.getContext = () => null;
   if (state) w.localStorage.setItem('adhkar.v10', JSON.stringify(state));
+  if (setup) setup(w);
   const order = [
     ...fs.readFileSync(path.join(WEB, 'index.html'), 'utf8').matchAll(/<script src="([^"]+)"><\/script>/g)
   ].map((m) => m[1]);
@@ -1305,6 +1306,177 @@ ok(/Ramaḍān Mubārak/.test(rt), 'Ramaḍān greeting in Ramaḍān');
   const box = menv.w.document.createElement('div');
   menv.w.A.chart.area(box, [], {});
   ok(box.innerHTML === '', 'A.chart.area handles empty data without throwing');
+}
+
+{
+  const { w } = boot('2026-11-24T12:00:00Z', settled);
+  const a = w.A;
+  const before = JSON.parse(a.exportJSON()).state;
+  before.counts = { '2024-01-10|morning|m1': 33 };
+  a.importJSON(JSON.stringify(before), 'replace');
+  const second = { ...before, counts: { '2024-01-10|evening|e1': 20 } };
+  a.importJSON(JSON.stringify(second), 'merge');
+  a.importJSON(JSON.stringify(before), 'merge');
+  a.importJSON(JSON.stringify(second), 'merge');
+  ok(a.totals().byDay['2024-01-10'] === 53, 'raw daily backups restore and archived counts merge idempotently');
+  a.S.tasbih.days = { '2026-11-24': 100 };
+  a.S.tasbih.pd = { '2026-11-24': { subhanallah: 100 } };
+  const next = JSON.parse(a.exportJSON());
+  next.state.tasbih.pd['2026-11-24'] = { astaghfirullah: 100 };
+  a.importJSON(JSON.stringify(next), 'merge');
+  ok(a.S.tasbih.days['2026-11-24'] === 200, 'merged Tracker totals include both distinct phrases');
+  w.close();
+}
+{
+  const { w } = boot('2026-11-24T12:00:00Z');
+  const a = w.A;
+  const incoming = a.exportJSON();
+  a.S.saved.push('sample');
+  a.S.fasts['2026-11-23'] = 'sunnah';
+  w.__native.onImport(incoming);
+  const replace = w.document.getElementById('impRep');
+  ok(!!replace && a.S.saved.length === 1, 'backup import offers a choice when bookmarks and fasts are present');
+  if (replace) replace.click();
+  const recovery = w.localStorage.getItem('adhkar.before-import');
+  ok(!!recovery && a.readBackup(recovery).fasts['2026-11-23'] === 'sunnah', 'replace saves a restorable copy first');
+  a.S.saved.push('keep-me');
+  w.__native.onImport(incoming);
+  const original = w.Storage.prototype.setItem;
+  w.Storage.prototype.setItem = function (key, value) {
+    if (key === 'adhkar.v10') throw new w.DOMException('Full', 'QuotaExceededError');
+    return original.call(this, key, value);
+  };
+  w.document.querySelector('.sheet:not(.out) #impRep').click();
+  w.Storage.prototype.setItem = original;
+  ok(a.S.saved.includes('keep-me'), 'a failed replacement write leaves current records in place');
+  w.close();
+}
+{
+  const time = '2026-11-24T22:00:00Z';
+  const state = { ...settled, loc: { name: 'Makkah', lat: 21.42, lng: 39.82, tz: 'Asia/Riyadh' } };
+  const env = boot(time, state);
+  env.w.A.setExcused(true);
+  const restored = boot(time, JSON.parse(env.w.A.exportJSON()).state);
+  ok(
+    restored.w.A.S.excused.on && restored.w.A.S.excused.since === '2026-11-25',
+    'location date survives a reload during a break'
+  );
+  env.w.close();
+  restored.w.close();
+}
+{
+  let scheduled = [];
+  const state = { ...settled, loc: { name: 'Lagos', lat: 6.52, lng: 3.38, tz: 'Africa/Lagos' } };
+  const { w } = boot('2026-11-27T00:05:00Z', state, (win) => {
+    win.ADHKAR_DESKTOP = true;
+    win.DeskBridge = {
+      deskSchedule: (json) => {
+        scheduled = JSON.parse(json);
+      }
+    };
+  });
+  const a = w.A;
+  a.S.notif.enabled = true;
+  a.S.notif.night.on = true;
+  a.S.notif.night.off = 0;
+  a.S.notif.friday.on = false;
+  a.S.journal.nudge.night = false;
+  a.S.journal.nudge.friday = true;
+  a.S.journal.items = [{ id: 'sample', text: 'Sample request', since: '2026-11-20' }];
+  w.Desk.schedule();
+  const tonight = a.pday('2026-11-26').lastThird;
+  ok(
+    tonight > w.Date.now() && scheduled.some((e) => e.t === tonight && e.route === 'night'),
+    'Windows keeps the current night after midnight'
+  );
+  ok(
+    scheduled.some((e) => e.route === 'journal' && e.hour),
+    'Windows honors a Friday journal-only reminder'
+  );
+  a.S.notif.enabled = false;
+  a.S.fastPlan['2026-11-28'] = 'sunnah';
+  w.Desk.schedule();
+  ok(scheduled.length === 0, 'turning reminders off cancels planned-fast notifications too');
+  ok(
+    a.dayOcc('2026-05-28').some((e) => e.nofast) &&
+      !a.dayOcc('2026-05-28').some((e) => /Sunnah fast/.test(e.t)) &&
+      !a.occasion('2028-05-07', false).some((e) => e.t === 'Tomorrow is Monday') &&
+      /day of ʿĪd/.test(a.occasion('2026-05-27', false)[0].t),
+    'fasting recommendations respect Tashrīq and Today prioritizes Eid'
+  );
+  const sheet = a.sheet('Example', '<button>Example</button>');
+  sheet.el.querySelector('button').dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+  ok(sheet.closed, 'Escape closes a sheet');
+  a.openReader('morning', 0);
+  ok(
+    w.document.querySelector('.reader').contains(w.document.activeElement),
+    'opening the reader moves keyboard focus inside'
+  );
+  w.close();
+}
+{
+  const { w } = boot('2026-11-24T12:00:00Z');
+  const a = w.A;
+  for (let i = 0; i < 3; i++) a.obNext();
+  const { document } = w;
+  const city = document.querySelector('[data-a="pick-city"][data-ob]');
+  if (city) city.click();
+  ok(
+    !!city && !!document.querySelector('.ob-times') && !!document.querySelector('[data-a="coords"]'),
+    'city selection shows prayer preview and coordinates'
+  );
+  a.obNext();
+  const sw = document.querySelector('[data-a="ob-prayers"]');
+  if (sw) sw.click();
+  ok(!!sw && !Object.values(a.S.notif.prayers).some(Boolean), 'onboarding can turn off prayer alerts independently');
+  a.S.notif.enabled = true;
+  a.N.notifState = () => ({ granted: false, exact: true });
+  ok(/Blocked by system/.test(a.V.settings(['notifications']).html), 'reminder settings report OS-level blocking');
+  w.close();
+}
+
+{
+  let download, testReminder;
+  const state = { ...settled, loc: { name: 'Lagos', lat: 6.52, lng: 3.38, tz: 'Africa/Lagos' } };
+  const { w } = boot('2026-11-24T13:00:00Z', state, (win) => {
+    win.AndroidBridge = {
+      audioPlay() {},
+      audioHave() {
+        return '[]';
+      },
+      audioDownload(list, tag) {
+        download = { list: JSON.parse(list), tag };
+      },
+      testReminder(title) {
+        testReminder = title;
+        return true;
+      }
+    };
+  });
+  const a = w.A;
+  a.S.prayed[a.today()] = {};
+  a.acts['dash-pray']({ dataset: { p: 'dhuhr' } });
+  ok(
+    !!w.document.querySelector('#dash a[href^="#/r/salah/"][href$="/dhuhr"]'),
+    'logging a prayer offers its after-prayer reader directly'
+  );
+  const div = w.document.createElement('div');
+  div.innerHTML = a.audio.collectionButton('morning');
+  const button = div.firstElementChild;
+  if (button) {
+    a.acts['au-get-collection'](button);
+    w.document.querySelector('.sheet:not(.out) [data-ok]').click();
+  }
+  ok(
+    !!download &&
+      download.tag === 'collection-morning' &&
+      download.list.length === a.audio.collection('morning').length &&
+      download.list.length < a.audio.all().length,
+    'collection download sends only its missing files to the native bridge'
+  );
+  a.acts['test-reminder']();
+  ok(testReminder === 'Test reminder', 'test reminder uses the native notification bridge');
+  w.close();
 }
 
 setTimeout(function () {

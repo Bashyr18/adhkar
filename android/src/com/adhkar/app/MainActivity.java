@@ -612,8 +612,17 @@ public class MainActivity extends Activity implements SensorEventListener {
                 AlarmManager am = getSystemService(AlarmManager.class);
                 o.put("granted", nm != null && nm.areNotificationsEnabled());
                 o.put("exact", Build.VERSION.SDK_INT < 31 || (am != null && am.canScheduleExactAlarms()));
+                o.put("nextAt", Store.prefs(MainActivity.this).getLong("nextReminderAt", 0));
             } catch (Exception ignored) { }
             return o.toString();
+        }
+        @JavascriptInterface public boolean testReminder(String title, String body) {
+            JSONObject cfg = Store.config(MainActivity.this);
+            JSONObject n = cfg.optJSONObject("notif");
+            Scheduler.channels(MainActivity.this);
+            String ch = n != null && n.optBoolean("adhan", true) ? Scheduler.CH_ADHAN : Scheduler.CH_PRAYER;
+            return Scheduler.post(MainActivity.this, new Scheduler.Ev("test-reminder", System.currentTimeMillis(),
+                    ch, title, body, "#/settings/notifications", null, null, false));
         }
         @JavascriptInterface public void printPage(String name) {
             ui.post(() -> {

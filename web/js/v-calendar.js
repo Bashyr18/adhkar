@@ -29,8 +29,8 @@
     if (h.m === 1 && h.d === 10) o.push({ t: 'ʿĀshūrāʾ', h: 'teal' });
     if (h.m === 1 && h.d === 9) o.push({ t: 'Tāsūʿāʾ', h: 'teal' });
     if (h.m === 10 && h.d >= 2 && h.d <= 7) o.push({ t: 'Six of Shawwāl', h: 'sand' });
-    if (h.d >= 13 && h.d <= 15 && h.m !== 9 && !(h.m === 12 && h.d === 13)) o.push({ t: 'White Day', h: 'sand' });
-    if ((dw === 1 || dw === 4) && h.m !== 9)
+    if (h.d >= 13 && h.d <= 15 && h.m !== 9 && !A.noFastDay(h)) o.push({ t: 'White Day', h: 'sand' });
+    if ((dw === 1 || dw === 4) && h.m !== 9 && !A.noFastDay(h))
       o.push({ t: dw === 1 ? 'Monday · Sunnah fast' : 'Thursday · Sunnah fast', h: 'sand', minor: true });
     if (dw === 5) o.push({ t: 'Jumuʿah', h: 'jade', minor: true });
     return o;

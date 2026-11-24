@@ -95,7 +95,17 @@ pub fn call(name: &str, body: &[u8]) -> Option<Value> {
         "overlayOk" | "dndOk" | "batteryOk" | "requestNotifications" => Some(json!(true)),
         "takeNudgeTally" => Some(json!("{}")),
         "takeTrackerEvents" | "takeWidgetEvents" => Some(json!("[]")),
-        "notificationState" => Some(json!("{\"granted\":true,\"exact\":true}")),
+        "notificationState" => {
+            let now = crate::now_ms();
+            let next = a.events.borrow().iter().filter_map(|e| e["t"].as_f64())
+                .filter(|&t| t > now).min_by(f64::total_cmp);
+            Some(json!(json!({"granted": true, "exact": true, "nextAt": next}).to_string()))
+        }
+        "testReminder" => {
+            *a.last_route.borrow_mut() = Some("settings/notifications".into());
+            a.balloon(&s(0), &s(1));
+            Some(json!(true))
+        }
         "openSettings" => { ac::shell_open("ms-settings:notifications"); None }
         "locateQuiet" => { locate::locate(); Some(json!(true)) }
         "requestLocation" => { locate::locate(); None }

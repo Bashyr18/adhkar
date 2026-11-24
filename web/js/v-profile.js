@@ -420,33 +420,34 @@
         });
       return [
         'Prayer times',
-        group('', [
-          '<a class="set" href="#/location"><div class="grow"><div class="t">Location</div><div class="s">' +
-            (S.loc ? esc(S.loc.name) : 'Not set') +
-            '</div></div>' +
-            ic('right', 's') +
-            '</a>',
-          row('Choose method automatically', 'From your country', A.sw(S.calc.auto, 'calc-auto')),
-          row('Calculation method', '', pick('pick-method', (P.METHODS[S.calc.method] || P.METHODS.mwl).name)),
-          row('ʿAṣr', 'Shadow length', pick('pick-asr', S.calc.asr === 'hanafi' ? 'Ḥanafī (×2)' : 'Standard (×1)')),
-          row(
-            'High latitudes',
-            'For places where twilight persists',
-            pick(
-              'pick-highlat',
-              (
-                HIGHLAT.filter(function (x) {
-                  return x.v === S.calc.highLat;
-                })[0] || HIGHLAT[0]
-              ).t
+        (S.loc ? '<div class="card">' + prayerPreview(A.pday(A.today())) + '</div>' : '') +
+          group('', [
+            '<a class="set" href="#/location"><div class="grow"><div class="t">Location</div><div class="s">' +
+              (S.loc ? esc(S.loc.name) : 'Not set') +
+              '</div></div>' +
+              ic('right', 's') +
+              '</a>',
+            row('Choose method automatically', 'From your country', A.sw(S.calc.auto, 'calc-auto')),
+            row('Calculation method', '', pick('pick-method', (P.METHODS[S.calc.method] || P.METHODS.mwl).name)),
+            row('ʿAṣr', 'Shadow length', pick('pick-asr', S.calc.asr === 'hanafi' ? 'Ḥanafī (×2)' : 'Standard (×1)')),
+            row(
+              'High latitudes',
+              'For places where twilight persists',
+              pick(
+                'pick-highlat',
+                (
+                  HIGHLAT.filter(function (x) {
+                    return x.v === S.calc.highLat;
+                  })[0] || HIGHLAT[0]
+                ).t
+              )
+            ),
+            row(
+              'Follow me when I travel',
+              'Updates a GPS location when you are 25 km away',
+              A.sw(S.prefs.autoLoc, 'pref', ' data-k="autoLoc"')
             )
-          ),
-          row(
-            'Follow me when I travel',
-            'Updates a GPS location when you are 25 km away',
-            A.sw(S.prefs.autoLoc, 'pref', ' data-k="autoLoc"')
-          )
-        ]) +
+          ]) +
           group(
             'Travel',
             [
@@ -489,14 +490,34 @@
     notifications: function () {
       var N = S.notif,
         en = N.enabled,
-        ns = A.N.notifState();
-      var warn =
-        ns && ns.exact === false
+        ns = A.N.notifState(),
+        blocked = ns && ns.granted === false;
+      var warn = blocked
+        ? '<div class="rd-note">' +
+          ic('info', 's') +
+          '<div>System notifications are blocked. <button type="button" class="gold" data-a="os-settings" data-w="notifications">Open settings</button></div></div>'
+        : ns && ns.exact === false
           ? '<div class="rd-note">' +
             ic('info', 's') +
-            '<div>Reminders may arrive a few minutes late. <button type="button" class="gold" style="font-weight:800" data-a="os-settings" data-w="exact">Allow</button></div></div>'
+            '<div>Reminders may be delayed without exact timing. <button type="button" class="gold" style="font-weight:800" data-a="os-settings" data-w="exact">Allow</button></div></div>'
           : '';
-      var rows = [row('Reminders', en ? 'On' : 'Allow notifications to begin', A.sw(en, 'notif-master'))];
+      var rows = [
+        row(
+          'Reminders',
+          blocked ? 'Blocked by system' : en ? 'On' : 'Allow notifications to begin',
+          A.sw(en, 'notif-master')
+        )
+      ];
+      if (A.N.has && !blocked)
+        rows.push(
+          '<button type="button" class="set" data-a="test-reminder"><div class="grow"><div class="t">Send a test reminder</div>' +
+            (en && ns && ns.nextAt > Date.now()
+              ? '<div class="s">' + esc(A.T('Next scheduled reminder')) + ' · ' + esc(A.fmtTxt(ns.nextAt)) + '</div>'
+              : '') +
+            '</div>' +
+            ic('bell', 's') +
+            '</button>'
+        );
       if (en && A.N.call('batteryOk') === false)
         warn +=
           '<div class="rd-note">' +
@@ -741,6 +762,9 @@
           '<button type="button" class="set" data-a="import"><span class="badge h-teal">' +
             ic('upload', 's') +
             '</span><div class="grow"><div class="t">Import backup</div><div class="s">From a backup file</div></div></button>',
+          recoveryCopy()
+            ? '<button type="button" class="set" data-a="recover-import"><div class="grow"><div class="t">Restore pre-import copy</div></div></button>'
+            : '',
           '<button type="button" class="set" data-a="wipe"><span class="badge" style="--h:var(--bad)">' +
             ic('trash', 's') +
             '</span><div class="grow"><div class="t" style="color:var(--bad)">Erase all data</div><div class="s">Counts, logs, profile and settings</div></div></button>'
@@ -948,6 +972,10 @@
   A.acts['os-settings'] = function (el) {
     A.N.openSettings(el.dataset.w);
   };
+  A.acts['test-reminder'] = function () {
+    if (A.N.call('testReminder', A.T('Test reminder'), A.T('Adhkār can send reminders on this device.')) !== true)
+      A.toast('Could not send a test reminder. Check system notification settings.', 'info');
+  };
   A.acts['haptic-test'] = function () {
     A.N.haptic('tick');
     setTimeout(function () {
@@ -965,8 +993,20 @@
   A.acts.import = function () {
     A.N.importFile();
   };
-  function finishImport(text, mode) {
-    A.importJSON(text, mode);
+  var RECOVERY_KEY = 'adhkar.before-import';
+  function recoveryCopy() {
+    try {
+      return localStorage.getItem(RECOVERY_KEY);
+    } catch (e) {
+      return null;
+    }
+  }
+  A.acts['recover-import'] = function () {
+    var text = recoveryCopy();
+    if (text) window.__native.onImport(text);
+  };
+  function finishImport(text, mode, requireStorage) {
+    A.importJSON(text, mode, requireStorage);
     S.profile.onboarded = true;
     A.save(true);
     A.applyTheme();
@@ -977,20 +1017,12 @@
   }
   window.__native.onImport = function (text) {
     try {
-      var parsed = JSON.parse(text);
-      if (
-        !parsed ||
-        typeof parsed !== 'object' ||
-        !(parsed.app === 'adhkar' || parsed.state || parsed.counts || parsed.done)
-      )
-        throw new Error('bad');
+      A.readBackup(text);
     } catch (e) {
       A.toast('That file is not an Adhkār backup');
       return;
     }
-    var tot = A.totals(),
-      hasData = tot.dhikr > 0 || tot.sessions > 0 || tot.prayed > 0 || (S.journal && S.journal.items.length > 0);
-    if (!hasData) {
+    if (!A.hasLocalBackupData()) {
       try {
         finishImport(text, 'replace');
       } catch (e) {
@@ -1000,7 +1032,7 @@
     }
     var sh = A.sheet(
       'Import backup',
-      '<p class="muted" style="line-height:1.6">Keep your record here and add what is in the backup, or replace everything on this device.</p>' +
+      '<p class="muted" style="line-height:1.6">Keep your record here and add what is in the backup, or replace everything on this device. Before replacing, Adhkār saves a recovery copy in Backup &amp; data.</p>' +
         '<div class="col" style="gap:8px;margin-top:8px">' +
         '<button type="button" class="btn pri wide" id="impMerge">Merge with this device</button>' +
         '<button type="button" class="btn sec wide" id="impRep">Replace everything</button></div>',
@@ -1015,11 +1047,17 @@
             }
           });
           $('#impRep', el).addEventListener('click', function () {
+            try {
+              localStorage.setItem(RECOVERY_KEY, JSON.stringify(S));
+            } catch (e) {
+              A.toast('Could not save a recovery copy. Free storage before replacing your record.', 'info');
+              return;
+            }
             sh.close(true);
             try {
-              finishImport(text, 'replace');
+              finishImport(text, 'replace', true);
             } catch (e) {
-              A.toast('That file is not an Adhkār backup');
+              A.toast('Could not save the imported record. Free storage and try again.', 'info');
             }
           });
         }
@@ -1035,6 +1073,9 @@
       'All counts, logs, saved items, your profile and settings on this device will be erased. This cannot be undone.',
       'Erase',
       function () {
+        try {
+          localStorage.removeItem(RECOVERY_KEY);
+        } catch (e) {}
         A.reset();
         A.applyTheme();
         A.go('#/welcome');
@@ -1050,6 +1091,16 @@
   var ob = { step: 0 },
     OB_STEPS = ['Name', 'About you', 'Location', 'Reminders', 'Counting', 'Recitations', 'Ready'],
     OB_GLOW = ['gold', 'gold', 'rose', 'jade', 'sapphire', 'jade', 'gold', 'gold'];
+  function prayerPreview(t) {
+    if (!t) return '';
+    return (
+      '<div class="ob-times">' +
+      A.PRAYERS.map(function (p) {
+        return '<div><span>' + esc(A.T(P.NAMES[p])) + '</span><b>' + A.fmtT(t[p]) + '</b></div>';
+      }).join('') +
+      '</div>'
+    );
+  }
   /* the recitations step is only offered where audio can be downloaded (the app, not a browser) */
   var obSkip = function (n) {
     return n === 6 && !(A.audio && A.audio.ok() && !A.audio.web);
@@ -1210,21 +1261,8 @@
             '</div><div class="faint small">' +
             esc(P.METHODS[S.calc.method].name) +
             '</div></div></div>' +
-            (t
-              ? '<div class="ob-times">' +
-                [
-                  ['Fajr', t.fajr],
-                  ['Ḍhuhr', t.dhuhr],
-                  ['ʿAṣr', t.asr],
-                  ['Maghrib', t.maghrib],
-                  ['ʿIshāʾ', t.isha]
-                ]
-                  .map(function (x) {
-                    return '<div><span>' + x[0] + '</span><b>' + A.fmtT(x[1]) + '</b></div>';
-                  })
-                  .join('') +
-                '</div>'
-              : '') +
+            prayerPreview(t) +
+            '<button type="button" class="btn ghost sm" data-a="pick-method">Change calculation method</button>' +
             '</div>'
           : '') +
         '<button type="button" class="btn ' +
@@ -1238,7 +1276,7 @@
         window.CITIES.length +
         ' cities" aria-label="Search cities" enterkeyhint="search"></label><div class="card pad0 cities"><div class="list" id="obl">' +
         A.cityList('', true) +
-        '</div></div></div><div class="foot"><button type="button" class="btn ' +
+        '</div></div><button type="button" class="btn ghost sm" data-a="coords">Enter coordinates</button></div><div class="foot"><button type="button" class="btn ' +
         (S.loc ? 'pri' : 'ghost') +
         ' wide" data-a="ob-next">' +
         (S.loc ? 'Continue' : 'Skip for now') +
@@ -1257,7 +1295,12 @@
         row(
           'Prayer times',
           S.profile.gender === 'f' ? 'Paused automatically on break days' : 'All five prayers',
-          A.sw(true, 'noop')
+          A.sw(
+            A.PRAYERS.some(function (p) {
+              return N.prayers[p];
+            }),
+            'ob-prayers'
+          )
         ) +
         row('Morning adhkār', N.morning.after + ' min after Fajr', A.sw(N.morning.on, 'ob-tog', ' data-k="morning"')) +
         row('Evening adhkār', N.evening.after + ' min after ʿAṣr', A.sw(N.evening.on, 'ob-tog', ' data-k="evening"')) +
@@ -1446,6 +1489,15 @@
     var o = S.notif[el.dataset.k];
     o.on = !o.on;
     el.setAttribute('aria-checked', o.on);
+    A.N.haptic('tick');
+  };
+  A.acts['ob-prayers'] = function (el) {
+    var on = el.getAttribute('aria-checked') !== 'true';
+    A.PRAYERS.forEach(function (p) {
+      S.notif.prayers[p] = on;
+    });
+    el.setAttribute('aria-checked', on);
+    A.save();
     A.N.haptic('tick');
   };
   A.acts['silence-on'] = function () {
