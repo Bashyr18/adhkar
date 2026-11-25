@@ -10,6 +10,7 @@ On Android and Windows. Works offline. No ads, no account, no tracking. Free and
 [![Tests](https://github.com/Bashyr18/adhkar/actions/workflows/test.yml/badge.svg)](https://github.com/Bashyr18/adhkar/actions/workflows/test.yml)
 [![Licence: GPL-3.0](https://img.shields.io/badge/licence-GPL--3.0-6b5a3e)](LICENSE)
 
+[![Google Play Beta](https://img.shields.io/badge/Google%20Play-join%20beta-01875f?logo=googleplay&logoColor=white)](https://bashyr18.github.io/adhkar/guide/#get)
 [![Download for Android](https://img.shields.io/badge/Android-download%20APK-3ddc84?logo=android&logoColor=white)](https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar.apk)
 [![Download for Windows](https://img.shields.io/badge/Windows-installer-0078d4?logo=windows&logoColor=white)](https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar-Setup.exe)
 [![The illustrated guide](https://img.shields.io/badge/the%20guide-read%20online-c79c52)](https://bashyr18.github.io/adhkar/guide/)
@@ -46,7 +47,7 @@ One calm place for the whole day's remembrance. Today leads with what is due now
 
 | | |
 |---|---|
-| **Android** 8 or newer, phones, tablets and foldables | [**Download `Adhkar.apk`**](https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar.apk) (about 4 MB), open it on the phone and allow the install. |
+| **Android** 8 or newer, phones, tablets and foldables | **Google Play (Beta):** 1. [Join the `adhkar-testers` Google Group](https://groups.google.com/g/adhkar-testers) (one click, instant). 2. [Opt in on Google Play](https://play.google.com/apps/testing/com.b3labs.adhkar) and install from the [Play listing](https://play.google.com/store/apps/details?id=com.b3labs.adhkar). Or [**download `Adhkar.apk` directly**](https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar.apk) (about 4 MB), open it on the phone and allow the install. |
 | **Windows** 10 or 11 | [**Download `Adhkar-Setup.exe`**](https://github.com/Bashyr18/adhkar/releases/latest/download/Adhkar-Setup.exe) (about 4 MB), open it and choose **Install**. Adhkār goes in its own folder, in Start, on your desktop and in **Settings › Apps**, for you only with no administrator needed, and updates itself from inside the app. (`Adhkar-Windows.exe` on the release page is the same app as one file that runs without installing.) |
 
 Every file, with its SHA-256 checksum, is on the [releases page](https://github.com/Bashyr18/adhkar/releases/latest). The [guide](https://bashyr18.github.io/adhkar/guide/#install) shows each install screen, step by step.
