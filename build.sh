@@ -30,7 +30,7 @@ echo "[3/8] aapt2 compile"
 
 echo "[4/8] aapt2 link"
 "$BT/aapt2$EXE" link -o "$OUT/base.apk" -I "$AJ" --manifest android/AndroidManifest.xml \
-  --java "$OUT/gen" --min-sdk-version 26 --target-sdk-version 35 \
+  --java "$OUT/gen" --min-sdk-version 26 --target-sdk-version 36 \
   --version-code "$VCODE" --version-name "$VNAME" --auto-add-overlay "$OUT/res.zip"
 
 # aapt2 has twice exited cleanly here without writing its output (the build folder was emptied under it); stop with a
@@ -61,12 +61,19 @@ java -jar "$BT/lib/apksigner.jar" sign --ks "$KS_DIR/adhkar-release.jks" --ks-ke
   --ks-pass "pass:$PASS" --key-pass "pass:$PASS" --out "$DIST/Adhkar.apk" "$OUT/aligned.apk"
 java -jar "$BT/lib/apksigner.jar" verify --print-certs "$DIST/Adhkar.apk" | head -3
 
-# Play Store bundle (needs tools/.bin/bundletool.jar): same resources linked in proto format, signed with the upload key
+# Play Store bundle (needs tools/.bin/bundletool.jar): same resources linked in proto format under the Play Store package ID, signed with the upload key
 if [ -f tools/.bin/bundletool.jar ]; then
   echo "[aab] Play Store bundle"
-  # Play updates its own copies (and does not allow an app to install its own updates): the bundle leaves out that permission
-  grep -v "REQUEST_INSTALL_PACKAGES" android/AndroidManifest.xml > "$OUT/AndroidManifest.play.xml"
-  "$BT/aapt2$EXE" link --proto-format -o "$OUT/proto.apk" -I "$AJ" --manifest "$OUT/AndroidManifest.play.xml"     --min-sdk-version 26 --target-sdk-version 35 --version-code "$VCODE" --version-name "$VNAME" --auto-add-overlay "$OUT/res.zip"
+  PLAY_PKG="${PLAY_PKG:-com.b3labs.adhkar}"
+  # Play updates its own copies (and does not allow an app to install its own updates): leave out REQUEST_INSTALL_PACKAGES
+  # and use the Play Store package ID & ShareProvider authority while keeping com.adhkar.app for GitHub APK updates.
+  grep -v "REQUEST_INSTALL_PACKAGES" android/AndroidManifest.xml | sed "s/com\.adhkar\.app\.share/${PLAY_PKG}.share/g" > "$OUT/AndroidManifest.play.xml"
+  mkdir -p "$OUT/play-res/xml"
+  sed "s/android:targetPackage=\"com\.adhkar\.app\"/android:targetPackage=\"${PLAY_PKG}\"/g" android/res/xml/shortcuts.xml > "$OUT/play-res/xml/shortcuts.xml"
+  "$BT/aapt2$EXE" compile --dir "$OUT/play-res" -o "$OUT/play-res.zip"
+  "$BT/aapt2$EXE" link --proto-format -o "$OUT/proto.apk" -I "$AJ" --manifest "$OUT/AndroidManifest.play.xml" \
+    --rename-manifest-package "$PLAY_PKG" --min-sdk-version 26 --target-sdk-version 36 \
+    --version-code "$VCODE" --version-name "$VNAME" --auto-add-overlay -R "$OUT/play-res.zip" "$OUT/res.zip"
   python tools/aab.py "$OUT/proto.apk" "$OUT/assets" build/dex/classes.dex "$OUT/base.zip" >/dev/null
   rm -f "$DIST/Adhkar.aab"
   java -jar tools/.bin/bundletool.jar build-bundle --modules="$OUT/base.zip" --output="$DIST/Adhkar.aab"

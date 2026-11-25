@@ -545,7 +545,7 @@ public class MainActivity extends Activity implements SensorEventListener {
                 File[] old = dir.listFiles(); if (old != null) for (File f : old) f.delete();
                 String name = "adhkar-" + System.currentTimeMillis() + ".png";
                 try (FileOutputStream fo = new FileOutputStream(new File(dir, name))) { fo.write(Base64.decode(b64, Base64.DEFAULT)); }
-                Uri u = Uri.parse("content://" + ShareProvider.AUTH + "/" + name);
+                Uri u = Uri.parse("content://" + getPackageName() + ".share/" + name);
                 Intent i = new Intent(Intent.ACTION_SEND).setType("image/png").putExtra(Intent.EXTRA_STREAM, u).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 if (text != null && !text.isEmpty()) i.putExtra(Intent.EXTRA_TEXT, text);
                 i.setClipData(ClipData.newRawUri(name, u));
