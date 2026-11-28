@@ -230,8 +230,13 @@ python -I tools/readme_images.py        # docs/screens/*.webp, composed from tho
 ### The promotional films
 
 ```bash
-bash tools/promo/film.sh                # the 45-second film in 4:5, 9:16 and 16:9: tools/promo/ad.html drawn frame by frame, its sound cued by the picture
+node tools/guide-shots.js promo-extra promo-friday promo-ramadan   # the films' own screens, from the app (with a seeded Ramaḍān day 11)
+bash tools/promo/general.sh             # the 50-second film, any time of year: 9:16, 4:5 and 16:9, each framed for its shape
+bash tools/promo/ramadan.sh             # the 45-second Ramaḍān film, in the same three shapes
+bash tools/promo/film.sh                # the earlier 45-second film (tools/promo/ad.html)
 ```
+
+Each script writes a master, a lighter `-share` copy and a `-sfx` copy (sound design only) per shape to `dist/`. The 4:5 and 16:9 cuts reframe every scene for their shape (`focus.feed` and `focus.land`), so phones stay whole in 16:9 and the desktop app fills the frame.
 
 ### Download counts
 

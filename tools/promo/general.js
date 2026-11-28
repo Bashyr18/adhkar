@@ -95,10 +95,15 @@
       ['G', 19.6, 'push'], ['H', 22.8, 'flip'], ['I', 25.8, 'split'], ['J', 28.6, 'slide'], ['K', 31.6, 'bloom'], ['L', 34.6, 'iris2'],
       ['M', 37.8, 'push'], ['N', 41.0, 'window'], ['O', 44.0, 'zoom'], ['P', 47.0, 'flash']],
     /* each beat's subject in the portrait frame, and where it goes in the other shapes */
-    focus: { _: [40, 500, 1040, 1460], A: [140, 380, 940, 1080], C: [-160, 520, 1240, 1460], I: [-120, 520, 1200, 1460], J: [40, 520, 1180, 1460], N: [140, 520, 940, 1560], O: [-110, 620, 1190, 1400], P: [120, 300, 960, 1420] },
+    focus: { _: [40, 500, 1040, 1460], A: [140, 380, 940, 1080], C: [-160, 520, 1240, 1460], I: [-120, 520, 1200, 1460], J: [40, 520, 1180, 1460], N: [140, 520, 940, 1560], O: [-110, 620, 1190, 1400], P: [120, 300, 960, 1420],
+      /* the feed: the desktop leans in, its sidebar and sky card filling the width, the far edge running off */
+      feed: { O: [-40, 650, 900, 1390] },
+      /* landscape: every phone whole, top to foot, beside the words; the computer as large as the frame allows */
+      land: { B: [190, 520, 890, 1690], L: [190, 520, 890, 1690], M: [190, 520, 890, 1690], G: [80, 440, 1000, 1800], H: [140, 490, 940, 1800],
+        J: [170, 520, 1110, 1680], C: [-160, 520, 1240, 1690], I: [-130, 520, 1210, 1640], O: [-10, 680, 1090, 1370] } },
     area: {
-      feed: { _: [40, 320, 1040, 1350], A: [140, 70, 940, 1080], P: [80, 30, 1000, 1330] },
-      land: { _: [780, 40, 1860, 1040], A: [820, 60, 1820, 1020], P: [400, 30, 1520, 1050], O: [740, 140, 1880, 940], C: [740, 60, 1900, 1040], I: [740, 60, 1900, 1040] }
+      feed: { _: [40, 320, 1040, 1350], A: [140, 70, 940, 1080], P: [80, 30, 1000, 1330], O: [0, 360, 1080, 1300] },
+      land: { _: [780, 40, 1860, 1040], A: [820, 60, 1820, 1020], P: [400, 30, 1520, 1050], O: [640, 100, 1860, 1000], C: [740, 40, 1900, 1040], I: [740, 40, 1900, 1040] }
     },
     tint: function (t, AT) { return t >= AT.K && t < AT.L ? '246,190,215' : t >= AT.E && t < AT.F ? '170,235,210' : '246,214,150'; },
     flashes: [['C', .75], ['O', .45], ['P', .8]],
@@ -206,7 +211,7 @@
         $('Gph').style.transform = 'translateY(' + ((1 - a) * 260 + 120) + 'px) rotateX(' + (20 - 12 * a) + 'deg) rotateY(' + (14 - 22 * io(seg(lt, 0, 3.6))) + 'deg) scale(.82)';
         $('Ggl').style.backgroundPosition = (100 - seg(lt, .3, 2.3) * 100) + '% 0';
         var n = back(seg(lt, 1.3, 2.0));
-        $('Gn').style.transform = 'translateY(' + L(-520, 0, n) + 'px) translateZ(160px) scale(' + L(.92, 1, o3(seg(lt, 1.3, 2.0))) + ')';
+        $('Gn').style.transform = 'translateY(' + L(SHAPE === 'port' ? -520 : -140, 0, n) + 'px) translateZ(160px) scale(' + L(.92, 1, o3(seg(lt, 1.3, 2.0))) + ')';
         $('Gn').style.opacity = o3(seg(lt, 1.3, 1.6));
         var dua = 'Guidance and good health for my parents', k = Math.floor(seg(lt, 2.1, 3.1) * dua.length);
         $('Gtype').textContent = dua.slice(0, k) + (lt > 2.0 && lt < 3.3 && Math.floor(lt * 3) % 2 ? '|' : '');
@@ -255,7 +260,8 @@
       },
       M: function (lt) {
         phoneIn('Mph', lt, 14, -8);
-        $('Mimg').style.transform = 'translateY(' + -io(seg(lt, .7, 3.0)) * 1560 + 'px)';
+        /* down through the fasts and make-up fasts to tarāwīḥ and the khatm */
+        $('Mimg').style.transform = 'translateY(' + -io(seg(lt, .6, 3.0)) * 2500 + 'px)';
         $('Mgl').style.backgroundPosition = (100 - seg(lt, .3, 2.3) * 100) + '% 0';
       },
       N: function (lt) {

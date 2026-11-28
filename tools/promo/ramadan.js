@@ -127,10 +127,14 @@
     beats: [['A', 0, 'fade'], ['B', 4.2, 'iris'], ['C', 8.2, 'diag'], ['D', 12.45, 'zoom'], ['E', 17.0, 'push'], ['F', 21.2, 'window'],
       ['Q', 25.0, 'shutter'], ['G', 28.6, 'flip'], ['H', 32.2, 'slide'], ['I', 36.2, 'iris2'], ['J', 38.6, 'zoom'], ['K', 41.3, 'flash']],
     /* each beat's subject in the portrait frame, and where it goes in the feed and in landscape */
-    focus: { _: [40, 500, 1040, 1460], A: [60, 120, 1020, 960], J: [24, 688, 1056, 1385], K: [60, 160, 1020, 1440] },
+    focus: { _: [40, 500, 1040, 1460], A: [60, 120, 1020, 960], J: [24, 688, 1056, 1385], K: [60, 160, 1020, 1440],
+      /* the feed: the dashboard leans in, its sidebar and ifṭār card filling the width, the far edge running off */
+      feed: { J: [30, 700, 930, 1360] },
+      /* landscape: each phone whole, top to foot, beside the words; the dashboard as large as the frame allows */
+      land: { B: [120, 520, 960, 1700], E: [80, 440, 1000, 1800], J: [30, 700, 1050, 1360] } },
     area: {
-      feed: { _: [40, 320, 1040, 1350], A: [60, 30, 1020, 960], K: [60, 20, 1020, 1330], J: [46, 370, 1034, 1190] },
-      land: { _: [780, 40, 1860, 1040], A: [860, 40, 1860, 1040], K: [420, 20, 1500, 1060], J: [790, 120, 1860, 1010] }
+      feed: { _: [40, 320, 1040, 1350], A: [60, 30, 1020, 960], K: [60, 20, 1020, 1330], J: [0, 360, 1080, 1300] },
+      land: { _: [780, 40, 1860, 1040], A: [860, 40, 1860, 1040], K: [420, 20, 1500, 1060], J: [620, 110, 1870, 990] }
     },
     tint: function (t, AT) {
       return t >= AT.G && t < AT.H ? '246,190,215' : '246,214,150';
@@ -228,7 +232,7 @@
       $('Eph').style.transform = 'translateY(' + ((1 - a) * 260 + 120) + 'px) rotateX(' + (20 - 12 * a) + 'deg) rotateY(' + (14 - 22 * io(seg(lt, 0, 4.8))) + 'deg) scale(.82)';
       $('Egl').style.backgroundPosition = (100 - seg(lt, .3, 2.3) * 100) + '% 0';
       var n = back(seg(lt, 1.4, 2.1)), out = 0;
-      $('En').style.transform = 'translateY(' + L(-520, 0, n) + 'px) translateZ(' + 160 + 'px) scale(' + L(.92, 1, o3(seg(lt, 1.4, 2.1))) + ')';
+      $('En').style.transform = 'translateY(' + L(F.SHAPE === 'port' ? -520 : -140, 0, n) + 'px) translateZ(' + 160 + 'px) scale(' + L(.92, 1, o3(seg(lt, 1.4, 2.1))) + ')';
       $('En').style.opacity = o3(seg(lt, 1.4, 1.7)) * (1 - out);
       var dua = 'Guidance and good health for my parents', k = Math.floor(seg(lt, 2.2, 3.6) * dua.length);
       $('Etype').textContent = dua.slice(0, k) + (lt > 2.1 && lt < 4.2 && Math.floor(lt * 3) % 2 ? '|' : '');

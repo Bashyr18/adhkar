@@ -62,6 +62,9 @@ html.land .small { font-size: 31px; max-width: 600px; }
 #fade { position: absolute; inset: 0; z-index: 60; background: #000; pointer-events: none; }
 /* in landscape the words sit over a soft shade, so they read over the busiest beat */
 html.land .b::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 980px; z-index: 5; pointer-events: none; background: linear-gradient(90deg, rgba(4,5,20,.78), rgba(4,5,20,.45) 60%, rgba(4,5,20,0)); }
+/* the dashboard gets the width: a narrower column of words, and the shade stops short of its sidebar */
+html.land #J .band { width: 500px; }
+html.land #J::after { width: 700px; }
 .notif { position: absolute; left: 90px; width: 900px; padding: 30px 34px 32px; border-radius: 44px; background: rgba(30,32,42,.94); box-shadow: 0 40px 90px -20px rgba(0,0,0,.9), 0 0 0 1.5px rgba(246,223,170,.25); font-family: Quicksand; }
 .notif .hd { display: flex; align-items: center; gap: 14px; font: 600 24px Quicksand; color: rgba(245,240,231,.62); }
 .notif .hd svg { width: 40px; height: 40px; border-radius: 10px; }
@@ -190,7 +193,7 @@ html.land .b::after { content: ''; position: absolute; left: 0; top: 0; bottom: 
     </div>
     <div class="band">
       <div class="m"><span class="kick">The last ten nights</span></div>
-      <div class="m"><span class="line">Seek <span class="g">Laylat al-Qadr.</span></span></div>
+      <div class="m"><span class="line">Seek <span class="g" style="white-space:nowrap">Laylat al-Qadr.</span></span></div>
       <div class="m"><span class="small">Every odd night marked, with its duʿāʾ ready.</span></div>
     </div>
   </div>

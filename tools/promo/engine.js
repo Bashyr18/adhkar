@@ -1,6 +1,7 @@
 /* The films' shared engine (tools/promo/general.html, ramadan.html): the shape, the beats and the ways they open, the
    light that rides each cut, drifting motes, grain, the words rising from behind a mask, and the sound cues.
-   A film calls Film({ dur, beats, draw, focus, area, cues, tint, flashes }) from its own script. Everything is a pure
+   A film calls Film({ dur, beats, draw, focus, area, cues, tint, flashes }); focus.feed and focus.land, when
+   given, frame a beat's subject differently for that shape from its own script. Everything is a pure
    function of t: window.render(t) draws one frame; tools/promo/render.js steps through it into ffmpeg.
    Shapes (from the page's query): portrait 1080 x 1920 by default, ?feed 1080 x 1350, ?land 1920 x 1080. Each beat's
    visuals are drawn once in the portrait frame (.vis, 1080 x 1920); fit() moves the box `focus` of that frame into the
@@ -31,7 +32,7 @@
     var DEF_AREA = { port: null, feed: [40, 320, 1040, 1350], land: [780, 40, 1860, 1040] };
     function fit(id) {
       if (SHAPE === 'port') return null;
-      var f = FOCUS[id] || DEF_FOCUS, a = (AREA[SHAPE] && AREA[SHAPE][id]) || (AREA[SHAPE] && AREA[SHAPE]._) || DEF_AREA[SHAPE];
+      var f = (FOCUS[SHAPE] && FOCUS[SHAPE][id]) || FOCUS[id] || DEF_FOCUS, a = (AREA[SHAPE] && AREA[SHAPE][id]) || (AREA[SHAPE] && AREA[SHAPE]._) || DEF_AREA[SHAPE];
       var s = Math.min((a[2] - a[0]) / (f[2] - f[0]), (a[3] - a[1]) / (f[3] - f[1]));
       return { s: s, tx: (a[0] + a[2]) / 2 - s * (f[0] + f[2]) / 2, ty: (a[1] + a[3]) / 2 - s * (f[1] + f[3]) / 2, cx: (f[0] + f[2]) / 2, cy: (f[1] + f[3]) / 2 };
     }

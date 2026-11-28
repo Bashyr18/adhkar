@@ -14,8 +14,8 @@
      Every beat's visuals are drawn once in the portrait frame and placed per shape by fit(): the words go to a band at
      the top (portrait, feed) or a column at the left (landscape). In portrait nothing that matters sits in the bottom
      quarter or the right edge, where status and reels viewers lay their buttons. The screens are the guide's own
-     (docs/guide/shots, made by tools/guide-shots.js); assets/ramadan-full.webp is the full Ramaḍān page from the same
-     sample. The notification and break wording are the app's (Scheduler.java, v-today.js). -->
+     (docs/guide/shots, made by tools/guide-shots.js); ramadan/month-full.webp is the whole Ramaḍān page on day 11, made by
+     its promo-ramadan group. The notification and break wording are the app's (Scheduler.java, v-today.js). -->
 <style>
 @font-face { font-family: 'Quicksand'; font-weight: 400 700; src: url(../../docs/guide/fonts/Quicksand-400-700-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+2000-206F; }
 @font-face { font-family: 'Quicksand'; font-weight: 400 700; src: url(../../docs/guide/fonts/Quicksand-400-700-latin-ext.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02FF, U+1E00-1EFF; }
@@ -72,6 +72,9 @@ html.land .small { font-size: 31px; max-width: 600px; }
 #fade { position: absolute; inset: 0; z-index: 60; background: #000; pointer-events: none; }
 /* in landscape the words sit over a soft shade, so they read over the busiest beat */
 html.land .b::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 980px; z-index: 5; pointer-events: none; background: linear-gradient(90deg, rgba(4,5,20,.78), rgba(4,5,20,.45) 60%, rgba(4,5,20,0)); }
+/* the computer gets the width: a narrower column of words, and the shade stops short of its sidebar */
+html.land #O .band { width: 500px; }
+html.land #O::after { width: 700px; }
 /* the home-screen widgets, drawn as the app draws them (android/res/drawable/widget_bg_day, widget_tsb_bg, widget_ring) */
 .wg { font-family: 'Quicksand', sans-serif; color: #F5F0E7; overflow: hidden; box-sizing: border-box; }
 .wp { display: flex; flex-direction: column; border-radius: 44px; padding: 34px 38px 32px; background: linear-gradient(180deg, #0E2544, #1C4670 55%, #2F6A94); }
@@ -333,7 +336,7 @@ html.land .b::after { content: ''; position: absolute; left: 0; top: 0; bottom: 
     <div class="bg" style="background:radial-gradient(75% 50% at 50% 56%, #2a2160, #05061a 74%)"></div>
     <div class="stars" id="Mst"></div>
     <div class="vis" id="Mv">
-      <div class="phone" id="Mph" style="left:220px;top:560px"><div class="scr"><img id="Mimg" src="assets/ramadan-full.webp" style="height:auto;bottom:auto"><i class="gl" id="Mgl"></i></div></div>
+      <div class="phone" id="Mph" style="left:220px;top:560px"><div class="scr"><img id="Mimg" src="../../docs/guide/shots/ramadan/month-full.webp" style="height:auto;bottom:auto"><i class="gl" id="Mgl"></i></div></div>
     </div>
     <div class="band">
       <div class="m"><span class="kick">Ramaḍān</span></div>

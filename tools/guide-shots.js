@@ -1,5 +1,6 @@
 /* Every screenshot in the guide and the README, from the app itself with a month of sample use.
-     node tools/guide-shots.js [group ...]       (groups: dark light ar friday friday-light ramadan desk desk-light desk-ar)
+     node tools/guide-shots.js [group ...]       (groups: dark light ar friday friday-light ramadan desk desk-light desk-ar,
+                                                   promo-extra promo-friday promo-ramadan)
    Each group is one run of headless Edge (tools/cdp.js) with its own theme, language and, for Friday and Ramaḍān,
    a clock set to such a day, so those modes appear exactly as they do on that day. Phone screens are 360 x 746 at
    2x (saved 720 x 1491), desktop screens 1600 x 1000. Output: docs/guide/shots/<group>/<name>.webp. */
@@ -68,6 +69,11 @@ const GROUPS = {
   'friday-ar': { theme: 'dark', ar: true, at: '2026-11-20T09:30:00', dir: 'friday', suffix: '-ar', shots: FRIDAY },
   'ramadan-light': { theme: 'light', at: '2027-02-18T15:20:00', dir: 'ramadan', suffix: '-light', shots: RAMADAN },
   'ramadan-ar': { theme: 'dark', ar: true, at: '2027-02-18T15:20:00', dir: 'ramadan', suffix: '-ar', shots: RAMADAN },
+  /* the promo films' own screens (tools/promo): the reader with its recitation, al-Kahf with its translation,
+     and the Ramaḍān page from top to foot, which the general film scrolls through */
+  'promo-extra': { theme: 'dark', dir: 'extra', shots: { 'reader-audio': '#/r/morning/1' } },
+  'promo-friday': { theme: 'dark', at: '2026-11-20T09:30:00', dir: 'friday', shots: { 'kahf-tr': '#/kahf|[data-a="kf-mode"][data-m="tr"]' } },
+  'promo-ramadan': { theme: 'dark', at: '2027-02-18T15:20:00', dir: 'ramadan', month: true, full: ['month-full'], shots: { 'month-full': '#/ramadan' } },
   ramadan: {
     theme: 'dark',
     at: '2027-02-18T15:20:00',
@@ -143,7 +149,25 @@ function sample(now, g) {
   }
   const t = iso(new Date(now));
   prayed[t] = { fajr: 1 };
+  /* the promo's Ramaḍān (day 11 of 1448): nine fasts kept and one missed, ten nights of tarāwīḥ, eleven ajzāʾ read */
+  const extra = {};
+  if (g.month) {
+    const back = (n) => iso(new Date(now - n * 864e5));
+    const fasts = {},
+      skip = {},
+      taraweeh = {},
+      juz = {};
+    for (let n = 1; n <= 10; n++) {
+      if (n === 4) skip[back(11 - n)] = 1;
+      else fasts[back(11 - n)] = 'ramadan';
+    }
+    for (let n = 1; n <= 11; n++) if (n !== 6) taraweeh[back(12 - n)] = n % 3 ? 8 : 20;
+    for (let j = 1; j <= 11; j++) juz[j] = 1;
+    extra.fasts = fasts;
+    extra.ramadan = { skip, taraweeh, khatm: { juz, done: 0 } };
+  }
   return {
+    ...extra,
     v: 10,
     profile: { name: 'Bashir', hue: 'gold', since: iso(new Date(now - 40 * 864e5)), onboarded: true, gender: 'm' },
     loc: { lat: 6.5244, lng: 3.3792, name: 'Lagos', city: 'Lagos', country: 'Nigeria', src: 'city', tz: 1 },
@@ -223,7 +247,15 @@ async function run(page) {
     }
     await page.eval('window.scrollTo(0,0);1');
     await page.wait(250);
+    /* a whole page: the window grows to the page's full height for one picture */
+    const full = (g.full || []).indexOf(shot) >= 0;
+    if (full) {
+      const h = await page.eval('Math.ceil(document.documentElement.scrollHeight)');
+      await page.size(360, h, 2);
+      await page.wait(1200);
+    }
     const r = await page.send('Page.captureScreenshot', { format: 'png' });
+    if (full) await page.size(360, 746, 2);
     const png = path.join(dir, shot + (g.suffix || '') + '.png');
     fs.writeFileSync(png, Buffer.from(r.result.data, 'base64'));
     if (route === 'pal') await page.eval('Desk.palette();1');
@@ -266,7 +298,7 @@ import glob, os
 from PIL import Image
 for f in glob.glob(${JSON.stringify(path.join(ROOT, 'docs', 'guide', 'shots').replace(/\\/g, '/'))} + '/*/*.png'):
     im = Image.open(f).convert('RGB')
-    if im.width == 720: im = im.crop((0, 0, 720, 1491))
+    if im.width == 720 and not f.endswith('-full.png'): im = im.crop((0, 0, 720, 1491))
     im.save(f[:-4] + '.webp', quality=86, method=6)
     os.remove(f)
 `
