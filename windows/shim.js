@@ -204,11 +204,15 @@
       a.onerror = fail;
       if (!Q.held) a.play().catch(fail);
       if (Q.i + 1 < Q.list.length) media('/rec/' + Q.list[Q.i + 1]).catch(function () {});
-      Q.t = setInterval(function () {
-        if (Q.el && Q.el.duration && nat().onAudioPos)
-          nat().onAudioPos(Q.i, Q.list.length, Q.el.currentTime * 1000, Q.el.duration * 1000, !Q.el.paused);
-      }, 200);
+      if (!Q.held) startTick();
     }, fail);
+  }
+  function startTick() {
+    clearInterval(Q.t);
+    Q.t = setInterval(function () {
+      if (Q.el && Q.el.duration && nat().onAudioPos)
+        nat().onAudioPos(Q.i, Q.list.length, Q.el.currentTime * 1000, Q.el.duration * 1000, !Q.el.paused);
+    }, 200);
   }
   B.audioPlay = function (json, rate) {
     try {
@@ -223,11 +227,16 @@
   };
   B.audioPause = function () {
     Q.held = true;
+    clearInterval(Q.t);
+    Q.t = 0;
     if (Q.el) Q.el.pause();
   };
   B.audioResume = function () {
     Q.held = false;
-    if (Q.el) Q.el.play().catch(function () {});
+    if (Q.el) {
+      Q.el.play().catch(function () {});
+      startTick();
+    }
   };
   B.audioRate = function (r) {
     Q.rate = Math.max(0.5, Math.min(1.5, +r || 1));
@@ -245,8 +254,10 @@
       return false;
     }
     var me = (adhan = {
+      el: null,
       pause: function () {
         me.off = true;
+        if (me.el) me.el.pause();
       }
     });
     var done = function () {
@@ -255,7 +266,7 @@
     };
     media('/audio/adhan_takbir.ogg').then(function (url) {
       if (me.off || adhan !== me) return;
-      var a = (adhan = new Audio(url));
+      var a = (me.el = new Audio(url));
       a.onended = a.onerror = done;
       a.play().catch(done);
     }, done);

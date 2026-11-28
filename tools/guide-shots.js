@@ -30,6 +30,8 @@ const PHONE = {
   location: '#/location',
   learn: '#/learn',
   'learn-fajr': '#/learn/fajr',
+  wudu: '#/purity/wudu/3',
+  ghusl: '#/purity/ghusl',
   quiz: '#/learn/quiz',
   journal: '#/journal',
   answered: '#/answered',
@@ -71,6 +73,7 @@ const GROUPS = {
     at: '2027-02-18T15:20:00',
     shots: RAMADAN
   },
+  'ramadan-desktop': { theme: 'dark', desk: true, at: '2027-02-18T15:20:00', shots: { month: '#/ramadan' } },
   desk: {
     theme: 'dark',
     desk: true,

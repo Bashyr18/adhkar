@@ -9,6 +9,10 @@
     esc = A.esc,
     ic = A.icon;
   var MIN = 60000;
+  if (A.addAr)
+    A.addAr({
+      'Install Adhkār on Android or Windows for reminders.': 'ثبّت الأذكار على أندرويد أو ويندوز لتفعيل التنبيهات.'
+    });
 
   /* ---------- iqāmah ---------- */
   A.iqamaAt = function (key, k) {
@@ -135,21 +139,31 @@
         '<div class="sec"><h2>Answered</h2><span class="aside">Alḥamdulillāh</span></div><div class="col" style="gap:10px">' +
         done.map(card).join('') +
         '</div>';
-    var N = j.nudge;
+    var N = j.nudge,
+      rem = A.remindersOn();
     h +=
       '<div class="sec"><h2>Remind me</h2></div><div class="card pad0"><div class="list">' +
-      row('The last third of the night', 'With one of your duʿāʾs', A.sw(N.night, 'dua-nudge', ' data-k="night"')) +
-      row('The last hour of Friday', 'Before Maghrib on Friday', A.sw(N.friday, 'dua-nudge', ' data-k="friday"')) +
+      row(
+        'The last third of the night',
+        'With one of your duʿāʾs',
+        A.sw(rem && N.night, 'dua-nudge', ' data-k="night"')
+      ) +
+      row(
+        'The last hour of Friday',
+        'Before Maghrib on Friday',
+        A.sw(rem && N.friday, 'dua-nudge', ' data-k="friday"')
+      ) +
       row(
         'Between adhān and iqāmah',
-        N.adhan ? 'At ' + P.NAMES[N.adhan] : 'Off',
+        rem && N.adhan ? 'At ' + P.NAMES[N.adhan] : 'Off',
         '<button type="button" class="chip on" data-a="dua-adhan-pick">' +
-          (N.adhan ? P.NAMES[N.adhan] : 'Off') +
+          (rem && N.adhan ? P.NAMES[N.adhan] : 'Off') +
           ic('down', 'xs') +
           '</button>'
       ) +
       '</div></div>';
-    if (!S.notif.enabled) h += '<p class="faint small" style="margin:4px 6px">Reminders are off in Settings.</p>';
+    if (!A.N.has) h += '<p class="faint small" style="margin:4px 6px">Install the Adhkār app for reminders.</p>';
+    else if (!S.notif.enabled) h += '<p class="faint small" style="margin:4px 6px">Reminders are off in Settings.</p>';
     h +=
       '<a class="card coll press h-indigo" href="#/answered"><div class="badge s">' +
       ic('book', 's') +
@@ -230,6 +244,7 @@
         '<button type="button" class="btn pri wide" id="duOk">' +
         (isNew ? 'Add' : 'Save') +
         '</button>' +
+        (d.done ? '<button type="button" class="btn sec wide" id="duAsk">Return to asking</button>' : '') +
         (isNew
           ? ''
           : '<button type="button" class="btn ghost wide" id="duDel" style="color:var(--bad)">Delete</button>'),
@@ -265,6 +280,15 @@
             sh.close();
             A.rerender();
           });
+          var ask = $('#duAsk', el);
+          if (ask)
+            ask.addEventListener('click', function () {
+              delete d.done;
+              A.save();
+              A.N.haptic('tick');
+              sh.close();
+              A.rerender();
+            });
           var del = $('#duDel', el);
           if (del)
             del.addEventListener('click', function () {
@@ -305,9 +329,20 @@
     A.rerender();
   };
   A.acts['dua-nudge'] = function (el) {
-    var N = J().nudge;
-    N[el.dataset.k] = !N[el.dataset.k];
-    el.setAttribute('aria-checked', N[el.dataset.k]);
+    var N = J().nudge,
+      k = el.dataset.k;
+    if (!A.remindersOn()) {
+      A.enableNotifs(function (ok) {
+        if (ok) {
+          N[k] = true;
+          A.save();
+          A.rerender();
+        }
+      });
+      return;
+    }
+    N[k] = !N[k];
+    el.setAttribute('aria-checked', N[k]);
     A.save();
     A.N.haptic('tick');
   };
@@ -327,6 +362,16 @@
       ),
       J().nudge.adhan || '',
       function (v) {
+        if (v && !A.remindersOn()) {
+          A.enableNotifs(function (ok) {
+            if (ok) {
+              J().nudge.adhan = v;
+              A.save();
+              A.rerender();
+            }
+          });
+          return;
+        }
         J().nudge.adhan = v;
         A.save();
         A.rerender();

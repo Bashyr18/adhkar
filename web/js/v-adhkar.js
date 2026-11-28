@@ -627,36 +627,41 @@
         star(g, x, y, 34, 25);
         g.stroke();
       }
-    var M = 56;
-    g.strokeStyle = hexA(c[0], 0.35);
+    var M = 52;
+    g.strokeStyle = hexA(c[0], 0.36);
     g.lineWidth = 2;
-    roundRect(g, M, M, W - 2 * M, H - 2 * M, 48);
+    roundRect(g, M, M, W - 2 * M, H - 2 * M, 44);
+    g.stroke();
+    g.strokeStyle = hexA(c[0], 0.14);
+    g.lineWidth = 1.2;
+    roundRect(g, M + 12, M + 12, W - 2 * (M + 12), H - 2 * (M + 12), 34);
     g.stroke();
     g.textAlign = 'center';
     g.textBaseline = 'alphabetic';
+    var isAr = A.ar && A.ar();
     /* header: an eight-point star, the collection, today's date */
-    var hy = fmt === 'post' ? 150 : 210;
-    g.fillStyle = hexA(c[0], 0.9);
-    star(g, W / 2, hy - 64, 18, 13);
+    var hy = fmt === 'post' ? 136 : 182;
+    g.fillStyle = hexA(c[0], 0.92);
+    star(g, W / 2, hy - 54, 18, 12.5);
     g.fill();
-    g.font = '700 28px Quicksand';
-    g.fillStyle = hexA(c[0], 0.95);
-    g.fillText(
-      String(colTitle || 'Adhkār')
-        .toUpperCase()
-        .split('')
-        .join(String.fromCharCode(8202)),
-      W / 2,
-      hy
-    );
-    g.font = '600 26px Quicksand';
-    g.fillStyle = 'rgba(245,240,231,.5)';
-    g.fillText(A.hijriText(A.today()), W / 2, hy + 46);
-    /* body: fit the Arabic, then the translation, into the space between header and footer */
-    var top = hy + 110,
-      bottom = H - (fmt === 'post' ? 210 : 290),
+    g.direction = isAr ? 'rtl' : 'ltr';
+    g.font = isAr ? '700 32px Amiri, serif' : '700 30px Quicksand, sans-serif';
+    g.fillStyle = hexA(c[0], 0.96);
+    var headTitle = isAr
+      ? A.T(colTitle || 'Adhkār')
+      : String(colTitle || 'Adhkār')
+          .toUpperCase()
+          .split('')
+          .join(String.fromCharCode(8202));
+    g.fillText(headTitle, W / 2, hy);
+    g.font = isAr ? '400 28px Amiri, serif' : '600 27px Quicksand, sans-serif';
+    g.fillStyle = 'rgba(245,240,231,.6)';
+    g.fillText(A.hijriText(A.today()), W / 2, hy + 44);
+    /* body: generous real-estate usage so Arabic and translation read effortlessly on mobile screens */
+    var top = hy + 92,
+      bottom = H - (fmt === 'post' ? 196 : 254),
       area = bottom - top,
-      tw = W - 2 * M - 120;
+      tw = W - 2 * M - 92;
     /* the basmalah keeps its own line; the āyāt after it flow on */
     var keepBsm = function (x) {
       var p = String(x || '').split('\n');
@@ -665,50 +670,50 @@
         : p.join(' ');
     };
     var ar = keepBsm(it.ar),
-      en = keepBsm(it.en),
-      af = it.quran ? '"Amiri Quran"' : 'Amiri',
+      en = isAr ? '' : keepBsm(it.en),
+      af = it.quran ? '"Amiri Quran", Amiri, serif' : 'Amiri, serif',
       aS,
       aL,
       eS,
       eL;
     g.direction = 'rtl';
-    for (aS = 92; aS >= 34; aS -= 2) {
+    for (aS = isAr ? 104 : 98; aS >= 38; aS -= 2) {
       g.font = '400 ' + aS + 'px ' + af;
       aL = wrap(g, ar, tw);
-      if (aL.length * aS * 1.85 <= area * (en ? 0.6 : 0.9)) break;
+      if (aL.length * aS * 1.8 <= area * (en ? 0.58 : 0.9)) break;
     }
     g.direction = 'ltr';
-    var left = area - aL.length * aS * 1.85 - 90;
-    for (eS = 38; eS >= 24; eS -= 2) {
-      g.font = '500 ' + eS + 'px Quicksand';
+    var left = area - aL.length * aS * 1.8 - 84;
+    for (eS = 44; eS >= 28; eS -= 2) {
+      g.font = '500 ' + eS + 'px Quicksand, sans-serif';
       eL = en ? wrap(g, '“' + en + '”', tw) : [];
-      if (eL.length * eS * 1.5 <= left) break;
+      if (eL.length * eS * 1.48 <= left) break;
     }
-    var maxE = Math.max(0, Math.floor(left / (eS * 1.5)));
+    var maxE = Math.max(0, Math.floor(left / (eS * 1.48)));
     if (eL.length > maxE) {
       eL = eL.slice(0, maxE);
       if (eL.length) eL[eL.length - 1] = eL[eL.length - 1].replace(/\s*\S*$/, '…');
     }
-    var block = aL.length * aS * 1.85 + (eL.length ? 90 + eL.length * eS * 1.5 : 0),
-      y0 = top + (area - block) / 2;
+    var block = aL.length * aS * 1.8 + (eL.length ? 84 + eL.length * eS * 1.48 : 0),
+      y0 = top + Math.max(0, (area - block) / 2);
     g.direction = 'rtl';
     g.font = '400 ' + aS + 'px ' + af;
-    g.fillStyle = '#f7f1e6';
+    g.fillStyle = '#faf5eb';
     aL.forEach(function (l, i) {
-      g.fillText(l, W / 2, y0 + i * aS * 1.85 + aS * 1.25);
+      g.fillText(l, W / 2, y0 + i * aS * 1.8 + aS * 1.2);
     });
     g.direction = 'ltr';
     if (eL.length) {
-      var oy = y0 + aL.length * aS * 1.85 + 40;
+      var oy = y0 + aL.length * aS * 1.8 + 38;
       g.strokeStyle = hexA(c[0], 0.55);
       g.lineWidth = 2;
       g.beginPath();
-      g.moveTo(W / 2 - 90, oy);
+      g.moveTo(W / 2 - 104, oy);
       g.lineTo(W / 2 - 16, oy);
       g.moveTo(W / 2 + 16, oy);
-      g.lineTo(W / 2 + 90, oy);
+      g.lineTo(W / 2 + 104, oy);
       g.stroke();
-      g.fillStyle = hexA(c[0], 0.85);
+      g.fillStyle = hexA(c[0], 0.9);
       g.beginPath();
       g.moveTo(W / 2, oy - 8);
       g.lineTo(W / 2 + 8, oy);
@@ -716,22 +721,36 @@
       g.lineTo(W / 2 - 8, oy);
       g.closePath();
       g.fill();
-      g.font = '500 ' + eS + 'px Quicksand';
-      g.fillStyle = 'rgba(245,240,231,.82)';
+      g.font = '500 ' + eS + 'px Quicksand, sans-serif';
+      g.fillStyle = 'rgba(248,243,234,.88)';
       eL.forEach(function (l, i) {
-        g.fillText(l, W / 2, oy + 50 + i * eS * 1.5 + eS * 0.8);
+        g.fillText(l, W / 2, oy + 46 + i * eS * 1.48 + eS * 0.78);
       });
     }
-    /* footer: source and a quiet signature */
-    var fy = H - (fmt === 'post' ? 140 : 200);
+    /* footer: source and a clean minimalist app wordmark */
+    var fy = H - (fmt === 'post' ? 136 : 186);
     if (it.refs && it.refs[0]) {
-      g.font = '700 26px Quicksand';
-      g.fillStyle = hexA(c[0], 0.9);
-      g.fillText(it.refs[0].l + (it.target > 1 ? '  ·  ×' + it.target : ''), W / 2, fy);
+      g.direction = isAr ? 'rtl' : 'ltr';
+      g.font = isAr ? '700 28px Amiri, serif' : '700 28px Quicksand, sans-serif';
+      g.fillStyle = hexA(c[0], 0.92);
+      var refLabel = isAr ? A.T(it.refs[0].l) : it.refs[0].l;
+      g.fillText(refLabel + (it.target > 1 ? '  ·  ×' + A.fmtN(it.target) : ''), W / 2, fy);
     }
-    g.font = '700 22px Quicksand';
-    g.fillStyle = 'rgba(245,240,231,.4)';
-    g.fillText('ADHKĀR'.split('').join(String.fromCharCode(8202)), W / 2, fy + 52);
+    var sigY = fy + 50,
+      sigTxt = isAr ? 'تطبيق الأذكار' : 'ADHKĀR · أذكار';
+    g.direction = isAr ? 'rtl' : 'ltr';
+    g.font = isAr ? '700 25px Amiri, serif' : '700 24px Quicksand, sans-serif';
+    g.fillStyle = 'rgba(248,243,234,.58)';
+    g.fillText(sigTxt, W / 2, sigY);
+    var sw = g.measureText(sigTxt).width / 2;
+    g.strokeStyle = hexA(c[0], 0.32);
+    g.lineWidth = 1.4;
+    g.beginPath();
+    g.moveTo(W / 2 - sw - 46, sigY - 8);
+    g.lineTo(W / 2 - sw - 16, sigY - 8);
+    g.moveTo(W / 2 + sw + 16, sigY - 8);
+    g.lineTo(W / 2 + sw + 46, sigY - 8);
+    g.stroke();
     return cv.toDataURL('image/png');
   };
   /* the share sheet: status or post, image or text */
@@ -893,11 +912,16 @@
       if (S.prefs.wake) A.N.keepAwake(true);
       if (S.prefs.volKeys && !A.pace.on()) A.N.volumeKeys(true);
       dir = idx > R.idx ? 1 : idx < R.idx ? -1 : 0;
-      R.idx = A.clamp(idx, 0, R.items.length - 1);
+      idx = A.clamp(idx, 0, R.items.length - 1);
+      if (idx !== R.idx) R.visit++;
+      R.idx = idx;
       R.finished = false;
       paintPage(dir);
       return;
     }
+    var actEl =
+      document.activeElement && document.activeElement.closest && document.activeElement.closest('a[href],button');
+    var openerHref = actEl && actEl.getAttribute ? actEl.getAttribute('href') : null;
     if (R) A.closeReader(true);
     var items = A.items(cid, prayer);
     R = {
@@ -908,7 +932,9 @@
       ck: A.colKey(cid, prayer),
       date: A.today(),
       idx: A.clamp(idx, 0, items.length - 1),
-      t0: Date.now()
+      visit: 0,
+      t0: Date.now(),
+      openerHref: openerHref
     };
     S.last = { c: cid, p: prayer, d: R.date };
     A.save();
@@ -959,6 +985,7 @@
     if (!v || !v.bare) $('.nav').classList.remove('hide');
     A.N.keepAwake(false);
     A.N.volumeKeys(false);
+    if (A.pace) A.pace.stop();
     if (A.audio) A.audio.stop();
     if (instant) el.remove();
     else {
@@ -968,15 +995,25 @@
       }, 280);
     }
     A.syncLayers();
-    if (pf && pf.isConnected && typeof pf.focus === 'function') {
+    /* focus returns to what opened the reader; if the page was drawn again meanwhile, to its twin, else the heading */
+    var href = pf && pf.getAttribute && pf.getAttribute('href'),
+      back =
+        pf && pf.isConnected
+          ? pf
+          : (href && document.querySelector('#app a[href="' + href.replace(/"/g, '') + '"]')) ||
+            document.querySelector('#app .view h1');
+    if (back && typeof back.focus === 'function') {
+      if (back.tagName === 'H1' && !back.hasAttribute('tabindex')) back.setAttribute('tabindex', '-1');
       try {
-        pf.focus({ preventScroll: true });
+        back.focus({ preventScroll: true });
       } catch (e) {}
     }
   };
   A.acts['rd-close'] = function () {
     if (!R) return;
-    A.goBack('#/c/' + R.cid + (R.prayer ? '/' + R.prayer : ''));
+    var fb = '#/c/' + R.cid + (R.prayer ? '/' + R.prayer : '');
+    A.pendingFocus = R.openerHref || fb;
+    A.goBack(fb);
   };
 
   function stories() {
@@ -1048,6 +1085,26 @@
           })
           .join('') +
         '</div></div>';
+    /* what this page holds beyond the Arabic, named above it and one tap away: listening, the transliteration, the
+       translation, the sources */
+    var below = [];
+    if (A.audio && A.audio.ok() && it.kind !== 'flag' && A.audio.files(it).length) below.push(['au', 'Listen']);
+    if (S.prefs.tr && it.tr) below.push(['tx-tr', 'Transliteration']);
+    if (S.prefs.en && it.en) below.push(['tx-en', 'Translation']);
+    if (it.refs && it.refs.length) below.push(['rd-src', 'Sources']);
+    var jump = '';
+    if (below.length && !(R.memo && learnable))
+      jump =
+        '<nav class="rd-jump" aria-label="On this page">' +
+        below
+          .map(function (b) {
+            return (
+              '<button type="button" data-a="rd-jump" data-t="' + b[0] + '">' + b[1] + ic('down', 'xs') + '</button>'
+            );
+          })
+          .join('') +
+        '</nav>';
+    h += jump;
     h +=
       R.memo && learnable
         ? memoText(it, R.memo)
@@ -1065,11 +1122,12 @@
       A.audio.attach(it);
       h += A.audio.bar(it, R.cid);
     }
+
     if (it.note) h += '<div class="rd-note">' + ic('info', 's') + '<div>' + esc(it.note) + '</div></div>';
     h += A.txSections(it);
     if (it.refs && it.refs.length)
       h +=
-        '<div class="rd-sec"><div class="eyebrow">Sources</div><div class="refs">' +
+        '<div class="rd-sec rd-src"><div class="eyebrow">Sources</div><div class="refs">' +
         it.refs
           .map(function (r) {
             return '<a href="' + esc(r.u) + '" data-a="ext">' + ic('link', 'xs') + esc(r.l) + '</a>';
@@ -1113,6 +1171,17 @@
         : '')
     );
   }
+  A.acts['rd-jump'] = function (el) {
+    var body = $('#rdB'),
+      t = body && body.querySelector('.' + el.dataset.t);
+    if (!t) return;
+    var top = t.getBoundingClientRect().top - body.getBoundingClientRect().top + body.scrollTop - 10,
+      calm = !S.prefs.motion || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+    body.scrollTo({ top: top, behavior: calm ? 'auto' : 'smooth' });
+    if (!t.hasAttribute('tabindex')) t.setAttribute('tabindex', '-1');
+    t.focus({ preventScroll: true });
+    A.N.haptic('tick');
+  };
   A.acts.memo = function (el) {
     R.memo = +el.dataset.v;
     if (!R.memo) R.memoOpen = false;
@@ -1142,6 +1211,18 @@
     paintPage(0);
   };
   function paintDock(it, n) {
+    /* the dock is drawn again on every step: a focused control keeps its focus on its redrawn twin */
+    var fa = document.activeElement,
+      fk = fa && R && R.el.contains(fa) && fa.getAttribute('data-a');
+    paintDockInner(it, n);
+    if (fk) {
+      var tw = R && R.el.querySelector('[data-a="' + fk + '"]');
+      if (tw && tw !== document.activeElement) tw.focus({ preventScroll: true });
+    }
+  }
+  function paintDockInner(it, n) {
+    var dk = $('#rdD');
+    if (dk) dk.style.gridTemplateColumns = '';
     if (A.pace.on())
       A.hint(
         'fingers',
@@ -1274,14 +1355,18 @@
     else if (delta > 0) A.fx.click();
     $('#rdS').innerHTML = stories();
     paintDock(it, m);
+    /* the delayed steps belong to this reader and this item: another collection opened meanwhile is left alone */
+    var r0 = R,
+      visit = R.visit;
     if (res.completed) {
-      setTimeout(finish, 520);
+      setTimeout(function () {
+        if (R === r0 && !R.finished && R.visit === visit) finish();
+      }, 520);
       return;
     }
     if (reached && S.prefs.autoNext) {
-      var idx = R.idx;
       setTimeout(function () {
-        if (R && R.idx === idx) next();
+        if (R === r0 && !R.finished && R.visit === visit) next();
       }, 480);
     }
   }
@@ -1295,14 +1380,17 @@
     paintDock(it, t);
     var cb = $('.counter', R.el);
     if (cb) cb.classList.add('burst');
+    var r0 = R,
+      visit = R.visit;
     if (res.completed) {
-      setTimeout(finish, 520);
+      setTimeout(function () {
+        if (R === r0 && !R.finished && R.visit === visit) finish();
+      }, 520);
       return;
     }
     if (S.prefs.autoNext) {
-      var idx = R.idx;
       setTimeout(function () {
-        if (R && R.idx === idx) next();
+        if (R === r0 && !R.finished && R.visit === visit) next();
       }, 520);
     }
   }
@@ -1340,16 +1428,22 @@
   A.acts['rd-next'] = next;
   A.acts['rd-prev'] = prev;
   A.acts['rd-flag'] = function () {
+    if (!R || R.finished) return;
     var it = R.items[R.idx],
       n = A.cnt(R.date, R.ck, it.id),
       res = A.setCnt(R.date, R.ck, it.id, n ? 0 : 1);
     A.N.haptic(n ? 'click' : 'success');
     $('#rdS').innerHTML = stories();
     paintDock(it, n ? 0 : 1);
-    if (res.completed) setTimeout(finish, 450);
+    var r0 = R,
+      visit = R.visit;
+    if (res.completed)
+      setTimeout(function () {
+        if (R === r0 && !R.finished && R.visit === visit) finish();
+      }, 450);
     else if (!n && S.prefs.autoNext)
       setTimeout(function () {
-        if (R && R.items[R.idx] === it) next();
+        if (R === r0 && !R.finished && R.visit === visit) next();
       }, 450);
   };
   A.acts['rd-log'] = function (el) {
@@ -1440,7 +1534,8 @@
     S.prefs[k] = v;
     el.setAttribute('aria-checked', v);
     A.N.haptic('tick');
-    A.save();
+    A.save(k === 'widgets');
+    if (k === 'widgets') A.rerender();
     if (k === 'wake' && R) A.N.keepAwake(v);
     if (k === 'volKeys' && R) A.N.volumeKeys(v);
     if (k === 'motion' || k === 'h24') A.applyTheme();
@@ -1501,7 +1596,7 @@
       R.prayer &&
       S.prefs.trackPrayers &&
       S.loc &&
-      !A.isExcused(R.date) &&
+      !A.prayerExcused(R.date, R.prayer) &&
       !(S.prayed[R.date] || {})[R.prayer] &&
       A.canLog(R.date, R.prayer)
     )

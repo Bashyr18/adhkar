@@ -72,11 +72,16 @@
     var h =
       '<header class="top"><div class="tt"><div class="eyebrow">From the Qurʾān and Sunnah</div><h1 class="no-tr">' +
       (A.ar() ? 'ستر <em>العورة</em> واللباس' : 'Dress &amp; <em>ʿawrah</em>') +
-      '</h1></div><div class="acts"><button type="button" class="chip' +
-      (showAr ? ' on' : '') +
-      '" data-a="gd-ar" aria-pressed="' +
-      showAr +
-      '">Arabic</button></div></header>';
+      '</h1></div>' +
+      /* in Arabic the hadith already shows in Arabic: no switch for it */
+      (A.ar()
+        ? ''
+        : '<div class="acts"><button type="button" class="chip' +
+          (showAr ? ' on' : '') +
+          '" data-a="gd-ar" aria-pressed="' +
+          showAr +
+          '">Arabic</button></div>') +
+      '</header>';
     h +=
       '<div class="seg gd-seg"><button type="button" data-a="gd-tab" data-v="s" aria-pressed="' +
       (tab === 's') +

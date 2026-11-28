@@ -263,7 +263,7 @@ public class MainActivity extends Activity implements SensorEventListener {
     }
 
     /* ---------- lifecycle ---------- */
-    @Override protected void onResume() { super.onResume(); visible = true; if (loaded) js("__native.onResume&&__native.onResume()"); }
+    @Override protected void onResume() { super.onResume(); visible = true; Overlay.dismissDhikr(this); if (loaded) js("__native.onResume&&__native.onResume()"); }
     @Override protected void onPause() { visible = false; super.onPause(); stopCompass(); setKeepAwake(false); stopPreview(); }
     @Override protected void onSaveInstanceState(Bundle out) { super.onSaveInstanceState(out); if (web != null) web.saveState(out); }
     @Override protected void onDestroy() { stopCompass(); if (audio != null) audio.stop(); if (web != null) { web.destroy(); web = null; } super.onDestroy(); }
@@ -318,7 +318,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         super.onRequestPermissionsResult(req, perms, res);
         boolean ok = false; for (int r : res) if (r == PackageManager.PERMISSION_GRANTED) ok = true;
         if (req == REQ_LOC) { if (ok) locate(); else js("__native.onLocation('{\"error\":\"denied\"}')"); }
-        if (req == REQ_NOTIF) { js("__native.onPermission&&__native.onPermission('notifications'," + ok + ")"); if (ok) Scheduler.run(this); }
+        if (req == REQ_NOTIF) { js("__native.onPermission&&__native.onPermission('notifications'," + ok + ")"); if (ok) syncExec.execute(() -> Scheduler.run(this)); }
     }
 
     @Override
@@ -569,10 +569,12 @@ public class MainActivity extends Activity implements SensorEventListener {
         }
         @JavascriptInterface public String takeWidgetEvents() { return Store.takeEvents(MainActivity.this); }
         @JavascriptInterface public boolean pinWidget(String kind) {
+            if (!Widgets.enabled(MainActivity.this)) return false;
             AppWidgetManager m = getSystemService(AppWidgetManager.class);
             if (m == null || !m.isRequestPinAppWidgetSupported()) return false;
             Class<?> w = "tasbih".equals(kind) ? TasbihWidget.class : "adhkar".equals(kind) ? AdhkarWidget.class : "dhikr".equals(kind) ? DhikrWidget.class : PrayerWidget.class;
-            return m.requestPinAppWidget(new ComponentName(MainActivity.this, w), null, null);
+            try { return m.requestPinAppWidget(new ComponentName(MainActivity.this, w), null, null); }
+            catch (IllegalStateException e) { return false; }
         }
         @JavascriptInterface public void volumeKeys(boolean on) { volumeKeys = on; }
         @JavascriptInterface public void audioHold(boolean on) { audioHold = on; }
@@ -599,7 +601,10 @@ public class MainActivity extends Activity implements SensorEventListener {
             if (Build.VERSION.SDK_INT < 33 || checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
                 NotificationManager nm = getSystemService(NotificationManager.class);
                 boolean en = nm == null || nm.areNotificationsEnabled();
-                if (!en) ui.post(() -> openSettings("notifications"));
+                if (!en) ui.post(() -> {
+                    js("__native.onPermission&&__native.onPermission('notifications',false)");
+                    openSettings("notifications");
+                });
                 return en;
             }
             ui.post(() -> requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, REQ_NOTIF));

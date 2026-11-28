@@ -15,7 +15,7 @@ public class AlarmReceiver extends BroadcastReceiver {
         String a = i.getAction() == null ? "" : i.getAction();
         if (Scheduler.ACTION_PRAYED_N.equals(a)) {
             String d = i.getStringExtra("d"), p = i.getStringExtra("p");
-            if (d != null && p != null && !Widgets.isPrayed(c, d, p)) Store.togglePrayed(c, d, p, false);
+            if (Widgets.canLogPrayer(c, d, p) && !Widgets.isPrayed(c, d, p)) Store.togglePrayed(c, d, p, false);
             NotificationManager nm = c.getSystemService(NotificationManager.class);
             if (nm != null) nm.cancel(i.getIntExtra("nid", 0));
             Widgets.updateAll(c);
@@ -37,13 +37,12 @@ public class AlarmReceiver extends BroadcastReceiver {
             return;
         }
         if (Scheduler.ACTION_SNOOZED.equals(a)) {
-            Scheduler.channels(c);
-            Scheduler.post(c, new Scheduler.Ev(i.getStringExtra("id"), System.currentTimeMillis(), i.getStringExtra("ch"), i.getStringExtra("title"),
-                    i.getStringExtra("text"), i.getStringExtra("route"), i.getStringExtra("action"), i.getStringExtra("actionRoute"), false));
+            final PendingResult pr = goAsync();
+            new Thread(() -> {
+                try { Scheduler.postSnooze(c, i.getStringExtra("id")); }
+                finally { pr.finish(); }
+            }).start();
             return;
-        }
-        if (Intent.ACTION_BOOT_COMPLETED.equals(a) || Intent.ACTION_MY_PACKAGE_REPLACED.equals(a)) {
-            Store.prefs(c).edit().putLong("lastFired", System.currentTimeMillis()).apply();
         }
         final PendingResult pr = goAsync();
         new Thread(() -> { try { Scheduler.run(c); } finally { pr.finish(); } }).start();

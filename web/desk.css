@@ -559,7 +559,7 @@ html.is-desk.dropping body::after {
 .db-p.nudge::after {
   content: '';
   position: absolute;
-  top: 52px;
+  top: 56px;
   inset-inline-start: 0;
   width: calc(var(--nx) + 7px);
   height: 1px;
@@ -1952,4 +1952,12 @@ html.has-rail .view.dk-two > .lp-lead {
 }
 .dk-week.dk-week-none .dk-bar b {
   display: none;
+}
+
+/* the times of answered duʿāʾ: on a computer the dial has room to be read from a little further away */
+html.is-desk .ans-dial .dl-wrap {
+  width: min(100%, 400px);
+}
+html.is-desk .dl-t {
+  font-size: 16px;
 }

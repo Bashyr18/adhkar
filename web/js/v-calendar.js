@@ -106,16 +106,22 @@
       '</button><button type="button" class="ib" data-a="cal-nav" data-d="1" aria-label="Next month">' +
       ic('right', 's') +
       '</button></div></header>';
-    h +=
-      '<div class="card col"><div class="spread"><span class="ar" style="font-size:22px;color:var(--gold2)">' +
-      esc(A.hijri(first).ar) +
-      '</span>' +
-      (cur.y !== th.y || cur.m !== th.m
+    var calTopRight =
+      cur.y !== th.y || cur.m !== th.m
         ? '<button type="button" class="chip on" data-a="cal-today">Today</button>'
         : fasted
           ? '<span class="chip">' + fasted + ' fasted</span>'
-          : '') +
-      '</div>';
+          : '';
+    h +=
+      '<div class="card col">' +
+      (!A.ar() || calTopRight
+        ? '<div class="spread">' +
+          (A.ar()
+            ? '<span></span>'
+            : '<span class="ar" style="font-size:22px;color:var(--gold2)">' + esc(A.hijri(first).ar) + '</span>') +
+          calTopRight +
+          '</div>'
+        : '');
     h +=
       '<div class="calg">' +
       /* the days' initials; in Arabic the first letter of each name, as Arabic calendars print them */
@@ -158,7 +164,7 @@
         '</button>';
     });
     h +=
-      '</div><div class="legend"><span><i style="background:color-mix(in srgb,var(--sand) 40%,var(--s2))"></i>Sunnah days</span><span><i style="background:color-mix(in srgb,var(--rose) 40%,var(--s2))"></i>ʿĪd</span><span><i style="background:var(--goldh);border-radius:50%"></i>Fasted</span><span><i style="border:1.5px dashed var(--goldh);border-radius:50%;background:none"></i>Planned</span><span><i style="background:var(--jade);border-radius:50%"></i>Remembrance</span></div></div>';
+      '</div><div class="legend"><span><i style="background:color-mix(in srgb,var(--sand) 40%,var(--s2))"></i>Sunnah days</span><span><i style="background:color-mix(in srgb,var(--rose) 40%,var(--s2))"></i>ʿĪd</span><span><i style="background:var(--goldh);border-radius:50%"></i>Fasted</span><span><i style="border:1.5px dashed var(--goldh);border-radius:50%;background:none"></i>Planned</span><span><i style="background:var(--gold);border-radius:50%"></i>Remembrance</span></div></div>';
     var up = upcoming(t);
     h +=
       '<a class="card coll press h-gold" href="#/ramadan"><div class="badge">' +
@@ -264,7 +270,7 @@
       body +=
         '<dl class="kv">' +
         P.ORDER.map(function (k) {
-          return '<dt>' + (k === 'sunrise' ? 'Sunrise' : P.NAMES[k]) + '</dt><dd>' + A.fmtTxt(t[k]) + '</dd>';
+          return '<dt>' + (k === 'sunrise' ? 'Sunrise' : A.pName(k, d)) + '</dt><dd>' + A.fmtTxt(t[k]) + '</dd>';
         }).join('') +
         '</dl>';
     body += '<div class="divider"></div>';
@@ -299,18 +305,25 @@
     else
       body +=
         '<div class="eyebrow">Fasting</div><div class="col" style="gap:8px">' +
-        FAST_TYPES.map(function (x) {
-          return (
-            '<button type="button" class="opt" data-fast="' +
-            x[0] +
-            '" aria-pressed="' +
-            (f === x[0]) +
-            '"><span class="rad"></span><div class="grow"><div class="t">' +
-            x[1] +
-            '</div></div></button>'
-          );
-        }).join('') +
-        (f ? '<button type="button" class="btn ghost" data-fast="">Remove</button>' : '') +
+        FAST_TYPES.filter(function (x) {
+          return (x[0] === 'ramadan') === !!(A.isRamadan && A.isRamadan(d));
+        })
+          .map(function (x) {
+            return (
+              '<button type="button" class="opt" data-fast="' +
+              x[0] +
+              '" aria-pressed="' +
+              (f === x[0]) +
+              '"><span class="rad"></span><div class="grow"><div class="t">' +
+              x[1] +
+              '</div></div></button>'
+            );
+          })
+          .join('') +
+        (A.isRamadan(d) ? '<button type="button" class="btn sec" data-fast="missed">Not fasted</button>' : '') +
+        (f || (S.ramadan.skip && S.ramadan.skip[d])
+          ? '<button type="button" class="btn ghost" data-fast="">Remove</button>'
+          : '') +
         '</div>';
     A.sheet(hh.d + ' ' + hh.name + ' ' + hh.y, body, {
       mount: function (sh, o) {
@@ -325,7 +338,7 @@
             A.rerender();
             if (pl.dataset.plan)
               A.toast(
-                S.notif.enabled || window.ADHKAR_DESKTOP
+                A.remindersOn() || window.ADHKAR_DESKTOP
                   ? 'Planned. A reminder comes at Maghrib the evening before'
                   : 'Planned. It shows on Today the evening before',
                 'fast'
@@ -335,14 +348,23 @@
           var b = e.target.closest('[data-fast]');
           if (!b) return;
           if (d > A.today()) return;
-          if (b.dataset.fast) delete S.fastPlan[d];
-          if (b.dataset.fast) S.fasts[d] = b.dataset.fast;
+          var kind = b.dataset.fast,
+            fasted = !!kind && kind !== 'missed';
+          if (fasted && A.isExcused(d)) {
+            A.toast('This day is already recorded as a break day');
+            return;
+          }
+          if (kind === 'missed' && !A.isRamadan(d)) return;
+          if (kind) delete S.fastPlan[d];
+          if (fasted) S.fasts[d] = kind;
           else delete S.fasts[d];
+          if (kind === 'missed') S.ramadan.skip[d] = 1;
+          else delete S.ramadan.skip[d];
           A.save();
-          A.N.haptic(b.dataset.fast ? 'success' : 'tick');
+          A.N.haptic(fasted ? 'success' : 'tick');
           o.close();
           A.rerender();
-          if (b.dataset.fast) {
+          if (fasted) {
             var fr = A.checkBadges();
             A.toast(
               fr.length ? 'Achievement: ' + fr[0].name : 'May Allah accept your fast',

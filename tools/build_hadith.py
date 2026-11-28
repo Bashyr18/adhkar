@@ -95,10 +95,39 @@ SPEC = {
     'bukhari:1229': (('فَصَلَّى رَكْعَتَيْنِ ثُمَّ سَلَّمَ ثُمَّ كَبَّرَ', None), ('So the Prophet (ﷺ) offered two more', None)),
     'bukhari:401': (('وَإِذَا شَكَّ أَحَدُكُمْ', 'سَجْدَتَيْنِ'), ('if anyone of you is doubtful', None)),
     'muslim:571': ('q1', ('When any one of you is in doubt', None)),
+    # Ramaḍān, the last ten nights, Zakāt al-Fiṭr and ʿĪd al-Fiṭr
+    'muslim:1079#2': ('q1', ('When it is the month of Ramadan', None)),
+    'muslim:760': ('q1', ('He who observed the fasts of Ramadan', None)),
+    'muslim:759': ('q1', ('He who observed prayer at night during Ramadan', None)),
+    'muslim:1095': ('q1', ('Take meal a little before dawn', None)),
+    'muslim:1151#6': ('q1', ('Allah, the Exalted and Majestic, said:', None)),
+    'muslim:1152': ('q1', ('In Paradise there is a gate which is called Rayyan', None)),
+    'muslim:1098': ('q1', ('The people will continue to prosper', None)),
+    'muslim:2308': (('كَانَ رَسُولُ اللَّهِ', None), ("Allah's Messenger (ﷺ) was the most generous", None)),
+    'muslim:804': (('اقْرَءُوا الْقُرْآنَ', 'لأَصْحَابِهِ', '+'), ("Recite the Qur'an", 'those who recite It.', '+')),
+    'muslim:1153': ('q1', ('Every servant of Allah who observes fast for a day', None)),
+    'muslim:1150': ('q1', ('If any one of you is invited to a meal', None)),
+    'muslim:1080': ('q1', ('Do not fast till you see the new moon', None)),
+    'muslim:1174': (('كَانَ رَسُولُ اللَّهِ', None), ('when the last ten nights began', None)),
+    'muslim:1175': (('كَانَ رَسُولُ اللَّهِ', None), ("Allah's Messenger (ﷺ) used to exert himself", None)),
+    'muslim:1169': (('تَحَرَّوْا لَيْلَةَ الْقَدْرِ', 'مِنْ رَمَضَانَ'), ('Look for (and in the words of Waki, seek)', None)),
+    'muslim:1172': (('كَانَ رَسُولُ اللَّهِ', None), ('the Messenger of Allah (ﷺ) used to observe', None)),
+    'muslim:1165': ('q1', ('I see that your dreams agree', None)),
+    'muslim:1170': ('q1', ('He who amongst you remembers', None)),
+    'muslim:984': (('فَرَضَ زَكَاةَ الْفِطْرِ', None), ("Allah's Messenger (way peace be upon him) prescribed", None)),
+    'muslim:986': (('أَمَرَ بِزَكَاةِ الْفِطْرِ', None), ('the Messenger of Allah (ﷺ) ordered that the Sadaqat-ul-Fitr', None)),
+    'muslim:1164': ('q1', ('He who observed the fast of Ramadan', None)),
+    'muslim:890#2': (('كُنَّا نُؤْمَرُ بِالْخُرُوجِ', None), ('We were commanded to go out', None)),
 }
 # typing errors in the source English, corrected (the sunnah.com page reads as fixed here)
 FIX = {'abudawud:641': [('wears a veil', 'wears a khimār')],   # the hadith's own word, explained in NOTE below
-       'muslim:571': [('does Dot know', 'does not know'), ("(rak'ahs). he should", "(rak'ahs), he should"), ('is sure of. then', 'is sure of, then')]}
+       'muslim:571': [('does Dot know', 'does not know'), ("(rak'ahs). he should", "(rak'ahs), he should"), ('is sure of. then', 'is sure of, then')],
+       'muslim:760': [('Lailat-ul- Qadr', 'Lailat-ul-Qadr')],
+       'muslim:1152': [('Day on Resurrection', 'Day of Resurrection')],
+       'muslim:2308': [('month of Ramadin', 'month of Ramadan')],
+       'muslim:804': [('recite It', 'recite it')],
+       'muslim:984': [('(way peace be upon him)', '(may peace be upon him)')],
+       'muslim:1164': [('Shawwal. it would', 'Shawwal, it would')]}
 # a word of explanation shown beneath a hadith, in English and Arabic
 NOTE = {'abudawud:641': ('Khimār: the covering of the head, drawn down over the neck and chest (from khamara, to cover, as Ibn Kathīr explains on an-Nūr 24:31). With the rest of her clothing it conceals the hair, head, neck and body. Covering the ʿawrah is a condition for the prayer to be valid: if a grown woman prays with her hair, neck or body uncovered, her prayer is not valid and must be repeated. This holds even when she prays alone in her own room.',
                          'الخمار: غطاء الرأس يُسدل على العنق والصدر (من خمّر: غطّى، كما بيّنه ابن كثير في تفسير النور ٣١). ومع بقية ثيابها يستر الشعر والرأس والعنق والبدن. وستر العورة شرط لصحة الصلاة: فإن صلّت المرأة البالغة وقد ظهر شعرها أو عنقها أو بدنها لم تصح صلاتها ووجبت إعادتها، ولو كانت تصلي وحدها في غرفتها.')}

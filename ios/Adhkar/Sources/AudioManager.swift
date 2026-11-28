@@ -54,8 +54,15 @@ final class AudioManager: NSObject, AVAudioPlayerDelegate, URLSessionTaskDelegat
         }
         if type == .began {
             DispatchQueue.main.async { [weak self] in
-                self?.player?.pause()
-                self?.stopPreview()
+                guard let self = self else { return }
+                self.progressTimer?.invalidate()
+                self.progressTimer = nil
+                self.player?.pause()
+                let hadPreview = self.previewPlayer != nil
+                self.stopPreview()
+                if hadPreview {
+                    self.sendJS("__native.onAdhanEnd&&__native.onAdhanEnd()")
+                }
             }
         }
     }
@@ -116,11 +123,19 @@ final class AudioManager: NSObject, AVAudioPlayerDelegate, URLSessionTaskDelegat
     }
 
     func deleteAll() {
-        stop()
-        let dir = store.audioDir
-        guard let files = try? FileManager.default.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil) else { return }
-        for f in files {
-            try? FileManager.default.removeItem(at: f)
+        let work = { [weak self] in
+            guard let self = self else { return }
+            self.stopInternal()
+            let dir = self.store.audioDir
+            guard let files = try? FileManager.default.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil) else { return }
+            for f in files {
+                try? FileManager.default.removeItem(at: f)
+            }
+        }
+        if Thread.isMainThread {
+            work()
+        } else {
+            DispatchQueue.main.sync(execute: work)
         }
     }
 
@@ -324,6 +339,8 @@ final class AudioManager: NSObject, AVAudioPlayerDelegate, URLSessionTaskDelegat
 
     func pause() {
         DispatchQueue.main.async { [weak self] in
+            self?.progressTimer?.invalidate()
+            self?.progressTimer = nil
             self?.player?.pause()
         }
     }

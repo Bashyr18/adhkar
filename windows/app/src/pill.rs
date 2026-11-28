@@ -184,8 +184,11 @@ fn place(s: &St, w: i32, hh: i32) {
             match s.place.as_str() {
                 "top" => (wa.left + (wa.right - wa.left - w) / 2, mi.rcMonitor.top + (6.0 * s.k) as i32 - m),
                 "corner" => (wa.right - w + m - (14.0 * s.k) as i32, wa.bottom - hh + m - (14.0 * s.k) as i32),
-                /* dropped somewhere: it grows upwards from its foot, and never above the screen */
-                _ => (r.left, if r.bottom - r.top != hh && r.bottom > r.top { (r.bottom - hh).max(wa.top) } else { r.top }),
+                /* dropped somewhere: it grows upwards from its foot, and stays within the work area */
+                _ => {
+                    let y0 = if r.bottom - r.top != hh && r.bottom > r.top { r.bottom - hh } else { r.top };
+                    (r.left.clamp(wa.left, (wa.right - w).max(wa.left)), y0.clamp(wa.top, (wa.bottom - hh).max(wa.top)))
+                }
             }
         };
         let _ = SetWindowPos(s.hwnd, None, x, y, w, hh, SWP_NOZORDER | SWP_NOACTIVATE);

@@ -30,8 +30,9 @@
   };
   A.debounce = function (fn, ms) {
     var t;
-    return function () {
+    return function (immediate) {
       clearTimeout(t);
+      if (immediate === true) return fn();
       t = setTimeout(fn, ms);
     };
   };
@@ -205,7 +206,8 @@
         autoLoc: true,
         imsak: 0,
         theme: 'auto',
-        ar: 30,
+        ar: 24,
+        arV: 0,
         tr: true,
         en: true,
         h24: false,
@@ -221,12 +223,13 @@
         count: 'fingers',
         pace: 'steady',
         lang: null,
-        nudge: { on: true, every: 20, over: false },
+        nudge: { on: true, every: 20, over: true },
+        widgets: true,
         /* the desktop pill: where it sits, how big, what it shows */
         pill: { place: 'top', size: 'compact', hover: true, friday: true, adhkar: true, fast: true }
       },
       notif: {
-        enabled: false,
+        enabled: true,
         adhan: true,
         prayers: { fajr: true, dhuhr: true, asr: true, maghrib: true, isha: true },
         pre: 0,
@@ -266,6 +269,8 @@
       excused: {
         on: false,
         since: null,
+        endedAt: 0,
+        ended: {},
         days: {},
         cycles: [],
         habit: null,
@@ -288,8 +293,8 @@
       last: null,
       badges: {},
       goals: { tasbih: 100 },
-      /* updates for the release-page copies: off until you turn on the weekly check */
-      upd: { auto: false, at: 0, v: '', size: 0, notes: '' }
+      /* updates for direct-download copies: checks after setup and weekly unless switched off in About */
+      upd: { auto: true, at: 0, attempt: 0, v: '', size: 0, notes: '' }
     };
   }
   function cleanMap(v) {
@@ -345,6 +350,10 @@
     if (!Object.prototype.hasOwnProperty.call(THEMES_OK, s.prefs.theme)) s.prefs.theme = 'auto';
     if (!Object.prototype.hasOwnProperty.call(ACCENTS, s.prefs.accent)) s.prefs.accent = 'gold';
     s.prefs.ar = A.clamp(s.prefs.ar, 18, 54);
+    if (s.prefs.arV !== 1) {
+      if (s.prefs.ar === 30) s.prefs.ar = 24;
+      s.prefs.arV = 1;
+    }
     s.prefs.hijriAdj = A.clamp(Math.round(s.prefs.hijriAdj), -2, 2);
     s.prefs.nudge.every = A.clamp(Math.round(s.prefs.nudge.every) || 20, 5, 180);
     if (!ISO_RE.test(s.profile.since)) s.profile.since = todayISO();
@@ -446,6 +455,13 @@
     return s;
   }
   A.storageOk = true;
+  function storedDefaults() {
+    var s = defaults();
+    s.notif.enabled = false;
+    s.prefs.nudge.over = false;
+    s.upd.auto = false;
+    return s;
+  }
   function load() {
     var raw = null;
     try {
@@ -455,7 +471,7 @@
     }
     if (raw) {
       try {
-        return compactCounts(sane(merge(defaults(), JSON.parse(raw))));
+        return compactCounts(sane(merge(storedDefaults(), JSON.parse(raw))));
       } catch (e) {
         try {
           localStorage.setItem(KEY + '.corrupt.' + Date.now(), raw);
@@ -469,7 +485,7 @@
         var m = JSON.parse(mirror);
         if (m && m.v === 10) {
           A.restoredFromMirror = true;
-          return compactCounts(sane(merge(defaults(), m)));
+          return compactCounts(sane(merge(storedDefaults(), m)));
         }
       }
     } catch (e) {}
@@ -477,6 +493,7 @@
     try {
       var v8 = localStorage.getItem('adhkar.v8');
       if (v8) {
+        s = storedDefaults();
         importV8(s, JSON.parse(v8));
         A.migrated = true;
       }
@@ -547,7 +564,7 @@
         A.toast('Storage is full or blocked; export a backup to keep your record safe.', 'info');
       }
     }
-    A.N.sync();
+    A.N.sync(!!flush);
     mirrorSoon(json, !!flush);
   };
   var mirrorJson = null,
@@ -582,7 +599,7 @@
       delete S[k];
     });
     Object.assign(S, d);
-    saveNow();
+    saveNow(true);
   };
   A.exportJSON = function () {
     return JSON.stringify({ app: 'adhkar', exported: new Date().toISOString(), state: S }, null, 1);
@@ -652,6 +669,32 @@
     unionMap(cur.memo, inc.memo);
     unionMap(cur.badges, inc.badges);
     unionMap(cur.excused.days, inc.excused.days);
+    var cyKey = function (x) {
+      return (x && x.from ? x.from : '') + '|' + (x && x.to ? x.to : '');
+    };
+    var cySort = function (a, b) {
+      return (a.from || '').localeCompare(b.from || '');
+    };
+    cur.excused.cycles = mergeList(cur.excused.cycles || [], (inc.excused && inc.excused.cycles) || [], cyKey)
+      .filter(function (x) {
+        return x && x.from && x.to;
+      })
+      .sort(cySort)
+      .slice(-24);
+    cur.excused.nifas = mergeList(cur.excused.nifas || [], (inc.excused && inc.excused.nifas) || [], cyKey)
+      .filter(function (x) {
+        return x && x.from && x.to;
+      })
+      .sort(cySort)
+      .slice(-12);
+    cur.excused.ended = cur.excused.ended || {};
+    var incEnded = (inc.excused && inc.excused.ended) || {};
+    maxMap(cur.excused.ended, incEnded);
+    if (inc.excused && inc.excused.endedAt) {
+      var iek = A.keyAt(inc.excused.endedAt);
+      cur.excused.ended[iek] = Math.max(cur.excused.ended[iek] || 0, inc.excused.endedAt);
+      cur.excused.endedAt = Math.max(cur.excused.endedAt || 0, inc.excused.endedAt);
+    }
     maxMap(cur.tasbih.days, inc.tasbih.days);
     maxMap(cur.tasbih.per, inc.tasbih.per);
     Object.keys(inc.tasbih.pd || {}).forEach(function (d) {
@@ -687,8 +730,12 @@
     if (!Object.values(cur.qada).some(Boolean)) Object.assign(cur.qada, inc.qada);
     unionMap(cur.ramadan.skip, inc.ramadan.skip);
     maxMap(cur.ramadan.taraweeh, inc.ramadan.taraweeh);
-    unionMap(cur.ramadan.khatm.juz, inc.ramadan.khatm.juz);
-    cur.ramadan.khatm.done = Math.max(cur.ramadan.khatm.done || 0, inc.ramadan.khatm.done || 0);
+    var ck = cur.ramadan.khatm,
+      ik = inc.ramadan.khatm;
+    if (ik.done > ck.done) {
+      ck.done = ik.done;
+      ck.juz = ik.juz;
+    } else if (ik.done === ck.done) unionMap(ck.juz, ik.juz);
     Object.keys((inc.jumuah && inc.jumuah.days) || {}).forEach(function (d) {
       cur.jumuah.days[d] = cur.jumuah.days[d] || {};
       unionMap(cur.jumuah.days[d], inc.jumuah.days[d]);
@@ -729,7 +776,7 @@
   }
   A.readBackup = function (text) {
     var r = JSON.parse(text),
-      s = defaults(),
+      s = storedDefaults(),
       raw = r && r.app === 'adhkar' ? r.state : r;
     if (
       raw &&
@@ -747,8 +794,12 @@
     return s;
   };
   A.hasLocalBackupData = function () {
-    var empty = defaults();
+    var empty = sane(storedDefaults());
     empty.profile.since = S.profile.since;
+    if (!S.profile.onboarded) {
+      empty.prefs.lang = S.prefs.lang;
+      empty.prefs.arV = S.prefs.arV;
+    }
     return Object.keys(empty).some(function (k) {
       return JSON.stringify(S[k]) !== JSON.stringify(empty[k]);
     });
@@ -856,7 +907,7 @@
     return A.fmtT(ms, 'bare') + (S.prefs.h24 ? '' : A.parts(ms).h < 12 ? ' am' : ' pm');
   };
   A.fmtDur = function (ms, long) {
-    var m = Math.max(0, Math.round(ms / 60000)),
+    var m = Math.max(0, Math.floor(ms / 60000)),
       h = Math.floor(m / 60);
     m = m % 60;
     if (long) return h ? h + ' hr ' + (m ? m + ' min' : '') : m + ' min';
@@ -1241,7 +1292,7 @@
   /* ---- break from ṣalāh (ḥayḍ / nifās) ---- */
   A.isExcused = function (d) {
     var e = S.excused;
-    return !!(e && (e.days[d] || (e.on && e.since && d >= e.since && d <= A.today())));
+    return !!(e && (e.days[d] || (e.on && (e.since ? d >= e.since && d <= A.today() : d === A.today()))));
   };
   A.excusedDay = function () {
     var e = S.excused;
@@ -1328,8 +1379,12 @@
     if (on && !e.on) {
       e.on = true;
       e.since = from && from < t ? from : t;
-      /* Ramaḍān days already filled in as fasted are not fasts on a break: they become days to make up */
-      for (var d0 = e.since; d0 <= t; d0 = A.shift(d0, 1)) if (S.fasts[d0] === 'ramadan') delete S.fasts[d0];
+      e.ended = e.ended || {};
+      /* days already logged as fasted are not valid fasts on a break */
+      for (var d0 = e.since; d0 <= t; d0 = A.shift(d0, 1)) {
+        delete S.fasts[d0];
+        delete e.ended[d0];
+      }
     } else if (!on && e.on) {
       if (e.since > t) t = e.since;
       var d = e.since,
@@ -1346,15 +1401,46 @@
       e.kind = 'hayd';
       e.on = false;
       e.since = null;
+      var now = Date.now();
+      e.endedAt = now;
+      e.ended = e.ended || {};
+      e.ended[t] = now;
     }
     A.save(true);
   };
-  /* Ramaḍān days missed on a break, minus make-up fasts logged since */
+  /* timestamp when a break ended on civil day d, or 0 if still covered by an active/subsequent break */
+  A.breakEndedAt = function (d) {
+    var e = S.excused;
+    if (!e) return 0;
+    if (e.on && e.since && d >= e.since) return 0;
+    if (e.ended && e.ended[d]) return e.ended[d];
+    if (e.endedAt && A.keyAt(e.endedAt) === d) return e.endedAt;
+    return 0;
+  };
+  /* the day a break ended: it stays a break day for fasting and the streak, but the prayers from then on are hers */
+  A.breakEndedOn = function (d) {
+    return !!A.breakEndedAt(d);
+  };
+  /* a prayer is excused unless the break ended before its time ran out (the prayer whose time she is in is prayed) */
+  A.prayerExcused = function (d, p) {
+    if (!A.isExcused(d)) return false;
+    var endedAt = A.breakEndedAt(d);
+    if (!endedAt || !S.loc) return true;
+    var t = A.pday(d),
+      i = A.PRAYERS.indexOf(p),
+      end = p === 'fajr' ? t.sunrise : i < 4 ? t[A.PRAYERS[i + 1]] : A.pday(A.shift(d, 1)).fajr;
+    return !(end > endedAt);
+  };
+  /* Ramaḍān days not fasted, minus make-up fasts logged since. A day on a break and a day marked "not fasted" (illness,
+     travel, or simply missed) are both made up: brk and skipped say which. */
   A.qadaOwed = function () {
     var missed = 0,
       made = 0,
+      brk = 0,
+      skipped = 0,
       e = S.excused,
-      seen = {};
+      seen = {},
+      sk = (S.ramadan && S.ramadan.skip) || {};
     Object.keys(e.days).forEach(function (d) {
       seen[d] = 1;
     });
@@ -1368,12 +1454,37 @@
       }
     }
     Object.keys(seen).forEach(function (d) {
-      if (A.hijri(d).m === 9) missed++;
+      if (A.hijri(d).m === 9) brk++;
+    });
+    var today = A.today(),
+      ev = [];
+    Object.keys(seen).forEach(function (d) {
+      if (A.hijri(d).m === 9 && d <= today) ev.push([d, 1]);
+    });
+    Object.keys(sk).forEach(function (d) {
+      if (sk[d] && !seen[d] && !(S.fasts && S.fasts[d]) && d <= today && A.hijri(d).m === 9) {
+        skipped++;
+        ev.push([d, 1]);
+      }
     });
     Object.keys(S.fasts || {}).forEach(function (d) {
-      if (S.fasts[d] === 'qada') made++;
+      if (S.fasts[d] === 'qada' && d <= today && A.hijri(d).m !== 9) ev.push([d, -1]);
     });
-    return { missed: missed, made: made, owed: Math.max(0, missed - made) };
+    /* in date order: a make-up fast answers a day already missed; one kept with nothing owed yet is left aside */
+    ev.sort(function (x, y) {
+      return x[0] < y[0] ? -1 : x[0] > y[0] ? 1 : y[1] - x[1];
+    });
+    var open = 0;
+    ev.forEach(function (x) {
+      if (x[1] > 0) {
+        missed++;
+        open++;
+      } else if (open > 0) {
+        made++;
+        open--;
+      }
+    });
+    return { missed: missed, made: made, owed: missed - made, brk: brk, skipped: skipped };
   };
 
   A.totals = function () {
@@ -1613,15 +1724,20 @@
 
   /* ================= occasions (Hijri-aware) ================= */
   /* the adhkār session due now: morning from Fajr (or sunrise) until the evening begins at ʿAṣr (or Maghrib) */
-  /* a prayer can be logged only once its time has begun */
+  /* a prayer can be logged only once its time has begun and if it was not excused by a break */
   A.canLog = function (day, p) {
     if (day > A.today()) return false;
+    if (A.prayerExcused(day, p)) return false;
     if (!S.loc) return true;
     var at = A.pday(day)[p];
     return !isFinite(at) || at <= Date.now(); /* yesterday's ʿishāʾ may still be ahead after midnight */
   };
   A.notYet = function (day, p) {
     A.N.haptic('tick');
+    if (A.prayerExcused(day, p)) {
+      A.toast('This prayer fell during your break');
+      return;
+    }
     A.toast(P.NAMES[p] + ' begins at ' + A.fmtTxt(A.pday(day)[p]), 'clock');
   };
   /* the last third is a span, from its start until Fajr; the wake time can sit a little before or inside it */
@@ -1875,12 +1991,18 @@
           loc: S.loc,
           calc: S.calc,
           offsets: S.offsets,
-          notif: S.notif,
+          notif: Object.assign({}, S.notif, { enabled: S.profile.onboarded && S.notif.enabled }),
+          widgets: S.prefs.widgets !== false,
+          trackPrayers: S.prefs.trackPrayers !== false,
           h24: S.prefs.h24,
           hijriAdj: S.prefs.hijriAdj,
           today: {
             key: key,
             prayed: S.prayed[key] || {},
+            excused: A.PRAYERS.reduce(function (m, p) {
+              if (A.prayerExcused(key, p)) m[p] = true;
+              return m;
+            }, {}),
             morning: dd.morning,
             evening: dd.evening,
             sleep: dd.sleep,
@@ -1913,7 +2035,7 @@
             };
           })(),
           nudge: {
-            on: S.prefs.nudge.on,
+            on: S.profile.onboarded && S.prefs.nudge.on,
             every: S.prefs.nudge.every,
             over: S.prefs.nudge.over,
             phrases: (D.tasbih || [])
@@ -1963,14 +2085,22 @@
       } catch (e) {
         return 0;
       }
+      var changed = 0;
       ev.forEach(function (x) {
-        var o = (S.prayed[x.d] = S.prayed[x.d] || {});
-        if (x.on) o[x.p] = Date.now();
-        else delete o[x.p];
-        if (!Object.keys(o).length) delete S.prayed[x.d];
+        if (!x || !x.d || !x.p || A.PRAYERS.indexOf(x.p) < 0) return;
+        if (x.on) {
+          if (S.prefs.trackPrayers === false || !A.canLog(x.d, x.p)) return;
+          var o = (S.prayed[x.d] = S.prayed[x.d] || {});
+          o[x.p] = Date.now();
+          changed++;
+        } else if (S.prayed[x.d] && S.prayed[x.d][x.p]) {
+          delete S.prayed[x.d][x.p];
+          if (!Object.keys(S.prayed[x.d]).length) delete S.prayed[x.d];
+          changed++;
+        }
       });
-      if (ev.length) A.save(true);
-      return ev.length;
+      if (changed) A.save(true);
+      return changed;
     },
     /* taps, resets and finished rounds from the tracker widget */
     trackerEvents: function () {
@@ -2046,6 +2176,11 @@
     version: function () {
       return call('version') || 'web';
     }
+  };
+  A.remindersOn = function () {
+    if (!A.N.has || !S.notif.enabled) return false;
+    var ns = A.N.notifState ? A.N.notifState() : null;
+    return !(ns && ns.granted === false);
   };
   A.copy = function (text) {
     if (navigator.clipboard && navigator.clipboard.writeText)

@@ -16,6 +16,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Computes upcoming reminders from the mirrored config and keeps exactly one exact alarm armed
@@ -101,15 +103,31 @@ final class Scheduler {
         String atTime = n.optBoolean("adhan", true) ? CH_ADHAN : CH_PRAYER;
         Calendar dw0 = Calendar.getInstance(PrayerCalc.zone(o)); dw0.setTimeInMillis(d.dhuhr);
         boolean fri0 = dw0.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY, sis = "f".equals(cfg.optString("gender"));
+        JSONObject rm = n.optJSONObject("ramadan");
+        boolean isRamadanDay = Store.hijriMonth(cfg, d.y, d.m, d.d) == 9;
+        boolean ramIftar = rm != null && rm.optBoolean("iftar", true) && isRamadanDay && !cfg.optBoolean("excused", false);
+        boolean maghribMerged = false;
         for (String k : PrayerCalc.PRAYERS) {
             long at = d.get(k);
             String nm = fri0 && k.equals("dhuhr") ? (sis ? L.t("Jumuʿah or Ẓuhr", "الجمعة أو الظهر") : L.t("Jumuʿah", "الجمعة")) : Store.name(k);
             if (pr != null && pr.optBoolean(k, false)) {
-                out.add(new Ev("p-" + k + "-" + key, at, atTime, nm + " · " + Store.fmtTime(cfg, o, at),
-                        L.t("It is time for " + nm + (place.isEmpty() ? "" : " in " + place) + ". Then the adhkār after the prayer.", "حان وقت " + nm + (place.isEmpty() ? "" : " في " + place) + "، ثم أذكار بعد الصلاة."),
-                        "#/salah", L.t("After-prayer adhkār", "أذكار بعد الصلاة"), "#/r/salah/0/" + k, false));
+                long end = Math.min(at + 45 * MIN, d.nextFajr);
+                for (String boundary : PrayerCalc.ORDER) {
+                    long t = d.get(boundary);
+                    if (t > at) end = Math.min(end, t);
+                }
+                if (k.equals("maghrib") && ramIftar) {
+                    maghribMerged = true;
+                    out.add(new Ev("p-maghrib-" + key, at, atTime, L.t("Maghrib & Ifṭār · ", "المغرب والإفطار · ") + Store.fmtTime(cfg, o, at),
+                            L.t("Dhahabaẓ-ẓama’u wabtallatil-ʿurūq, wa thabatal-ajru in shā’ Allāh.", "ذَهَبَ الظَّمَأُ وَابْتَلَّتِ العُرُوقُ، وَثَبَتَ الْأَجْرُ إِنْ شَاءَ اللَّهُ"),
+                            "#/ramadan", L.t("Ifṭār duʿāʾ", "دعاء الإفطار"), "#/r/ramadan/1", false).through(end));
+                } else {
+                    out.add(new Ev("p-" + k + "-" + key, at, atTime, nm + " · " + Store.fmtTime(cfg, o, at),
+                            L.t("It is time for " + nm + (place.isEmpty() ? "" : " in " + place) + ". Then the adhkār after the prayer.", "حان وقت " + nm + (place.isEmpty() ? "" : " في " + place) + "، ثم أذكار بعد الصلاة."),
+                            "#/salah", L.t("After-prayer adhkār", "أذكار بعد الصلاة"), "#/r/salah/0/" + k, false).through(end));
+                }
                 if (pre > 0) out.add(new Ev("q-" + k + "-" + key, at - pre * MIN, CH_PRAYER, L.t(nm + " in " + pre + " minutes", nm + " بعد " + L.n(pre) + " دقيقة"),
-                        Store.fmtTime(cfg, o, at) + L.t(" · a moment to make wuḍūʾ", " · وقت للوضوء"), "#/salah", null, null, false));
+                        Store.fmtTime(cfg, o, at) + L.t(" · a moment to make wuḍūʾ", " · وقت للوضوء"), "#/salah", null, null, false).through(at));
             }
         }
         JSONObject m = n.optJSONObject("morning");
@@ -136,7 +154,7 @@ final class Scheduler {
             }
             Calendar cal = Calendar.getInstance(PrayerCalc.zone(o)); cal.clear();
             cal.set(d.y, d.m - 1, d.d, sh, sm, 0);
-            out.add(new Ev("s-" + key, cal.getTimeInMillis(), CH_ADHKAR, L.t("Before you sleep", "قبل النوم"), L.t("The three Quls, Āyat al-Kursī and the adhkār of sleep.", "المعوذات وآية الكرسي وأذكار النوم."), "#/c/sleep", L.t("Begin", "ابدأ"), "#/r/sleep/0", true));
+            out.add(new Ev("s-" + key, cal.getTimeInMillis(), CH_ADHKAR, L.t("Before you sleep", "قبل النوم"), L.t("The three Quls, Āyat al-Kursī and the adhkār of sleep.", "المعوذات وآية الكرسي وأذكار النوم."), "#/c/sleep", L.t("Begin", "ابدأ"), "#/r/sleep/0", true).through(d.nextFajr));
         }
         JSONObject du = n.optJSONObject("duha");
         if (du != null && du.optBoolean("on") && !(smart && today.optBoolean("duha")))
@@ -159,14 +177,13 @@ final class Scheduler {
         String ja = jn == null ? "" : jn.optString("adhan", "");
         if (!dua.isEmpty() && !ja.isEmpty() && d.get(ja) > 0)
             out.add(new Ev("ja-" + key, d.get(ja) + 2 * MIN, CH_SUNNAH, L.t("Between adhān and iqāmah", "بين الأذان والإقامة"), L.t("Duʿāʾ now is not rejected.", "الدعاء الآن لا يُرد.") + yours, "#/journal", null, null, false));
-        JSONObject rm = n.optJSONObject("ramadan");
         if (rm != null) {
             PrayerCalc.Day nx = PrayerCalc.dayAt(now, off + 1, o);
             long imsak = cfg.optInt("imsak", 0) * MIN;
             if (rm.optBoolean("suhoor", true) && !cfg.optBoolean("excused", false) && Store.hijriMonth(cfg, nx.y, nx.m, nx.d) == 9)
                 out.add(new Ev("rs-" + key, nx.fajr - imsak - rm.optInt("suhoorMin", 45) * MIN, CH_ADHKAR, L.t("Suhūr", "السحور"),
                         L.t("Eat before " + Store.fmtTime(cfg, o, nx.fajr - imsak) + ". There is blessing in suhūr.", "تسحّر قبل " + Store.fmtTime(cfg, o, nx.fajr - imsak) + "، فإن في السحور بركة."), "#/ramadan", null, null, false));
-            if (rm.optBoolean("iftar", true) && Store.hijriMonth(cfg, d.y, d.m, d.d) == 9 && !cfg.optBoolean("excused", false))
+            if (!maghribMerged && ramIftar)
                 out.add(new Ev("ri-" + key, d.maghrib, CH_PRAYER, L.t("Ifṭār · ", "الإفطار · ") + Store.fmtTime(cfg, o, d.maghrib),
                         L.t("Dhahabaẓ-ẓama’u wabtallatil-ʿurūq, wa thabatal-ajru in shā’ Allāh.", "ذَهَبَ الظَّمَأُ وَابْتَلَّتِ العُرُوقُ، وَثَبَتَ الْأَجْرُ إِنْ شَاءَ اللَّهُ"), "#/ramadan", L.t("Ifṭār duʿāʾ", "دعاء الإفطار"), "#/r/ramadan/1", false));
         }
@@ -191,7 +208,7 @@ final class Scheduler {
         boolean ours = sp.getBoolean("dndOurs", false), granted = nm != null && nm.isNotificationPolicyAccessGranted();
         boolean on = si != null && si.optBoolean("on") && !cfg.optBoolean("excused", false) && granted;
         long next = Long.MAX_VALUE, until = 0;
-        if (on) for (int off = -1; off <= 1; off++) {
+        if (on && o != null) for (int off = -1; off <= 1; off++) {
             PrayerCalc.Day d = PrayerCalc.dayAt(now, off, o);
             Calendar dw = Calendar.getInstance(PrayerCalc.zone(o)); dw.setTimeInMillis(d.dhuhr);
             boolean fri = dw.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY;
@@ -241,7 +258,7 @@ final class Scheduler {
     }
 
     /** Fire anything due now, then re-arm. */
-    static void run(Context c) {
+    static synchronized void run(Context c) {
         try { runUnsafe(c); } catch (Throwable t) { android.util.Log.w("Adhkar", "scheduler", t); }
     }
 
@@ -253,23 +270,42 @@ final class Scheduler {
         AlarmManager am = c.getSystemService(AlarmManager.class);
         PendingIntent tick = PendingIntent.getBroadcast(c, 1, new Intent(c, AlarmReceiver.class).setAction(ACTION_TICK), PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         if (o == null) {
+            silence(c, cfg, null, System.currentTimeMillis());
             Store.prefs(c).edit().remove("nextReminderAt").apply();
             if (am != null) am.cancel(tick);
             return;
         }
-        long now = System.currentTimeMillis(), last = Store.prefs(c).getLong("lastFired", now - 2 * MIN);
+        long now = System.currentTimeMillis();
+        android.content.SharedPreferences sp = Store.prefs(c);
+        boolean hadFired = sp.contains("firedReminders");
+        boolean wasEnabled = sp.getBoolean("notifWasEnabled", hadFired);
+        JSONObject nObj = cfg.optJSONObject("notif");
+        boolean isEnabled = nObj != null && nObj.optBoolean("enabled", false);
+        boolean seedPastOnly = !hadFired || (!wasEnabled && isEnabled);
+        Set<String> fired = new HashSet<>(sp.getStringSet("firedReminders", java.util.Collections.emptySet()));
+        String from = PrayerCalc.key(PrayerCalc.dayAt(now, -3, o));
+        String through = PrayerCalc.key(PrayerCalc.dayAt(now, 3, o));
+        fired.removeIf(id -> {
+            String date = id.substring(Math.max(0, id.length() - 10));
+            return date.compareTo(from) < 0 || date.compareTo(through) > 0;
+        });
+        long legacy = sp.getLong("lastFired", 0);
         List<Ev> evs = new ArrayList<>();
         for (int off = -1; off <= 1; off++) evs.addAll(events(c, cfg, o, off));
-        for (Ev e : evs) if (e.at > last && e.at <= now + 5000 && now < e.expires) {
-            post(c, e);
+        long next = Long.MAX_VALUE;
+        for (Ev e : evs) {
+            if (e.at > now) { next = Math.min(next, e.at); continue; }
+            if (now >= e.expires || fired.contains(e.id)) continue;
+            if (seedPastOnly || (legacy <= now && e.at <= legacy)) { fired.add(e.id); continue; }
+            if (!post(c, e)) continue;
+            fired.add(e.id);
             JSONObject ju = cfg.optJSONObject("jumuah");
-            if (e.id.startsWith("fh-") && ju != null && ju.optBoolean("overlay", true) && !MainActivity.visible && !Store.prefs(c).getBoolean("dndOurs", false))
+            if (e.id.startsWith("fh-") && ju != null && ju.optBoolean("overlay", true) && !MainActivity.visible && !sp.getBoolean("dndOurs", false))
                 Overlay.hour(c, e.text, e.route);
         }
-        long next = Long.MAX_VALUE;
-        for (Ev e : evs) if (e.at > now + 5000 && e.at < next) next = e.at;
-        Store.prefs(c).edit().putLong("lastFired", now + 5000)
-                .putLong("nextReminderAt", next == Long.MAX_VALUE ? 0 : next).apply();
+        NotificationManager nm = c.getSystemService(NotificationManager.class);
+        sp.edit().remove("lastFired").putBoolean("notifWasEnabled", isEnabled).putStringSet("firedReminders", fired)
+                .putLong("nextReminderAt", next == Long.MAX_VALUE || nm == null || !nm.areNotificationsEnabled() ? 0 : next).apply();
         for (int off = 0; off <= 1; off++) {
             PrayerCalc.Day d = PrayerCalc.dayAt(now, off, o);
             for (String k : PrayerCalc.ORDER) { long t = d.get(k); if (t > now + 5000 && t < next) next = t; }
@@ -284,6 +320,20 @@ final class Scheduler {
         if (am == null) return;
         if (Build.VERSION.SDK_INT < 31 || am.canScheduleExactAlarms()) am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, next, tick);
         else am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, next, tick);
+    }
+
+    static synchronized void postSnooze(Context c, String id) {
+        if (id == null) return;
+        JSONObject cfg = Store.config(c);
+        PrayerCalc.Opts opts = Store.opts(cfg);
+        if (opts == null) return;
+        long now = System.currentTimeMillis();
+        for (int off = -1; off <= 0; off++) for (Ev e : events(c, cfg, opts, off)) {
+            if (!e.snooze || !id.equals(e.id) || now < e.at || now >= e.expires) continue;
+            channels(c);
+            post(c, new Ev(e.id, now, e.ch, e.title, e.text, e.route, e.action, e.actionRoute, false));
+            return;
+        }
     }
 
     static PendingIntent open(Context c, String route, int req) {

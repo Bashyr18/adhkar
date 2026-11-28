@@ -58,7 +58,15 @@ final class Audio {
 
     long usage() { long s = 0; File[] f = dir().listFiles(); if (f != null) for (File x : f) s += x.length(); return s; }
 
-    void deleteAll() { stop(); File[] f = dir().listFiles(); if (f != null) for (File x : f) x.delete(); }
+    void deleteAll() {
+        ui.post(() -> {
+            stop();
+            net.execute(() -> {
+                File[] f = dir().listFiles();
+                if (f != null) for (File x : f) x.delete();
+            });
+        });
+    }
 
     void cancel() { cancel = true; }
 
@@ -146,7 +154,7 @@ final class Audio {
         } catch (Exception e) { stop(); sink.send("__native.onAudioEnd&&__native.onAudioEnd()"); }
     }
 
-    void pause() { if (mp != null && mp.isPlaying()) mp.pause(); }
+    void pause() { ui.removeCallbacks(tick); if (mp != null && mp.isPlaying()) mp.pause(); }
     void resume() { if (mp != null && !mp.isPlaying()) { mp.start(); ui.removeCallbacks(tick); ui.post(tick); } }
     void setRate(float r) { rate = Math.max(.5f, Math.min(1.5f, r)); try { if (mp != null) { boolean was = mp.isPlaying(); mp.setPlaybackParams(new PlaybackParams().setSpeed(rate)); if (!was) mp.pause(); } } catch (Exception ignored) { } }
     void stop() { ui.removeCallbacks(tick); if (mp != null) { try { mp.stop(); } catch (Exception ignored) { } mp.release(); mp = null; } }

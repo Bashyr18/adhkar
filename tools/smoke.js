@@ -309,6 +309,9 @@ base.w.A.setExcused(false);
 ok(S.excused.cycles.length === 2 && S.excused.nifas.length === 1, 'nifās not added to the cycle history');
 S.excused.cycles = [];
 S.excused.nifas = [];
+S.excused.days = {};
+S.excused.ended = {};
+S.excused.endedAt = 0;
 S.profile.gender = '';
 ok(/Not perfumed/.test(visit(base, '#/modesty')), 'dress guide renders');
 
@@ -339,13 +342,124 @@ const fresh = boot('2026-11-02T09:00:00Z');
 for (let i = 0; i < 6; i++) {
   const h = visit(fresh, '#/welcome');
   ok(/class="ob/.test(h), 'onboarding step ' + i);
-  const nx = fresh.w.document.querySelector('[data-a="ob-next"]');
+  const nx = fresh.w.document.querySelector('[data-a="ob-next"], [data-a="ob-notif"]');
   if (!nx) break;
   try {
     nx.click();
   } catch (e) {
     fresh.errors.push(String(e));
   }
+}
+
+/* New settings are on, while explicit choices survive backup and reload. */
+{
+  let requests = 0,
+    checks = 0;
+  const install = (w) => {
+    w.AndroidBridge = {
+      updateCan: () => 'yes',
+      updateCheck: () => {
+        checks++;
+      },
+      requestNotifications: () => {
+        requests++;
+        return false;
+      }
+    };
+  };
+  const env = boot('2026-11-24T12:00:00Z', null, install),
+    w = env.w,
+    A = w.A;
+  for (let i = 0; i < 4; i++) A.obNext();
+  const doc = w.document;
+  ok(
+    doc.querySelector('[data-a="ob-reminders"]').getAttribute('aria-checked') === 'true' &&
+      doc.querySelector('[data-a="upd-auto"]').getAttribute('aria-checked') === 'true' &&
+      A.S.prefs.widgets &&
+      A.S.prefs.nudge.on &&
+      A.S.prefs.nudge.over,
+    'fresh reminder, widget and update choices are on'
+  );
+  A.upd.autoCheck();
+  ok(checks === 0 && requests === 0, 'setup gives users a choice before asking or checking');
+  doc.querySelector('[data-a="upd-auto"]').click();
+  doc.querySelector('[data-a="ob-notif"]').click();
+  ok(doc.querySelector('[data-a="ob-notif"]').disabled, 'permission prompt stays on the reminder step');
+  w.__native.onPermission('notifications', false);
+  ok(!!doc.querySelector('[data-a="ob-notif"]'), 'permission result leaves setup on reminders');
+  ok(requests === 1 && A.S.notif.enabled, 'the default choice prompts once and system denial is independent');
+  A.S.notif.enabled = false;
+  A.S.prefs.widgets = false;
+  A.S.prefs.nudge.on = false;
+  const restored = boot('2026-11-24T12:00:00Z', JSON.parse(A.exportJSON()).state);
+  const p = restored.w.A.S;
+  ok(!p.notif.enabled && !p.upd.auto && !p.prefs.widgets && !p.prefs.nudge.on, 'explicit opt-outs survive reload');
+  const older = A.readBackup(JSON.stringify({ app: 'adhkar', state: { v: 10, profile: { onboarded: true } } }));
+  ok(
+    !older.notif.enabled && !older.upd.auto && !older.prefs.nudge.over,
+    'omitted legacy choices preserve earlier defaults'
+  );
+  w.close();
+  restored.w.close();
+}
+{
+  const env = boot('2026-11-24T12:00:00Z', settled),
+    w = env.w,
+    A = w.A;
+  visit(env, '#/');
+  A.nudgeNow();
+  const button = w.document.querySelector('.dn-main');
+  const before = A.S.tasbih.total;
+  if (button) {
+    button.click();
+    button.click();
+  }
+  ok(!!button && A.S.tasbih.total === before + 1, 'the on-screen dhikr counts only once');
+  A.hideNudge();
+  for (const route of ['#/kahf', '#/counting', '#/purity/wudu']) {
+    visit(env, route);
+    const count = w.document.querySelectorAll('.dnudge').length;
+    A.nudgeNow();
+    ok(w.document.querySelectorAll('.dnudge').length === count, 'dhikr avoids ' + route);
+  }
+  for (const [kind, max] of [
+    ['wudu', 7],
+    ['ghusl', 6]
+  ]) {
+    visit(env, '#/purity/' + kind);
+    const doc = w.document;
+    ok(doc.querySelectorAll('.pu [data-a="pu-to"]').length === max, kind + ' opens with every step to jump to');
+    ok(doc.querySelectorAll('.pu-evidence li').length >= 4, kind + ' includes offline source summaries');
+    ok(
+      doc.querySelector('.pu-k[aria-pressed="true"]').dataset.k === kind &&
+        doc.querySelectorAll('#puP i').length === max,
+      kind + ' marks its own lesson and has a progress bar per step'
+    );
+    for (let i = 1; i <= max; i++) {
+      visit(env, '#/purity/' + kind + '/' + i);
+      const art = doc.querySelector('.pu .lp-fig.on').getAttribute('src');
+      const filled = [...doc.querySelectorAll('#puP b')].filter((b) => /scaleX\(1\)/.test(b.style.transform)).length;
+      ok(fs.existsSync(path.join(WEB, art)) && filled === i, kind + ' step ' + i + ' has its art and progress');
+    }
+    visit(env, '#/purity/' + kind + '/' + (max + 1));
+    ok(!!doc.querySelector('.pu .lp-done'), kind + ' has a completion view');
+  }
+  /* the dock steps through, and the other lesson slides in place from the opening page */
+  visit(env, '#/purity/wudu');
+  A.acts['pu-next']();
+  ok(/Step 1 of 7/.test(w.document.getElementById('puR').textContent), 'Begin moves to the first step');
+  A.acts['pu-prev']();
+  A.acts['pu-kind'](w.document.querySelector('.pu-k[data-k="ghusl"]'));
+  ok(
+    w.document.getElementById('puT').textContent === 'Ghusl' && w.document.querySelectorAll('#puP i').length === 6,
+    'choosing ghusl switches the lesson in place'
+  );
+  A.S.prefs.lang = 'ar';
+  visit(env, '#/purity/ghusl/4');
+  ok(
+    w.document.querySelector('.pu .lp-name h2').textContent === 'أوصل الماء إلى أصول الشعر',
+    'purification steps are available in Arabic'
+  );
 }
 
 /* seasonal content follows the calendar */
@@ -1415,7 +1529,9 @@ ok(/Ramaḍān Mubārak/.test(rt), 'Ramaḍān greeting in Ramaḍān');
   w.close();
 }
 {
-  const { w } = boot('2026-11-24T12:00:00Z');
+  const { w } = boot('2026-11-24T12:00:00Z', null, (win) => {
+    win.AndroidBridge = {};
+  });
   const a = w.A;
   for (let i = 0; i < 3; i++) a.obNext();
   const { document } = w;
@@ -1572,6 +1688,443 @@ ok(/Ramaḍān Mubārak/.test(rt), 'Ramaḍān greeting in Ramaḍān');
     'iOS async bridge calls go through WKScriptMessageHandler'
   );
   w.close();
+}
+
+/* Ramaḍān: missed days and break days are both made up; the page shows the month, the make-up fasts and tonight */
+{
+  const st = JSON.parse(JSON.stringify(settled));
+  st.excused = { on: false, since: null, days: { '2027-02-14': 1, '2027-02-15': 1 }, cycles: [], habit: {} };
+  st.ramadan = { skip: { '2027-02-24': 1 }, taraweeh: { '2027-03-03': 11 }, khatm: { juz: { 1: 1, 2: 1 }, done: 0 } };
+  st.fasts = { '2026-12-01': 'qada' };
+  const env = boot('2027-03-05T14:20:00Z', st),
+    A = env.w.A,
+    doc = env.w.document;
+  const q = A.qadaOwed();
+  ok(
+    q.brk === 2 && q.skipped === 1 && q.missed === 3 && q.owed === 3 && q.made === 0,
+    'a missed Ramaḍān day is made up like a break day, and a make-up kept before any miss answers none ' +
+      JSON.stringify(q)
+  );
+  const beforeFasts = JSON.stringify(A.S.fasts);
+  visit(env, '#/ramadan');
+  ok(JSON.stringify(A.S.fasts) === beforeFasts, 'opening Ramadan writes no fasting record');
+  ok(doc.querySelectorAll('.rmd.unlogged').length > 0, 'unlogged days are distinct from missed days');
+  A.S.ramadan.khatm.juz = {};
+  for (let j = 1; j <= 30; j++) A.acts['rm-juz']({ dataset: { v: String(j) } });
+  ok(
+    A.S.ramadan.khatm.done === 0 && Object.keys(A.S.ramadan.khatm.juz).length === 30,
+    'the last juz stays editable before saving'
+  );
+  A.acts['rm-juz']({ dataset: { v: '30' } });
+  ok(!A.S.ramadan.khatm.juz[30] && A.S.ramadan.khatm.done === 0, 'an accidental last juz can be corrected');
+  A.acts['rm-juz']({ dataset: { v: '30' } });
+  A.acts['rm-khatm-save']();
+  doc.querySelector('.sheet [data-ok]').click();
+  ok(A.S.ramadan.khatm.done === 1 && !Object.keys(A.S.ramadan.khatm.juz).length, 'confirmation saves one khatm');
+  ok(
+    !!doc.querySelector('.rm-qada') && doc.querySelector('.rm-qada .ring [data-n]').dataset.n === '3',
+    'the make-up fasts card counts what is owed'
+  );
+  ok(
+    doc.querySelector('.rmd.today').getAttribute('aria-current') === 'date' &&
+      doc.querySelector('.rm-tw [data-v="8"]').getAttribute('aria-label') === 'Log 8 rakʿahs',
+    'today and the rakʿah choices say what they are'
+  );
+  /* after Ramaḍān: make-ups count in order, never a future one; the button never replaces another fast or logs ʿĪd */
+  {
+    const st2 = JSON.parse(JSON.stringify(st));
+    st2.fasts = { '2026-12-01': 'qada', '2027-03-15': 'qada', '2027-04-30': 'qada', '2027-03-19': 'mon' };
+    const e2 = boot('2027-03-19T09:00:00Z', st2),
+      A2 = e2.w.A,
+      q2 = A2.qadaOwed();
+    ok(
+      q2.made === 1 && q2.owed === 2,
+      'only make-ups kept after a miss, and not in the future, count ' + JSON.stringify(q2)
+    );
+    visit(e2, '#/ramadan');
+    A2.acts['rm-qada']();
+    ok(A2.S.fasts['2027-03-19'] === 'mon', 'logging a make-up never replaces a fast already logged today');
+    const e3 = boot('2027-03-09T09:00:00Z', st);
+    e3.w.A.acts['rm-qada']();
+    ok(!e3.w.A.S.fasts['2027-03-09'], 'no make-up fast is logged on ʿĪd');
+  }
+  ok(
+    doc.querySelectorAll('.rmgrid .rmd.off').length === 1 && doc.querySelectorAll('.rmd.ex').length === 2,
+    'the month shows a missed day and the break days'
+  );
+  ok(
+    !!doc.querySelector('.rm-arc [data-rm-orb]') && !!doc.querySelector('[data-rm-cd]'),
+    'the Ramaḍān card has its live countdown and the arc of the fast'
+  );
+  ok(doc.querySelectorAll('.rm-sky .rn.now').length === 1, 'tonight is marked among the last ten nights');
+  ok(
+    doc.querySelector('.rm-dua .ar').textContent === env.w.DATA.items['r-qadr'].ar,
+    'the duʿāʾ of Laylat al-Qadr is shown from the verified data'
+  );
+  ok(
+    !!doc.querySelector('.rm-tw') && !!doc.querySelector('.rm-kh .rm-pace'),
+    'tarāwīḥ and the khatm pace are shown in Ramaḍān'
+  );
+  visit(env, '#/answered');
+  ok(
+    doc.querySelectorAll('.ans-dial .dl-w').length >= 10 && !!doc.querySelector('[data-dl-hand]'),
+    'the times of duʿāʾ are drawn on a dial of the day'
+  );
+  const pre = boot('2026-11-28T10:00:00Z', settled);
+  visit(pre, '#/ramadan');
+  ok(!pre.w.document.querySelector('.rm-tw'), 'tarāwīḥ waits for Ramaḍān');
+  ok(
+    !!pre.w.document.querySelector('.rm-daily-cta [data-a="rm-share"]'),
+    'pre-Ramaḍān page offers browsing the Day 1 to ʿĪd cards'
+  );
+}
+
+/* v13.10 release-gate checks: web remindersOn, Arabic Qibla, qaḍāʾ filter, break bead cap, Ramaḍān/ʿĪd dual share cards */
+{
+  /* 1. Web without native bridge reports reminders Off even though defaults() has notif.enabled = true */
+  const webEnv = boot('2026-11-28T10:00:00Z', settled);
+  const wA = webEnv.w.A;
+  ok(
+    wA.S.notif.enabled === true && wA.remindersOn() === false,
+    'web reports A.remindersOn() false without a native bridge'
+  );
+  visit(webEnv, '#/profile');
+  ok(
+    !/Reminders<\/span><b>On<\/b>/.test(webEnv.w.document.body.innerHTML),
+    'web profile does not claim reminders are On'
+  );
+  visit(webEnv, '#/salah');
+  ok(
+    !webEnv.w.document.querySelector('[data-a="bell"][aria-pressed="true"]'),
+    'web prayer bells do not appear active when notifications cannot fire'
+  );
+  visit(webEnv, '#/journal');
+  ok(
+    !webEnv.w.document.querySelector('[data-a="dua-nudge"][aria-checked="true"]'),
+    'web journal reminder switches stay Off without a native bridge'
+  );
+  visit(webEnv, '#/purity/wudu/1');
+  webEnv.w.A.rerender();
+  ok(
+    !!webEnv.w.document.querySelector('.pu.no-anim'),
+    'same-step purity rerender suppresses entrance animation to avoid flashes'
+  );
+  webEnv.w.close();
+
+  /* 2. Arabic Qibla uses full Arabic cardinal words and localized digits */
+  const arQ = boot('2026-11-28T10:00:00Z', { ...settled, prefs: { ...settled.prefs, lang: 'ar' } });
+  visit(arQ, '#/qibla');
+  const qTxt = arQ.w.document.body.textContent;
+  ok(
+    /جنوب شرق|شمال شرق|جنوب غرب|شمال غرب|شمال|جنوب|شرق|غرب/.test(qTxt) && /[٠-٩]+°/.test(qTxt),
+    'Arabic Qibla shows full Arabic compass words and Arabic digits'
+  );
+
+  /* 3. Break-day beads are capped with an overflow chip when a long recorded habit would overflow the row */
+  const brkEnv = boot('2026-11-28T10:00:00Z', {
+    ...settled,
+    profile: { ...settled.profile, gender: 'f' },
+    excused: {
+      on: true,
+      since: '2026-11-26',
+      cycles: [{ from: '2026-09-01', to: '2026-09-25' }]
+    }
+  });
+  visit(brkEnv, '#/');
+  const beads = brkEnv.w.document.querySelectorAll('.brk-beads i').length;
+  ok(
+    beads === 14 && /\+11/.test((brkEnv.w.document.querySelector('.brk-beads') || {}).textContent || ''),
+    'break beads cap overflow with a +N chip'
+  );
+  brkEnv.w.close();
+
+  /* 4. Ramaḍān Day 1–30, Odd Nights, ʿĪd al-Fiṭr & Shawwāl shareable cards */
+  const rmEnv = boot('2027-03-04T14:00:00Z', settled); /* Ramaḍān 25, odd night */
+  const rA = rmEnv.w.A;
+  const totalCards = rA.ramadanCardCount();
+  let allVerified = totalCards === 32;
+  for (let i = 0; i < totalCards; i++) {
+    const e = rA.ramadanDayEntry(i);
+    if (!e || !e.ar || !e.en || !e.ref) allVerified = false;
+  }
+  ok(allVerified, 'all 32 Ramaḍān Day 1–30, ʿĪd and Shawwāl cards resolve to verified verbatim Arabic and English');
+  ok(
+    rA.ramadanDayEntry(1).entry.k === 'muslim:1080' &&
+      rA.ramadanDayEntry(4).g === 'Ḥasan (al-Albānī)' &&
+      rA.ramadanDayEntry(28).entry.k === 'muslim:1170',
+    'Day 2 (Muslim 1080), Day 5 (Ḥasan al-Albānī), and Night 29 (Muslim 1170) carry exact verified sources and grades'
+  );
+  visit(rmEnv, '#/');
+  ok(
+    !!rmEnv.w.document.querySelector('.rm-daily.is-odd [data-a="rm-share"]'),
+    'Today shows the odd-night shareable card during the last ten'
+  );
+  rA.openRamadanShare(26);
+  const sh = rmEnv.w.document.querySelector('.sheet:not(.out)');
+  ok(
+    !!sh &&
+      !!sh.querySelector('[data-fmt="status"]') &&
+      !!sh.querySelector('[data-fmt="post"]') &&
+      !!sh.querySelector('[data-rm-step="1"]') &&
+      sh.querySelectorAll('[data-rm-jump]').length === 4,
+    'Ramaḍān share sheet exposes dual Status/Post formats and Day 1 to ʿĪd navigation'
+  );
+  /* Verify qadaOwed ignores any qada entry mistakenly recorded inside Ramaḍān */
+  rA.S.fasts['2027-02-20'] = 'qada';
+  ok(rA.qadaOwed().made === 0, 'qadaOwed ignores qada entries inside Ramaḍān');
+  rmEnv.w.close();
+
+  /* 5. ʿĪd al-Fiṭr (1 Shawwāl = 2027-03-09) shows the ʿĪd shareable card on Today, including in Arabic mode */
+  const eidEnv = boot('2027-03-09T09:00:00Z', settled);
+  visit(eidEnv, '#/');
+  ok(
+    !!eidEnv.w.document.querySelector('.rm-daily.is-eid') && /ʿĪd Mubārak/.test(eidEnv.w.document.body.textContent),
+    'Today shows the ʿĪd al-Fiṭr shareable card on 1 Shawwāl'
+  );
+  eidEnv.w.close();
+
+  const eidAr = boot('2027-03-09T09:00:00Z', { ...settled, prefs: { ...settled.prefs, lang: 'ar' } });
+  visit(eidAr, '#/');
+  ok(
+    !!eidAr.w.document.querySelector('.rm-daily.is-eid') &&
+      !eidAr.w.document.querySelector('.rm-daily .rm-daily-en') &&
+      /عيد الفطر/.test(eidAr.w.document.querySelector('.rm-daily').textContent),
+    'Arabic mode renders the ʿĪd shareable card purely in Arabic'
+  );
+
+  /* 6. Sol 6.2 regressions: per-prayer break eligibility, multi-break ended map, OS-blocked reminders, Jumuʿah guard, Qibla static fallback */
+  {
+    const lagos = {
+      ...settled,
+      profile: { ...settled.profile, gender: 'f' },
+      loc: { name: 'Lagos', lat: 6.52, lng: 3.38, tz: 'Africa/Lagos' }
+    };
+    const b1 = boot('2026-02-19T12:20:00Z', {
+      ...lagos,
+      excused: {
+        on: true,
+        since: '2026-02-15',
+        days: { '2026-02-15': 1, '2026-02-16': 1, '2026-02-17': 1, '2026-02-18': 1 }
+      }
+    });
+    const A1 = b1.w.A;
+    A1.setExcused(false); /* ends at 13:20 Lagos (after Fajr/sunrise, during Dhuhr) */
+    ok(
+      A1.prayerExcused('2026-02-19', 'fajr') && !A1.prayerExcused('2026-02-19', 'dhuhr'),
+      'ending a break at Dhuhr excuses Fajr and enables Dhuhr'
+    );
+    visit(b1, '#/');
+    const dots = Array.from(b1.w.document.querySelectorAll('#dash [data-a="dash-pray"]')).map((x) => x.dataset.p);
+    ok(
+      !dots.includes('fajr') && dots.includes('dhuhr') && dots.length === 4,
+      'Today dash hides excused Fajr and shows 4 remaining prayers'
+    );
+    A1.acts['dash-pray']({ dataset: { p: 'fajr' } });
+    ok(!(A1.S.prayed['2026-02-19'] || {}).fajr, 'dash-pray rejects excused Fajr');
+    /* Starting a second break later preserves the prior break day end timestamp */
+    const snap = JSON.parse(A1.exportJSON());
+    b1.w.close();
+
+    const b2 = boot('2026-03-19T10:00:00Z', snap.state);
+    const A2 = b2.w.A;
+    A2.setExcused(true);
+    ok(
+      A2.breakEndedOn('2026-02-19') && !A2.prayerExcused('2026-02-19', 'dhuhr'),
+      'a second break does not revoke the earlier break day prayer eligibility'
+    );
+    b2.w.close();
+  }
+
+  /* 7. OS-blocked notifications reflect Off across Friday, Ramaḍān, Night, and Ḍuḥā while preserving saved prefs */
+  {
+    let permissionRequests = 0;
+    const osEnv = boot('2026-11-27T12:00:00Z', settled, (win) => {
+      win.AndroidBridge = {
+        notificationState() {
+          return JSON.stringify({ granted: false, exact: true });
+        },
+        requestNotifications() {
+          permissionRequests++;
+        }
+      };
+    });
+    const oA = osEnv.w.A;
+    oA.S.notif.enabled = true;
+    oA.S.notif.friday.on = true;
+    oA.S.notif.ramadan.suhoor = true;
+    oA.S.notif.ramadan.iftar = true;
+    ok(oA.remindersOn() === false, 'A.remindersOn() is false when OS denies notification permission');
+    visit(osEnv, '#/jumuah');
+    ok(
+      !osEnv.w.document.querySelector('[data-a="fr-notif"][aria-checked="true"]'),
+      'Friday switch shows Off when OS blocks notifications'
+    );
+    visit(osEnv, '#/ramadan');
+    ok(
+      !osEnv.w.document.querySelector('[data-a="rm-n"][aria-checked="true"]'),
+      'Suḥūr and Ifṭār switches show Off when OS blocks notifications'
+    );
+    ok(
+      oA.S.notif.friday.on === true && oA.S.notif.ramadan.suhoor === true,
+      'saved preferences stay intact while OS blocks delivery'
+    );
+    const salahHtml = visit(osEnv, '#/salah');
+    ok(
+      /System notifications are blocked\./.test(salahHtml) && /data-a="os-settings"/.test(salahHtml),
+      'Ṣalāh shows OS-blocked banner and Settings shortcut when OS denies permission'
+    );
+    oA.acts.bell({ dataset: { k: 'fajr' } });
+    ok(permissionRequests === 0, 'an OS-blocked Ṣalāh bell leaves recovery to system Settings');
+    osEnv.w.close();
+  }
+
+  /* 8. Jumuʿah fr-prayed works on Friday after Dhuhr, ticks cleanly, and refuses stale clicks after Friday Maghrib */
+  {
+    const friOk = boot('2026-11-27T14:00:00Z', settled);
+    const fA = friOk.w.A;
+    visit(friOk, '#/jumuah');
+    const v = fA.V.jumuah();
+    v.tick(friOk.w.document.getElementById('app'));
+    fA.acts['fr-prayed']({ dataset: { d: '2026-11-27' } });
+    ok(!!(fA.S.prayed['2026-11-27'] || {}).dhuhr, 'fr-prayed marks Jumuʿah prayed during Friday afternoon');
+    ok(!friOk.errors.length, 'Jumuʿah tick runs cleanly on Friday');
+    friOk.w.close();
+
+    const satEnv = boot('2026-11-28T10:00:00Z', settled);
+    const sA = satEnv.w.A;
+    sA.acts['fr-prayed']({ dataset: { d: '2026-11-27' } });
+    ok(!(sA.S.prayed['2026-11-27'] || {}).dhuhr, 'fr-prayed ignores stale checkbox taps after Friday Maghrib');
+    satEnv.w.close();
+  }
+
+  /* 9. Qibla static fallback before sensor sample & after sunset */
+  {
+    const qEnv = boot('2026-11-28T22:00:00Z', settled); /* night in London */
+    visit(qEnv, '#/qibla');
+    ok(
+      /Face \d+° from true north/.test((qEnv.w.document.getElementById('qmsg') || {}).textContent || ''),
+      'Qibla shows static bearing guidance until a real sensor sample arrives'
+    );
+    qEnv.w.A.acts['q-mode']({ dataset: { v: 'sun' } });
+    ok(
+      (qEnv.w.document.getElementById('qlbl') || {}).textContent === 'from north',
+      'Qibla sun mode shows from north instead of sun at top after sunset'
+    );
+    qEnv.w.close();
+  }
+
+  /* 10. Reader finger-counting timers stay with the item that scheduled them */
+  {
+    const fEnv = boot('2026-11-28T07:00:00Z', settled);
+    const fA = fEnv.w.A;
+    const timers = [];
+    const origSetTimeout = fEnv.w.setTimeout;
+    fEnv.w.setTimeout = function (fn, ms) {
+      if (ms >= 400 && ms <= 600) {
+        timers.push(fn);
+        return timers.length;
+      }
+      return origSetTimeout.call(this, fn, ms);
+    };
+    fA.S.prefs.count = 'fingers';
+    fA.S.prefs.autoNext = true;
+    visit(fEnv, '#/r/morning/0');
+    const paceBtn = fEnv.w.document.querySelector('[data-a="pace-tap"]');
+    ok(!!paceBtn, 'fingers mode renders pace circle');
+    if (paceBtn && paceBtn._pace && paceBtn._pace.onDone) {
+      paceBtn._pace.onDone();
+      visit(fEnv, '#/r/morning/1');
+      visit(fEnv, '#/r/morning/0');
+      timers.splice(0).forEach((fn) => fn());
+      ok(fEnv.w.location.hash === '#/r/morning/0', 'returning to a Morning item does not revive its old timer');
+      visit(fEnv, '#/r/morning/1');
+      const nextPaceBtn = fEnv.w.document.querySelector('[data-a="pace-tap"]');
+      ok(!!(nextPaceBtn && nextPaceBtn._pace), 'the next Morning item renders a pace circle');
+      if (nextPaceBtn && nextPaceBtn._pace) nextPaceBtn._pace.onDone();
+      visit(fEnv, '#/r/evening/0');
+      timers.splice(0).forEach((fn) => fn());
+      ok(fEnv.w.location.hash === '#/r/evening/0', 'finger-counting timer from Morning does not advance Evening');
+    }
+    fEnv.w.close();
+  }
+
+  /* 11. Learn lp-start starts fresh at step 0; Today break snooze hides usualDone; backup merge preserves cycles */
+  {
+    const nEnv = boot('2026-11-28T09:00:00Z', settled);
+    const nA = nEnv.w.A;
+    nA.S.learn.last = { p: 'dhuhr', imam: false, short: false, i: 3, n: 10, at: Date.now() };
+    visit(nEnv, '#/learn');
+    nA.acts['lp-pick']({ dataset: { p: 'dhuhr' } });
+    nA.acts['lp-imam']();
+    nA.acts['lp-start']();
+    nEnv.w.dispatchEvent(new nEnv.w.Event('hashchange'));
+    ok(
+      nA.S.learn.last && nA.S.learn.last.i === 0 && nA.S.learn.last.imam === true,
+      'lp-start resets to step 0 with chosen options'
+    );
+
+    nA.S.profile.gender = 'f';
+    nA.S.excused.on = true;
+    nA.S.excused.since = '2026-11-20';
+    nA.S.excused.habit = { len: 7, gap: 28 };
+    ok(/Look for the signs of purity/.test(visit(nEnv, '#/')), 'usualDone prompt renders before snooze');
+    nA.acts['cyc-later']();
+    ok(!/Look for the signs of purity/.test(visit(nEnv, '#/')), 'tapping Not yet snoozes usualDone prompt for today');
+
+    const freshEnv = boot('2026-11-28T09:00:00Z', {});
+    ok(freshEnv.w.A.hasLocalBackupData() === false, 'fresh un-onboarded install hasLocalBackupData() is false');
+    freshEnv.w.close();
+
+    const backup = JSON.stringify({
+      app: 'adhkar',
+      state: {
+        v: 10,
+        profile: { onboarded: true, since: '2026-01-01' },
+        counts: {},
+        excused: {
+          days: { '2026-10-01': 1 },
+          cycles: [{ from: '2026-10-01', to: '2026-10-06' }],
+          nifas: [{ from: '2026-05-01', to: '2026-06-05' }]
+        }
+      }
+    });
+    nA.S.excused.cycles = [{ from: '2026-11-01', to: '2026-11-06' }];
+    nA.S.excused.nifas = [];
+    nA.importJSON(backup, 'merge');
+    ok(
+      nA.S.excused.cycles.length === 2 && nA.S.excused.nifas.length === 1,
+      'backup merge preserves excused.cycles and excused.nifas'
+    );
+    ok(nA.V.print().tab === 4 && nA.V.jumuah().tab === 0, 'print and jumuah views preserve active nav tab');
+    nEnv.w.close();
+  }
+
+  /* 12. Android widgetEvents() checks persisted break history during startup */
+  {
+    const day = '2026-11-27';
+    const state = JSON.parse(JSON.stringify(settled));
+    state.profile.gender = 'f';
+    state.excused.days[day] = 1;
+    state.excused.ended = { [day]: Date.parse(day + 'T13:00:00Z') };
+    let queued = JSON.stringify([
+      { d: day, p: 'fajr', on: true },
+      { d: day, p: 'maghrib', on: true }
+    ]);
+    const wEnv = boot('2026-11-28T10:00:00Z', state, (win) => {
+      win.AndroidBridge = {
+        takeWidgetEvents() {
+          const out = queued;
+          queued = '';
+          return out;
+        }
+      };
+    });
+    const wA = wEnv.w.A;
+    ok(wA.prayerExcused(day, 'fajr'), 'previous-day Fajr before break end is excused');
+    ok(!(wA.S.prayed[day] || {}).fajr, 'widgetEvents() refuses to credit an excused previous-day prayer');
+    ok(!!(wA.S.prayed[day] || {}).maghrib, 'widgetEvents() credits a previous-day prayer after the break ended');
+    wEnv.w.close();
+  }
 }
 
 setTimeout(function () {

@@ -214,7 +214,7 @@ final class MainViewController: UIViewController,
         case .began:
             evalJS("__native.onBackStart&&__native.onBackStart(false)")
         case .changed:
-            evalJS(String(format: "__native.onBackProgress&&__native.onBackProgress(%.3f)", progress))
+            evalJS(String(format: "__native.onBackProgress&&__native.onBackProgress(%.3f)", locale: Locale(identifier: "en_US_POSIX"), progress))
         case .ended:
             let vx = g.velocity(in: view).x
             if progress > 0.35 || vx > 600 {

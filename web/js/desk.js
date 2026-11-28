@@ -122,7 +122,7 @@
       'الصلاة',
       'mosque',
       '#/salah',
-      ['salah', 'learn', 'qibla', 'month', 'night', 'duha', 'qada', 'calendar', 'ramadan', 'location']
+      ['salah', 'learn', 'purity', 'qibla', 'month', 'night', 'duha', 'qada', 'calendar', 'ramadan', 'location']
     ],
     ['journal', 'Duʿāʾ', 'الدعاء', null, '#/journal', ['journal', 'answered', 'deeds', 'modesty']],
     ['profile', 'You', 'أنت', 'user', '#/profile', ['profile', 'settings']]
@@ -143,7 +143,9 @@
       sky(Date.now()) +
       '"><div class="rl-top"><a class="rl-brand" href="#/" aria-label="Adhkār">' +
       MARK +
-      '<span class="rl-word"><b>Adhkār</b><small lang="ar" dir="rtl">أذكار</small></span></a><button class="rl-fold" data-desk="fold" title="' +
+      '<span class="rl-word"><b>Adhkār</b>' +
+      (A.ar && A.ar() ? '' : '<small lang="ar" dir="rtl">أذكار</small>') +
+      '</span></a><button class="rl-fold" data-desk="fold" title="' +
       esc(L(mini ? 'Widen the rail' : 'Narrow the rail', mini ? 'وسّع الشريط' : 'ضيّق الشريط')) +
       '">' +
       ic('fold', 18) +
@@ -190,7 +192,7 @@
           '" href="#/desk/print">' +
           ic('print', 20) +
           '<span>' +
-          esc(L('Print and PDF', 'الطباعة وPDF')) +
+          esc(L('Print and PDF', 'الطباعة و PDF')) +
           '</span></a>' +
           '<a class="rl-i' +
           (r.raw === 'desk/pc' ? ' on' : '') +
@@ -332,7 +334,8 @@
       return v.querySelector('.trk-day') && direct(v, v.querySelector('.trk-day')).previousElementSibling;
     },
     salah: function (v) {
-      return v.querySelector('.lp-entry') ? direct(v, v.querySelector('.lp-entry')) : null;
+      var f = v.querySelector('.pr-flow');
+      return f ? direct(v, f).previousElementSibling || direct(v, f) : null;
     },
     /* the achievements under the profile; the settings on their own on the right */
     /* the right column starts at Achievements or at Settings, whichever leaves the two columns closest in height:
@@ -674,7 +677,10 @@
     /* a second look once the page has settled (images, fonts, the entrance), when the heights are the real ones */
     if (SPLIT[name] && COLS[name])
       setTimeout(function () {
-        if ($('#app > .view') === v) lay(v, name);
+        if ($('#app > .view') !== v) return;
+        /* columns rebuilt here must not rise in a second time */
+        v.classList.remove('in');
+        lay(v, name);
       }, 450);
     deal(v.querySelector('.dk-grid'));
   }
@@ -810,8 +816,18 @@
     if (typing(e) || ctrl || e.altKey) return;
     /* Space is the counting circle: a tap moves on, holding pauses, exactly as a finger on the phone */
     if (k === ' ') {
-      var c = circle();
-      if (!c) return;
+      var c = circle(),
+        f = document.activeElement;
+      /* a focused button, link or switch keeps its own Space; the circle takes it from anywhere else */
+      if (
+        !c ||
+        (f &&
+          f !== c &&
+          !c.contains(f) &&
+          f.closest &&
+          f.closest('button, a[href], [role="button"], [role="switch"], [role="checkbox"], summary'))
+      )
+        return;
       e.preventDefault();
       if (e.repeat || spaceDown) return;
       spaceDown = c;
@@ -1138,13 +1154,17 @@
   function nextToHost() {
     if (tab) return; /* the tray, the pill and the reminders are the Windows app's */
     var n = A.now();
-    if (!n.next || !n.next.at) return;
+    if (!S.profile.onboarded || !n.next || !n.next.at) {
+      if (B.deskNext) B.deskNext('', 0, '');
+      Desk._pillSig = '';
+      return;
+    }
     try {
       B.deskNext(pname(n.next.k, n.next.at), n.next.at, A.fmtTxt(n.next.at));
     } catch (e) {}
     if (B.deskPill && A.paintPill) {
       var info = pillInfo(n),
-        sig = JSON.stringify(info) + document.documentElement.dataset.theme;
+        sig = JSON.stringify(info) + document.documentElement.dataset.theme + '|' + (S.prefs.accent || '');
       /* repaint only when something on it changes (the countdown ticks in the Windows app) */
       if (sig === Desk._pillSig) return;
       Desk._pillSig = sig;
@@ -1256,7 +1276,7 @@
       now = Date.now(),
       todayKey = A.today(),
       exc = !!(S.excused && S.excused.on);
-    if (!N || !S.loc) {
+    if (!S.profile.onboarded || !N.enabled || !S.loc) {
       try {
         B.deskSchedule('[]');
       } catch (e) {}
@@ -1265,7 +1285,6 @@
     [A.shift(todayKey, -1), todayKey, A.shift(todayKey, 1)].forEach(function (key) {
       var t = A.pday(key);
       if (!t) return;
-      if (!N.enabled) return;
       var tomorrow = A.shift(key, 1),
         plan = S.fastPlan && S.fastPlan[tomorrow];
       if (plan && !exc && !A.noFastDay(A.hijri(tomorrow)) && isFinite(t.maghrib))
@@ -1278,9 +1297,11 @@
       var smart = N.smart !== false && key <= todayKey,
         dd = smart ? A.dayDone(key) : {},
         jn = S.journal.nudge,
-        openDua = S.journal.items.find(function (d) {
-          return d && !d.done && d.text;
-        }),
+        openDua =
+          (A.duaPick && A.duaPick(key)) ||
+          S.journal.items.find(function (d) {
+            return d && !d.done && d.text;
+          }),
         jFri = !!(openDua && jn.friday),
         friday = !!(N.friday && N.friday.on);
       if (A.dow(key) === 5 && (friday || jFri)) {
@@ -1303,20 +1324,31 @@
             hour: true
           });
       }
+      var isRam = !!(A.isRamadan && A.isRamadan(key)),
+        ramIftar = isRam && !exc && !!(N.ramadan && N.ramadan.iftar);
       if (!exc) {
         A.PRAYERS.forEach(function (p) {
           if (!N.prayers || !N.prayers[p] || !isFinite(t[p])) return;
+          var fri = p === 'dhuhr' && A.dow(key) === 5,
+            name = fri
+              ? S.profile.gender === 'f'
+                ? ['Jumuʿah or Ẓuhr', 'الجمعة أو الظهر']
+                : ['Jumuʿah', 'الجمعة']
+              : PN[p],
+            mergeIftar = p === 'maghrib' && ramIftar;
           out.push({
             t: t[p],
-            title: L('Time for ' + PN[p][0], 'حان وقت ' + PN[p][1]),
-            body: A.fmtTxt(t[p]),
+            title: mergeIftar
+              ? L('Maghrib & Ifṭār', 'المغرب والإفطار')
+              : L('Time for ' + name[0], 'حان وقت ' + name[1]),
+            body: mergeIftar ? L('Time to break your fast · ', 'حان وقت الإفطار · ') + A.fmtTxt(t[p]) : A.fmtTxt(t[p]),
             takbir: !!N.adhan,
-            route: 'salah'
+            route: mergeIftar ? 'ramadan' : 'salah'
           });
           if (N.pre > 0)
             out.push({
               t: t[p] - N.pre * 60000,
-              title: L(PN[p][0] + ' in ' + N.pre + ' min', PN[p][1] + ' بعد ' + A.fmtN(N.pre) + ' د'),
+              title: L(name[0] + ' in ' + N.pre + ' min', name[1] + ' بعد ' + A.fmtN(N.pre) + ' د'),
               body: A.fmtTxt(t[p]),
               route: 'salah'
             });
@@ -1365,8 +1397,9 @@
           body: openDua.text.slice(0, 120),
           route: 'journal'
         });
-      if (A.isRamadan && A.isRamadan(key) && N.ramadan) {
-        if (N.ramadan.iftar && !exc && isFinite(t.maghrib))
+      if (isRam && N.ramadan) {
+        var magOn = !exc && !!(N.prayers && N.prayers.maghrib);
+        if (N.ramadan.iftar && !exc && !magOn && isFinite(t.maghrib))
           out.push({
             t: t.maghrib,
             title: L('Ifṭār', 'الإفطار'),
@@ -1404,13 +1437,13 @@
     if (A.route().raw === 'desk/pc') A.rerender();
   };
   var sync0 = A.N.sync;
-  A.N.sync = function () {
-    if (sync0) sync0.apply(this, arguments);
-    clearTimeout(Desk._st);
-    Desk._st = setTimeout(function () {
-      schedule();
-      nextToHost();
-    }, 500);
+  var syncDesk = A.debounce(function () {
+    schedule();
+    nextToHost();
+  }, 500);
+  A.N.sync = function (immediate) {
+    if (sync0) sync0(immediate);
+    syncDesk(immediate);
   };
   setInterval(function () {
     paintNext();

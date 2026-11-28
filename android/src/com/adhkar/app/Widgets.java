@@ -16,7 +16,6 @@ final class Widgets {
     static final String ACTION_TAP = "com.adhkar.app.TASBIH_TAP", ACTION_RESET = "com.adhkar.app.TASBIH_RESET", ACTION_PRAYED = "com.adhkar.app.PRAYED", ACTION_ROUND = "com.adhkar.app.TASBIH_ROUND";
     private static final int[] COL_C = {R.id.c0, R.id.c1, R.id.c2, R.id.c3, R.id.c4};
     private static final int DIM = 0x99F5F0E7, WHITE = 0xFFF5F0E7;
-    private static int GOLD = 0xFFF1D59E;
     /** the app's accent, so "done" and the current prayer follow the colour the user chose */
     static int accent(JSONObject cfg) {
         try { String h = cfg.optString("accent", ""); if (h.matches("#[0-9a-fA-F]{6}")) return 0xFF000000 | Integer.parseInt(h.substring(1), 16); } catch (Exception ignored) { }
@@ -29,7 +28,24 @@ final class Widgets {
         try { updateAllUnsafe(c); } catch (Throwable t) { android.util.Log.w("Adhkar", "widgets", t); }
     }
 
+    static boolean enabled(Context c) { return Store.config(c).optBoolean("widgets", true); }
+
+    private static RemoteViews paused(Context c) {
+        RemoteViews v = new RemoteViews(c.getPackageName(), R.layout.widget_paused);
+        v.setTextViewText(R.id.title, L.t("Widgets paused", "الأدوات متوقفة"));
+        v.setTextViewText(R.id.sub, L.t("Open widget settings", "افتح إعدادات الأدوات"));
+        v.setOnClickPendingIntent(R.id.root, Scheduler.open(c, "#/settings/device", 214));
+        return v;
+    }
+
     private static void updateAllUnsafe(Context c) {
+        if (!enabled(c)) {
+            AppWidgetManager m = AppWidgetManager.getInstance(c);
+            RemoteViews v = paused(c);
+            for (Class<?> widget : new Class<?>[]{PrayerWidget.class, AdhkarWidget.class, DhikrWidget.class, TasbihWidget.class})
+                m.updateAppWidget(new ComponentName(c, widget), v);
+            return;
+        }
         AppWidgetManager m = AppWidgetManager.getInstance(c);
         int[] p = m.getAppWidgetIds(new ComponentName(c, PrayerWidget.class));
         if (p.length > 0) {
@@ -63,7 +79,7 @@ final class Widgets {
         RemoteViews v = new RemoteViews(c.getPackageName(), R.layout.widget_prayer);
         v.setOnClickPendingIntent(R.id.root, Scheduler.open(c, "#/salah", 100));
         JSONObject cfg = Store.config(c);
-        GOLD = accent(cfg);
+        int gold = accent(cfg);
         PrayerCalc.Opts o = Store.opts(cfg);
         if (o == null) {
             v.setTextViewText(R.id.label, L.t("ADHKĀR", "الأذكار"));
@@ -86,11 +102,16 @@ final class Widgets {
         for (String k : PrayerCalc.PRAYERS) if (d.get(k) <= now) cur = k;
         if (now >= d.sunrise && now < d.dhuhr) cur = null;
         if (lateIsha) cur = null;
+        java.util.Calendar dw = java.util.Calendar.getInstance(PrayerCalc.zone(o)); dw.setTimeInMillis(d.dhuhr);
+        boolean isFri = dw.get(java.util.Calendar.DAY_OF_WEEK) == java.util.Calendar.FRIDAY;
+        java.util.Calendar nDw = java.util.Calendar.getInstance(PrayerCalc.zone(o)); nDw.setTimeInMillis(nat);
+        boolean nextFri = nDw.get(java.util.Calendar.DAY_OF_WEEK) == java.util.Calendar.FRIDAY;
+        boolean sis = "f".equals(cfg.optString("gender"));
         v.setInt(R.id.root, "setBackgroundResource", sky(d, now));
         v.setTextViewText(R.id.hijri, Store.hijri(cfg, o));
         v.setTextViewText(R.id.place, Store.locName(cfg));
         v.setTextViewText(R.id.label, nk.equals("sunrise") ? L.t("FAJR ENDS AT", "ينتهي الفجر") : L.t("NEXT PRAYER", "الصلاة القادمة"));
-        v.setTextViewText(R.id.name, Store.name(nk));
+        v.setTextViewText(R.id.name, nextFri && "dhuhr".equals(nk) ? (sis ? L.t("Jumuʿah or Ẓuhr", "الجمعة أو الظهر") : L.t("Jumuʿah", "الجمعة")) : Store.name(nk));
         v.setTextViewText(R.id.at, Store.fmtTime(cfg, o, nat));
         v.setViewVisibility(R.id.countdown, android.view.View.VISIBLE);
         v.setChronometerCountDown(R.id.countdown, true);
@@ -99,6 +120,7 @@ final class Widgets {
         JSONObject today = cfg.optJSONObject("today");
         String dayKey = PrayerCalc.key(d);
         boolean sameDay = today != null && dayKey.equals(today.optString("key")), excused = cfg.optBoolean("excused", false);
+        boolean trackPrayers = cfg.optBoolean("trackPrayers", true);
         JSONObject prayed = sameDay ? today.optJSONObject("prayed") : null;
         for (int i = 0; i < 5; i++) {
             String k = PrayerCalc.PRAYERS[i];
@@ -106,12 +128,15 @@ final class Widgets {
             Boolean w = Store.widgetPrayed(c, dayKey, k);
             boolean done = w != null ? w.booleanValue() : prayed != null && prayed.has(k);
             boolean due = d.get(k) <= now;
-            v.setTextViewText(COL_N[i], (done ? "\u2713 " : "") + Store.name(k));
+            JSONObject excP = sameDay ? today.optJSONObject("excused") : null;
+            boolean pExc = excused || (excP != null && excP.optBoolean(k, false));
+            String pNm = isFri && "dhuhr".equals(k) ? L.t("Jumuʿah", "الجمعة") : Store.name(k);
+            v.setTextViewText(COL_N[i], (done && trackPrayers ? "\u2713 " : "") + pNm);
             v.setTextViewText(COL_T[i], Store.fmtTime(cfg, o, d.get(k)).replace(" am", "").replace(" pm", "").replace(" ص", "").replace(" م", ""));
-            v.setTextColor(COL_N[i], done ? GOLD : on ? GOLD : DIM);
-            v.setTextColor(COL_T[i], on ? GOLD : WHITE);
+            v.setTextColor(COL_N[i], (done && trackPrayers) ? gold : on ? gold : DIM);
+            v.setTextColor(COL_T[i], on ? gold : WHITE);
             v.setInt(COL_C[i], "setBackgroundResource", on ? R.drawable.widget_cell_on : R.drawable.widget_cell);
-            if (due && !excused) {
+            if (trackPrayers && due && !pExc) {
                 Intent t = new Intent(c, PrayerWidget.class).setAction(ACTION_PRAYED).putExtra("p", k).putExtra("d", dayKey);
                 v.setOnClickPendingIntent(COL_C[i], PendingIntent.getBroadcast(c, 300 + i, t, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
             } else v.setOnClickPendingIntent(COL_C[i], Scheduler.open(c, "#/salah", 310 + i));
@@ -129,6 +154,26 @@ final class Widgets {
         return v;
     }
 
+    static boolean canLogPrayer(Context c, String dayKey, String p) {
+        if (dayKey == null || p == null) return false;
+        JSONObject cfg = Store.config(c);
+        if (!cfg.optBoolean("trackPrayers", true)) return false;
+        if (cfg.optBoolean("excused", false)) return false;
+        PrayerCalc.Opts o = Store.opts(cfg);
+        if (o == null) return false;
+        long now = System.currentTimeMillis();
+        PrayerCalc.Day d = PrayerCalc.dayAt(now, 0, o);
+        String todayKey = PrayerCalc.key(d);
+        if (!dayKey.equals(todayKey)) return false;
+        if (d.get(p) > now) return false;
+        JSONObject today = cfg.optJSONObject("today");
+        if (today != null && dayKey.equals(today.optString("key"))) {
+            JSONObject excP = today.optJSONObject("excused");
+            if (excP != null && excP.optBoolean(p, false)) return false;
+        }
+        return true;
+    }
+
     /** the sky behind the prayer widget follows the day: dawn, day, the golden hour of ʿaṣr, dusk, night */
     static int sky(PrayerCalc.Day d, long now) {
         if (now >= d.fajr && now < d.sunrise) return R.drawable.widget_bg_dawn;
@@ -144,7 +189,7 @@ final class Widgets {
         RemoteViews v = new RemoteViews(c.getPackageName(), R.layout.widget_prayer_small);
         v.setOnClickPendingIntent(R.id.root, Scheduler.open(c, "#/salah", 101));
         JSONObject cfg = Store.config(c);
-        GOLD = accent(cfg);
+        int gold = accent(cfg);
         PrayerCalc.Opts o = Store.opts(cfg);
         if (o == null) { v.setTextViewText(R.id.name, L.t("Set location", "حدّد الموقع")); v.setTextViewText(R.id.at, L.t("Open Adhkār", "افتح التطبيق")); return v; }
         long now = System.currentTimeMillis();
@@ -155,9 +200,12 @@ final class Widgets {
         /* at high latitudes last night's ʿishāʾ can fall after midnight: until it comes, it is next */
         long yIsha = PrayerCalc.dayAt(now, -1, o).isha; boolean lateIsha = yIsha != Long.MIN_VALUE && yIsha > now;
         if (lateIsha) { nk = "isha"; nat = yIsha; }
+        java.util.Calendar nDw = java.util.Calendar.getInstance(PrayerCalc.zone(o)); nDw.setTimeInMillis(nat);
+        boolean nextFri = nDw.get(java.util.Calendar.DAY_OF_WEEK) == java.util.Calendar.FRIDAY;
+        boolean sis = "f".equals(cfg.optString("gender"));
         v.setInt(R.id.root, "setBackgroundResource", sky(d, now));
         v.setTextViewText(R.id.label, nk.equals("sunrise") ? L.t("FAJR ENDS", "ينتهي الفجر") : L.t("NEXT PRAYER", "الصلاة القادمة"));
-        v.setTextViewText(R.id.name, Store.name(nk));
+        v.setTextViewText(R.id.name, nextFri && "dhuhr".equals(nk) ? (sis ? L.t("Jumuʿah or Ẓuhr", "الجمعة أو الظهر") : L.t("Jumuʿah", "الجمعة")) : Store.name(nk));
         v.setTextViewText(R.id.at, Store.fmtTime(cfg, o, nat));
         v.setChronometerCountDown(R.id.countdown, true);
         v.setChronometer(R.id.countdown, SystemClock.elapsedRealtime() + (nat - now), L.t("in %s", "بعد %s"), true);
@@ -167,7 +215,7 @@ final class Widgets {
             String k = PrayerCalc.PRAYERS[i];
             boolean done = isPrayed(c, dayKey, k), due = d.get(k) <= now;
             v.setTextViewText(DOTS[i], done ? "\u2713" : "\u25cf");
-            v.setTextColor(DOTS[i], excused ? 0x33F5F0E7 : done ? GOLD : due ? (GOLD & 0x00FFFFFF) | 0xCC000000 : 0x40F5F0E7);
+            v.setTextColor(DOTS[i], excused ? 0x33F5F0E7 : done ? gold : due ? (gold & 0x00FFFFFF) | 0xCC000000 : 0x40F5F0E7);
         }
         return v;
     }
@@ -179,23 +227,31 @@ final class Widgets {
     static RemoteViews adhkar(Context c) {
         RemoteViews v = new RemoteViews(c.getPackageName(), R.layout.widget_adhkar);
         JSONObject cfg = Store.config(c), prog = cfg.optJSONObject("prog"), n = cfg.optJSONObject("notif");
-        GOLD = accent(cfg);
+        int gold = accent(cfg);
         PrayerCalc.Opts o = Store.opts(cfg);
         long now = System.currentTimeMillis();
         String sess = "morning"; String when = L.t("THIS MORNING", "هذا الصباح"); int bg = R.drawable.widget_bg_day;
         if (o != null) {
             PrayerCalc.Day d = PrayerCalc.dayAt(now, 0, o);
             boolean eveFromMaghrib = n != null && n.optJSONObject("evening") != null && "maghrib".equals(n.optJSONObject("evening").optString("from"));
+            boolean morningFromSunrise = n != null && n.optJSONObject("morning") != null && "sunrise".equals(n.optJSONObject("morning").optString("from"));
             long eve = eveFromMaghrib ? d.maghrib : d.asr;
-            /* the morning adhkār end before Dhuhr; until ʿAṣr the widget shows the evening's, still to come */
-            if (now >= d.fajr && now < d.dhuhr) { sess = "morning"; when = now < d.sunrise ? L.t("BEFORE SUNRISE", "قبل الشروق") : L.t("THIS MORNING", "هذا الصباح"); bg = now < d.sunrise ? R.drawable.widget_bg_dawn : R.drawable.widget_bg_day; }
-            else if (now >= d.dhuhr && now < eve) { sess = "evening"; when = L.t("FROM ʿAṢR", "من العصر"); bg = R.drawable.widget_bg_day; }
+            if (now >= d.fajr && now < d.dhuhr) {
+                when = now >= d.sunrise ? L.t("THIS MORNING", "هذا الصباح") : morningFromSunrise
+                        ? L.t("FROM SUNRISE", "من الشروق") : L.t("BEFORE SUNRISE", "قبل الشروق");
+                bg = now < d.sunrise ? R.drawable.widget_bg_dawn : R.drawable.widget_bg_day;
+            } else if (now >= d.dhuhr && now < eve) {
+                sess = "evening";
+                when = eveFromMaghrib ? L.t("FROM MAGHRIB", "من المغرب") : L.t("FROM ʿAṢR", "من العصر");
+                bg = R.drawable.widget_bg_day;
+            }
             else if (now >= eve && now < d.isha) { sess = "evening"; when = L.t("THIS EVENING", "هذا المساء"); bg = now < d.maghrib ? R.drawable.widget_bg_asr : R.drawable.widget_bg_dusk; }
             else { sess = "sleep"; when = L.t("BEFORE YOU SLEEP", "قبل النوم"); bg = R.drawable.widget_bg_night; }
         }
         /* progress belongs to the day it was synced; after midnight it starts at zero until the app syncs again */
         JSONObject td = cfg.optJSONObject("today");
-        if (o != null && (td == null || !Store.todayKey(o).equals(td.optString("key")))) prog = null;
+        String todayKey = o != null ? Store.todayKey(o) : new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(new java.util.Date(now));
+        if (td == null || !todayKey.equals(td.optString("key"))) prog = null;
         double f = prog == null ? 0 : prog.optDouble(sess, 0);
         boolean done = f >= 0.999;
         v.setInt(R.id.root, "setBackgroundResource", bg);
@@ -204,14 +260,14 @@ final class Widgets {
         v.setTextViewText(R.id.sub, done ? L.t("Complete · mā shāʾ Allāh", "اكتملت · ما شاء الله") : f > 0 ? L.t("Tap to continue where you left off", "اضغط للمتابعة من حيث توقفت") : sess.equals("sleep") ? L.t("Āyat al-Kursī, the three Quls and more", "آية الكرسي والمعوذات وغيرها") : L.t("Tap to begin", "اضغط للبدء"));
         v.setTextViewText(R.id.kl0, L.t("MORNING", "الصباح")); v.setTextViewText(R.id.kl1, L.t("EVENING", "المساء")); v.setTextViewText(R.id.kl2, L.t("SLEEP", "النوم"));
         v.setProgressBar(R.id.ring, 100, (int) Math.round(f * 100), false);
-        if (android.os.Build.VERSION.SDK_INT >= 31) v.setColorStateList(R.id.ring, "setProgressTintList", android.content.res.ColorStateList.valueOf(GOLD));
+        if (android.os.Build.VERSION.SDK_INT >= 31) v.setColorStateList(R.id.ring, "setProgressTintList", android.content.res.ColorStateList.valueOf(gold));
         v.setTextViewText(R.id.pct, done ? "\u2713" : L.n(Math.round(f * 100) + "%"));
         for (int i = 0; i < 3; i++) {
             double g = prog == null ? 0 : prog.optDouble(SESS[i], 0);
             v.setTextViewText(CHIP_V[i], g >= 0.999 ? "\u2713" : L.n(Math.round(g * 100) + "%"));
             v.setInt(CHIP[i], "setBackgroundResource", g >= 0.999 ? R.drawable.widget_chip_on : R.drawable.widget_chip);
-            v.setTextColor(CHIP_V[i], g >= 0.999 ? GOLD : WHITE);
-            if (android.os.Build.VERSION.SDK_INT >= 31) v.setColorStateList(CHIP[i], "setBackgroundTintList", g >= 0.999 ? android.content.res.ColorStateList.valueOf((GOLD & 0x00FFFFFF) | 0x33000000) : null);
+            v.setTextColor(CHIP_V[i], g >= 0.999 ? gold : WHITE);
+            if (android.os.Build.VERSION.SDK_INT >= 31) v.setColorStateList(CHIP[i], "setBackgroundTintList", g >= 0.999 ? android.content.res.ColorStateList.valueOf((gold & 0x00FFFFFF) | 0x33000000) : null);
             v.setOnClickPendingIntent(CHIP[i], Scheduler.open(c, "#/c/" + SESS[i], 120 + i));
         }
         v.setOnClickPendingIntent(R.id.root, Scheduler.open(c, "#/c/" + sess, 119));
@@ -222,7 +278,7 @@ final class Widgets {
     static RemoteViews dhikr(Context c) {
         RemoteViews v = new RemoteViews(c.getPackageName(), R.layout.widget_dhikr);
         JSONObject cfg = Store.config(c), dd = cfg.optJSONObject("dod");
-        GOLD = accent(cfg);
+        int gold = accent(cfg);
         PrayerCalc.Opts o = Store.opts(cfg);
         String answer = null;
         if (o != null) {
@@ -232,7 +288,14 @@ final class Widgets {
             boolean friday = cal.get(java.util.Calendar.DAY_OF_WEEK) == java.util.Calendar.FRIDAY;
             if ((now >= y.lastThird && now < d.fajr) || now >= d.lastThird) answer = L.t("THE LAST THIRD OF THE NIGHT", "ثلث الليل الآخر");
             else if (friday && now >= d.maghrib - 60 * 60000L && now < d.maghrib) answer = L.t("THE LAST HOUR OF FRIDAY", "آخر ساعة من الجمعة");
-            else for (String k : PrayerCalc.PRAYERS) { long t = d.get(k); if (now >= t && now < t + 20 * 60000L) { answer = L.t("BETWEEN ADHĀN AND IQĀMAH", "بين الأذان والإقامة"); break; } }
+            else {
+                JSONObject iq = cfg.optJSONObject("iqama");
+                for (String k : PrayerCalc.PRAYERS) {
+                    long t = d.get(k);
+                    int iqMin = (iq != null && iq.optBoolean("on") && iq.optInt(k, 0) > 0) ? iq.optInt(k, 20) : 20;
+                    if (now >= t && now < t + iqMin * 60000L) { answer = L.t("BETWEEN ADHĀN AND IQĀMAH", "بين الأذان والإقامة"); break; }
+                }
+            }
         }
         v.setInt(R.id.root, "setBackgroundResource", answer != null ? R.drawable.widget_bg_answer : R.drawable.widget_bg_dhikr);
         v.setTextViewText(R.id.label, answer != null ? "\u2726  " + answer : L.t("DHIKR OF THE DAY", "ذكر اليوم"));
@@ -253,6 +316,7 @@ final class Widgets {
 
     /** the tracker sizes itself to the widget: compact at 2x2, a larger ring when enlarged, the day's Sunnah numbers when wide */
     static RemoteViews tasbih(Context c) {
+        if (!enabled(c)) return paused(c);
         if (android.os.Build.VERSION.SDK_INT < 31) return tasbih(c, R.layout.widget_tasbih);
         java.util.Map<android.util.SizeF, RemoteViews> sizes = new java.util.HashMap<>();
         sizes.put(new android.util.SizeF(100f, 100f), tasbih(c, R.layout.widget_tasbih));
@@ -310,13 +374,13 @@ final class Widgets {
     static RemoteViews tasbih(Context c, int layout) {
         RemoteViews v = new RemoteViews(c.getPackageName(), layout);
         JSONObject cfg = Store.config(c);
-        GOLD = accent(cfg);
+        int gold = accent(cfg);
         Trk k = trk(c, cfg);
         boolean wide = layout == R.layout.widget_tasbih_wide, large = layout == R.layout.widget_tasbih_large;
-        android.content.res.ColorStateList tint = android.content.res.ColorStateList.valueOf(GOLD);
+        android.content.res.ColorStateList tint = android.content.res.ColorStateList.valueOf(gold);
         boolean tint31 = android.os.Build.VERSION.SDK_INT >= 31;
         v.setTextViewText(R.id.ar, k.ar.isEmpty() ? k.tr : k.ar);
-        v.setTextColor(R.id.ar, GOLD);
+        v.setTextColor(R.id.ar, gold);
         if (large) v.setTextViewText(R.id.tr, k.ar.isEmpty() || L.ar ? "" : k.tr);
         String goalLine = k.goal > 0 ? (k.today >= k.goal ? "✓ " : "") + L.t("Today ", "اليوم ") + L.n(Math.min(k.today, k.goal)) + " / " + L.n(k.goal) + (k.today > k.goal ? "  +" + L.n(k.today - k.goal) : "")
             : k.after > 0 ? L.t("Today ", "اليوم ") + L.n(k.today) + L.t("  ·  33 after each prayer", "  ·  ٣٣ بعد كل صلاة")
@@ -328,12 +392,12 @@ final class Widgets {
             v.setTextViewText(R.id.of, k.goal > 0 ? L.t("of ", "من ") + L.n(k.goal) : L.t("today", "اليوم"));
             v.setProgressBar(R.id.tprog, 1000, f, false);
             v.setTextViewText(R.id.today, wide ? goalLine : k.goal > 0 && k.today >= k.goal ? L.t("✓ Done for today", "✓ اكتمل اليوم") : L.t("On your fingers · ", "على الأصابع · ") + L.t("rounds of ", "جولات من ") + L.n(k.round));
-            v.setTextColor(R.id.today, k.goal > 0 && k.today >= k.goal ? GOLD : DIM);
+            v.setTextColor(R.id.today, k.goal > 0 && k.today >= k.goal ? gold : DIM);
             boolean arm = armed(c);
             v.setViewVisibility(R.id.round, android.view.View.VISIBLE);
             v.setTextViewText(R.id.round, arm ? L.t("Tap again to log ", "اضغط مجددًا لتسجيل ") + L.n(k.round) : L.t("✓  Finished ", "✓  أتممت ") + L.n(k.round));
             v.setInt(R.id.round, "setBackgroundResource", arm ? R.drawable.widget_chip_arm : R.drawable.widget_chip);
-            v.setTextColor(R.id.round, arm ? GOLD : WHITE);
+            v.setTextColor(R.id.round, arm ? gold : WHITE);
             v.setOnClickPendingIntent(R.id.round, PendingIntent.getBroadcast(c, 203, new Intent(c, TasbihWidget.class).setAction(ACTION_ROUND), PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
             v.setViewVisibility(R.id.reset, wide ? android.view.View.GONE : android.view.View.INVISIBLE);
             /* the ring opens the tracker, where the circle keeps the pace */
@@ -345,7 +409,7 @@ final class Widgets {
             v.setTextViewText(R.id.of, (t > 0 ? L.t("of ", "من ") + L.n(t) : L.t("tap to count", "اضغط للعد")) + (laps > 0 ? "  ·  ×" + L.n(laps) : ""));
             v.setProgressBar(R.id.tprog, 1000, t > 0 ? shown * 1000 / t : 0, false);
             v.setTextViewText(R.id.today, goalLine);
-            v.setTextColor(R.id.today, k.goal > 0 && k.today >= k.goal ? GOLD : DIM);
+            v.setTextColor(R.id.today, k.goal > 0 && k.today >= k.goal ? gold : DIM);
             v.setViewVisibility(R.id.round, android.view.View.GONE);
             v.setViewVisibility(R.id.reset, k.live > 0 ? android.view.View.VISIBLE : android.view.View.INVISIBLE);
             v.setOnClickPendingIntent(R.id.face, PendingIntent.getBroadcast(c, 200, new Intent(c, TasbihWidget.class).setAction(ACTION_TAP), PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
@@ -362,9 +426,9 @@ final class Widgets {
                 boolean met = k.gn[i] >= k.gg[i], cur = k.gid[i].equals(k.id);
                 v.setViewVisibility(G[i], android.view.View.VISIBLE);
                 v.setTextViewText(GN[i], (met ? "✓ " : "") + k.gname[i]);
-                v.setTextColor(GN[i], met || cur ? GOLD : 0xE6F5F0E7);
+                v.setTextColor(GN[i], met || cur ? gold : 0xE6F5F0E7);
                 v.setTextViewText(GV[i], L.n(Math.min(k.gn[i], k.gg[i])) + "/" + L.n(k.gg[i]));
-                v.setTextColor(GV[i], met ? GOLD : DIM);
+                v.setTextColor(GV[i], met ? gold : DIM);
                 v.setProgressBar(GB[i], 1000, (int) Math.min(1000, (long) k.gn[i] * 1000 / k.gg[i]), false);
                 if (tint31) v.setColorStateList(GB[i], "setProgressTintList", tint);
                 v.setOnClickPendingIntent(G[i], Scheduler.open(c, "#/tracker/" + k.gid[i], 210 + i));

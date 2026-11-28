@@ -196,22 +196,32 @@ body::before {
   }
 }
 .glowcard {
+  position: relative;
   box-shadow:
     var(--hi),
     var(--shadow),
     0 0 0 1px color-mix(in srgb, var(--h, var(--gold)) 30%, transparent),
     0 0 28px -8px color-mix(in srgb, var(--h, var(--gold)) 45%, transparent);
+}
+/* the glow breathes on a layer of its own, so only its opacity changes (no repaint of the card each frame) */
+.glowcard::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--h, var(--gold)) 45%, transparent),
+    0 0 38px -6px color-mix(in srgb, var(--h, var(--gold)) 60%, transparent);
+  opacity: 0;
   animation: glowpulse 3.2s ease-in-out infinite;
 }
 @keyframes glowpulse {
   50% {
-    box-shadow:
-      var(--hi),
-      var(--shadow),
-      0 0 0 1px color-mix(in srgb, var(--h, var(--gold)) 45%, transparent),
-      0 0 38px -6px color-mix(in srgb, var(--h, var(--gold)) 60%, transparent);
+    opacity: 1;
   }
 }
+
 .card,
 .jr,
 .chip,
@@ -733,51 +743,574 @@ body::before {
   display: none;
 }
 
-/* ---------- Ramaḍān ---------- */
+/* ---------- Ramaḍān (web/js/v-ramadan.js) ----------
+   One language across the page: gold for what was done, rose for a break, a red outline for a day missed, a dashed
+   outline for what is still to come. Things arrive once, as the page does (.view.in): the cells pop in a quick wave,
+   the strip grows, the rings draw; afterwards a tap only changes what it touches. */
 .rmgrid {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 6px;
+  gap: 7px;
+}
+@media (max-width: 360px) {
+  .rmgrid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
 }
 .rmd {
+  position: relative;
   aspect-ratio: 1;
-  border-radius: 12px;
-  background: var(--s3);
-  border: 1px solid transparent;
+  padding: 0;
+  border-radius: 13px;
+  background: var(--s2);
+  border: 1px solid var(--line);
   font: 700 13px/1 var(--f-ui);
+  font-variant-numeric: tabular-nums;
   color: var(--t2);
   transition:
-    background 0.25s,
+    background 0.3s var(--out),
+    color 0.3s,
+    box-shadow 0.3s,
     transform 0.2s var(--spring);
 }
 .rmd.on {
-  background: var(--goldh);
+  background: linear-gradient(155deg, #ffe9b8, var(--goldh) 48%, color-mix(in srgb, var(--goldh) 72%, #6b4706));
+  border-color: transparent;
   color: #1a1206;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 6px 14px -9px color-mix(in srgb, var(--goldh) 80%, transparent);
 }
 .rmd.ex {
-  background: color-mix(in srgb, var(--rose) 45%, var(--s3));
-  color: var(--t1);
+  background: var(--rose);
+  background: linear-gradient(
+    155deg,
+    color-mix(in srgb, var(--rose) 78%, #fff),
+    color-mix(in srgb, var(--rose) 62%, var(--s3))
+  );
+  border-color: transparent;
+  color: #2b0d1b;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 .rmd.off {
-  background: var(--s2);
-  color: var(--t3);
-  text-decoration: line-through;
+  background: var(--s1);
+  background: color-mix(in srgb, var(--bad) 9%, var(--s1));
+  border: 1.5px solid var(--bad);
+  border-color: color-mix(in srgb, var(--bad) 70%, transparent);
+  color: var(--bad);
+  color: color-mix(in srgb, var(--bad) 85%, var(--t1));
 }
 .rmd.fut {
-  opacity: 0.4;
+  background: transparent;
+  border: 1px dashed var(--line2);
+  color: var(--t3);
 }
 .rmd.today {
-  border-color: var(--t1);
+  box-shadow:
+    0 0 0 2px var(--s1),
+    0 0 0 3.5px var(--t1);
+}
+.rmd.today.on {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 0 0 2px var(--s1),
+    0 0 0 3.5px var(--goldh),
+    0 0 18px -2px var(--goldh);
+}
+.rmd.today::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 14px;
+  border: 1.5px solid var(--goldh);
+  opacity: 0;
+  pointer-events: none;
+  animation: rmping 2.8s var(--out) infinite;
+}
+@keyframes rmping {
+  0% {
+    opacity: 0.75;
+    transform: scale(0.88);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.14);
+  }
 }
 .rmd:active {
-  transform: scale(0.92);
+  transform: scale(0.9);
 }
+.view.in .rmd {
+  animation: rmpop 0.34s var(--spring) both;
+  animation-delay: calc(var(--i) * 8ms + 80ms);
+}
+@keyframes rmpop {
+  from {
+    opacity: 0;
+    transform: scale(0.55);
+  }
+}
+.legend i.lg-on {
+  background: var(--goldh);
+}
+.legend i.lg-ex {
+  background: var(--rose);
+}
+.legend i.lg-off {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--bad);
+}
+.legend i.lg-today {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--t1);
+}
+
+/* the card: greeting, a live countdown, the fast's arc, the month in one strip */
 .rm-hero {
   position: relative;
+  gap: 12px;
+  overflow: hidden;
   background: linear-gradient(160deg, color-mix(in srgb, var(--goldh) 16%, var(--s1)), var(--s1b) 70%);
 }
-.rm-hero .bar i {
-  background: linear-gradient(90deg, var(--goldh), var(--gold2));
+.rm-hero .lanterns {
+  right: 8px;
+}
+[dir='rtl'] .rm-hero .lanterns {
+  right: auto;
+  left: 8px;
+}
+.rm-top {
+  padding-inline-end: 100px;
+}
+@media (max-width: 340px) {
+  .rm-top {
+    padding-inline-end: 64px;
+  }
+  .rm-top .eyebrow {
+    letter-spacing: 0.08em;
+  }
+}
+.rm-top .eyebrow {
+  color: var(--goldh);
+}
+.rm-greet {
+  width: fit-content;
+  margin-top: 3px;
+  font: 400 21px/1.35 var(--f-ar);
+  color: var(--gold2);
+}
+.rm-cdrow {
+  align-items: flex-end;
+  gap: 10px;
+}
+.rm-cdl {
+  font: 700 10.5px/1 var(--f-ui);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--t3);
+}
+.rm-cd {
+  margin-top: 6px;
+  font: 700 clamp(34px, 11vw, 46px) / 1 var(--f-ui);
+  letter-spacing: -0.035em;
+  font-variant-numeric: tabular-nums;
+}
+.rm-arc {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 4px 0 -4px;
+  overflow: visible;
+}
+[dir='rtl'] .rm-arc {
+  transform: scaleX(-1);
+}
+.rm-arc .trk {
+  fill: none;
+  stroke: var(--line2);
+  stroke: color-mix(in srgb, var(--goldh) 30%, transparent);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-dasharray: 0.4 1.6;
+}
+.rm-arc .fil {
+  fill: none;
+  stroke: var(--goldh);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--goldh) 70%, transparent));
+  transition: stroke-dashoffset 1s linear;
+}
+.rm-arc .end {
+  fill: var(--s1);
+  stroke: color-mix(in srgb, var(--goldh) 65%, transparent);
+  stroke-width: 1.5;
+}
+.rm-arc [data-rm-orb] {
+  transition: transform 1s linear;
+}
+.rm-arc .halo {
+  fill: var(--goldh);
+  opacity: 0.2;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: rmhalo 3.4s ease-in-out infinite;
+}
+.rm-arc .orb {
+  fill: #fff4d2;
+  filter: drop-shadow(0 0 6px var(--goldh));
+}
+.rm-arc.night .fil {
+  stroke: #b8b0ff;
+  filter: drop-shadow(0 0 5px rgba(184, 176, 255, 0.7));
+}
+.rm-arc.night .trk {
+  stroke: rgba(184, 176, 255, 0.3);
+}
+.rm-arc.night .halo {
+  fill: #b8b0ff;
+}
+.rm-arc.night .orb {
+  fill: #eeeaff;
+  filter: drop-shadow(0 0 6px #b8b0ff);
+}
+@keyframes rmhalo {
+  50% {
+    opacity: 0.4;
+  }
+}
+.view.in .rm-arc .fil {
+  animation: rmdraw 1.1s var(--out) 0.15s both;
+}
+@keyframes rmdraw {
+  from {
+    stroke-dashoffset: 100;
+  }
+}
+.view.in .rm-arc [data-rm-orb] {
+  animation: fade 0.5s var(--out) 0.7s both;
+}
+.rm-ends {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.rm-ends span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.rm-ends span:last-child {
+  align-items: flex-end;
+  text-align: end;
+}
+.rm-ends b {
+  font: 700 13.5px/1.1 var(--f-ui);
+  color: var(--t1);
+}
+.rm-ends em {
+  font: 600 11px/1.2 var(--f-ui);
+  font-style: normal;
+  color: var(--t3);
+}
+.rm-strip {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 12px;
+}
+.rm-strip i {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--s3);
+}
+.rm-strip i.on {
+  background: var(--goldh);
+}
+.rm-strip i.ex {
+  background: var(--rose);
+}
+.rm-strip i.off {
+  background: var(--bad);
+}
+.rm-strip i.fut {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line2);
+}
+.rm-strip i.today {
+  height: 12px;
+  box-shadow: 0 0 10px -1px var(--goldh);
+}
+.view.in .rm-strip i {
+  animation: rmgrow 0.4s var(--out) both;
+  animation-delay: calc(var(--i) * 9ms + 160ms);
+}
+@keyframes rmgrow {
+  from {
+    opacity: 0;
+    transform: scaleY(0);
+  }
+}
+.rm-note {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: var(--s2);
+  background: color-mix(in srgb, var(--goldh) 10%, transparent);
+  border: 1px solid var(--line2);
+  border-color: color-mix(in srgb, var(--goldh) 26%, transparent);
+  font: 600 12.5px/1.35 var(--f-ui);
+  color: var(--t1);
+}
+.rm-note .ic {
+  color: var(--goldh);
+  flex: none;
+}
+.rm-soon .rm-cd {
+  font-size: clamp(32px, 10vw, 42px);
+}
+
+/* fasts, make-up fasts, tarāwīḥ, the khatm: a ring with the one number that matters, then the detail */
+.rm-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.rm-stat {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 99px;
+  background: var(--s2);
+  border: 1px solid var(--line);
+  font: 600 12px/1 var(--f-ui);
+  color: var(--t2);
+}
+.rm-stat b {
+  font: 700 15px/1 var(--f-ui);
+  color: var(--t1);
+}
+.rm-stat.on b {
+  color: var(--goldh);
+}
+.rm-stat.ex b {
+  color: var(--rose);
+}
+.rm-stat.off b {
+  color: var(--bad);
+}
+.rm-qada .ring .in,
+.rm-tw .ring .in,
+.rm-kh .ring .in {
+  font: 700 23px/1 var(--f-ui);
+  letter-spacing: -0.02em;
+  color: var(--t1);
+}
+.rm-qt {
+  font: 700 18px/1.25 var(--f-ui);
+  letter-spacing: -0.01em;
+  margin-bottom: 3px;
+}
+.rm-dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.rm-dots i {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  box-shadow: inset 0 0 0 1.5px var(--line2);
+  color: #1a1206;
+}
+.rm-dots i.on {
+  background: linear-gradient(155deg, #ffe9b8, var(--goldh));
+  box-shadow: 0 4px 10px -6px var(--goldh);
+}
+.rm-dots .ic {
+  width: 13px;
+  height: 13px;
+  stroke-width: 2.4;
+}
+.view.in .rm-dots i {
+  animation: rmpop 0.36s var(--spring) both;
+  animation-delay: calc(var(--i) * 25ms + 200ms);
+}
+.rm-tw .rak {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+/* on narrow phones the rakʿahs move under the ring, so each is a full-size target */
+@media (max-width: 380px) {
+  .rm-twrow {
+    flex-wrap: wrap;
+  }
+  .rm-twrow > .grow {
+    flex: 1 1 100%;
+  }
+  .rm-tw .rak button {
+    min-height: 44px;
+  }
+}
+.rm-tw .rak button {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  padding: 0;
+  border-radius: 12px;
+}
+.rm-nights {
+  display: flex;
+  gap: 3px;
+}
+.rm-nights i {
+  flex: 1;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--s3);
+}
+.rm-nights i.on {
+  background: var(--goldh);
+}
+.rm-nights i.fut {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line2);
+}
+.rm-nights i.now {
+  box-shadow:
+    0 0 0 1.5px var(--s1),
+    0 0 0 3px var(--t1);
+}
+.rm-pace {
+  font: 700 17px/1.25 var(--f-ui);
+  letter-spacing: -0.01em;
+  margin-bottom: 3px;
+}
+.rm-pace.ahead {
+  color: var(--goldh);
+}
+.rm-pace.behind {
+  color: color-mix(in srgb, var(--bad) 80%, var(--t1));
+}
+
+/* the last ten nights: a row of nights, the odd ones as stars, tonight alight */
+.rm-sky {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 18px 6px 8px;
+  border-radius: 18px;
+  background:
+    radial-gradient(130% 120% at 50% 0%, color-mix(in srgb, var(--indigo) 18%, transparent), transparent 72%), var(--s2);
+  border: 1px solid var(--line);
+}
+.rn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+}
+.rn i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--t3);
+  display: grid;
+  place-items: center;
+}
+.rn.odd {
+  transform: translateY(-8px);
+}
+.rn.odd i {
+  width: 26px;
+  height: 26px;
+  background: none;
+}
+.rn.odd svg {
+  width: 100%;
+  height: 100%;
+  fill: var(--goldh);
+}
+.rn b {
+  font: 700 11px/1 var(--f-ui);
+  color: var(--t3);
+}
+.rn.odd b {
+  color: var(--t2);
+}
+.rn.past {
+  opacity: 0.35;
+}
+.rn.now i {
+  background: var(--t1);
+  box-shadow: 0 0 10px var(--t1);
+}
+.rn.now.odd i {
+  background: none;
+  box-shadow: none;
+}
+.rn.now.odd svg {
+  fill: #fff4d2;
+  filter: drop-shadow(0 0 7px var(--goldh)) drop-shadow(0 0 16px var(--goldh));
+  animation: rmstar 2.6s ease-in-out infinite;
+}
+.rn.now b {
+  color: var(--goldh);
+}
+@keyframes rmstar {
+  50% {
+    opacity: 0.7;
+  }
+}
+.view.in .rn {
+  animation: rmrise 0.5s var(--spring) both;
+  animation-delay: calc(var(--i) * 35ms + 120ms);
+}
+@keyframes rmrise {
+  from {
+    opacity: 0;
+    translate: 0 14px;
+  }
+}
+.rm-tt {
+  font: 700 17px/1.25 var(--f-ui);
+  letter-spacing: -0.01em;
+  margin-bottom: 2px;
+}
+.rm-dua {
+  display: block;
+  padding: 16px 16px 14px;
+  border-radius: 18px;
+  text-align: center;
+  color: inherit;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--goldh) 10%, var(--s2)), var(--s2) 75%);
+  border: 1px solid color-mix(in srgb, var(--goldh) 24%, transparent);
+}
+.rm-dua .ar {
+  margin: 8px 0 4px;
+  font: 400 25px/1.9 var(--f-ar);
+  color: var(--gold2);
+}
+.rm-tr {
+  font: 500 12.5px/1.5 var(--f-ui);
+  font-style: italic;
+  color: var(--t2);
+}
+.rm-en {
+  margin-top: 6px;
+  font: 500 13.5px/1.5 var(--f-ui);
+  color: var(--t1);
+}
+.rm-ref {
+  margin-top: 8px;
 }
 
 /* =====================================================================
@@ -1557,8 +2090,9 @@ a,
   bottom: 0;
   z-index: 2;
   margin-top: auto;
-  padding-top: 14px;
-  background: linear-gradient(transparent, var(--bg) 26%);
+  padding-top: 18px;
+  /* the words scroll under the buttons into a solid ground, never behind them */
+  background: linear-gradient(transparent, var(--bg) 16px);
 }
 .ob.kb .ob-medal,
 .ob.kb .lead,
@@ -2346,7 +2880,7 @@ textarea.input {
   display: flex;
   align-items: center;
   gap: 4px;
-  width: min(92vw, 420px);
+  width: min(92vw, 440px);
   padding: 6px 6px 6px 8px;
   border-radius: 22px;
   background: color-mix(in srgb, var(--s2) 95%, transparent);
@@ -2382,20 +2916,23 @@ textarea.input {
   line-height: 1.5;
   color: var(--gold2);
   max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 .dnudge .dn-tr {
   font-size: 12px;
   font-weight: 600;
   color: var(--t2);
 }
+.dnudge .dn-action {
+  color: var(--gold2);
+  font-size: 11px;
+  margin-top: 3px;
+}
 .dnudge .dn-go,
 .dnudge .dn-x {
   flex: none;
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   display: grid;
   place-items: center;
@@ -2408,7 +2945,7 @@ textarea.input {
 .dnudge.done {
   border-color: color-mix(in srgb, var(--gold) 50%, transparent);
 }
-.dnudge.done .dn-tr {
+.dnudge.done .dn-action {
   color: var(--gold);
 }
 .dnudge .dn-main:active {
@@ -5243,7 +5780,7 @@ html[dir='rtl'] body .tx-t {
 /* E2: text in the accent uses its readable shade; the lighter gold is kept for fills, borders and marks */
 .au[data-state='turn'] .au-lbl,
 .jr-note,
-.dnudge.done .dn-tr {
+.dnudge.done .dn-action {
   color: var(--gold2);
 }
 /* E5: fields show where the focus is */
@@ -5359,4 +5896,830 @@ button.ob-batt {
   background: rgba(9, 10, 28, 0.5);
   -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
+}
+
+/* ---------- the times of answered duʿāʾ as a dial of the day (web/js/v-virtues.js) ---------- */
+.ans-dial {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background:
+    radial-gradient(80% 60% at 50% 40%, color-mix(in srgb, var(--indigo) 14%, transparent), transparent 75%), var(--s1);
+}
+.dl-wrap {
+  position: relative;
+  width: min(100%, 320px);
+  margin: 0 auto;
+  aspect-ratio: 1;
+}
+.dl-wrap svg {
+  direction: ltr;
+  unicode-bidi: isolate;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.dl-trk {
+  fill: none;
+  stroke: var(--s3);
+  stroke-width: 12;
+}
+.dl-in {
+  fill: none;
+  stroke: var(--s2);
+  stroke: color-mix(in srgb, var(--s3) 60%, transparent);
+  stroke-width: 5;
+}
+.dl-tk {
+  stroke: var(--t3);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  opacity: 0.45;
+}
+.dl-tk.big {
+  stroke-width: 2;
+  opacity: 0.8;
+}
+.dl-hr {
+  font: 700 10px var(--f-ui);
+  fill: var(--t3);
+  text-anchor: middle;
+}
+.dl-pn {
+  font: 700 10.5px var(--f-ui);
+  fill: var(--t2);
+}
+.dl-pn.third {
+  fill: var(--indigo);
+}
+.dl-w {
+  fill: none;
+  stroke-linecap: round;
+  stroke-width: 12;
+  stroke: var(--goldh);
+  stroke-dasharray: 100;
+}
+.dl-w.after {
+  stroke: color-mix(in srgb, var(--goldh) 38%, transparent);
+  stroke-width: 6;
+}
+.dl-w.third {
+  stroke: var(--indigo);
+}
+.dl-w.friday {
+  stroke: #ffd98e;
+}
+.dl-w.inner {
+  stroke-width: 5;
+}
+.dl-w.fasting,
+.dl-w.arafah {
+  stroke: color-mix(in srgb, var(--goldh) 70%, #ff9a5a);
+}
+.dl-w.qadr {
+  stroke: var(--indigo);
+}
+.dl-w.open {
+  animation: dlopen 2.4s ease-in-out infinite;
+}
+.dl-w.inner.open {
+  stroke-width: 7;
+}
+/* in daylight the faint golds lose the page: the ring's colours deepen, and the hand gets an outline */
+:root[data-theme='light'] .dl-w {
+  stroke: var(--gold);
+}
+:root[data-theme='light'] .dl-w.after {
+  stroke: color-mix(in srgb, var(--gold) 45%, transparent);
+}
+:root[data-theme='light'] .dl-w.friday {
+  stroke: #9a6a12;
+}
+:root[data-theme='light'] .dl-w.third,
+:root[data-theme='light'] .dl-w.qadr,
+:root[data-theme='light'] .dl-pn.third {
+  stroke: var(--indigo);
+  fill: var(--indigo);
+}
+:root[data-theme='light'] .dl-pn.third {
+  stroke: none;
+}
+:root[data-theme='light'] .dl-hand .tip {
+  fill: var(--gold);
+  stroke: #fff;
+  stroke-width: 2;
+  filter: none;
+}
+@keyframes dlopen {
+  50% {
+    opacity: 0.65;
+  }
+}
+.view.in .dl-w {
+  animation: dldraw 0.8s var(--out) both;
+  animation-delay: calc(var(--i) * 30ms + 120ms);
+}
+@keyframes dldraw {
+  from {
+    stroke-dashoffset: 100;
+  }
+}
+.dl-hand line {
+  stroke: var(--t1);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  opacity: 0.8;
+}
+.dl-hand .tip {
+  fill: #fff4d2;
+  filter: drop-shadow(0 0 6px var(--goldh));
+}
+.dl-hand .hub {
+  fill: var(--goldh);
+}
+.dl-hand {
+  transition: transform 1s linear;
+}
+.view.in .dl-hand {
+  animation: dlhand 1.2s var(--out) 0.2s both;
+}
+@keyframes dlhand {
+  from {
+    opacity: 0;
+  }
+}
+.dl-c {
+  position: absolute;
+  inset: 25% 26%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 4px;
+}
+.dl-t {
+  font: 700 14px/1.22 var(--f-ui);
+  letter-spacing: -0.01em;
+}
+.dl-s {
+  font: 600 11.5px/1.3 var(--f-ui);
+  color: var(--t3);
+}
+.dl-leg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  justify-content: center;
+  font: 600 11px/1.3 var(--f-ui);
+  color: var(--t2);
+}
+.dl-leg span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.dl-leg i {
+  width: 14px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--goldh);
+}
+.dl-leg i.af {
+  background: color-mix(in srgb, var(--goldh) 38%, transparent);
+}
+.dl-leg i.th {
+  background: var(--indigo);
+}
+.dl-leg i.fr {
+  background: #ffd98e;
+}
+:root[data-theme='light'] .dl-leg i.fr {
+  background: #9a6a12;
+}
+.dl-leg i.qd {
+  background: var(--indigo);
+}
+.dl-leg i.fa {
+  background: color-mix(in srgb, var(--goldh) 70%, #ff9a5a);
+}
+html.rest .dl-w.open {
+  animation-play-state: paused !important;
+}
+
+/* ---------- qibla: the Kaʿbah glows, and a ring of light marks the moment you face it (web/js/v-salah.js) ---------- */
+.compass .kb-glow {
+  opacity: 0.18;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: kbglow 3s ease-in-out infinite;
+}
+@keyframes kbglow {
+  50% {
+    opacity: 0.4;
+  }
+}
+.compass.aligned .kb-glow {
+  fill: var(--jade);
+  opacity: 0.5;
+}
+#qdev {
+  filter: drop-shadow(0 0 4px var(--gold));
+  transition: stroke 0.3s;
+}
+.compass .burst {
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  border: 2px solid var(--jade);
+  box-shadow:
+    0 0 24px color-mix(in srgb, var(--jade) 70%, transparent),
+    inset 0 0 24px color-mix(in srgb, var(--jade) 50%, transparent);
+}
+.compass.lock .burst {
+  animation: qburst 0.9s var(--out) both;
+}
+@keyframes qburst {
+  0% {
+    opacity: 0.95;
+    transform: scale(0.96);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.1);
+  }
+}
+.compass.lock .hub {
+  animation: qhub 0.6s var(--spring);
+}
+@keyframes qhub {
+  40% {
+    transform: scale(1.08);
+  }
+}
+.compass.aligned .hub span::after {
+  content: ' ✓';
+}
+.view.in .compass .bezel,
+.view.in .compass .hub {
+  animation: qin 0.8s var(--out) both;
+}
+.view.in .compass .rose svg {
+  animation: qspin 1.2s var(--out) 0.05s both;
+}
+@keyframes qin {
+  from {
+    opacity: 0;
+    transform: scale(0.88);
+  }
+}
+@keyframes qspin {
+  from {
+    opacity: 0;
+    transform: rotate(-110deg) scale(0.9);
+  }
+}
+html.rest .compass .kb-glow {
+  animation-play-state: paused !important;
+}
+
+/* ---------- the break from ṣalāh: a softer rose card, the days of her habit as beads (web/js/v-today.js) ---------- */
+.brk-card {
+  --h: var(--rose);
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, var(--rose) 22%, transparent), transparent 60%),
+    linear-gradient(160deg, color-mix(in srgb, var(--rose) 12%, var(--s1)), var(--s1b) 75%);
+  border-color: color-mix(in srgb, var(--rose) 35%, transparent);
+  box-shadow:
+    var(--hi),
+    var(--shadow),
+    0 0 30px -10px color-mix(in srgb, var(--rose) 45%, transparent);
+}
+.brk-card .badge {
+  color: var(--rose);
+  background: color-mix(in srgb, var(--rose) 14%, var(--s2));
+  border-color: color-mix(in srgb, var(--rose) 35%, transparent);
+}
+.brk-card .eyebrow {
+  color: var(--rose);
+}
+.brk-t {
+  margin-top: 4px;
+  font: 700 17px/1.25 var(--f-ui);
+  letter-spacing: -0.01em;
+}
+.brk-card .btn.pri,
+:root[data-theme='light'] .brk-card .btn.pri,
+:root[data-season='ramadan'] .brk-card .btn.pri {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--rose) 55%, #fff), var(--rose));
+  color: #2b0d1b;
+  border-color: transparent;
+}
+.brk-beads {
+  display: flex;
+  gap: 5px;
+}
+.brk-beads i {
+  flex: 1;
+  height: 7px;
+  border-radius: 4px;
+  background: var(--s3);
+  background: color-mix(in srgb, var(--rose) 16%, var(--s3));
+}
+.brk-beads i.on {
+  background: var(--rose);
+}
+.brk-beads i.now {
+  background: var(--rose);
+  box-shadow: 0 0 10px var(--rose);
+}
+.view.in .brk-beads i {
+  animation: rmgrow 0.4s var(--out) both;
+  animation-delay: calc(var(--i) * 40ms + 150ms);
+}
+.brk-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.brk-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 11px 0 9px;
+  border-radius: 99px;
+  font: 600 11.5px/1 var(--f-ui);
+  color: var(--t1);
+  background: color-mix(in srgb, var(--rose) 10%, var(--s2));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rose) 30%, transparent);
+}
+.brk-chip .ic {
+  width: 13px;
+  height: 13px;
+  color: var(--rose);
+}
+.view.in .brk-chip {
+  animation: rmpop 0.4s var(--spring) both;
+}
+.view.in .brk-chip:nth-child(2) {
+  animation-delay: 0.08s;
+}
+.view.in .brk-chip:nth-child(3) {
+  animation-delay: 0.16s;
+}
+
+/* ---------- wuḍūʾ and ghusl: the prayer guide's player (.lp), with its own stage and opening page (v-purity.js) ---------- */
+.pu {
+  --wash: #77c7be;
+  background:
+    radial-gradient(120% 60% at 50% 8%, color-mix(in srgb, var(--wash) 14%, transparent), transparent 60%), var(--bg);
+}
+.pu .lp-halo {
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--wash) 26%, transparent), transparent 72%);
+}
+.pu-gap {
+  flex: none;
+  width: 40px;
+}
+.pu-stage {
+  height: clamp(180px, 32vh, 300px);
+}
+.pu .lp-fig {
+  object-position: center;
+  inset: 2% 6% 6%;
+  width: 88%;
+  height: 92%;
+}
+/* the figure arrives with a breath of water each step */
+.pu .lp-fig.on {
+  animation: puIn 0.55s var(--out);
+}
+.pu.no-anim .lp-fig.on {
+  animation: none;
+}
+@keyframes puIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+    filter: saturate(0.6);
+  }
+}
+.pu-pick {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 2px 0 12px;
+}
+.pu-k {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 64px;
+  padding: 8px 12px 8px 8px;
+  border-radius: 18px;
+  text-align: start;
+  color: var(--t1);
+  background: var(--s1b);
+  border: 1px solid var(--line);
+  transition:
+    background 0.25s,
+    border-color 0.25s,
+    transform 0.2s var(--spring);
+}
+.pu-k:active {
+  transform: scale(0.97);
+}
+.pu-k img {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  object-fit: contain;
+  background: var(--s2);
+}
+.pu-k b {
+  display: block;
+  font: 800 14px/1.2 var(--f-ui);
+}
+.pu-k .grow > span {
+  display: block;
+  margin-top: 2px;
+  font: 600 11px/1.3 var(--f-ui);
+  color: var(--t3);
+}
+.pu-k[aria-pressed='true'] {
+  background: var(--s2);
+  background: color-mix(in srgb, var(--wash) 12%, var(--s1b));
+  border-color: var(--wash);
+  box-shadow: 0 0 0 1px var(--wash) inset;
+}
+.pu-k[aria-pressed='true'] b {
+  color: var(--wash);
+}
+:root[data-theme='light'] .pu {
+  --wash: #1f7f76;
+}
+.pu-lead {
+  margin: 0 2px 12px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--t2);
+}
+.pu-notes p {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--t2);
+}
+.pu-evidence {
+  margin: 8px 0 0;
+  padding-inline-start: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 12.5px;
+  color: var(--t2);
+}
+.pu-num {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font: 800 12px/1 var(--f-ui);
+  color: var(--wash);
+  box-shadow: inset 0 0 0 1.5px var(--wash);
+}
+.pu .lp-act > .ic {
+  color: var(--t3);
+  flex: none;
+}
+.pu-text {
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: var(--s1b);
+  font: 500 15px/1.65 var(--f-ui);
+  color: var(--t1);
+}
+.pu-also {
+  margin-top: 12px;
+}
+.pu-last {
+  margin: 12px 4px 0;
+}
+.pu .lp-seal {
+  background: var(--wash);
+  box-shadow: 0 0 0 10px color-mix(in srgb, var(--wash) 18%, transparent);
+}
+
+/* ---------- Ramaḍān daily & ʿĪd shareable cards (web/js/v-ramadan.js) ---------- */
+.rm-daily {
+  gap: 10px;
+  background:
+    radial-gradient(120% 80% at 100% 0%, color-mix(in srgb, var(--goldh) 16%, transparent), transparent 62%),
+    linear-gradient(165deg, color-mix(in srgb, var(--goldh) 9%, var(--s1)), var(--s1b) 78%);
+  border-color: color-mix(in srgb, var(--goldh) 28%, transparent);
+}
+.rm-daily.is-odd {
+  background:
+    radial-gradient(120% 85% at 50% 0%, color-mix(in srgb, var(--goldh) 24%, transparent), transparent 65%),
+    linear-gradient(165deg, color-mix(in srgb, var(--indigo) 18%, var(--s1)), var(--s1b) 80%);
+  border-color: color-mix(in srgb, var(--goldh) 42%, transparent);
+}
+.rm-daily.is-eid {
+  background:
+    radial-gradient(120% 85% at 100% 0%, color-mix(in srgb, var(--jade) 20%, transparent), transparent 64%),
+    linear-gradient(165deg, color-mix(in srgb, var(--goldh) 14%, var(--s1)), var(--s1b) 80%);
+  border-color: color-mix(in srgb, var(--jade) 36%, transparent);
+}
+.rm-daily-hd {
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.rm-daily .rm-pill {
+  color: var(--gold2);
+}
+.rm-daily.is-eid .rm-pill {
+  color: var(--jade);
+}
+.rm-daily-ar {
+  font-size: clamp(20px, 5.4vw, 25px);
+  line-height: 2;
+  color: var(--t1);
+  margin: 2px 0 0;
+}
+.rm-daily-en {
+  font-size: 14px;
+  line-height: 1.62;
+  color: var(--t2);
+  margin: 0;
+}
+.rm-daily-note {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--gold2);
+  margin: 0;
+}
+.rm-daily .foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 2px;
+}
+.rm-daily-cta {
+  gap: 12px;
+  align-items: center;
+}
+.rm-daily-cta .t {
+  font-weight: 700;
+  font-size: 14.5px;
+}
+.rm-sh-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.rm-sh-lbl {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-width: 0;
+}
+.rm-sh-lbl b {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--t1);
+}
+.rm-sh-lbl span {
+  font-size: 12px;
+  color: var(--t3);
+  max-width: 240px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rm-sh-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.rm-sh-chips .chip {
+  cursor: pointer;
+}
+
+/* ---------- Ṣalāh: each prayer in order — purify, face the qibla, pray, remember (web/js/v-salah.js) ---------- */
+.pr-flow {
+  position: relative;
+  padding: 4px 0;
+}
+.pr-flow::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 25px;
+  top: 34px;
+  bottom: 34px;
+  width: 1.5px;
+  background: linear-gradient(var(--gold-line), var(--line2));
+}
+.pf-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-inline: 14px 12px;
+}
+.pf-row + .pf-row .pf-main {
+  border-top: 1px solid var(--line);
+}
+.pf-n {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font: 800 11px/1 var(--f-ui);
+  color: var(--gold2);
+  background: var(--s2);
+  box-shadow: inset 0 0 0 1.5px var(--gold-line);
+}
+.pf-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  color: inherit;
+}
+.pf-main > .ic {
+  color: var(--t3);
+  flex: none;
+}
+/* where a chip sits at the end of the row, it is the way on: no second arrow */
+.pf-row:has(.pf-chip) .pf-main > .ic {
+  display: none;
+}
+.pf-art,
+.pf-ic {
+  flex: none;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+}
+/* every step's tile is the same size, picture or icon, so the words start on one line */
+.pf-main .badge.pf-ic {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+}
+.pf-main .badge.pf-ic .ic {
+  width: 20px;
+  height: 20px;
+}
+.pf-art {
+  object-fit: contain;
+  background: var(--s2);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.pf-main .t {
+  display: block;
+  font: 700 15px/1.2 var(--f-ui);
+}
+.pf-main .s {
+  display: block;
+  margin-top: 3px;
+  font: 500 12px/1.35 var(--f-ui);
+  color: var(--t3);
+}
+.pf-chip {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  height: 34px;
+  padding: 0 13px;
+  border-radius: 99px;
+  font: 700 12px/1 var(--f-ui);
+  color: var(--gold2);
+  background: var(--s2);
+  box-shadow: inset 0 0 0 1px var(--gold-line);
+}
+.view.in .pf-row {
+  animation: rmrise 0.5s var(--spring) both;
+}
+.view.in .pf-row:nth-child(2) {
+  animation-delay: 0.06s;
+}
+.view.in .pf-row:nth-child(3) {
+  animation-delay: 0.12s;
+}
+.view.in .pf-row:nth-child(4) {
+  animation-delay: 0.18s;
+}
+
+/* ---------- the reader: what lies below the Arabic, one tap away (web/js/v-adhkar.js) ---------- */
+.rd-jump {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 6px 0 14px;
+}
+.rd-jump button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 38px;
+  padding: 8px 13px;
+  border-radius: 99px;
+  font: 700 11.5px/1 var(--f-ui);
+  color: var(--t2);
+  background: var(--s2);
+  box-shadow: inset 0 0 0 1px var(--line2);
+}
+.rm-daily-cta .btn {
+  flex: none;
+  white-space: nowrap;
+}
+/* Expanded invisible touch hit areas without altering visual density */
+.pt .chk,
+.chk,
+.fr-tk,
+.sw,
+.pf-chip,
+.sky .loc {
+  position: relative;
+}
+.pt .chk::before,
+.chk::before,
+.fr-tk::before,
+.sw::before,
+.pf-chip::before,
+.sky .loc::before {
+  content: '';
+  position: absolute;
+  inset: -7px;
+}
+.set button.v {
+  min-height: 44px;
+  padding: 10px 0;
+}
+@media (max-width: 360px) {
+  .top .eyebrow {
+    white-space: normal;
+    line-height: 1.35;
+  }
+}
+.rd-jump .ic {
+  width: 12px;
+  height: 12px;
+  opacity: 0.7;
+}
+
+.tx-b:focus,
+.rd-src:focus,
+.au:focus {
+  outline: none;
+}
+
+/* Today's prayers on the narrowest phones: a smaller ring and tighter dots, so every name fits whole */
+@media (max-width: 370px) {
+  .dash {
+    gap: 10px;
+  }
+  .dash > .ring {
+    width: 68px !important;
+    height: 68px !important;
+  }
+  .dash .ring .in b {
+    font-size: 17px;
+  }
+  .pdots {
+    gap: 2px;
+  }
+  .pdot b {
+    width: 30px;
+    height: 30px;
+  }
+  .pdot {
+    font-size: 9.5px;
+    letter-spacing: -0.02em;
+  }
 }

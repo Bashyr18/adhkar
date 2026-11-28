@@ -98,7 +98,9 @@
       r +
       '" fill="none" stroke-width="' +
       stroke +
-      '" stroke-linecap="round" stroke-dasharray="' +
+      '" stroke-linecap="round" style="--c:' +
+      c.toFixed(2) +
+      '" stroke-dasharray="' +
       c.toFixed(2) +
       '" stroke-dashoffset="' +
       (c * (1 - f)).toFixed(2) +
@@ -106,6 +108,33 @@
       (inner == null ? '' : inner) +
       '</div></div>'
     );
+  };
+  /* the numbers in [data-n] count up from nothing, once, as their page arrives (never on a redraw, never when motion
+     is off) */
+  A.countUp = function (root) {
+    if (!S.prefs.motion || !root || !root.querySelector('.view.in')) return;
+    if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var els = Array.prototype.slice.call(root.querySelectorAll('.view.in [data-n]')),
+      t0 = 0;
+    if (!els.length) return;
+    var fmt = function (n) {
+      return A.ar() ? A.arDigits(String(n)) : String(n);
+    };
+    els.forEach(function (e) {
+      e.textContent = fmt(0);
+    });
+    (function step(ts) {
+      if (!t0) t0 = ts;
+      var k = Math.min(1, (ts - t0) / 750),
+        ease = 1 - Math.pow(1 - k, 3);
+      els.forEach(function (e) {
+        if (e.isConnected) e.textContent = fmt(Math.round(+e.dataset.n * ease));
+      });
+      if (k < 1) requestAnimationFrame(step);
+    })(0);
+    requestAnimationFrame(function (ts) {
+      t0 = ts;
+    });
   };
   A.hueVar = function (h) {
     return 'var(--' + (h === 'gold' ? 'goldh' : h) + ')';
@@ -896,9 +925,10 @@
         (n.next.k === 'sunrise' ? 'Fajr ends' : 'Next prayer') +
         '</div><div class="nm"><b>' +
         esc(n.next.k === 'sunrise' ? 'Sunrise' : A.pName(n.next.k, A.keyAt(n.next.at))) +
-        '</b><span class="ar">' +
-        A.pAr(n.next.k, A.keyAt(n.next.at)) +
-        '</span></div>';
+        '</b>' +
+        /* in Arabic the name is already Arabic: no second, smaller copy beside it */
+        (A.ar() ? '' : '<span class="ar">' + A.pAr(n.next.k, A.keyAt(n.next.at)) + '</span>') +
+        '</div>';
       h +=
         '<div class="cd"><span data-sky-cd>in <b>' +
         A.fmtCountdown(n.next.at - n.now) +
@@ -1113,7 +1143,7 @@
       if (arrived)
         setTimeout(function () {
           arrived.classList.remove('in');
-        }, 700);
+        }, 1400);
     }
     document.title = (v.title ? v.title + ' · ' : '') + 'Adhkār';
     /* a sub-page lights the tab you reached it from, so the bar always says where Back leads; a cold deep link uses the page's own tab */
@@ -1153,6 +1183,26 @@
           console.error(e);
         } catch (_) {}
       }
+    }
+    if (A.pendingFocus && !v.bare && !A.readerOpen()) {
+      var want = A.pendingFocus;
+      A.pendingFocus = null;
+      var target = null;
+      var links = app.querySelectorAll('a[href]');
+      for (var fi = 0; fi < links.length; fi++) {
+        if (links[fi].getAttribute('href') === want) {
+          target = links[fi];
+          break;
+        }
+      }
+      if (!target) {
+        var h1 = app.querySelector('h1');
+        if (h1) {
+          if (!h1.hasAttribute('tabindex')) h1.setAttribute('tabindex', '-1');
+          target = h1;
+        }
+      }
+      if (target) target.focus({ preventScroll: true });
     }
   }
   A.rerender = function () {
@@ -1384,6 +1434,7 @@
     saved: '#/adhkar',
     qibla: '#/salah',
     learn: '#/salah',
+    purity: '#/learn',
     modesty: '#/salah',
     month: '#/salah',
     night: '#/salah',
@@ -1621,6 +1672,7 @@
       var d = A.today();
       if (d !== day) {
         day = d;
+        A.applyTheme(); /* Ramaḍān's season comes and goes at midnight */
         A.rerender();
         return;
       }

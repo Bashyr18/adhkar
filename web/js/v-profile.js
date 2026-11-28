@@ -150,8 +150,20 @@
         ['appearance', 'palette', 'gold', 'Appearance', 'Theme, motion, clock, Hijri date'],
         ['reading', 'text', 'dawn', 'Reading', 'Arabic size, transliteration, counting'],
         ['prayer', 'mosque', 'jade', 'Prayer times', P.METHODS[S.calc.method].name],
-        ['notifications', 'bell', 'rose', 'Reminders', S.notif.enabled ? 'On' : 'Off'],
-        ['device', 'widget', 'teal', 'Widgets & device', 'Home-screen widgets, shortcuts, haptics'],
+        ['notifications', 'bell', 'rose', 'Reminders', A.remindersOn() ? 'On' : 'Off'],
+        [
+          'device',
+          'widget',
+          'teal',
+          window.ADHKAR_DESKTOP ? 'Desktop & device' : window.ADHKAR_IOS || !A.N.has ? 'Device' : 'Widgets & device',
+          window.ADHKAR_DESKTOP
+            ? 'Desktop settings & feedback'
+            : window.ADHKAR_IOS
+              ? 'Haptics, keep screen on'
+              : !A.N.has
+                ? 'Screen & feedback'
+                : 'Home-screen widgets, shortcuts, haptics'
+        ],
         ['data', 'shield', 'sand', 'Backup & data', 'Export, import, reset'],
         ['print', 'book', 'dawn', 'Print and PDF', 'Adhkār booklets and the prayer timetable'],
         ['modesty', 'shield', 'rose', 'Dress & ʿawrah', 'From the Qurʾān and Sunnah'],
@@ -203,6 +215,8 @@
             return (
               '<button type="button" data-h="' +
               h +
+              '" aria-label="' +
+              esc(A.T(h[0].toUpperCase() + h.slice(1))) +
               '" aria-pressed="' +
               (S.profile.hue === h) +
               '" style="border-radius:50%;padding:3px;border:2px solid ' +
@@ -249,7 +263,9 @@
             if (!b) return;
             hue = b.dataset.h;
             Array.prototype.forEach.call(el.querySelectorAll('[data-h]'), function (x) {
-              x.style.borderColor = x.dataset.h === hue ? 'var(--gold)' : 'transparent';
+              var on = x.dataset.h === hue;
+              x.style.borderColor = on ? 'var(--gold)' : 'transparent';
+              x.setAttribute('aria-pressed', on);
             });
             $('#epA', el).innerHTML = A.avatar(84, $('#epN', el).value, hue);
           });
@@ -318,6 +334,60 @@
     { v: 'none', t: 'None' }
   ];
 
+  function nudgeSettings() {
+    return group(
+      'On-screen dhikr',
+      [
+        row(
+          'A gentle reminder while the app is open',
+          'A short dhikr slides up; tap to count it',
+          A.sw(S.prefs.nudge.on, 'nudge-on')
+        )
+      ].concat(
+        S.prefs.nudge.on
+          ? [
+              row(
+                'Every',
+                '',
+                '<div class="seg sm">' +
+                  [10, 20, 30, 60]
+                    .map(function (m) {
+                      return (
+                        '<button type="button" data-a="nudge-every" data-v="' +
+                        m +
+                        '" aria-pressed="' +
+                        (S.prefs.nudge.every === m) +
+                        '">' +
+                        m +
+                        ' min</button>'
+                      );
+                    })
+                    .join('') +
+                  '</div>'
+              ),
+              '<button type="button" class="set" data-a="nudge-test"><div class="grow"><div class="t">Show one now</div></div>' +
+                ic('right', 's') +
+                '</button>'
+            ].concat(
+              A.N.has && !window.ADHKAR_DESKTOP && !window.ADHKAR_IOS
+                ? [
+                    row(
+                      'Also over other apps',
+                      A.N.call('overlayOk') === false && S.prefs.nudge.over
+                        ? 'Allow “Display over other apps” to start'
+                        : 'From Fajr until an hour after ʿIshāʾ',
+                      A.sw(S.prefs.nudge.over, 'nudge-over') +
+                        (A.N.call('overlayOk') === false && S.prefs.nudge.over
+                          ? '<button type="button" class="btn sec sm" data-a="nudge-access">Allow</button>'
+                          : '')
+                    )
+                  ]
+                : []
+            )
+          : []
+      )
+    );
+  }
   var SECTIONS = (A.settingSections = {
     appearance: function () {
       return [
@@ -389,10 +459,20 @@
                         A.plural(m.length, 'recording') +
                         ' · ' +
                         A.audio.mb(A.audio.bytes(m)) +
-                        '</div><div class="au-dl" data-au-all style="margin-top:8px"><i></i></div><div class="faint small" data-au-all-t></div></div><div class="ctl"><button type="button" class="btn pri sm" data-a="au-get-all">' +
+                        '</div><div class="au-dl" data-au-all style="margin-top:8px"><i></i></div><div class="faint small" data-au-all-t></div></div><div class="ctl"><button type="button" class="btn pri sm" data-a="au-get-all" aria-label="' +
+                        esc(A.T('Download all')) +
+                        '">' +
                         ic('download', 's') +
                         '</button></div></div>'
-                    : row(A.T('Every recitation is on your phone'), '', ic('check', 's'));
+                    : row(
+                        A.T(
+                          window.ADHKAR_DESKTOP
+                            ? 'Every recitation is on this computer'
+                            : 'Every recitation is on your phone'
+                        ),
+                        '',
+                        ic('check', 's')
+                      );
                 })(),
                 row(
                   'Downloaded audio',
@@ -488,6 +568,11 @@
       ];
     },
     notifications: function () {
+      if (!A.N.has)
+        return [
+          'Reminders',
+          '<p class="card muted">Scheduled reminders are available in the installed apps.</p>' + nudgeSettings()
+        ];
       var N = S.notif,
         en = N.enabled,
         ns = A.N.notifState(),
@@ -501,13 +586,7 @@
             ic('info', 's') +
             '<div>Reminders may be delayed without exact timing. <button type="button" class="gold" style="font-weight:800" data-a="os-settings" data-w="exact">Allow</button></div></div>'
           : '';
-      var rows = [
-        row(
-          'Reminders',
-          blocked ? 'Blocked by system' : en ? 'On' : 'Allow notifications to begin',
-          A.sw(en, 'notif-master')
-        )
-      ];
+      var rows = [row('Reminders', !en ? 'Off' : blocked ? 'Blocked by system' : 'On', A.sw(en, 'notif-master'))];
       if (A.N.has && !blocked)
         rows.push(
           '<button type="button" class="set" data-a="test-reminder"><div class="grow"><div class="t">Send a test reminder</div>' +
@@ -523,7 +602,7 @@
           '<div class="rd-note">' +
           ic('alarm', 's') +
           '<div>Battery saving may delay reminders. <button type="button" class="gold" style="font-weight:800" data-a="ob-battery">Fix</button></div></div>';
-      if (!en) return ['Reminders', group('', rows) + warn];
+      if (!en) return ['Reminders', group('', rows) + nudgeSettings()];
       var pr = A.PRAYERS.map(function (k) {
         return row(P.NAMES[k], '', A.sw(N.prayers[k], 'notif-prayer', ' data-k="' + k + '"'));
       });
@@ -611,55 +690,7 @@
             ),
             row('Skip if already done', 'No reminder for a session you have completed', A.sw(N.smart, 'notif-smart'))
           ]) +
-          group(
-            'On-screen dhikr',
-            [
-              row(
-                'A gentle reminder while the app is open',
-                'A short dhikr slides up; tap to count it',
-                A.sw(S.prefs.nudge.on, 'nudge-on')
-              )
-            ].concat(
-              S.prefs.nudge.on
-                ? [
-                    row(
-                      'Every',
-                      '',
-                      '<div class="seg sm">' +
-                        [10, 20, 30, 60]
-                          .map(function (m) {
-                            return (
-                              '<button type="button" data-a="nudge-every" data-v="' +
-                              m +
-                              '" aria-pressed="' +
-                              (S.prefs.nudge.every === m) +
-                              '">' +
-                              m +
-                              ' min</button>'
-                            );
-                          })
-                          .join('') +
-                        '</div>'
-                    ),
-                    '<button type="button" class="set" data-a="nudge-test"><div class="grow"><div class="t">Show one now</div></div>' +
-                      ic('right', 's') +
-                      '</button>'
-                  ].concat(
-                    A.N.has && !window.ADHKAR_DESKTOP && !window.ADHKAR_IOS
-                      ? [
-                          row(
-                            'Also over other apps',
-                            A.N.call('overlayOk') === false && S.prefs.nudge.over
-                              ? 'Allow “Display over other apps” to start'
-                              : 'From Fajr until an hour after ʿIshāʾ',
-                            A.sw(S.prefs.nudge.over, 'nudge-over')
-                          )
-                        ]
-                      : []
-                  )
-                : []
-            )
-          ) +
+          nudgeSettings() +
           (window.ADHKAR_DESKTOP || window.ADHKAR_IOS
             ? ''
             : group(
@@ -679,7 +710,7 @@
                               : '',
                             row('For', 'Minutes from the iqāmah', A.stepper(S.silence.min, 'silence-min')),
                             row(
-                              'On Friday at Ḍhuhr',
+                              'On Friday at Dhuhr',
                               'Jumuʿah: khuṭbah and prayer',
                               A.stepper(S.silence.jumuah, 'silence-jum')
                             )
@@ -728,28 +759,35 @@
         ];
       return [
         'Widgets & device',
-        group('Home screen', [
-          '<button type="button" class="set" data-a="pin-widget" data-w="prayer"><span class="badge h-jade">' +
-            ic('mosque', 's') +
-            '</span><div class="grow"><div class="t">Prayer widget</div><div class="s">Countdown and today’s times</div></div>' +
-            ic('plus', 's') +
-            '</button>',
-          '<button type="button" class="set" data-a="pin-widget" data-w="tasbih"><span class="badge h-teal">' +
-            ic('tracker', 's') +
-            '</span><div class="grow"><div class="t">Tracker widget</div><div class="s">Count from your home screen</div></div>' +
-            ic('plus', 's') +
-            '</button>',
-          '<button type="button" class="set" data-a="pin-widget" data-w="adhkar"><span class="badge h-gold">' +
-            ic('sun', 's') +
-            '</span><div class="grow"><div class="t">Adhkār widget</div><div class="s">Whichever is due, with progress</div></div>' +
-            ic('plus', 's') +
-            '</button>',
-          '<button type="button" class="set" data-a="pin-widget" data-w="dhikr"><span class="badge h-indigo">' +
-            ic('spark', 's') +
-            '</span><div class="grow"><div class="t">Dhikr of the day widget</div><div class="s">Glows at the times duʿāʾ is answered</div></div>' +
-            ic('plus', 's') +
-            '</button>'
-        ]) +
+        group(
+          'Home screen',
+          [row('Home-screen widgets', 'Show live information on widgets you add', swPref('widgets'))].concat(
+            S.prefs.widgets
+              ? [
+                  '<button type="button" class="set" data-a="pin-widget" data-w="prayer"><span class="badge h-jade">' +
+                    ic('mosque', 's') +
+                    '</span><div class="grow"><div class="t">Prayer widget</div><div class="s">Countdown and today’s times</div></div>' +
+                    ic('plus', 's') +
+                    '</button>',
+                  '<button type="button" class="set" data-a="pin-widget" data-w="tasbih"><span class="badge h-teal">' +
+                    ic('tracker', 's') +
+                    '</span><div class="grow"><div class="t">Tracker widget</div><div class="s">Count from your home screen</div></div>' +
+                    ic('plus', 's') +
+                    '</button>',
+                  '<button type="button" class="set" data-a="pin-widget" data-w="adhkar"><span class="badge h-gold">' +
+                    ic('sun', 's') +
+                    '</span><div class="grow"><div class="t">Adhkār widget</div><div class="s">Whichever is due, with progress</div></div>' +
+                    ic('plus', 's') +
+                    '</button>',
+                  '<button type="button" class="set" data-a="pin-widget" data-w="dhikr"><span class="badge h-indigo">' +
+                    ic('spark', 's') +
+                    '</span><div class="grow"><div class="t">Dhikr of the day widget</div><div class="s">Glows at the times duʿāʾ is answered</div></div>' +
+                    ic('plus', 's') +
+                    '</button>'
+                ]
+              : []
+          )
+        ) +
           group('Shortcuts', [
             row('Quick settings tile', 'Swipe down twice → edit tiles → add “Tracker”', ''),
             row('App shortcuts', 'Long-press the app icon for Morning, Evening, Tracker and Qibla', '')
@@ -789,7 +827,15 @@
       ];
     },
     about: function () {
-      var m = window.DATA.meta;
+      var guide = 'https://bashyr18.github.io/adhkar/guide/',
+        platforms = [
+          [A.N.has && !window.ADHKAR_DESKTOP && !window.ADHKAR_IOS, 'Android', 'get-android'],
+          [window.ADHKAR_DESKTOP, 'Windows', 'get-windows'],
+          [window.ADHKAR_IOS, 'iPhone & iPad', 'get-ios']
+        ].filter(function (p) {
+          if (window.ADHKAR_IOS && p[1] === 'Android') return false;
+          return !p[0];
+        });
       return [
         'About',
         '<div class="card col" style="align-items:center;text-align:center;padding:24px">' +
@@ -798,6 +844,30 @@
           esc(A.N.has ? A.N.version() : (window.APP_VERSION || 'dev') + ' · web') +
           '</div><p class="muted" style="font-size:13.5px;line-height:1.6">Morning and evening adhkār, remembrance after prayer and before sleep, prayer times, qibla, the night and Ḍuḥā, beautifully, privately, offline.</p></div>' +
           (A.upd ? A.upd.settings() : '') +
+          group('Adhkār on your devices', [
+            '<a class="set" href="' +
+              guide +
+              '" data-a="ext"><span class="badge h-gold">' +
+              ic('book', 's') +
+              '</span><div class="grow"><div class="t">Illustrated guide</div><div class="s">Learn the app, screen by screen</div></div>' +
+              ic('link', 's') +
+              '</a>',
+            '<div class="set"><div class="grow"><div class="t">Also available on</div><div class="refs">' +
+              platforms
+                .map(function (p) {
+                  return (
+                    '<a data-a="ext" href="' +
+                    guide +
+                    '#' +
+                    p[2] +
+                    '">' +
+                    esc(p[1] === 'iPhone & iPad' ? A.T('iPhone & iPad (coming soon)') : A.T(p[1])) +
+                    '</a>'
+                  );
+                })
+                .join('') +
+              '</div></div></div>'
+          ]) +
           group('Contact', [
             '<a class="set" href="mailto:bashyr18@gmail.com?subject=' +
               encodeURIComponent('Adhkār feedback (v' + (A.N.has ? A.N.version() : 'web') + ')') +
@@ -944,14 +1014,14 @@
   A.acts['notif-prayer'] = function (el) {
     var k = el.dataset.k;
     S.notif.prayers[k] = !S.notif.prayers[k];
-    A.save();
+    A.save(true);
     el.setAttribute('aria-checked', S.notif.prayers[k]);
     A.N.haptic('tick');
   };
   A.acts['notif-on'] = function (el) {
     var o = S.notif[el.dataset.k];
     o.on = !o.on;
-    A.save();
+    A.save(true);
     el.setAttribute('aria-checked', o.on);
     A.N.haptic('tick');
   };
@@ -1088,6 +1158,7 @@
           localStorage.removeItem(RECOVERY_KEY);
         } catch (e) {}
         A.reset();
+        if (A.applyLang) A.applyLang();
         A.applyTheme();
         A.go('#/welcome');
       },
@@ -1123,17 +1194,27 @@
     A.rerender();
   };
   function obHead(n, icon, title, lead) {
+    /* the progress counts only the steps this device shows (no recitations step where audio cannot be downloaded) */
+    var shown = [],
+      pos = 0;
+    OB_STEPS.forEach(function (l, i) {
+      if (obSkip(i + 1)) return;
+      shown.push(i + 1);
+      if (i + 1 <= n) pos = shown.length;
+    });
     return (
       '<div class="ob-top"><button type="button" class="back" data-a="ob-back">' +
       ic('left', 's') +
       'Back</button><div class="steps" aria-label="Step ' +
-      n +
+      pos +
       ' of ' +
-      OB_STEPS.length +
+      shown.length +
       '">' +
-      OB_STEPS.map(function (l, i) {
-        return '<i class="' + (i < n ? 'on' : '') + (i === n - 1 ? ' cur' : '') + '"></i>';
-      }).join('') +
+      shown
+        .map(function (s, i) {
+          return '<i class="' + (i < pos ? 'on' : '') + (i === pos - 1 ? ' cur' : '') + '"></i>';
+        })
+        .join('') +
       '</div></div>' +
       '<div class="ob-medal" aria-hidden="true"><i class="ring"></i>' +
       ic(icon) +
@@ -1297,34 +1378,48 @@
       h =
         '<div class="ob">' +
         bg +
-        obHead(4, 'bell', 'Gentle <em>reminders</em>', 'A nudge at the right moments, nothing more.') +
+        obHead(4, 'bell', 'Gentle <em>reminders</em>', 'Choose what helps you remember.') +
         '<div class="col" style="gap:12px"><div class="ob-notif" aria-hidden="true"><span class="badge s h-gold">' +
         ic('mosque', 's') +
         '</span><div class="grow"><b>ʿAṣr</b><span>Time for ʿAṣr' +
         (S.loc ? ' in ' + esc(S.loc.name) : '') +
         '</span></div><span class="faint small">now</span></div><div class="card pad0"><div class="list">' +
-        row(
-          'Prayer times',
-          S.profile.gender === 'f' ? 'Paused automatically on break days' : 'All five prayers',
-          A.sw(
-            A.PRAYERS.some(function (p) {
-              return N.prayers[p];
-            }),
-            'ob-prayers'
-          )
-        ) +
-        row('Morning adhkār', N.morning.after + ' min after Fajr', A.sw(N.morning.on, 'ob-tog', ' data-k="morning"')) +
-        row('Evening adhkār', N.evening.after + ' min after ʿAṣr', A.sw(N.evening.on, 'ob-tog', ' data-k="evening"')) +
-        row('Jumuʿah', 'Al-Kahf and ṣalawāt', A.sw(N.friday.on, 'ob-tog', ' data-k="friday"')) +
+        (A.N.has ? row('Reminders', 'Prayer times and daily adhkār', A.sw(N.enabled, 'ob-reminders')) : '') +
+        (A.N.has && N.enabled
+          ? row(
+              'Prayer times',
+              S.profile.gender === 'f' ? 'Paused automatically on break days' : 'All five prayers',
+              A.sw(
+                A.PRAYERS.some(function (p) {
+                  return N.prayers[p];
+                }),
+                'ob-prayers'
+              )
+            ) +
+            row(
+              'Morning adhkār',
+              N.morning.after + ' min after Fajr',
+              A.sw(N.morning.on, 'ob-tog', ' data-k="morning"')
+            ) +
+            row(
+              'Evening adhkār',
+              N.evening.after + ' min after ʿAṣr',
+              A.sw(N.evening.on, 'ob-tog', ' data-k="evening"')
+            ) +
+            row('Jumuʿah', 'Al-Kahf and ṣalawāt', A.sw(N.friday.on, 'ob-tog', ' data-k="friday"'))
+          : '') +
+        row('On-screen dhikr', 'A short remembrance while the app is open', A.sw(S.prefs.nudge.on, 'nudge-on')) +
+        (A.upd && A.upd.can() === 'yes'
+          ? row('Check for updates', 'Checks after setup and then weekly', A.sw(S.upd.auto, 'upd-auto'))
+          : '') +
         '</div></div>' +
-        (S.notif.enabled ? batteryCard() : '') +
-        '</div><div class="foot">' +
-        (S.notif.enabled
-          ? '<button type="button" class="btn pri wide" data-a="ob-next">Continue</button>'
-          : '<button type="button" class="btn pri wide" data-a="ob-notif">' +
-            ic('bell', 's') +
-            'Turn on reminders</button><button type="button" class="btn ghost" data-a="ob-next">Not now</button>') +
-        '</div></div>';
+        (N.enabled && (A.N.notifState() || {}).granted ? batteryCard() : '') +
+        (N.enabled && ob.denied
+          ? '<div class="rd-note"><span>Notifications are blocked. You can allow them in system settings.</span></div>'
+          : '') +
+        '</div><div class="foot"><button type="button" class="btn pri wide" data-a="ob-notif"' +
+        (ob.waiting ? ' disabled' : '') +
+        '>Continue</button></div></div>';
     } else if (st === 5) {
       /* counting on the fingers, practised once with the real circle */
       h =
@@ -1386,14 +1481,27 @@
         [
           ['pin', S.loc ? S.loc.name : 'Location not set'],
           ['mosque', P.METHODS[S.calc.method].name],
-          ['bell', S.notif.enabled ? 'Reminders on' : 'Reminders off']
+          [
+            'bell',
+            !A.N.has
+              ? 'On-screen dhikr in the web app'
+              : !S.notif.enabled
+                ? 'Reminders off'
+                : (A.N.notifState() || {}).granted === false
+                  ? 'Allow notifications in system settings'
+                  : 'Reminders on'
+          ]
         ]
           .map(function (x, i) {
             return '<div style="--i:' + i + '">' + ic(x[0], 's') + '<span>' + esc(x[1]) + '</span></div>';
           })
           .join('') +
         '</div></div>' +
-        '<div class="foot"><button type="button" class="btn pri wide" data-a="ob-done">Enter Adhkār</button></div></div>';
+        '<div class="foot"><button type="button" class="btn pri wide" data-a="ob-done">Enter Adhkār</button>' +
+        (A.N.has && !window.ADHKAR_DESKTOP && !window.ADHKAR_IOS && S.prefs.widgets
+          ? '<button type="button" class="btn ghost" data-a="pin-widget" data-w="adhkar">Add the Adhkār widget</button>'
+          : '') +
+        '</div></div>';
     }
     return {
       html: h,
@@ -1500,6 +1608,7 @@
     var o = S.notif[el.dataset.k];
     o.on = !o.on;
     el.setAttribute('aria-checked', o.on);
+    A.save();
     A.N.haptic('tick');
   };
   A.acts['ob-prayers'] = function (el) {
@@ -1552,7 +1661,8 @@
   };
   A.acts['nudge-on'] = function () {
     S.prefs.nudge.on = !S.prefs.nudge.on;
-    A.save();
+    if (!S.prefs.nudge.on) A.hideNudge();
+    A.save(true);
     A.N.haptic('tick');
     A.rerender();
   };
@@ -1568,6 +1678,9 @@
     A.N.haptic('tick');
     if (S.prefs.nudge.over && A.N.call('overlayOk') === false) A.N.call('openOverlay');
     A.rerender();
+  };
+  A.acts['nudge-access'] = function () {
+    A.N.call('openOverlay');
   };
   A.acts['nudge-test'] = function () {
     A.go('#/');
@@ -1599,6 +1712,7 @@
     ob.step = 0;
     A.save(true);
     A.go('#/', true);
+    if (A.upd) A.upd.autoCheck();
     setTimeout(function () {
       A.toast(
         'Welcome' + (S.profile.name ? ', ' + S.profile.name.split(' ')[0] : '') + '. May Allah make it easy.',
@@ -1606,10 +1720,29 @@
       );
     }, 400);
   }
+  A.acts['ob-reminders'] = function () {
+    S.notif.enabled = !S.notif.enabled;
+    if (!S.notif.enabled) ob.asked = ob.denied = false;
+    A.save();
+    A.rerender();
+  };
   A.acts['ob-notif'] = function () {
-    A.enableNotifs(function () {
-      A.rerender();
-    });
+    if (!A.N.has || !S.notif.enabled || ob.asked || (A.N.notifState() || {}).granted) {
+      A.obNext();
+      return;
+    }
+    if (ob.waiting) return;
+    ob.waiting = true;
+    A.rerender();
+    A.enableNotifs(function (granted) {
+      ob.waiting = false;
+      ob.asked = true;
+      ob.denied = !granted;
+      if (ob.step === 4 && !S.profile.onboarded) {
+        if (granted) A.obNext();
+        else A.rerender();
+      }
+    }, true);
   };
   A.acts['ob-done'] = obFinish;
 
@@ -1684,6 +1817,17 @@
     A.rerender();
   };
   A.acts['cyc-remind'] = function () {
+    if (!A.remindersOn()) {
+      A.enableNotifs(function (ok) {
+        if (ok) {
+          S.excused.remind = true;
+          A.save();
+          A.N.haptic('tick');
+          A.rerender();
+        }
+      });
+      return;
+    }
     S.excused.remind = !S.excused.remind;
     A.save();
     A.N.haptic('tick');
@@ -1782,10 +1926,11 @@
         '</div></div><div class="set" style="padding:0"><div class="grow"><div class="t">Usually every</div><div class="s">From one start to the next</div></div><div class="ctl">' +
         A.stepper(((e.habit || {}).gap || 28) + ' d', 'cyc-habit', ' data-k="gap"') +
         '</div></div>';
-    h +=
-      '<div class="set" style="padding:0"><div class="grow"><div class="t">Private reminder</div><div class="s">A discreet note when your days may begin or end</div></div><div class="ctl">' +
-      A.sw(!!e.remind, 'cyc-remind') +
-      '</div></div>';
+    if (A.N.has)
+      h +=
+        '<div class="set" style="padding:0"><div class="grow"><div class="t">Private reminder</div><div class="s">A discreet note when your days may begin or end</div></div><div class="ctl">' +
+        A.sw(A.remindersOn() && !!e.remind, 'cyc-remind') +
+        '</div></div>';
     h +=
       '<div class="cyc-rules"><span>No ṣalāh or fasting</span><span>Fasts are made up, ṣalāh is not · Muslim 335</span><span>Dhikr and duʿāʾ continue</span></div>';
     if (cy.length)

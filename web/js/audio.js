@@ -53,11 +53,11 @@
   /* in a browser (the standalone page), recitations stream straight from the two sources; the app downloads them */
   var WEB = !A.N.has && !!window.ADHKAR_WEB_AUDIO && typeof window.Audio === 'function';
   var AU = (A.audio = {
+    files: files,
     ok: function () {
       return WEB || (A.N.has && typeof window.AndroidBridge.audioPlay === 'function');
     },
     web: WEB,
-    files: files,
     ready: function (it) {
       var f = files(it);
       return f.length > 0 && (WEB || have(f).length === f.length);
@@ -161,10 +161,24 @@
     );
   };
   /* the bar on screen redraws itself whenever a download lands, so it never shows Download for audio you have */
+  var items = {};
+  function itemKey(it) {
+    return (it && (it.uid || it.id)) || '';
+  }
+  function activeBar() {
+    if (P.bar && P.bar.isConnected) return P.bar;
+    var k = itemKey(P.it);
+    return (
+      (k && document.querySelector('.au[data-au-id="' + k.replace(/"/g, '') + '"]')) || document.getElementById('aubar')
+    );
+  }
   AU.refresh = function () {
-    var b = document.getElementById('aubar');
-    if (b && P.it && !P.playing && !P.round && b.dataset.state !== 'paused')
-      b.outerHTML = AU.bar(P.it, b.dataset.cid || '');
+    Array.prototype.forEach.call(document.querySelectorAll('.au[data-au-id], #aubar'), function (b) {
+      var it = (b.dataset.auId && items[b.dataset.auId]) || P.it;
+      if (!it) return;
+      if (b === activeBar() && (P.playing || P.round || b.dataset.state === 'paused')) return;
+      b.outerHTML = AU.bar(it, b.dataset.cid || '', !b.id);
+    });
   };
 
   /* ---------- downloads ---------- */
@@ -214,9 +228,9 @@
   };
 
   /* ---------- playback ---------- */
-  var P = { it: null, rate: 1, learn: false, round: 0, playing: false, wait: 0, timer: 0 };
+  var P = { it: null, bar: null, rate: 1, learn: false, round: 0, playing: false, wait: 0, timer: 0 };
   function setBar(state, frac) {
-    var b = document.getElementById('aubar');
+    var b = activeBar();
     if (!b) return;
     b.dataset.state = state;
     var r = b.querySelector('.au-ring circle.v');
@@ -263,9 +277,15 @@
       webStop();
       A.toast('Could not play. Check your connection and try again.', 'info');
       P.playing = false;
+      hold(false);
       setBar('idle', 0);
     };
-    a.play().catch(function () {});
+    a.play().catch(function () {
+      webStop();
+      P.playing = false;
+      hold(false);
+      setBar('idle', 0);
+    });
     clearInterval(W.t);
     W.t = setInterval(function () {
       if (W.el && W.el.duration)
@@ -308,6 +328,7 @@
     if (WEB) webStop();
     else A.N.call('audioStop');
     setBar('idle', 0);
+    P.bar = null;
   };
   var lastDur = 0,
     lastQ = [0, 1];
@@ -316,7 +337,8 @@
     lastDur = dur;
     lastQ = [qi, qn];
     setBar('play', (qi + pos / dur) / qn);
-    var t = document.querySelector('#aubar [data-au-time]');
+    var b = activeBar(),
+      t = b && b.querySelector('[data-au-time]');
     if (t)
       t.textContent = qn > 1 ? A.T('Āyah') + ' ' + A.fmtN(qi + 1) + ' / ' + A.fmtN(qn) : mmss(pos) + ' / ' + mmss(dur);
   };
@@ -338,7 +360,8 @@
           return;
         }
         setBar('turn', f);
-        var t = document.querySelector('#aubar [data-au-time]');
+        var b = activeBar(),
+          t = b && b.querySelector('[data-au-time]');
         if (t) t.textContent = A.fmtN(Math.ceil(left / 1000)) + (A.ar() ? ' ث' : ' s');
       }, 100);
       return;
@@ -351,13 +374,15 @@
     P.round = 0;
     hold(false);
     setBar('idle', 0);
-    var t = document.querySelector('#aubar [data-au-time]');
+    var b = activeBar(),
+      t = b && b.querySelector('[data-au-time]');
     if (t) t.textContent = '';
   };
   function nextRound() {
     clearInterval(P.timer);
     P.round++;
-    var t = document.querySelector('#aubar [data-au-time]');
+    var b = activeBar(),
+      t = b && b.querySelector('[data-au-time]');
     if (t) t.textContent = '';
     A.N.haptic('tick');
     playIt();
@@ -368,13 +393,18 @@
     return A.fmtN(Math.floor(s / 60)) + ':' + (s % 60 < 10 ? (A.ar() ? '٠' : '0') : '') + A.fmtN(s % 60);
   }
   /* ---------- the bar in the reader ---------- */
-  AU.bar = function (it, cid) {
+  AU.bar = function (it, cid, multi) {
     if (!AU.ok()) return '';
+    var k = itemKey(it);
+    if (k) items[k] = it;
+    var idAttr = multi ? '' : ' id="aubar"';
     /* no separate recording of these exact words: say so quietly rather than play something else */
     if (!files(it).length)
       return it.kind === 'flag'
         ? ''
-        : '<div class="au au-none" id="aubar"><span class="au-none-ic">' +
+        : '<div class="au au-none"' +
+            idAttr +
+            '><span class="au-none-ic">' +
             ic('vol', 'xs') +
             '</span><span>' +
             A.T('No separate recording of these exact words') +
@@ -384,10 +414,14 @@
       '<svg class="au-ring" viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="16"/><circle class="v" cx="18" cy="18" r="16"/></svg>';
     if (!ready)
       return (
-        '<div class="au" id="aubar" data-cid="' +
+        '<div class="au"' +
+        idAttr +
+        ' data-au-id="' +
+        esc(k) +
+        '" data-cid="' +
         esc(cid || '') +
         '" data-state="dl" data-au-tag="one-' +
-        esc(it.uid || it.id || '') +
+        esc(k) +
         '"><button type="button" class="au-play" data-a="au-get" aria-label="Download and play the recitation">' +
         ring +
         ic('download', 's') +
@@ -400,7 +434,11 @@
         '">All</button></div>'
       );
     return (
-      '<div class="au" id="aubar" data-cid="' +
+      '<div class="au"' +
+      idAttr +
+      ' data-au-id="' +
+      esc(k) +
+      '" data-cid="' +
       esc(cid || '') +
       '" data-state="idle"><button type="button" class="au-play" data-a="au-toggle" aria-label="Play or pause the recitation">' +
       ring +
@@ -425,25 +463,41 @@
   AU.attach = function (it) {
     if (P.it && P.it !== it) AU.stop();
     P.it = it;
+    var k = itemKey(it);
+    if (k) items[k] = it;
   };
-  A.acts['au-toggle'] = function () {
-    var b = document.getElementById('aubar'),
-      st = b && b.dataset.state;
+  A.acts['au-toggle'] = function (el) {
+    var b = (el && el.closest && el.closest('.au')) || activeBar(),
+      it = (b && b.dataset.auId && items[b.dataset.auId]) || P.it;
+    if (it && (it !== P.it || (P.bar && b && P.bar !== b))) {
+      AU.stop();
+      P.it = it;
+    }
+    P.bar = b;
+    var st = b && b.dataset.state;
     if (st === 'play') {
       if (WEB) {
         if (W.el) W.el.pause();
       } else A.N.call('audioPause');
       P.playing = false;
+      hold(false);
       b.dataset.state = 'paused';
       return;
     }
     if (st === 'paused') {
       A.pace.pause();
+      hold(true);
       P.playing = true;
-      if (WEB) {
-        if (W.el) W.el.play().catch(function () {});
-      } else A.N.call('audioResume');
       b.dataset.state = 'play';
+      if (WEB) {
+        if (W.el)
+          W.el.play().catch(function () {
+            webStop();
+            P.playing = false;
+            hold(false);
+            setBar('idle', 0);
+          });
+      } else A.N.call('audioResume');
       return;
     }
     if (st === 'turn') {
@@ -453,31 +507,49 @@
     P.round = 0;
     playIt();
   };
-  A.acts['au-rate'] = function (el) {
+  A.acts['au-rate'] = function () {
     P.rate = P.rate === 1 ? 0.75 : P.rate === 0.75 ? 0.5 : 1;
-    el.textContent = P.rate + '×';
+    Array.prototype.forEach.call(document.querySelectorAll('.au .au-rate'), function (x) {
+      x.textContent = P.rate + '×';
+    });
     if (WEB) {
       if (W.el) W.el.playbackRate = P.rate;
     } else A.N.call('audioRate', P.rate);
     A.N.haptic('tick');
   };
-  A.acts['au-learn'] = function (el) {
+  A.acts['au-learn'] = function () {
     P.learn = !P.learn;
-    el.classList.toggle('on', P.learn);
-    el.setAttribute('aria-pressed', P.learn);
+    Array.prototype.forEach.call(document.querySelectorAll('.au .au-learn'), function (x) {
+      x.classList.toggle('on', P.learn);
+      x.setAttribute('aria-pressed', P.learn);
+    });
     A.N.haptic('tick');
     A.toast(P.learn ? 'Learn mode: listen, then repeat in the pause. Three rounds.' : 'Learn mode off', 'repeat');
   };
   A.acts['au-get'] = function (el) {
-    var it = P.it;
+    var b0 = (el && el.closest && el.closest('.au')) || activeBar(),
+      it = (b0 && b0.dataset.auId && items[b0.dataset.auId]) || P.it;
     if (!it) return;
+    if (it !== P.it) {
+      AU.stop();
+      P.it = it;
+    }
+    P.bar = b0;
     el.disabled = true;
     /* each item downloads under its own tag; if you have moved on by the time it lands, nothing plays */
-    AU.download(files(it), 'one-' + (it.uid || it.id), function (ok) {
+    var k = itemKey(it);
+    AU.download(files(it), 'one-' + k, function (ok) {
       if (P.it !== it) return;
       if (ok) {
-        var b = document.getElementById('aubar');
-        if (b) b.outerHTML = AU.bar(it, b.dataset.cid || '');
+        var b =
+          document.querySelector('.au[data-au-id="' + k.replace(/"/g, '') + '"]') || document.getElementById('aubar');
+        if (b) {
+          var multi = !b.id,
+            cid = b.dataset.cid || '';
+          b.outerHTML = AU.bar(it, cid, multi);
+          P.bar =
+            document.querySelector('.au[data-au-id="' + k.replace(/"/g, '') + '"]') || document.getElementById('aubar');
+        }
         playIt();
       } else el.disabled = false;
     });
@@ -519,7 +591,7 @@
     );
   };
   window.addEventListener('hashchange', function () {
-    if (P.playing || P.round) {
+    if (P.playing || P.round || W.el || document.querySelector('.au[data-state="paused"]')) {
       if (!/^#\/r\//.test(location.hash)) AU.stop();
     }
   });

@@ -12,6 +12,7 @@ final class Scheduler {
     static let chSunnah = "sunnah"
 
     static let catPrayer = "ADHKAR_PRAYER"
+    static let catIftarPrayer = "ADHKAR_IFTAR_PRAYER"
     static let catAdhkar = "ADHKAR_SNOOZE"
     static let catAction = "ADHKAR_ACTION"
 
@@ -22,6 +23,7 @@ final class Scheduler {
 
     static let maxScheduled = 60
     private static let minMs: Int64 = 60_000
+    private static let iftarDuaRoute = "#/r/ramadan/1"
 
     struct Ev: Equatable {
         let id: String
@@ -33,6 +35,11 @@ final class Scheduler {
         let action: String?
         let actionRoute: String?
         let snooze: Bool
+        var expires: Int64 = 0
+
+        var endMs: Int64 {
+            expires > at ? expires : at + 60 * 60_000
+        }
     }
 
     private let center = UNUserNotificationCenter.current()
@@ -80,6 +87,17 @@ final class Scheduler {
             title: L.t("Begin", "ابدأ"),
             options: [.foreground]
         )
+        let iftar = UNNotificationAction(
+            identifier: Self.actOpen,
+            title: L.t("Ifṭār duʿāʾ", "دعاء الإفطار"),
+            options: [.foreground]
+        )
+        let iftarPrayerCategory = UNNotificationCategory(
+            identifier: Self.catIftarPrayer,
+            actions: [prayed, iftar],
+            intentIdentifiers: [],
+            options: []
+        )
         let snooze = UNNotificationAction(
             identifier: Self.actSnooze15,
             title: L.t("In 15 min", "بعد ١٥ دقيقة"),
@@ -104,7 +122,7 @@ final class Scheduler {
             options: []
         )
 
-        center.setNotificationCategories([prayerCategory, adhkarCategory, actionCategory])
+        center.setNotificationCategories([prayerCategory, iftarPrayerCategory, adhkarCategory, actionCategory])
     }
 
     func requestAuthorization(onResult: @escaping (Bool) -> Void) -> Bool {
@@ -128,7 +146,7 @@ final class Scheduler {
         let obj: [String: Any] = [
             "granted": isAuthorized,
             "exact": true,
-            "nextAt": store.nextReminderAt
+            "nextAt": isAuthorized ? store.nextReminderAt : 0
         ]
         guard let data = try? JSONSerialization.data(withJSONObject: obj),
               let str = String(data: data, encoding: .utf8) else {
@@ -184,6 +202,11 @@ final class Scheduler {
         let isFriday = cal.component(.weekday, from: dhuhrDate) == 6 // Sunday = 1, Friday = 6
         let sis = (cfg["gender"] as? String) == "f"
 
+        let rm = n["ramadan"] as? [String: Any]
+        let isRamadanDay = Store.hijriMonth(cfg: cfg, y: d.y, m: d.m, d: d.d) == 9
+        let ramIftar = !excused && isRamadanDay && Store.boolVal(rm?["iftar"], default: true)
+        var maghribMerged = false
+
         for k in PrayerCalc.prayers {
             let at = d.get(k)
             let nm: String
@@ -196,20 +219,38 @@ final class Scheduler {
                 let timeTxt = Store.fmtTime(cfg: cfg, opts: o, ms: at)
                 let placeEn = place.isEmpty ? "" : " in \(place)"
                 let placeAr = place.isEmpty ? "" : " في \(place)"
-                out.append(Ev(
-                    id: "p-\(k)-\(key)",
-                    at: at,
-                    ch: atTime,
-                    title: "\(nm) · \(timeTxt)",
-                    text: L.t(
-                        "It is time for \(nm)\(placeEn). Then the adhkār after the prayer.",
-                        "حان وقت \(nm)\(placeAr)، ثم أذكار بعد الصلاة."
-                    ),
-                    route: "#/salah",
-                    action: L.t("After-prayer adhkār", "أذكار بعد الصلاة"),
-                    actionRoute: "#/r/salah/0/\(k)",
-                    snooze: false
-                ))
+                if k == "maghrib" && ramIftar {
+                    maghribMerged = true
+                    out.append(Ev(
+                        id: "p-maghrib-\(key)",
+                        at: at,
+                        ch: atTime,
+                        title: L.t("Maghrib & Ifṭār · ", "المغرب والإفطار · ") + timeTxt,
+                        text: L.t(
+                            "Dhahabaẓ-ẓama’u wabtallatil-ʿurūq, wa thabatal-ajru in shā’ Allāh.",
+                            "ذَهَبَ الظَّمَأُ وَابْتَلَّتِ العُرُوقُ، وَثَبَتَ الْأَجْرُ إِنْ شَاءَ اللَّهُ"
+                        ),
+                        route: "#/ramadan",
+                        action: L.t("Ifṭār duʿāʾ", "دعاء الإفطار"),
+                        actionRoute: iftarDuaRoute,
+                        snooze: false
+                    ))
+                } else {
+                    out.append(Ev(
+                        id: "p-\(k)-\(key)",
+                        at: at,
+                        ch: atTime,
+                        title: "\(nm) · \(timeTxt)",
+                        text: L.t(
+                            "It is time for \(nm)\(placeEn). Then the adhkār after the prayer.",
+                            "حان وقت \(nm)\(placeAr)، ثم أذكار بعد الصلاة."
+                        ),
+                        route: "#/salah",
+                        action: L.t("After-prayer adhkār", "أذكار بعد الصلاة"),
+                        actionRoute: "#/r/salah/0/\(k)",
+                        snooze: false
+                    ))
+                }
                 if pre > 0 {
                     out.append(Ev(
                         id: "q-\(k)-\(key)",
@@ -241,7 +282,8 @@ final class Scheduler {
                     route: "#/c/morning",
                     action: L.t("Begin", "ابدأ"),
                     actionRoute: "#/r/morning/0",
-                    snooze: true
+                    snooze: true,
+                    expires: d.dhuhr
                 ))
             } else {
                 let srTxt = Store.fmtTime(cfg: cfg, opts: o, ms: d.sunrise)
@@ -257,7 +299,8 @@ final class Scheduler {
                     route: "#/c/morning",
                     action: L.t("Begin", "ابدأ"),
                     actionRoute: "#/r/morning/0",
-                    snooze: true
+                    snooze: true,
+                    expires: d.dhuhr
                 ))
             }
         }
@@ -277,7 +320,8 @@ final class Scheduler {
                     route: "#/c/evening",
                     action: L.t("Begin", "ابدأ"),
                     actionRoute: "#/r/evening/0",
-                    snooze: true
+                    snooze: true,
+                    expires: d.isha
                 ))
             } else {
                 let magTxt = Store.fmtTime(cfg: cfg, opts: o, ms: d.maghrib)
@@ -293,7 +337,8 @@ final class Scheduler {
                     route: "#/c/evening",
                     action: L.t("Begin", "ابدأ"),
                     actionRoute: "#/r/evening/0",
-                    snooze: true
+                    snooze: true,
+                    expires: d.isha
                 ))
             }
         }
@@ -322,7 +367,8 @@ final class Scheduler {
                     route: "#/c/sleep",
                     action: L.t("Begin", "ابدأ"),
                     actionRoute: "#/r/sleep/0",
-                    snooze: true
+                    snooze: true,
+                    expires: d.nextFajr
                 ))
             }
         }
@@ -444,7 +490,7 @@ final class Scheduler {
                     snooze: false
                 ))
             }
-            if Store.boolVal(rm["iftar"], default: true) && Store.hijriMonth(cfg: cfg, y: d.y, m: d.m, d: d.d) == 9 {
+            if !maghribMerged && Store.boolVal(rm["iftar"], default: true) && isRamadanDay {
                 let magTxt = Store.fmtTime(cfg: cfg, opts: o, ms: d.maghrib)
                 out.append(Ev(
                     id: "ri-\(key)",
@@ -457,7 +503,7 @@ final class Scheduler {
                     ),
                     route: "#/ramadan",
                     action: L.t("Ifṭār duʿāʾ", "دعاء الإفطار"),
-                    actionRoute: "#/r/ramadan/1",
+                    actionRoute: iftarDuaRoute,
                     snooze: false
                 ))
             }
@@ -505,7 +551,7 @@ final class Scheduler {
     static func upcoming(cfg: [String: Any], nowMs: Int64, days: Int = 10, limit: Int = maxScheduled) -> [Ev] {
         guard let opts = Store.opts(from: cfg) else { return [] }
         var all: [Ev] = []
-        for off in 0..<days {
+        for off in -1..<max(0, days) {
             all.append(contentsOf: events(cfg: cfg, opts: opts, nowMs: nowMs, off: off))
         }
         let filtered = all
@@ -520,42 +566,63 @@ final class Scheduler {
                 DispatchQueue.main.async { completion?() }
                 return
             }
-            let cfg = store.config()
             self.registerCategories()
-
-            let nowMs = Int64(Date().timeIntervalSince1970 * 1000.0)
-            let list = Self.upcoming(cfg: cfg, nowMs: nowMs)
-            store.nextReminderAt = list.first?.at ?? 0
-
             let done = DispatchSemaphore(value: 0)
-            self.center.getPendingNotificationRequests { pending in
-                let toRemove = pending.map { $0.identifier }.filter { $0.hasPrefix("adhkar.") }
-                if !toRemove.isEmpty {
-                    self.center.removePendingNotificationRequests(withIdentifiers: toRemove)
-                }
-                guard !list.isEmpty else {
-                    done.signal()
-                    return
-                }
-                var greg = Calendar(identifier: .gregorian)
-                greg.timeZone = TimeZone.current
-                let group = DispatchGroup()
-                for ev in list {
-                    let content = self.makeContent(for: ev)
-                    let triggerDate = Date(timeIntervalSince1970: Double(ev.at) / 1000.0)
-                    var comps = greg.dateComponents([.year, .month, .day, .hour, .minute, .second], from: triggerDate)
-                    comps.calendar = greg
-                    comps.timeZone = TimeZone.current
-                    let trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: false)
-                    let req = UNNotificationRequest(identifier: "adhkar.\(ev.id)", content: content, trigger: trigger)
-                    group.enter()
-                    self.center.add(req) { _ in group.leave() }
-                }
-                group.notify(queue: .global(qos: .utility)) {
-                    done.signal()
+            let acceptedLock = NSLock()
+            var nextAt: Int64 = 0
+            func accepted(_ at: Int64) {
+                acceptedLock.withLock { if nextAt == 0 || at < nextAt { nextAt = at } }
+            }
+            self.refreshAuthorizationStatus { _ in
+                self.center.getPendingNotificationRequests { pending in
+                    let cfg = store.config()
+                    let nowMs = Int64(Date().timeIntervalSince1970 * 1000.0)
+                    let list = self.isAuthorized ? Self.upcoming(cfg: cfg, nowMs: nowMs) : []
+                    let snoozeWindows = self.isAuthorized ? Self.activeSnoozeWindows(cfg: cfg, nowMs: nowMs) : [:]
+                    let snoozePrefix = "adhkar.snooze."
+                    let snoozes = pending.filter { request in
+                        guard request.identifier.hasPrefix(snoozePrefix),
+                              let trigger = request.trigger as? UNTimeIntervalNotificationTrigger,
+                              let date = trigger.nextTriggerDate() else { return false }
+                        let evId = String(request.identifier.dropFirst(snoozePrefix.count))
+                        guard let endMs = snoozeWindows[evId] else { return false }
+                        let fireMs = Int64(date.timeIntervalSince1970 * 1000.0)
+                        return fireMs > nowMs && fireMs < endMs
+                    }
+                    for request in snoozes {
+                        if let trigger = request.trigger as? UNTimeIntervalNotificationTrigger,
+                           let date = trigger.nextTriggerDate() {
+                            accepted(Int64(date.timeIntervalSince1970 * 1000.0))
+                        }
+                    }
+                    let normal = list.prefix(max(0, Self.maxScheduled - snoozes.count))
+                    let retained = Set(normal.map { "adhkar.\($0.id)" } + snoozes.map(\.identifier))
+                    let stale = pending.map(\.identifier).filter {
+                        $0.hasPrefix("adhkar.") && $0 != "adhkar.test" && !retained.contains($0)
+                    }
+                    self.center.removePendingNotificationRequests(withIdentifiers: stale)
+                    var greg = Calendar(identifier: .gregorian)
+                    greg.timeZone = TimeZone.current
+                    let group = DispatchGroup()
+                    for ev in normal {
+                        let triggerDate = Date(timeIntervalSince1970: Double(ev.at) / 1000.0)
+                        var comps = greg.dateComponents([.year, .month, .day, .hour, .minute, .second], from: triggerDate)
+                        comps.calendar = greg
+                        comps.timeZone = greg.timeZone
+                        let trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: false)
+                        let req = UNNotificationRequest(identifier: "adhkar.\(ev.id)", content: self.makeContent(for: ev), trigger: trigger)
+                        group.enter()
+                        self.center.add(req) { error in
+                            if error == nil { accepted(ev.at) }
+                            group.leave()
+                        }
+                    }
+                    group.notify(queue: .global(qos: .utility)) { done.signal() }
                 }
             }
             _ = done.wait(timeout: .now() + 15)
+            store.nextReminderAt = acceptedLock.withLock { nextAt }
+
             DispatchQueue.main.async {
                 completion?()
             }
@@ -585,32 +652,44 @@ final class Scheduler {
         return true
     }
 
-    func scheduleSnooze(from userInfo: [AnyHashable: Any]) {
-        let id = (userInfo["id"] as? String) ?? "snoozed"
-        let ch = (userInfo["ch"] as? String) ?? Self.chAdhkar
-        let title = (userInfo["title"] as? String) ?? L.t("Adhkār", "أذكار")
-        let text = (userInfo["text"] as? String) ?? ""
-        let route = (userInfo["route"] as? String) ?? "#/"
-        let actionRoute = userInfo["actionRoute"] as? String
-
-        let ev = Ev(
-            id: "\(id)-snooze",
-            at: Int64(Date().timeIntervalSince1970 * 1000.0) + 15 * Self.minMs,
-            ch: ch,
-            title: title,
-            text: text,
-            route: route,
-            action: actionRoute != nil ? L.t("Begin", "ابدأ") : nil,
-            actionRoute: actionRoute,
-            snooze: true
-        )
-        let content = makeContent(for: ev)
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 15 * 60, repeats: false)
-        let req = UNNotificationRequest(identifier: "adhkar.snooze.\(id)", content: content, trigger: trigger)
-        center.add(req, withCompletionHandler: nil)
+    static func activeSnoozeWindows(cfg: [String: Any], nowMs: Int64) -> [String: Int64] {
+        guard let opts = Store.opts(from: cfg) else { return [:] }
+        var out: [String: Int64] = [:]
+        for ev in (-1...0).flatMap({ events(cfg: cfg, opts: opts, nowMs: nowMs, off: $0) }) {
+            if ev.snooze && ev.at <= nowMs && nowMs < ev.endMs {
+                out[ev.id] = ev.endMs
+            }
+        }
+        return out
     }
 
-    private func makeContent(for ev: Ev) -> UNMutableNotificationContent {
+    static func snoozeEvents(cfg: [String: Any], nowMs: Int64) -> [Ev] {
+        guard let opts = Store.opts(from: cfg) else { return [] }
+        let snoozeAt = nowMs + 15 * minMs
+        return (-1...0).flatMap { events(cfg: cfg, opts: opts, nowMs: nowMs, off: $0) }
+            .filter { $0.snooze && $0.at <= nowMs && nowMs < $0.endMs && snoozeAt < $0.endMs }
+    }
+
+    func scheduleSnooze(from userInfo: [AnyHashable: Any], store: Store = .shared) {
+        guard let id = userInfo["id"] as? String else { return }
+        scheduleQueue.async {
+            guard self.isAuthorized else { return }
+            let nowMs = Int64(Date().timeIntervalSince1970 * 1000.0)
+            guard let source = Self.snoozeEvents(cfg: store.config(), nowMs: nowMs).first(where: { $0.id == id }) else { return }
+            let ev = Ev(
+                id: id, at: nowMs + 15 * Self.minMs, ch: source.ch, title: source.title,
+                text: source.text, route: source.route, action: source.action,
+                actionRoute: source.actionRoute, snooze: false
+            )
+            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 15 * 60, repeats: false)
+            let req = UNNotificationRequest(identifier: "adhkar.snooze.\(id)", content: self.makeContent(for: ev), trigger: trigger)
+            self.center.add(req) { error in
+                if error == nil { self.scheduleAll(store: store) }
+            }
+        }
+    }
+
+    func makeContent(for ev: Ev) -> UNMutableNotificationContent {
         let content = UNMutableNotificationContent()
         content.title = ev.title
         content.body = ev.text
@@ -644,7 +723,7 @@ final class Scheduler {
             if start < end {
                 info["prayer"] = String(ev.id[start..<end])
                 info["day"] = day
-                content.categoryIdentifier = Self.catPrayer
+                content.categoryIdentifier = ev.actionRoute == Self.iftarDuaRoute ? Self.catIftarPrayer : Self.catPrayer
             }
         } else if ev.snooze {
             content.categoryIdentifier = Self.catAdhkar

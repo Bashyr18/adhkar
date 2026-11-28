@@ -66,7 +66,7 @@ Adhkār comes from this page, not an app store, so Android and Windows ask you t
 
 ### Updates
 
-Open **You › About** and tap **Check now**, or turn on **Check once a week**. When a new version is out, a small gold **Update** key appears on Today (and in the rail on a computer). The file comes from the release page and is checked against its SHA-256 before anything changes; on Android, Android itself refuses an update not signed with the same key. Nothing is checked unless you ask. A copy from Google Play is updated by Play.
+Open **You › About** and tap **Check now**. New direct-download installs check after setup and weekly on subsequent launches unless you switch automatic checks off. When a new version is out, a small gold **Update** key appears on Today (and in the rail on a computer). The file comes from the release page and is checked against its SHA-256 before anything changes; on Android, Android itself refuses an update not signed with the same key. A copy from Google Play is updated by Play.
 
 ## The illustrated guide
 
@@ -176,7 +176,7 @@ A simple path for the first week. The [illustrated guide](https://bashyr18.githu
 - **Qurʾān:** the Uthmani text from Quran.com; the translation is *The Clear Quran* (Dr Mustafa Khattab), used with permission. Sūrat al-Kahf's page layout and fonts from the Quran.com API and the King Fahd Complex (QCF v2).
 - **Hadith:** Arabic and the sunnah.com English from fawazahmed0/hadith-api, with grades as given on sunnah.com; only authentic narrations are used.
 - **Recitations:** Ḥiṣn al-Muslim recordings and Mishary al-ʿAfāsī (everyayah.com), downloaded only when you ask.
-- **Privacy:** no adverts, no analytics, no account. The only internet use is a recitation you choose to download, and the update check if you ask for it or turn it on.
+- **Privacy:** no adverts, no analytics, no account. The only internet use is a recitation you choose to download, optional GPS place-name lookup via Android or iOS, and manual or automatic checks for updates on direct-download builds. You can turn automatic checks off in About.
 
 Details, with every font and asset's terms, are in [NOTICE.md](NOTICE.md).
 

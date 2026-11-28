@@ -106,6 +106,10 @@
       p = A.trkPhrase(),
       k = A.today(),
       today = T().days[k] || 0;
+    var all = $('[data-all]', el),
+      th = $('[data-this]', el);
+    if (all) all.textContent = A.fmtN(T().total || 0);
+    if (th) th.textContent = A.fmtN((T().per || {})[p.id] || 0);
     if (!$('[data-dial]', el)) return;
     $('[data-dial]', el).innerHTML = dial(v.t, v.c);
     $('[data-c]', el).textContent = A.fmtN(v.c);
@@ -117,8 +121,6 @@
     if (td) td.textContent = A.fmtN(today);
     var tp = $('[data-tp]', el);
     if (tp) tp.textContent = A.fmtN(todayOf(p.id));
-    $('[data-all]', el).textContent = A.fmtN(T().total || 0);
-    $('[data-this]', el).textContent = A.fmtN((T().per || {})[p.id] || 0);
     $('[data-dialbtn]', el).setAttribute('aria-label', 'Count. ' + v.c + (v.t ? ' of ' + v.t : ''));
   }
   function click() {
@@ -336,9 +338,8 @@
     h +=
       '<div class="trk-phrase">' +
       (p.ar ? '<div class="ar" lang="ar">' + esc(p.ar) + '</div>' : '') +
-      '<div class="tr">' +
-      esc(p.en || p.tr) +
-      '</div>' +
+      /* in Arabic the phrase itself is the meaning: the English gloss stays only when translations are on */
+      (A.ar() && p.ar && !S.prefs.en ? '' : '<div class="tr">' + esc(p.en || p.tr) + '</div>') +
       '<div class="trk-sn">' +
       (sn
         ? '<span class="lp-tag ' +
@@ -490,7 +491,7 @@
       esc(A.grade('abudawud:1502')) +
       '</a></div></div>';
     h += recent();
-    if (A.N.has)
+    if (A.N.has && !window.ADHKAR_DESKTOP && !window.ADHKAR_IOS && S.prefs.widgets)
       h +=
         '<button type="button" class="card coll press h-teal" data-a="pin-widget" data-w="tasbih"><div class="badge">' +
         ic('widget') +
@@ -590,9 +591,17 @@
     A.toast(S.prefs.volKeys ? 'Volume keys now count' : 'Volume keys released');
   };
   A.acts['trk-target'] = function () {
+    /* counted on the fingers, a phrase with its own daily number keeps rounds that fit it: only those are offered */
+    var sn = SUNNAH[A.trkPhrase().id],
+      fit =
+        S.prefs.count === 'fingers' && sn && sn.goal
+          ? TARGETS.filter(function (t) {
+              return t && (sn.goal % t === 0 || t % sn.goal === 0);
+            })
+          : TARGETS;
     A.options(
       'Target',
-      TARGETS.map(function (t) {
+      fit.map(function (t) {
         return {
           v: t,
           t: t ? 'Count to ' + A.fmtN(t) : 'No target',
@@ -671,6 +680,7 @@
     A.go('#/insights/tracker');
   };
   A.acts['pin-widget'] = function (el) {
+    if (!S.prefs.widgets || window.ADHKAR_DESKTOP || window.ADHKAR_IOS) return;
     if (!A.N.pinWidget(el.dataset.w)) A.toast('Long-press your home screen → Widgets → Adhkār');
   };
 })();

@@ -23,40 +23,50 @@
   }
   function booklet(cid) {
     var c = A.col(cid),
-      items = A.items(cid);
+      items = A.items(cid),
+      ar = A.ar(),
+      showTr = !ar && S.prefs.tr !== false,
+      showEn = !ar && S.prefs.en !== false;
     var rows = items
       .map(function (it, i) {
         var refs = (it.refs || [])
           .map(function (r) {
-            return r.l;
+            return T(r.l);
           })
           .join(' · ');
         return (
           '<article class="pp-it"><div class="pp-ih"><span class="pp-n">' +
-          (i + 1) +
+          A.fmtN(i + 1) +
           '</span><b>' +
-          esc(it.title) +
+          esc(T(it.title)) +
           '</b>' +
-          (it.target > 1 ? '<span class="pp-x">×' + it.target + '</span>' : '') +
+          (it.target > 1 ? '<span class="pp-x">×' + A.fmtN(it.target) + '</span>' : '') +
           '</div><p class="pp-ar" lang="ar" dir="rtl">' +
           esc(it.ar) +
           '</p>' +
-          (it.tr ? '<p class="pp-tr">' + esc(it.tr) + '</p>' : '') +
-          (it.en ? '<p class="pp-en"><span>' + esc(T('Translation')) + '</span>' + esc(it.en) + '</p>' : '') +
+          (showTr && it.tr ? '<p class="pp-tr">' + esc(it.tr) + '</p>' : '') +
+          (showEn && it.en ? '<p class="pp-en"><span>' + esc(T('Translation')) + '</span>' + esc(it.en) + '</p>' : '') +
           (refs ? '<p class="pp-ref">' + esc(refs) + '</p>' : '') +
           '</article>'
         );
       })
       .join('');
     return (
-      '<table class="pp-flow"><thead><tr><td><div class="pp-sp"></div></td></tr></thead><tfoot><tr><td><div class="pp-sp"></div></td></tr></tfoot><tbody><tr><td><div class="pp-sheet"><header class="pp-h"><div><small>Adhkār</small><h2>' +
-      esc(c.title) +
-      '</h2></div><p lang="ar" dir="rtl">' +
-      esc(c.ar || '') +
-      '</p></header>' +
+      '<table class="pp-flow"><thead><tr><td><div class="pp-sp"></div></td></tr></thead><tfoot><tr><td><div class="pp-sp"></div></td></tr></tfoot><tbody><tr><td><div class="pp-sheet"><header class="pp-h"><div><small>' +
+      esc(T('Adhkār')) +
+      '</small><h2>' +
+      esc(T(c.title)) +
+      '</h2></div>' +
+      (ar ? '' : '<p lang="ar" dir="rtl">' + esc(c.ar || '') + '</p>') +
+      '</header>' +
       rows +
       '<footer class="pp-f">' +
-      esc('Arabic from Ḥiṣn al-Muslim; translations from sunnah.com and The Clear Quran. Free, from the Adhkār app.') +
+      esc(
+        L(
+          'Arabic from Ḥiṣn al-Muslim; translations from sunnah.com and The Clear Quran. Free, from the Adhkār app.',
+          'النصوص العربية من حصن المسلم والمصحف الشريف. مجانًا من تطبيق أذكار.'
+        )
+      ) +
       '</footer></div></td></tr></tbody></table>'
     );
   }
@@ -109,17 +119,40 @@
         timeZone: 'UTC'
       });
     return (
-      '<div class="pp-page pp-tt"><header class="pp-h"><div><small>Adhkār · ' +
+      '<div class="pp-page pp-tt"><header class="pp-h"><div><small>' +
+      esc(T('Adhkār')) +
+      ' · ' +
       esc(place) +
       '</small><h2>' +
       esc(mTitle) +
       '</h2></div><p>' +
       esc(A.hijriText ? A.hijriText(firstKey) : '') +
-      '</p></header><table class="pp-times"><thead><tr><th>Day</th><th>Hijri</th><th>Fajr</th><th>Sunrise</th><th>Dhuhr</th><th>ʿAṣr</th><th>Maghrib</th><th>ʿIshāʾ</th></tr></thead><tbody>' +
+      '</p></header><table class="pp-times"><thead><tr><th>' +
+      esc(T('Day')) +
+      '</th><th>' +
+      esc(L('Hijri', 'هجري')) +
+      '</th><th>' +
+      esc(T('Fajr')) +
+      '</th><th>' +
+      esc(T('Sunrise')) +
+      '</th><th>' +
+      esc(T('Dhuhr')) +
+      '</th><th>' +
+      esc(T('ʿAṣr')) +
+      '</th><th>' +
+      esc(T('Maghrib')) +
+      '</th><th>' +
+      esc(T('ʿIshāʾ')) +
+      '</th></tr></thead><tbody>' +
       body +
       '</tbody></table><footer class="pp-f">' +
       esc(
-        'Calculated for ' + place + '. Times may differ from your masjid by a few minutes. Free, from the Adhkār app.'
+        L(
+          'Calculated for ' +
+            place +
+            '. Times may differ from your masjid by a few minutes. Free, from the Adhkār app.',
+          'مواقيت ' + place + '. قد تختلف عن المسجد ببضع دقائق. مجانًا من تطبيق أذكار.'
+        )
       ) +
       '</footer></div>'
     );
@@ -150,6 +183,7 @@
       document.body.appendChild(paper);
     }
     paper.innerHTML = sheetsFor(what, month);
+    if (A.localize) A.localize(paper);
     var name = fileName(what, month),
       t = document.title;
     A.print._origTitle = t;
@@ -237,6 +271,7 @@
     return {
       html: h,
       title: T('Print and PDF'),
+      tab: 4,
       mount: function (el) {
         var fit = function () {
           var box = $('.pr-prev', el),

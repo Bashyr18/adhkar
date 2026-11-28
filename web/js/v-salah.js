@@ -7,8 +7,88 @@
     $ = A.$,
     esc = A.esc,
     ic = A.icon;
+  if (A.addAr)
+    A.addAr({
+      'Prayed in sets of two. Two suffice; the Prophet ﷺ is reported to have prayed four, and eight on the day of the Conquest.':
+        'تُصلّى ركعتين ركعتين. وأقلها ركعتان، وقد ورد عن النبي ﷺ أنه صلاها أربعًا، وثمانيًا يوم الفتح.',
+      'The waking dhikr of Bukhārī 1154': 'ذكر الاستيقاظ · البخاري ١١٥٤',
+      'Ṣaḥīḥ (al-Albānī)': 'صحيح (الألباني)',
+      'Ḥasan (al-Albānī)': 'حسن (الألباني)',
+      'Ḥasan Ṣaḥīḥ (al-Albānī)': 'حسن صحيح (الألباني)',
+      'al-Bayhaqī, graded ṣaḥīḥ by al-Albānī': 'البيهقي، صحّحه الألباني',
+      'Three supplications are answered: of the fasting person, the oppressed and the traveller.':
+        'ثلاث دعوات مستجابات: دعوة الصائم، ودعوة المظلوم، ودعوة المسافر.',
+      'Better than a thousand months. Seek it in the odd nights of the last ten of Ramaḍān and ask: Allāhumma innaka ʿafuwwun tuḥibbul-ʿafwa faʿfu ʿannī.':
+        'خير من ألف شهر. تحرَّها في الوتر من العشر الأواخر من رمضان، واسأل: اللهم إنك عفو تحب العفو فاعفُ عني.',
+      'Dhuhr, ʿAṣr, ʿIshāʾ: 2 rakʿahs': 'الظهر والعصر والعشاء: ركعتان',
+      'On Friday at Dhuhr': 'يوم الجمعة عند الظهر',
+      'When duʿāʾ is answered': 'أوقات إجابة الدعاء',
+      'The dial · times of duʿāʾ': 'المؤشر · أوقات الدعاء',
+      timing: 'التوقيت'
+    });
   var MIN = 60000;
 
+  /* each prayer, in the order it is lived: purify, face the qibla, pray, then remember (also shown before a location is
+     set: the lessons need no place) */
+  function prayerFlow() {
+    var qb = S.loc ? Math.round(P.qibla(S.loc.lat, S.loc.lng)) : null;
+    var step = function (n, href, art, t, s, extra) {
+      return (
+        '<div class="pf-row"><span class="pf-n" aria-hidden="true">' +
+        n +
+        '</span><a class="pf-main press" href="' +
+        href +
+        '">' +
+        art +
+        '<span class="grow"><span class="t">' +
+        t +
+        '</span><span class="s">' +
+        s +
+        '</span></span>' +
+        ic('right', 's') +
+        '</a>' +
+        (extra || '') +
+        '</div>'
+      );
+    };
+    return (
+      '<div class="sec"><h2>Each prayer, in order</h2></div><div class="card pad0 pr-flow">' +
+      step(
+        1,
+        '#/purity/wudu',
+        '<img class="pf-art" src="' + A.asset('img/purity/hands.webp') + '" alt="" aria-hidden="true">',
+        'Purify',
+        'Wuḍūʾ, step by step',
+        '<a class="pf-chip press" href="#/purity/ghusl">Ghusl</a>'
+      ) +
+      step(
+        2,
+        '#/qibla',
+        '<span class="badge s pf-ic">' + ic('compass', 's') + '</span>',
+        'Face the qibla',
+        qb == null
+          ? 'Set your location'
+          : '<span dir="ltr">' + (A.ar() ? A.arDigits(String(qb)) : qb) + '°</span> from north'
+      ) +
+      step(
+        3,
+        '#/learn',
+        '<img class="pf-art" src="' +
+          A.asset('img/pose/' + (S.profile.gender === 'f' ? 'f' : 'm') + '/ruku.webp') +
+          '" alt="" aria-hidden="true">',
+        'Pray',
+        'As the Prophet ﷺ prayed, with the evidence'
+      ) +
+      step(
+        4,
+        '#/c/salah',
+        '<span class="badge s pf-ic">' + ic('book', 's') + '</span>',
+        'Remember',
+        'The adhkār after the prayer'
+      ) +
+      '</div>'
+    );
+  }
   function needLoc(title, tab) {
     return {
       html:
@@ -18,7 +98,8 @@
         ic('pin') +
         '</div><h3>Where are you?</h3><p>Prayer times, qibla and the night thirds are calculated on your device from your location, nothing is sent anywhere.</p><a class="btn pri" href="#/location">' +
         ic('locate', 's') +
-        'Set location</a></div>',
+        'Set location</a></div>' +
+        (tab === 3 && title === 'Ṣalāh' ? prayerFlow() : ''),
       title: title,
       tab: tab
     };
@@ -82,7 +163,7 @@
         '</span></div></div>';
     }
     var pr = S.prayed[key] || {},
-      exc = A.isExcused(key),
+      exc = A.isExcused(key) && !A.breakEndedOn(key),
       trv = A.travelling();
     if (trv)
       h +=
@@ -94,7 +175,7 @@
         esc(trv.from) +
         '</div></div><button type="button" class="chip" data-a="travel-home">I live here now</button></div><div class="trv-rules"><span>' +
         ic('check', 'xs') +
-        'Ẓuhr, ʿAṣr, ʿIshāʾ: 2 rakʿahs</span><span>' +
+        'Dhuhr, ʿAṣr, ʿIshāʾ: 2 rakʿahs</span><span>' +
         ic('check', 'xs') +
         'Combining is allowed</span><span>' +
         ic('check', 'xs') +
@@ -104,15 +185,27 @@
         '<div class="occ h-rose"><div class="badge s" style="--h:var(--rose)">' +
         ic('moonstar', 's') +
         '</div><div class="grow"><div class="t">On a break from ṣalāh</div><div class="d">Tracking and reminders paused.</div></div></div>';
+    /* the phone itself blocks notifications: the bells say so, and keep the choices for when it allows them again */
+    var ns = A.N.has && A.N.notifState ? A.N.notifState() : null,
+      osBlocked = !!S.notif.enabled && ns && ns.granted === false;
+    if (osBlocked)
+      h +=
+        '<div class="rd-note">' +
+        ic('info', 's') +
+        '<div>' +
+        A.T('System notifications are blocked.') +
+        ' <button type="button" class="gold" data-a="os-settings" data-w="notifications">' +
+        A.T('Open settings') +
+        '</button></div></div>';
     h +=
       '<div class="card pad0">' +
       P.ORDER.map(function (k) {
         var isP = k !== 'sunrise',
           past = isToday ? t[k] <= n.now : key < today,
           cur = curK === k,
-          notif = isP && S.notif.enabled && S.notif.prayers[k];
+          notif = isP && A.remindersOn() && !osBlocked && S.notif.prayers[k];
         var chk =
-          isP && S.prefs.trackPrayers && !exc && (past || cur)
+          isP && S.prefs.trackPrayers && !A.prayerExcused(key, k) && (past || cur)
             ? '<button type="button" class="chk' +
               (pr[k] ? ' on' : '') +
               '" data-a="prayed" data-k="' +
@@ -136,9 +229,8 @@
           chk +
           '<div class="grow"><div class="nm">' +
           (k === 'sunrise' ? 'Sunrise' : A.pName(k, key)) +
-          '</div><div class="arn ar">' +
-          A.pAr(k, key) +
           '</div>' +
+          (A.ar() ? '' : '<div class="arn ar">' + A.pAr(k, key) + '</div>') +
           (isP && S.iqama.on ? '<div class="iqm">Iqāmah ' + A.fmtT(t[k] + S.iqama[k] * 60000) + '</div>' : '') +
           (trv && A.SHORT[k] ? '<div class="iqm trv">2 rakʿahs</div>' : '') +
           '</div><div class="tm">' +
@@ -161,12 +253,7 @@
         );
       }).join('') +
       '</div>';
-    h +=
-      '<a class="card lp-entry press" href="#/learn"><img src="' +
-      A.asset('img/pose/' + (S.profile.gender === 'f' ? 'f' : 'm') + '/ruku.webp') +
-      '" alt="" aria-hidden="true"><div class="grow"><div class="eyebrow">Step by step</div><div class="t">Learn the prayer</div><div class="s">As the Prophet ﷺ prayed, with the evidence</div></div>' +
-      ic('right', 's') +
-      '</a>';
+    h += prayerFlow();
     h += '<div class="sec"><h2>Sunnah times</h2></div><div class="grid2">';
     h +=
       '<a class="card tile press h-gold" href="#/duha"><div class="badge s">' +
@@ -184,11 +271,9 @@
       '</div></div></a>';
     h += '</div><div class="sec"><h2>Tools</h2></div><div class="grid2">';
     h +=
-      '<a class="card coll press h-jade" href="#/qibla"><div class="badge s">' +
-      ic('compass', 's') +
-      '</div><div class="grow"><div class="t">Qibla</div><div class="s">' +
-      Math.round(P.qibla(S.loc.lat, S.loc.lng)) +
-      '° from north</div></div></a>';
+      '<a class="card coll press h-indigo" href="#/answered"><div class="badge s">' +
+      ic('hands', 's') +
+      '</div><div class="grow"><div class="t">When duʿāʾ is answered</div><div class="s">The dial · times of duʿāʾ</div></div></a>';
     h +=
       '<a class="card coll press h-teal" href="#/month"><div class="badge s">' +
       ic('cal', 's') +
@@ -211,7 +296,7 @@
       '<a class="card coll press h-gold" href="#/journal"><div class="badge s">' +
       ic('hands', 's') +
       '</div><div class="grow"><div class="t">My duʿāʾs</div><div class="s">' +
-      (jo ? A.plural(jo, 'duʿāʾ') + ' open' : 'A private journal') +
+      (jo ? (A.ar() ? A.plural(jo, 'duʿāʾ') + ' قائمة' : A.plural(jo, 'duʿāʾ') + ' open') : 'A private journal') +
       '</div></div></a>';
     h +=
       '<a class="card coll press h-indigo" href="#/qada"><div class="badge s">' +
@@ -224,9 +309,13 @@
       h += S.excused.on
         ? '<button type="button" class="card coll press h-rose" data-a="break-off"><div class="badge">' +
           ic('moonstar') +
-          '</div><div class="grow"><div class="t">End your break</div><div class="s">Day ' +
-          A.excusedDay() +
-          ' · resume prayer tracking</div></div>' +
+          '</div><div class="grow"><div class="t">' +
+          A.T('End your break') +
+          '</div><div class="s">' +
+          (A.ar()
+            ? 'اليوم ' + A.fmtN(A.excusedDay()) + ' · استئناف متابعة الصلاة'
+            : 'Day ' + A.excusedDay() + ' · resume prayer tracking') +
+          '</div></div>' +
           ic('right', 's') +
           '</button>'
         : '<button type="button" class="card coll press h-rose" data-a="break-on"><div class="badge">' +
@@ -234,7 +323,7 @@
           '</div><div class="grow"><div class="t">Not praying today?</div><div class="s">Start a break. Your streak stays safe.</div></div>' +
           ic('right', 's') +
           '</button>';
-    if (!S.notif.enabled)
+    if (A.N.has && !S.notif.enabled)
       h +=
         '<button type="button" class="card coll press h-gold" data-a="go-notif"><div class="badge">' +
         ic('bell') +
@@ -285,8 +374,14 @@
       A.toast('Next: the adhkār after ' + A.pName(k, d), 'mosque');
   };
   A.acts.bell = function (el) {
-    var k = el.dataset.k;
-    if (!S.notif.enabled) {
+    var k = el.dataset.k,
+      ns = A.N.has && A.N.notifState ? A.N.notifState() : null;
+    if (S.notif.enabled && ns && ns.granted === false) {
+      A.toast('System notifications are blocked.');
+      A.N.haptic('tick');
+      return;
+    }
+    if (!A.remindersOn()) {
       A.enableNotifs(function (ok) {
         if (ok) {
           S.notif.prayers[k] = true;
@@ -310,28 +405,28 @@
       if (ok) A.go('#/settings/notifications');
     });
   };
-  A.enableNotifs = function (cb) {
-    var r = A.N.notifPermission();
-    var done = function (ok) {
-      if (ok) {
+  A.enableNotifs = function (cb, setup) {
+    if (!A.N.has) {
+      if (!setup) A.toast('Scheduled reminders are available in the installed apps.', 'info');
+      if (cb) cb(false);
+      return;
+    }
+    var timer = setTimeout(function () {
+      finish('notifications', false);
+    }, 45000);
+    function finish(kind, ok) {
+      if (kind !== 'notifications' || window.__native.onPermission !== finish) return;
+      clearTimeout(timer);
+      delete window.__native.onPermission;
+      if (ok && !setup) {
         S.notif.enabled = true;
         A.save(true);
         A.toast('Reminders are on', 'bell');
-      } else A.toast('Notifications are blocked. Allow them in system settings.');
-      cb && cb(ok);
-    };
-    if (A.N.has) {
-      window.__native.onPermission = function (kind, ok) {
-        if (kind === 'notifications') done(!!ok);
-      };
-      if (r === true) done(true);
-      return;
+      } else if (!ok && !setup) A.toast('Notifications are blocked. Allow them in system settings.');
+      if (cb) cb(!!ok);
     }
-    if (r && r.then)
-      r.then(function (p) {
-        done(p === 'granted');
-      });
-    else done(true);
+    window.__native.onPermission = finish;
+    if (A.N.notifPermission() === true) finish('notifications', true);
   };
 
   /* ================= qibla ================= */
@@ -399,7 +494,7 @@
         ' ' +
         p[1].toFixed(1) +
         ')">' +
-        n +
+        A.fmtN(n) +
         '</text>';
     }
     [
@@ -422,32 +517,36 @@
         p[0].toFixed(1) +
         ' ' +
         p[1].toFixed(1) +
-        ')">' +
-        c[0] +
+        ')"' +
+        (A.ar() ? ' font-family="Amiri" font-size="13"' : '') +
+        '>' +
+        (A.ar() ? { N: 'ش', E: 'ق', S: 'ج', W: 'غ' }[c[0]] : c[0]) +
         '</text>';
     });
-    [
-      ['NE', 45],
-      ['SE', 135],
-      ['SW', 225],
-      ['NW', 315]
-    ].forEach(function (c) {
-      var p = pt(74, c[1]);
-      s +=
-        '<text x="' +
-        p[0].toFixed(1) +
-        '" y="' +
-        (p[1] + 2.4).toFixed(1) +
-        '" text-anchor="middle" font-size="6.5" font-weight="800" font-family="Quicksand" fill="var(--t3)" transform="rotate(' +
-        c[1] +
-        ' ' +
-        p[0].toFixed(1) +
-        ' ' +
-        p[1].toFixed(1) +
-        ')">' +
-        c[0] +
-        '</text>';
-    });
+    /* the in-between directions: two words each in Arabic, too long for the dial, so only in English */
+    if (!A.ar())
+      [
+        ['NE', 45],
+        ['SE', 135],
+        ['SW', 225],
+        ['NW', 315]
+      ].forEach(function (c) {
+        var p = pt(74, c[1]);
+        s +=
+          '<text x="' +
+          p[0].toFixed(1) +
+          '" y="' +
+          (p[1] + 2.4).toFixed(1) +
+          '" text-anchor="middle" font-size="6.5" font-weight="800" font-family="Quicksand" fill="var(--t3)" transform="rotate(' +
+          c[1] +
+          ' ' +
+          p[0].toFixed(1) +
+          ' ' +
+          p[1].toFixed(1) +
+          ')">' +
+          c[0] +
+          '</text>';
+      });
     /* qibla: golden band on the ring, a ray, and the Kaʿbah */
     var a0 = pt(92, q - 4),
       a1 = pt(92, q + 4);
@@ -475,13 +574,13 @@
       r2[1].toFixed(2) +
       '" stroke="var(--gold)" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="1 3.5"/>';
     s +=
-      '<g transform="translate(' +
+      '<g class="kb" transform="translate(' +
       kb[0].toFixed(2) +
       ' ' +
       kb[1].toFixed(2) +
       ') rotate(' +
       q.toFixed(1) +
-      ')"><circle r="9.5" fill="var(--bg)" stroke="var(--gold)" stroke-width="1.2"/><rect x="-5" y="-5" width="10" height="10" rx="1.2" fill="#15130f" stroke="var(--gold2)" stroke-width=".7"/><rect x="-5" y="-2.4" width="10" height="1.6" fill="var(--gold)"/></g>';
+      ')"><circle class="kb-glow" r="15" fill="var(--gold)"/><circle r="9.5" fill="var(--bg)" stroke="var(--gold)" stroke-width="1.2"/><rect x="-5" y="-5" width="10" height="10" rx="1.2" fill="#15130f" stroke="var(--gold2)" stroke-width=".7"/><rect x="-5" y="-2.4" width="10" height="1.6" fill="var(--gold)"/></g>';
     if (sun && sun.alt > -1) {
       var sp = pt(58, sun.az);
       s +=
@@ -491,7 +590,7 @@
         sp[1].toFixed(2) +
         ')"><circle r="5.5" fill="#ffd27a" fill-opacity=".25"/><circle r="3.2" fill="#ffcf6a"/></g>';
     }
-    return '<svg viewBox="-14 -14 228 228" aria-hidden="true">' + s + '</svg>';
+    return '<svg class="no-tr" viewBox="-14 -14 228 228" aria-hidden="true">' + s + '</svg>';
   }
   function glass() {
     return '<svg viewBox="-14 -14 228 228" aria-hidden="true"><path id="qdev" d="" fill="none" stroke="var(--gold)" stroke-opacity=".55" stroke-width="6" stroke-linecap="round"/><path d="M100 -9 106.5 3H93.5z" fill="var(--gold2)" stroke="var(--bg)" stroke-width="1"/><line x1="100" y1="3" x2="100" y2="14" stroke="var(--gold2)" stroke-width="1.4"/></svg>';
@@ -540,28 +639,30 @@
       rose(q, sun) +
       '</div><div class="glass">' +
       glass() +
-      '</div><div class="pulse"></div><div class="hub"><b class="num" id="qdeg">' +
-      Math.round(q) +
+      '</div><div class="pulse"></div><div class="burst"></div><div class="hub"><b class="num" id="qdeg" dir="ltr">' +
+      (A.ar() ? A.arDigits(String(Math.round(q))) : Math.round(q)) +
       '°</b><span id="qlbl">from north</span></div><i class="bubble" id="bub"></i></div>';
     h += '<div class="qstatus" id="qchips"></div><div class="qmsg" id="qmsg" aria-live="polite"></div></div>';
     h +=
-      '<div class="card"><dl class="kv"><dt>Bearing</dt><dd>' +
-      q.toFixed(1) +
-      '° ' +
+      '<div class="card"><dl class="kv"><dt>Bearing</dt><dd><span dir="ltr">' +
+      (A.ar() ? A.arDigits(q.toFixed(1)) : q.toFixed(1)) +
+      '°</span> ' +
       compassPt(q) +
       '</dd><dt>Distance to Makkah</dt><dd>' +
       A.fmtN(Math.round(km)) +
-      ' km</dd>' +
+      ' km</dd><dt id="qsunT">' +
+      (sunUp ? 'Sun now' : 'Sun') +
+      '</dt><dd id="qsun">' +
       (sunUp
-        ? '<dt>Sun now</dt><dd>' +
-          Math.round(sun.az) +
-          '° · qibla is ' +
-          Math.abs(Math.round(sunTurn)) +
-          '° ' +
+        ? '<span dir="ltr">' +
+          A.fmtN(Math.round(sun.az)) +
+          '°</span> · qibla is <span dir="ltr">' +
+          A.fmtN(Math.abs(Math.round(sunTurn))) +
+          '°</span> ' +
           (sunTurn >= 0 ? 'right' : 'left') +
-          ' of it</dd>'
-        : '<dt>Sun</dt><dd>Below the horizon</dd>') +
-      '<dt>From</dt><dd class="clamp1">' +
+          ' of it'
+        : 'Below the horizon') +
+      '</dd><dt>From</dt><dd class="clamp1">' +
       esc(S.loc.name) +
       '</dd></dl></div>';
     h +=
@@ -578,14 +679,52 @@
         Q.aligned = false;
         Q.shown = null;
         Q.target = null;
+        Q.acc = null;
+        Q.hasSample = false;
+        Q.label = null;
+        Q.lastSunAt = Date.now();
         startCompass();
         paintMode();
       },
-      unmount: stopCompass
+      unmount: stopCompass,
+      /* the sun moves while the page is open: refresh by elapsed time so sunset updates both the card and hub */
+      tick: function () {
+        if (!S.loc || Date.now() - (Q.lastSunAt || 0) < 30000) return;
+        Q.lastSunAt = Date.now();
+        Q.sun = P.sunAzAlt(Date.now(), S.loc.lat, S.loc.lng);
+        var up = Q.sun.alt > -1,
+          st = $('#qsunT'),
+          sv = $('#qsun');
+        if (st) st.textContent = A.T(up ? 'Sun now' : 'Sun');
+        if (sv) {
+          if (up) {
+            var turn = ((Q.q - Q.sun.az + 540) % 360) - 180;
+            sv.innerHTML = A.ar()
+              ? '<span dir="ltr">' +
+                A.fmtN(Math.round(Q.sun.az)) +
+                '°</span> · القبلة <span dir="ltr">' +
+                A.fmtN(Math.abs(Math.round(turn))) +
+                '°</span> ' +
+                (turn >= 0 ? 'يمينها' : 'يسارها')
+              : '<span dir="ltr">' +
+                A.fmtN(Math.round(Q.sun.az)) +
+                '°</span> · qibla is <span dir="ltr">' +
+                A.fmtN(Math.abs(Math.round(turn))) +
+                '°</span> ' +
+                (turn >= 0 ? 'right' : 'left') +
+                ' of it';
+          } else sv.textContent = A.T('Below the horizon');
+        }
+        if (Q.mode === 'sun') paintMode();
+      }
     };
   };
   function compassPt(d) {
-    return ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'][Math.round(d / 45) % 8];
+    return (
+      A.ar()
+        ? ['شمال', 'شمال شرق', 'شرق', 'جنوب شرق', 'جنوب', 'جنوب غرب', 'غرب', 'شمال غرب']
+        : ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
+    )[Math.round(d / 45) % 8];
   }
   function chips() {
     var el = $('#qchips');
@@ -606,26 +745,30 @@
     var msg = $('#qmsg');
     if (Q.mode === 'sun') {
       if (Q.sun.alt <= -1) {
-        if (msg) msg.textContent = 'The sun is below the horizon. Switch to compass mode.';
+        if (msg) msg.textContent = A.T('The sun is below the horizon. Switch to compass mode.');
         render(0, true);
         return;
       }
-      var turn = ((Q.q - Q.sun.az + 540) % 360) - 180;
+      var turn = ((Q.q - Q.sun.az + 540) % 360) - 180,
+        angle = A.fmtN(Math.abs(Math.round(turn))) + '°';
       if (msg)
-        msg.textContent =
-          'Point the top of your phone at the sun, then turn ' +
-          Math.abs(Math.round(turn)) +
-          '° to the ' +
-          (turn >= 0 ? 'right' : 'left') +
-          '.';
+        msg.textContent = A.ar()
+          ? 'وجّه أعلى هاتفك نحو الشمس، ثم استدر ' + angle + (turn >= 0 ? ' إلى اليمين.' : ' إلى اليسار.')
+          : 'Point the top of your phone at the sun, then turn ' +
+            angle +
+            (turn >= 0 ? ' to the right.' : ' to the left.');
       Q.target = Q.sun.az;
       Q.shown = Q.sun.az;
       render(Q.sun.az, true);
-    } else if (msg)
-      msg.textContent =
-        A.N.has || window.DeviceOrientationEvent
-          ? 'Turn until the Kaʿbah reaches the gold pointer.'
-          : 'Face ' + Math.round(Q.q) + '° clockwise from true north.';
+    } else {
+      if (Q.target == null) render(0, true);
+      if (msg)
+        msg.textContent = Q.hasSample
+          ? A.T('Turn until the Kaʿbah reaches the gold pointer.')
+          : A.ar()
+            ? 'اتّجه ' + A.fmtN(Math.round(Q.q)) + '° من الشمال الحقيقي.'
+            : 'Face ' + Math.round(Q.q) + '° from true north.';
+    }
   }
   /* render the rose for a heading; static text/arc updates only when the integer value changes (no layout thrash) */
   function render(heading, staticMode) {
@@ -634,14 +777,16 @@
     r.style.transform = 'rotate(' + (-heading).toFixed(2) + 'deg) translateZ(0)';
     var diff = ((Q.q - heading + 540) % 360) - 180,
       ad = Math.abs(diff),
-      al = !staticMode && ad < 3;
+      lowAcc = Q.acc != null && Q.acc < 2,
+      al = !staticMode && ad < 3 && !lowAcc,
+      sunVisible = Q.mode === 'sun' && Q.sun && Q.sun.alt > -1;
     var dev = document.getElementById('qdev');
     if (dev) {
       dev.setAttribute('d', devPath(diff));
       dev.setAttribute('stroke', al ? 'var(--jade)' : 'var(--gold)');
     }
     var label = staticMode
-      ? Q.mode === 'sun'
+      ? sunVisible
         ? 'sun at top'
         : 'from north'
       : al
@@ -649,18 +794,26 @@
         : diff > 0
           ? 'turn right'
           : 'turn left';
-    var deg = staticMode ? Math.round(Q.mode === 'sun' ? ad : Q.q) + '°' : al ? '✓' : Math.round(ad) + '°';
+    var deg = A.fmtN(Math.round(staticMode ? (sunVisible ? ad : Q.q) : al ? Q.q : ad)) + '°';
     var b = $('#qdeg'),
       l = $('#qlbl');
     if (b && b.textContent !== deg) b.textContent = deg;
     if (l && Q.label !== label) {
-      l.textContent = label;
+      l.textContent = A.T(label);
       Q.label = label;
     }
     var c = $('#cmp');
     if (c && c.classList.contains('aligned') !== al) c.classList.toggle('aligned', al);
     if (!staticMode) {
-      if (al && !Q.aligned) A.N.haptic('success');
+      if (al && !Q.aligned) {
+        A.N.haptic('success');
+        /* the moment it settles: a ring of light goes out once from the dial */
+        if (c && S.prefs.motion) {
+          c.classList.remove('lock');
+          void c.offsetWidth;
+          c.classList.add('lock');
+        }
+      }
       var bucket = Math.round(ad / 5);
       if (!al && ad < 30 && Q.lastTick !== null && bucket !== Q.lastTick) A.N.haptic('tick');
       Q.lastTick = bucket;
@@ -672,6 +825,7 @@
           : Q.acc != null && Q.acc < 2
             ? 'Low compass accuracy. Wave the phone in a figure-eight.'
             : 'Turn until the Kaʿbah reaches the gold pointer.';
+        t = A.T(t);
         if (m.textContent !== t) m.textContent = t;
       }
     }
@@ -695,6 +849,7 @@
   }
   function onHeading(hd, acc, pitch, roll) {
     if (Q.mode !== 'compass') return;
+    Q.hasSample = true;
     Q.target = +hd;
     if (acc != null && acc !== Q.acc) {
       Q.acc = acc;
@@ -731,6 +886,10 @@
   A.acts['q-mode'] = function (el) {
     Q.mode = el.dataset.v;
     A.N.haptic('tick');
+    /* the sun's bearing is not a heading: compass mode starts from true north until the sensor speaks */
+    Q.target = null;
+    Q.aligned = false;
+    Q.lastTick = null;
     document.querySelectorAll('.qmodes button').forEach(function (b) {
       b.setAttribute('aria-pressed', b.dataset.v === Q.mode);
     });
@@ -759,15 +918,16 @@
         t = A.pday(k),
         hj = A.hijri(k),
         isT = k === today;
+      var wd = A.ar() ? A.T(A.DOW[A.dow(k)]).replace(/^ال/, '') : A.DOW[A.dow(k)].slice(0, 2);
       rows +=
         '<tr' +
         (isT ? ' class="cur"' : '') +
         '><td><b>' +
-        d +
+        A.fmtN(d) +
         '</b><span>' +
-        A.DOW[A.dow(k)].slice(0, 2) +
+        esc(wd) +
         ' · ' +
-        hj.d +
+        A.fmtN(hj.d) +
         '</span></td>' +
         P.ORDER.map(function (p) {
           return '<td>' + A.fmtT(t[p], 'bare') + '</td>';
@@ -792,9 +952,9 @@
       ic('right', 's') +
       '</button></div></header>';
     h +=
-      '<style>.mt{width:100%;border-collapse:collapse;font-size:clamp(11px,3.4vw,12.5px);font-variant-numeric:tabular-nums;table-layout:fixed}.mt th{font:800 9.5px/1 var(--f-ui);letter-spacing:.04em;text-transform:uppercase;color:var(--t3);padding:12px 1px;text-align:center}.mt th:first-child{width:21%}.mt td{padding:9px 1px;text-align:center;border-top:1px solid var(--line);font-weight:700;color:var(--t2);white-space:nowrap}.mt td:first-child{text-align:left;padding-left:12px}.mt td b{display:block;color:var(--t1);font-size:13.5px}.mt td span{font-size:9.5px;color:var(--t3)}.mt tr.cur td{background:var(--gold-soft);color:var(--gold2)}</style>';
+      '<style>.mt{width:100%;border-collapse:collapse;font-size:clamp(11px,3.4vw,12.5px);font-variant-numeric:tabular-nums;table-layout:fixed}.mt th{font:800 9.5px/1 var(--f-ui);letter-spacing:.04em;text-transform:uppercase;color:var(--t3);padding:12px 1px;text-align:center}.mt th:first-child{width:21%;text-align:start;padding-inline-start:12px}.mt td{padding:9px 1px;text-align:center;border-top:1px solid var(--line);font-weight:700;color:var(--t2);white-space:nowrap}.mt td:first-child{text-align:start;padding-inline-start:12px}.mt td b{display:block;color:var(--t1);font-size:13.5px}.mt td span{font-size:9.5px;color:var(--t3)}.mt tr.cur td{background:var(--gold-soft);color:var(--gold2)}</style>';
     h +=
-      '<div class="card pad0 mt-card"><table class="mt"><thead><tr><th style="text-align:left;padding-left:12px">Day</th><th>Fajr</th><th>Rise</th><th>Dhuhr</th><th>ʿAṣr</th><th>Magh</th><th>ʿIshā</th></tr></thead><tbody>' +
+      '<div class="card pad0 mt-card"><table class="mt"><thead><tr><th>Day</th><th>Fajr</th><th>Rise</th><th>Dhuhr</th><th>ʿAṣr</th><th>Magh</th><th>ʿIshā</th></tr></thead><tbody>' +
       rows +
       '</tbody></table></div>';
     h +=
@@ -913,7 +1073,7 @@
       A.fmtTxt(wake) +
       '</button>' +
       '<label class="third-notif"><span>Remind me</span>' +
-      A.sw(S.notif.enabled && S.notif.night.on, 'notif-toggle', ' data-k="night"') +
+      A.sw(A.remindersOn() && S.notif.night.on, 'notif-toggle', ' data-k="night"') +
       '</label></div></div>';
     h += '<div class="sec"><h2>Tonight</h2></div><div class="card col">';
     h +=
@@ -1106,7 +1266,7 @@
       '</div><p class="faint small">Prayed in sets of two. Two suffice; the Prophet ﷺ is reported to have prayed four, and eight on the day of the Conquest.</p></div>';
     h +=
       '<div class="card pad0"><div class="list"><div class="set"><div class="grow"><div class="t">Remind me when it opens</div></div><div class="ctl">' +
-      A.sw(S.notif.enabled && S.notif.duha.on, 'notif-toggle', ' data-k="duha"') +
+      A.sw(A.remindersOn() && S.notif.duha.on, 'notif-toggle', ' data-k="duha"') +
       '</div></div><div class="set"><div class="grow"><div class="t">Start after sunrise</div><div class="s">Minutes</div></div><div class="ctl">' +
       A.stepper(S.offsets.ds, 'offset', ' data-k="ds"') +
       '</div></div><div class="set"><div class="grow"><div class="t">End before Dhuhr</div><div class="s">Minutes</div></div><div class="ctl">' +
@@ -1144,7 +1304,7 @@
   };
   A.acts['notif-toggle'] = function (el) {
     var k = el.dataset.k;
-    if (!S.notif.enabled) {
+    if (!A.remindersOn()) {
       A.enableNotifs(function (ok) {
         if (ok) {
           if (S.notif[k]) S.notif[k].on = true;

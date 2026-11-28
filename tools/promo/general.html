@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Adhkār · the film</title>
+<!-- The general film: 50 seconds, the whole app for any time of the year, in three shapes each laid out for its own frame:
+     portrait 1080 x 1920 (status, stories, reels, shorts), ?feed 1080 x 1350 (the LinkedIn and Facebook feed) and
+     ?land 1920 x 1080 (YouTube, LinkedIn on a computer, the web). window.render(t) draws the frame at t seconds from pure
+     functions of t; tools/promo/render.js steps headless Edge through it into ffmpeg (tools/promo/general.sh). Open it
+     directly to watch it play (?t=12 holds one moment).
+     Story: remember Allah → it knows what is next → authentic adhkār → counting on the fingers → every prayer, facing
+     the qibla → when duʿāʾ is answered → your duʿāʾs at the right moment → Jumuʿah → the night and the forenoon →
+     learning to pray → for sisters → Ramaḍān (two beats, about six seconds) → widgets → the computer → free and private.
+     Every beat's visuals are drawn once in the portrait frame and placed per shape by fit(): the words go to a band at
+     the top (portrait, feed) or a column at the left (landscape). In portrait nothing that matters sits in the bottom
+     quarter or the right edge, where status and reels viewers lay their buttons. The screens are the guide's own
+     (docs/guide/shots, made by tools/guide-shots.js); assets/ramadan-full.webp is the full Ramaḍān page from the same
+     sample. The notification and break wording are the app's (Scheduler.java, v-today.js). -->
+<style>
+@font-face { font-family: 'Quicksand'; font-weight: 400 700; src: url(../../docs/guide/fonts/Quicksand-400-700-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+2000-206F; }
+@font-face { font-family: 'Quicksand'; font-weight: 400 700; src: url(../../docs/guide/fonts/Quicksand-400-700-latin-ext.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02FF, U+1E00-1EFF; }
+@font-face { font-family: 'Amiri'; font-weight: 400; src: url(../../docs/guide/fonts/Amiri-400-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+2000-206F; }
+@font-face { font-family: 'Amiri'; font-weight: 400; src: url(../../docs/guide/fonts/Amiri-400-latin-ext.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02FF, U+1E00-1EFF; }
+@font-face { font-family: 'Amiri'; font-weight: 400; src: url(../../docs/guide/fonts/Amiri-400-arabic.woff2) format('woff2'); unicode-range: U+0600-06FF, U+FB50-FDFF, U+FE70-FEFF; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body, #stage { width: 1080px; height: 1920px; }
+html.feed, html.feed body, html.feed #stage { width: 1080px; height: 1350px; }
+html.land, html.land body, html.land #stage { width: 1920px; height: 1080px; }
+html, body { overflow: hidden; background: #000; }
+#stage { position: relative; perspective: 2600px; overflow: hidden; font-family: 'Quicksand', sans-serif; color: #f5f0e7; background: #05061a; }
+.b { position: absolute; inset: 0; visibility: hidden; overflow: hidden; backface-visibility: hidden; transform-origin: 50% 50%; }
+.bg { position: absolute; inset: 0; }
+.stars { position: absolute; left: -100px; top: -100px; width: 2120px; height: 2120px; background-size: 640px 1060px; opacity: .85; }
+.vis { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; transform-origin: 0 0; perspective: 2200px; perspective-origin: 50% 50%; transform-style: preserve-3d; }
+.band { position: absolute; left: 70px; right: 70px; top: 150px; height: 330px; z-index: 6; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; text-align: center; }
+html.feed .band { left: 60px; right: 60px; top: 46px !important; height: 270px; gap: 12px; }
+html.land .band { left: 120px; right: auto; width: 640px; top: 0 !important; height: 1080px; align-items: flex-start; text-align: left; gap: 22px; }
+.m { display: block; overflow: hidden; padding: 0 6px .12em; margin-bottom: -.12em; }
+.m > span { display: inline-block; will-change: transform; }
+.kick { font: 700 24px/1.2 'Quicksand'; letter-spacing: .36em; text-transform: uppercase; color: #e9c98b; }
+.line { font: 700 74px/1.06 'Quicksand'; letter-spacing: -.032em; }
+.small { font: 500 31px/1.4 'Quicksand'; color: #c9c2b5; max-width: 900px; }
+html.feed .kick { font-size: 21px; }
+html.feed .line { font-size: 60px; }
+html.feed .small { font-size: 26px; max-width: 860px; }
+html.land .line { font-size: 78px; }
+html.land .small { font-size: 31px; max-width: 600px; }
+.ar { font-family: 'Amiri', serif; direction: rtl; }
+.g { font-style: normal; background: linear-gradient(100deg, #b8873a 0%, #f6dfaa 22%, #fff7e2 30%, #f6dfaa 38%, #d9b26f 60%, #f6dfaa 100%); background-size: 260% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; }
+.rose { font-style: normal; background: linear-gradient(100deg, #b86f93 0%, #f6cfe0 24%, #fff3f8 31%, #f2c4d8 40%, #c98aaa 62%, #f6cfe0 100%); background-size: 260% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; }
+.jade { font-style: normal; color: #7fe0bb; }
+.phone { position: absolute; width: 640px; padding: 11px; border-radius: 68px; background: linear-gradient(160deg, #34373f, #0c0d12 38%, #1c1e25 80%, #2f3239); box-shadow: 0 100px 160px -50px rgba(0,0,0,.95), 0 0 0 2px rgba(255,255,255,.08) inset, inset 0 1px 0 rgba(255,255,255,.18); transform-style: preserve-3d; transform-origin: 50% 0; }
+.phone::before { content: ''; position: absolute; right: -4px; top: 21%; width: 4px; height: 9%; border-radius: 0 3px 3px 0; background: linear-gradient(90deg, #2c2f37, #4a4e58); }
+.phone::after { content: ''; position: absolute; left: -4px; top: 17%; width: 4px; height: 5%; border-radius: 3px 0 0 3px; background: linear-gradient(270deg, #2c2f37, #4a4e58); box-shadow: 0 90px 0 #3a3d46, 0 150px 0 #3a3d46; }
+.phone .scr { position: relative; width: 618px; height: 1280px; border-radius: 58px; overflow: hidden; background: #000; }
+.phone img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.phone .gl { position: absolute; inset: 0; background: linear-gradient(115deg, transparent 36%, rgba(255,255,255,.14) 48%, transparent 60%); mix-blend-mode: screen; background-size: 300% 100%; }
+.pop { position: absolute; border-radius: 30px; background-repeat: no-repeat; box-shadow: 0 50px 90px -30px rgba(0,0,0,.9), 0 0 0 1.5px rgba(246,223,170,.45); }
+.glass { position: absolute; border-radius: 40px; background: linear-gradient(160deg, rgba(255,255,255,.08), rgba(255,255,255,.02)); border: 1.5px solid rgba(246,223,170,.18); box-shadow: 0 50px 90px -40px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.08); }
+.chip { position: absolute; display: flex; align-items: center; gap: 14px; height: 76px; padding: 0 30px 0 18px; border-radius: 99px; font: 700 28px Quicksand; white-space: nowrap; }
+.chip i { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; font-style: normal; font-size: 24px; }
+.notif { position: absolute; left: 90px; width: 900px; padding: 30px 34px 32px; border-radius: 44px; background: rgba(30,32,42,.95); box-shadow: 0 40px 90px -20px rgba(0,0,0,.9), 0 0 0 1.5px rgba(246,223,170,.25); }
+.notif .hd { display: flex; align-items: center; gap: 14px; font: 600 24px Quicksand; color: rgba(245,240,231,.62); }
+.notif .hd svg { width: 40px; height: 40px; border-radius: 10px; }
+.notif .tt { margin-top: 16px; font: 700 36px Quicksand; }
+.notif .bd { margin-top: 8px; font: 500 29px/1.4 Quicksand; color: rgba(245,240,231,.78); }
+.notif .bd b { color: #f1d59e; font-weight: 700; }
+#grain { position: absolute; inset: 0; z-index: 51; pointer-events: none; opacity: .035; width: 100%; height: 100%; }
+#motes { position: absolute; inset: 0; z-index: 40; pointer-events: none; mix-blend-mode: screen; width: 100%; height: 100%; }
+#vig { position: absolute; inset: 0; z-index: 52; pointer-events: none; background: radial-gradient(120% 85% at 50% 45%, transparent 58%, rgba(0,0,0,.55)); }
+#flash { position: absolute; inset: 0; z-index: 53; pointer-events: none; opacity: 0; background: radial-gradient(60% 40% at 50% 45%, rgba(255,236,190,.9), rgba(255,236,190,0) 70%); mix-blend-mode: screen; }
+#fade { position: absolute; inset: 0; z-index: 60; background: #000; pointer-events: none; }
+/* in landscape the words sit over a soft shade, so they read over the busiest beat */
+html.land .b::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 980px; z-index: 5; pointer-events: none; background: linear-gradient(90deg, rgba(4,5,20,.78), rgba(4,5,20,.45) 60%, rgba(4,5,20,0)); }
+/* the home-screen widgets, drawn as the app draws them (android/res/drawable/widget_bg_day, widget_tsb_bg, widget_ring) */
+.wg { font-family: 'Quicksand', sans-serif; color: #F5F0E7; overflow: hidden; box-sizing: border-box; }
+.wp { display: flex; flex-direction: column; border-radius: 44px; padding: 34px 38px 32px; background: linear-gradient(180deg, #0E2544, #1C4670 55%, #2F6A94); }
+.wp-t { display: flex; justify-content: space-between; font-size: 22px; } .wp-t b { color: #F1D59E; font-weight: 700; } .wp-t span { color: rgba(245,240,231,.7); font-weight: 600; }
+.wp-e { margin-top: 18px; font-size: 18px; font-weight: 700; letter-spacing: .2em; color: rgba(245,240,231,.6); }
+.wp-n { display: flex; align-items: baseline; gap: 18px; margin-top: 2px; } .wp-n b { font-size: 64px; font-weight: 700; line-height: 1.05; } .wp-n span { font-size: 26px; font-weight: 600; color: rgba(245,240,231,.82); } .wp-n em { margin-left: auto; font-style: normal; font-size: 30px; font-weight: 700; color: #F1D59E; font-variant-numeric: tabular-nums; }
+.wp-cells { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: auto; }
+.wp-c { text-align: center; padding: 12px 0 10px; border-radius: 18px; } .wp-c span { display: block; font-size: 20px; font-weight: 600; color: rgba(245,240,231,.7); } .wp-c b { display: block; font-size: 29px; font-weight: 700; margin-top: 2px; }
+.wp-c.on { background: rgba(241,213,158,.12); box-shadow: inset 0 0 0 1.5px rgba(241,213,158,.3); } .wp-c.on span, .wp-c.on b { color: #F1D59E; }
+.wp-bar { height: 8px; border-radius: 4px; background: rgba(245,240,231,.15); margin-top: auto; overflow: hidden; } .wp-bar i { display: block; height: 100%; width: 40%; border-radius: 4px; background: linear-gradient(90deg, #A8823E, #F1D59E); }
+.wp-chips { display: flex; gap: 22px; margin-top: 16px; font-size: 20px; font-weight: 600; color: rgba(245,240,231,.62); } .wp-chips .on { color: #F1D59E; }
+.wt { border-radius: 40px; padding: 26px 24px 22px; display: flex; flex-direction: column; align-items: center; background: radial-gradient(circle at 50% 30%, #1E2433, #0B0D14 75%); }
+.wt-h { width: 100%; display: flex; align-items: center; justify-content: center; position: relative; } .wt-ar { font-family: 'Amiri', serif; font-size: 34px; color: #F1D59E; direction: rtl; line-height: 1.5; }
+.wt-h i { position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 34px; height: 34px; border-radius: 50%; background: rgba(245,240,231,.07); display: grid; place-items: center; font-style: normal; font-size: 20px; color: rgba(245,240,231,.6); }
+.wt-ring { position: relative; width: 196px; height: 196px; margin-top: 14px; } .wt-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.wt-ring circle { fill: none; stroke-width: 13; } .tr0 { stroke: rgba(245,240,231,.13); } .tr1 { stroke: url(#wgold); stroke-linecap: round; stroke-dasharray: 527.8; stroke-dashoffset: 527.8; }
+.wt-n { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; } .wt-n b { font-size: 60px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; } .wt-n span { font-size: 19px; font-weight: 600; color: rgba(245,240,231,.6); margin-top: 6px; }
+.wt-f { margin-top: auto; font-size: 18px; font-weight: 600; color: rgba(245,240,231,.62); }
+.wt-b { margin-top: 12px; width: 100%; box-sizing: border-box; text-align: center; padding: 14px 0; border-radius: 22px; background: rgba(245,240,231,.08); font-size: 22px; font-weight: 700; transition: none; }
+.wt-b.on { background: linear-gradient(180deg, #F1D59E, #C9A15A); color: #1A1408; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <svg width="0" height="0" style="position:absolute"><defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff2cc"/><stop offset=".5" stop-color="#f1d59e"/><stop offset="1" stop-color="#b8873a"/></linearGradient>
+    <linearGradient id="wgold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F1D59E"/><stop offset="1" stop-color="#A8823E"/></linearGradient>
+    <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="10"/></filter>
+    <filter id="glowD" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="8"/></filter>
+    <symbol id="mark" viewBox="0 0 64 64"><path d="M32 8l6.1 8.2 9.9-2.1-2.1 9.9L54 32l-8.1 6.1 2.1 9.9-9.9-2.1L32 56l-6.1-8.1-9.9 2.1 2.1-9.9L10 32l8.1-6.1-2.1-9.9 9.9 2.1z" fill="none" stroke="url(#gold)" stroke-width="2.2"/><path d="M32 21l3 4 4.9-1-1 4.9 4 3.1-4 3 1 4.9-4.9-1-3 4-3-4-4.9 1 1-4.9-4-3 4-3.1-1-4.9 4.9 1z" fill="url(#gold)"/></symbol>
+  </defs></svg>
+
+  <!-- A · a point of light becomes the mark -->
+  <div class="b" id="A">
+    <div class="bg" style="background:radial-gradient(80% 55% at 50% 48%, #1a1a4a, #06071d 62%, #02030d)"></div>
+    <div class="stars" id="Ast"></div>
+    <div class="vis" id="Av">
+      <div id="Aglow" style="position:absolute;left:140px;top:420px;width:800px;height:800px;border-radius:50%;background:radial-gradient(circle,rgba(246,214,150,.5),rgba(246,214,150,0) 60%)"></div>
+      <div id="Arays" style="position:absolute;left:40px;top:320px;width:1000px;height:1000px;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(246,214,150,.14) 0deg 3deg,rgba(246,214,150,0) 3deg 15deg);-webkit-mask:radial-gradient(circle,#000 18%,transparent 62%);mask:radial-gradient(circle,#000 18%,transparent 62%)"></div>
+      <svg id="Amark" viewBox="0 0 64 64" style="position:absolute;left:340px;top:620px;width:400px;height:400px;overflow:visible">
+        <circle id="Adot" cx="32" cy="32" r="2" fill="#fff3d6"/>
+        <path id="Aout" d="M32 8l6.1 8.2 9.9-2.1-2.1 9.9L54 32l-8.1 6.1 2.1 9.9-9.9-2.1L32 56l-6.1-8.1-9.9 2.1 2.1-9.9L10 32l8.1-6.1-2.1-9.9 9.9 2.1z" fill="none" stroke="url(#gold)" stroke-width="1.4" stroke-linejoin="round" stroke-dasharray="176" stroke-dashoffset="176"/>
+        <path id="Ain" d="M32 21l3 4 4.9-1-1 4.9 4 3.1-4 3 1 4.9-4.9-1-3 4-3-4-4.9 1 1-4.9-4-3 4-3.1-1-4.9 4.9 1z" fill="url(#gold)" style="transform-origin:32px 32px"/>
+      </svg>
+    </div>
+    <div class="band" id="Aband" style="top:1080px">
+      <div class="m"><span class="ar" style="font:400 90px/1.3 Amiri;color:#f3dca6">أذكار</span></div>
+      <div class="m"><span class="line">Remember Allah, <span class="g">every moment.</span></span></div>
+    </div>
+  </div>
+
+  <!-- B · Today: the sky card lifts out of the glass -->
+  <div class="b" id="B">
+    <div class="bg" style="background:radial-gradient(75% 50% at 50% 55%, #2a2a66, #05061a 74%)"></div>
+    <div class="stars" id="Bst"></div>
+    <div class="vis" id="Bv">
+      <div class="phone" id="Bph" style="left:220px;top:560px">
+        <div class="scr"><img src="../../docs/guide/shots/dark/today.webp"><i class="gl" id="Bgl"></i></div>
+        <div class="pop" id="Bpop" style="left:40px;top:145px;width:560px;height:496px;background-image:url(../../docs/guide/shots/dark/today.webp);background-size:618px 1280px;background-position:-29px -134px"></div>
+      </div>
+    </div>
+    <div class="band">
+      <div class="m"><span class="kick">Today</span></div>
+      <div class="m"><span class="line">It knows <span class="g">what is next.</span></span></div>
+      <div class="m"><span class="small">The next prayer, the adhkār due now, the time duʿāʾ is answered.</span></div>
+    </div>
+  </div>
+
+  <!-- C · the adhkār: three screens fan out in depth, English and Arabic -->
+  <div class="b" id="C">
+    <div class="bg" style="background:radial-gradient(75% 50% at 50% 56%, #2e2556, #06061a 74%)"></div>
+    <div class="stars" id="Cst"></div>
+    <div class="vis" id="Cv">
+      <div class="phone" id="C1" style="left:220px;top:560px"><div class="scr"><img src="../../docs/guide/shots/dark/adhkar.webp"></div></div>
+      <div class="phone" id="C3" style="left:220px;top:560px"><div class="scr"><img src="../../docs/guide/shots/ar/reader.webp"></div></div>
+      <div class="phone" id="C2" style="left:220px;top:560px"><div class="scr"><img src="../../docs/guide/shots/extra/reader-audio.webp"><i class="gl" id="Cgl"></i></div></div>
+    </div>
+    <div class="band">
+      <div class="m"><span class="kick">Adhkār</span></div>
+      <div class="m"><span class="line">Authentic, <span class="g">morning to night.</span></span></div>
+      <div class="m"><span class="small">Read, listen and learn them by heart. Every one referenced and graded.</span></div>
+    </div>
+  </div>
+
+  <!-- D · counting on the fingers: the pace ring -->
+  <div class="b" id="D">
+    <div class="bg" style="background:radial-gradient(70% 45% at 50% 56%, #3a2c12, #090703 74%)"></div>
+    <div class="stars" id="Dst" style="opacity:.5"></div>
+    <div class="vis" id="Dv">
+      <svg id="Dring" viewBox="0 0 600 600" style="position:absolute;left:140px;top:560px;width:800px;height:800px;overflow:visible">
+        <g id="Drip"></g>
+        <circle cx="300" cy="300" r="230" fill="rgba(255,255,255,.025)" stroke="rgba(233,201,139,.14)" stroke-width="14"/>
+        <circle id="Dglow" cx="300" cy="300" r="230" fill="none" stroke="#f1d59e" stroke-width="14" stroke-linecap="round" transform="rotate(-90 300 300)" stroke-dasharray="1445" stroke-dashoffset="1445" filter="url(#glowD)" opacity=".6"/>
+        <circle id="Darc" cx="300" cy="300" r="230" fill="none" stroke="url(#gold)" stroke-width="14" stroke-linecap="round" transform="rotate(-90 300 300)" stroke-dasharray="1445" stroke-dashoffset="1445"/>
+        <g id="Dbeads"></g>
+        <text x="300" y="250" text-anchor="middle" style="font:400 66px Amiri;fill:#f3dca6;direction:rtl">سُبْحَانَ اللَّهِ</text>
+        <text id="Dn" x="300" y="380" text-anchor="middle" style="font:700 150px Quicksand;fill:#f5f0e7;letter-spacing:-5px">1</text>
+        <text x="300" y="430" text-anchor="middle" style="font:700 24px Quicksand;letter-spacing:7px;fill:#a99e88">OF 33</text>
+      </svg>
+    </div>
+    <div class="band">
+      <div class="m"><span class="kick">Dhikr</span></div>
+      <div class="m"><span class="line">Count on your fingers, <span class="g">as the Sunnah teaches.</span></span></div>
+      <div class="m"><span class="small">The circle keeps a gentle pace. Your right hand keeps the count.</span></div>
+    </div>
+  </div>
+
+  <!-- E · the qibla: the compass swings, then settles and locks -->
+  <div class="b" id="E">
+    <div class="bg" style="background:radial-gradient(80% 50% at 50% 56%, #123b33, #03100d 72%)"></div>
+    <div class="stars" id="Est" style="opacity:.55"></div>
+    <div class="vis" id="Ev">
+      <div id="Eglow" style="position:absolute;left:90px;top:530px;width:900px;height:900px;border-radius:50%;background:radial-gradient(circle,rgba(127,224,187,.32),rgba(127,224,187,0) 60%);opacity:0"></div>
+      <svg id="Ec" viewBox="0 0 800 800" style="position:absolute;left:160px;top:600px;width:760px;height:760px;overflow:visible"></svg>
+      <div id="Emid" style="position:absolute;left:390px;top:880px;width:300px;height:200px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center">
+        <div id="Edeg" style="font:700 96px/1 Quicksand;font-variant-numeric:tabular-nums;letter-spacing:-.03em">0°</div>
+        <div id="Elab" style="margin-top:10px;font:700 22px Quicksand;letter-spacing:.2em;color:#a99e88">TURN RIGHT</div>
+      </div>
+    </div>
+    <div class="band">
+      <div class="m"><span class="kick">Ṣalāh · Qibla</span></div>
+      <div class="m"><span class="line">Every prayer, <span class="jade">facing the qibla.</span></span></div>
+      <div class="m"><span class="small">Times worked out on your phone, a compass that locks onto the Kaʿbah.</span></div>
+    </div>
+  </div>
+
+  <!-- F · the times duʿāʾ is answered, on a dial of the day -->
+  <div class="b" id="F">
+    <div class="bg" style="background:radial-gradient(75% 50% at 50% 56%, #2f2366, #06061a 74%)"></div>
+    <div class="stars" id="Fst"></div>
+    <div class="vis" id="Fv">
+      <svg id="Fdial" viewBox="0 0 800 800" style="position:absolute;left:140px;top:560px;width:800px;height:800px;overflow:visible"></svg>
+      <div id="Fmid" style="position:absolute;left:300px;top:810px;width:480px;height:300px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center">
+        <div class="kick" style="font-size:20px">Open now</div>
+        <div id="Ft" style="margin-top:14px;font:700 40px/1.15 Quicksand"></div>
+        <div id="Fh" style="margin-top:12px;font:600 24px Quicksand;color:#a99e88"></div>
+      </div>
+    </div>
+    <div class="band">
+      <div class="m"><span class="kick">Times of answered duʿāʾ</span></div>
+      <div class="m"><span class="line">Ask when duʿāʾ <span class="g">is answered.</span></span></div>
+      <div class="m"><span class="small">The authentic times from the Sunnah, found for your city every day.</span></div>
+    </div>
+  </div>
+
+  <!-- G · your duʿāʾs and the reminder that brings them back -->
+  <div class="b" id="G">
+    <div class="bg" style="background:radial-gradient(75% 50% at 50% 58%, #221d58, #04051a 74%)"></div>
+    <div class="stars" id="Gst"></div>
+    <div class="vis" id="Gv">
+      <div class="phone" id="Gph" style="left:220px;top:600px"><div class="scr"><img src="../../docs/guide/shots/dark/journal.webp"><i class="gl" id="Ggl"></i></div></div>
+      <div class="notif" id="Gn" style="top:560px">
+        <div class="hd"><svg viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#0b0d16"/><use href="#mark" width="64" height="64"/></svg>Adhkār · now</div>
+        <div class="tt">The last third of the night</div>
+        <div class="bd">It lasts until Fajr at 5:24 am. Call upon your Lord.<br>Your duʿāʾ: <b id="Gtype"></b></div>
+      </div>
+    </div>
+    <div class="band">
+      <div class="m"><span class="kick">My duʿāʾs</span></div>
+      <div class="m"><span class="line">Your duʿāʾs, <span class="g">at the right moment.</span></span></div>
+      <div class="m"><span class="small">A private journal, with reminders at the times of acceptance.</span></div>
+    </div>
+  </div>
+
+  <!-- H · Jumuʿah: a page of al-Kahf turns -->
+  <div class="b" id="H">
+    <div class="bg" style="background:radial-gradient(70% 45% at 50% 50%, #0f3a31, #03110e 74%)"></div>
+    <div class="stars" id="Hst" style="opacity:.5"></div>
+    <div class="vis" id="Hv">
+      <svg viewBox="0 0 400 520" style="position:absolute;left:140px;top:500px;width:800px;height:1040px;overflow:visible"><path id="Hpath" d="M20 520V250C20 130 110 50 200 10c90 40 180 120 180 240v270" fill="none" stroke="#e7cf92" stroke-width="1.4" stroke-dasharray="1180" stroke-dashoffset="1180" opacity=".7"/></svg>
+      <div id="Hbook" style="position:absolute;left:230px;top:600px;width:620px;height:1284px;transform-style:preserve-3d">
+        <div class="phone" style="left:0;top:0;width:620px"><div class="scr" style="width:598px;height:1262px">
+          <img src="../../docs/guide/shots/friday/kahf-tr.webp">
+          <div id="Hpage" style="position:absolute;inset:0;transform-origin:100% 50%;backface-visibility:hidden"><img src="../../docs/guide/shots/friday/kahf.webp" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top"></div>
+        </div></div>
+      </div>
+    </div>
+    <div class="band">
+      <div class="m"><span class="ar" style="font:400 56px/1.3 Amiri;color:#f3dca6">يوم الجمعة</span></div>
+      <div class="m"><span class="line">Jumuʿah, <span class="g">made special.</span></span></div>
+      <div class="m"><span class="small">Its Sunnahs, the hour of response, Sūrat al-Kahf.</span></div>
+    </div>
+  </div>
+
+  <!-- I · the night and the forenoon: qiyām and ḍuḥā side by side -->
+  <div class="b" id="I">
+    <div class="bg" style="background:linear-gradient(100deg, #070a26 0%, #141a4a 46%, #3a2c18 54%, #1a1208 100%)"></div>
+    <div class="stars" id="Ist" style="opacity:.6"></div>
+    <div class="vis" id="Iv">
+      <div class="phone" id="I1" style="left:220px;top:560px"><div class="scr"><img src="../../docs/guide/shots/dark/night.webp"></div></div>
+      <div class="phone" id="I2" style="left:220px;top:560px"><div class="scr"><img src="../../docs/guide/shots/dark/duha.webp"></div></div>
+    </div>
+    <div class="band">
+      <div class="m"><span class="kick">Qiyām · Ḍuḥā</span></div>
+      <div class="m"><span class="line">The night <span class="g">and the forenoon.</span></span></div>
+      <div class="m"><span class="small">The last third, witr and ḍuḥā, timed for wherever you are.</span></div>
+    </div>
+  </div>
+
+  <!-- J · learning to pray, then testing yourself -->
+  <div class="b" id="J">
+    <div class="bg" style="background:radial-gradient(75% 50% at 50% 56%, #1f2c3a, #04080c 74%)"></div>
+    <div class="stars" id="Jst" style="opacity:.5"></div>
+    <div class="vis" id="Jv">
+      <div class="phone" id="J1" style="left:220px;top:560px"><div class="scr"><img src="../../docs/guide/shots/dark/learn-fajr.webp"><i class="gl" id="Jgl"></i></div></div>
+      <div class="phone" id="J2" style="left:220px;top:560px"><div class="scr"><img src="../../docs/guide/shots/dark/quiz.webp"></div></div>
+    </div>
+    <div class="band">
+      <div class="m"><span class="kick">Learn</span></div>
+      <div class="m"><span class="line">Learn to pray, <span class="g">step by step.</span></span></div>
+      <div class="m"><span class="small">Each position and what is said in it, then test yourself.</span></div>
+    </div>
+  </div>
+
+  <!-- K · for sisters: the break, as the app draws it -->
+  <div class="b" id="K">
+    <div class="bg" style="background:radial-gradient(80% 55% at 50% 56%, #4a1f45, #140816 72%)"></div>
+    <div class="stars" id="Kst" style="opacity:.45"></div>
+    <div class="vis" id="Kv">
+      <div id="Kglow" style="position:absolute;left:90px;top:560px;width:900px;height:900px;border-radius:50%;background:radial-gradient(circle,rgba(234,180,204,.3),rgba(234,180,204,0) 62%)"></div>
+      <div class="glass" id="Kcard" style="left:100px;top:580px;width:880px;padding:42px 46px 44px;border-color:rgba(234,180,204,.32);background:radial-gradient(120% 90% at 100% 0%, rgba(236,142,171,.22), transparent 60%),linear-gradient(160deg,rgba(70,30,60,.92),rgba(28,12,30,.95))">
+        <div style="display:flex;gap:24px;align-items:flex-start">
+          <span style="flex:none;width:76px;height:76px;border-radius:24px;display:grid;place-items:center;background:rgba(236,142,171,.16);box-shadow:inset 0 0 0 1.5px rgba(236,142,171,.45)"><svg viewBox="0 0 24 24" width="38" height="38" fill="none" stroke="#f3a8c2" stroke-width="1.8" stroke-linecap="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></span>
+          <div><div class="kick" style="color:#f3a8c2;font-size:21px;letter-spacing:.2em">Break from ṣalāh · day 3</div><div style="margin-top:12px;font:700 46px/1.15 Quicksand">Your remembrance continues</div><div style="margin-top:12px;font:500 27px/1.45 Quicksand;color:#d9c6d2">Adhkār, duʿāʾ and dhikr are all still yours.</div></div>
+        </div>
+        <div id="Kbeads" style="display:flex;gap:10px;margin-top:30px"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:30px"><div style="height:80px;border-radius:24px;display:grid;place-items:center;font:700 28px Quicksand;background:rgba(255,255,255,.08)">Times of duʿāʾ</div><div style="height:80px;border-radius:24px;display:grid;place-items:center;font:700 28px Quicksand;color:#2b0d1b;background:linear-gradient(180deg,#f8c9d9,#ec8eab)">End break</div></div>
+      </div>
+      <div class="chip" id="Kc1" style="left:120px;top:1215px;background:rgba(30,12,30,.92);box-shadow:0 0 0 1.5px rgba(236,142,171,.4)"><i style="background:rgba(236,142,171,.18);color:#f3a8c2">✓</i>Streak protected</div>
+      <div class="chip" id="Kc2" style="left:545px;top:1215px;background:rgba(30,12,30,.92);box-shadow:0 0 0 1.5px rgba(236,142,171,.4)"><i style="background:rgba(236,142,171,.18);color:#f3a8c2">◔</i>Reminders paused</div>
+      <div class="chip" id="Kc3" style="left:265px;top:1315px;background:rgba(30,12,30,.92);box-shadow:0 0 0 1.5px rgba(236,142,171,.4)"><i style="background:rgba(236,142,171,.18);color:#f3a8c2">✦</i>Usually 7 days · you decide</div>
+    </div>
+    <div class="band">
+      <div class="m"><span class="kick" style="color:#f3a8c2">Made for sisters</span></div>
+      <div class="m"><span class="line">On a break, <span class="rose">still close.</span></span></div>
+      <div class="m"><span class="small" style="color:#d9c6d2">Private and on your phone only. It never decides for you.</span></div>
+    </div>
+  </div>
+
+  <!-- L · Ramaḍān 1: the card with its arc, lifted out -->
+  <div class="b" id="L">
+    <div class="bg" style="background:radial-gradient(75% 50% at 50% 55%, #241e66, #05061a 74%)"></div>
+    <div class="stars" id="Lst"></div>
+    <div class="vis" id="Lv">
+      <div class="phone" id="Lph" style="left:220px;top:560px">
+        <div class="scr"><img src="../../docs/guide/shots/ramadan/today.webp"><i class="gl" id="Lgl"></i></div>
+        <div class="pop" id="Lpop" style="left:43px;top:145px;width:558px;height:497px;background-image:url(../../docs/guide/shots/ramadan/today.webp);background-size:618px 1280px;background-position:-32px -134px"></div>
+      </div>
+    </div>
+    <div class="band">
+      <div class="m"><span class="kick">Ramaḍān</span></div>
+      <div class="m"><span class="line">Every fast, <span class="g">to the second.</span></span></div>
+      <div class="m"><span class="small">Suḥūr and ifṭār for your city, the day's arc, the month at a glance.</span></div>
+    </div>
+  </div>
+
+  <!-- M · Ramaḍān 2: the page scrolls through fasts, make-up fasts and the last ten nights -->
+  <div class="b" id="M">
+    <div class="bg" style="background:radial-gradient(75% 50% at 50% 56%, #2a2160, #05061a 74%)"></div>
+    <div class="stars" id="Mst"></div>
+    <div class="vis" id="Mv">
+      <div class="phone" id="Mph" style="left:220px;top:560px"><div class="scr"><img id="Mimg" src="assets/ramadan-full.webp" style="height:auto;bottom:auto"><i class="gl" id="Mgl"></i></div></div>
+    </div>
+    <div class="band">
+      <div class="m"><span class="kick">Ramaḍān</span></div>
+      <div class="m"><span class="line">Kept, counted, <span class="g">made up.</span></span></div>
+      <div class="m"><span class="small">Tarāwīḥ, your khatm, make-up fasts and the last ten nights.</span></div>
+    </div>
+  </div>
+
+  <!-- N · widgets on the home screen, their counts rising -->
+  <div class="b" id="N">
+    <div class="bg" style="background:radial-gradient(70% 45% at 50% 50%, rgba(26,40,66,.95), #05070d 74%)"></div>
+    <div class="stars" id="Nst" style="opacity:.5"></div>
+    <div class="vis" id="Nv">
+      <div class="pop wg wp" id="W1" style="left:160px;top:540px;width:760px;height:472px"><div class="wp-t"><b>2 Jumādā al-Ākhirah 1448</b><span>Lagos</span></div><div class="wp-e">NEXT PRAYER</div><div class="wp-n"><b>ʿAṣr</b><span>3:53 pm</span><em id="Wcd">in 47:31</em></div><div class="wp-cells"><div class="wp-c"><span>Fajr</span><b>5:23</b></div><div class="wp-c on"><span>Dhuhr</span><b>12:31</b></div><div class="wp-c"><span>ʿAṣr</span><b>3:53</b></div><div class="wp-c"><span>Maghrib</span><b>6:26</b></div><div class="wp-c"><span>ʿIshāʾ</span><b>7:34</b></div></div><div class="wp-bar"><i id="Wbar"></i></div><div class="wp-chips"><span class="on">Morning ✓</span><span>Evening ○</span><span>After ṣalāh 2/5</span></div></div>
+      <div class="pop wg wt" id="W2" style="left:160px;top:1060px;width:362px;height:472px"><div class="wt-h"><span class="wt-ar">سُبْحَانَ اللَّهِ</span><i>›</i></div><div class="wt-ring"><svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="84" class="tr0"/><circle cx="100" cy="100" r="84" class="tr1" id="W2r"/></svg><div class="wt-n"><b id="W2n">0</b><span>of 33</span></div></div><div class="wt-f">On your fingers · rounds of 33</div><div class="wt-b" id="W2b">✓ Finished 33</div></div>
+      <div class="pop wg wt" id="W3" style="left:558px;top:1060px;width:362px;height:472px"><div class="wt-h"><span class="wt-ar">الْحَمْدُ لِلَّهِ</span><i>›</i></div><div class="wt-ring"><svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="84" class="tr0"/><circle cx="100" cy="100" r="84" class="tr1" id="W3r"/></svg><div class="wt-n"><b id="W3n">0</b><span>of 33</span></div></div><div class="wt-f">On your fingers · rounds of 33</div><div class="wt-b" id="W3b">✓ Finished 33</div></div>
+    </div>
+    <div class="band">
+      <div class="m"><span class="kick">Widgets</span></div>
+      <div class="m"><span class="line">Never more than <span class="g">a glance away.</span></span></div>
+      <div class="m"><span class="small">The next prayer and your count for the day, on your home screen.</span></div>
+    </div>
+  </div>
+
+  <!-- O · on the computer: the Windows app, the next prayer floating above your work -->
+  <div class="b" id="O">
+    <div class="bg" style="background:radial-gradient(70% 45% at 50% 50%, rgba(32,38,60,.95), #05060b 72%)"></div>
+    <div class="stars" id="Ost" style="opacity:.5"></div>
+    <div class="vis" id="Ov">
+      <div id="Olap" style="position:absolute;left:-90px;top:640px;width:1260px">
+        <div style="border-radius:28px;padding:16px;background:linear-gradient(180deg,#26292f,#0e0f13);box-shadow:0 100px 160px -60px rgba(0,0,0,.95),0 0 0 2px rgba(255,255,255,.06) inset">
+          <div style="position:relative;height:715px;border-radius:12px;overflow:hidden;background:#000">
+            <img src="../../docs/guide/shots/desk/today.webp" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top left">
+            <div id="Opill" style="position:absolute;left:50%;top:16px;display:flex;align-items:center;gap:13px;height:56px;padding:0 22px 0 8px;border-radius:99px;background:linear-gradient(180deg,#151925,#0d1018);border:1.5px solid rgba(217,178,111,.6);box-shadow:0 18px 40px -12px rgba(0,0,0,.85)">
+              <span style="width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:rgba(217,178,111,.14);border:1px solid rgba(217,178,111,.4)"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="#f1d59e" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V11.5c0-2 1.2-3.4 3-4.2M19 20V11.5c0-2-1.2-3.4-3-4.2M7.5 12c0-3.4 2-5.1 4.5-6.6 2.5 1.5 4.5 3.2 4.5 6.6M4 20h16M12 3v2.4"/></svg></span>
+              <b style="font:700 21px Quicksand;color:#f5f0e7">Dhuhr</b><span class="ar" style="font:400 19px Amiri;color:#f1d59e">الظهر</span><b id="Ocd" style="margin-left:22px;font:700 22px Quicksand;color:#f5f0e7">2:15:40</b>
+            </div>
+          </div>
+        </div>
+        <div style="height:24px;margin:0 -70px;border-radius:0 0 24px 24px;background:linear-gradient(180deg,#2b2e36,#121318)"></div>
+      </div>
+    </div>
+    <div class="band">
+      <div class="m"><span class="kick">Windows</span></div>
+      <div class="m"><span class="line">On your computer, <span class="g">too.</span></span></div>
+      <div class="m"><span class="small">Laid out for a big screen. The next prayer floats above your work.</span></div>
+    </div>
+  </div>
+
+  <!-- P · the name, and what it promises -->
+  <div class="b" id="P">
+    <div class="bg" style="background:radial-gradient(80% 55% at 50% 42%, #1e1b56, #04051a 72%)"></div>
+    <div class="stars" id="Pst"></div>
+    <div class="vis" id="Pv">
+      <div id="Pglow" style="position:absolute;left:190px;top:330px;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(246,214,150,.45),rgba(246,214,150,0) 62%)"></div>
+      <svg id="Picon" viewBox="0 0 64 64" style="position:absolute;left:390px;top:480px;width:300px;height:300px;overflow:visible"><rect id="Ptile" width="64" height="64" rx="16" fill="#0b0d16" stroke="rgba(246,223,170,.3)" stroke-width=".5"/><path id="Pout" d="M32 8l6.1 8.2 9.9-2.1-2.1 9.9L54 32l-8.1 6.1 2.1 9.9-9.9-2.1L32 56l-6.1-8.1-9.9 2.1 2.1-9.9L10 32l8.1-6.1-2.1-9.9 9.9 2.1z" fill="none" stroke="url(#gold)" stroke-width="2.2" stroke-dasharray="176" stroke-dashoffset="176" stroke-linejoin="round"/><path id="Pin" d="M32 21l3 4 4.9-1-1 4.9 4 3.1-4 3 1 4.9-4.9-1-3 4-3-4-4.9 1 1-4.9-4-3 4-3.1-1-4.9 4.9 1z" fill="url(#gold)" style="transform-origin:32px 32px"/></svg>
+      <div id="Pname" style="position:absolute;left:0;right:0;top:820px;text-align:center"><span style="font:700 120px/1 Quicksand;letter-spacing:-.04em">Adhkār</span></div>
+      <div id="Ptag" style="position:absolute;left:0;right:0;top:975px;text-align:center"><div class="ar" style="font:400 64px/1.4 Amiri;color:#f3dca6">أذكار</div><div style="font:600 38px Quicksand;color:#d7d0c2;margin-top:4px">Remembrance for every moment</div></div>
+      <div id="Pfree" style="position:absolute;left:0;right:0;top:1180px;display:flex;justify-content:center;gap:14px"></div>
+      <div id="Pcta" style="position:absolute;left:150px;right:150px;top:1290px;height:100px;border-radius:99px;display:flex;align-items:center;justify-content:center;font:700 34px Quicksand;color:#1a1408;background:linear-gradient(180deg,#f6dfaa,#c9a15a);box-shadow:0 30px 60px -20px rgba(246,214,150,.5)">Android · Windows · iPhone</div>
+    </div>
+  </div>
+
+  <div id="tring" style="position:absolute;z-index:45;border-radius:50%;pointer-events:none;opacity:0;border:6px solid #fff1cc;box-shadow:0 0 60px 18px rgba(246,214,150,.75),inset 0 0 60px 10px rgba(246,214,150,.5)"></div>
+  <div id="streak" style="position:absolute;z-index:45;left:-600px;top:-400px;width:260px;height:3200px;pointer-events:none;opacity:0;background:linear-gradient(90deg,rgba(255,236,190,0),rgba(255,246,220,.95) 50%,rgba(255,236,190,0));filter:blur(6px);mix-blend-mode:screen"></div>
+  <div id="bar1" style="position:absolute;z-index:45;left:0;right:0;height:6px;pointer-events:none;opacity:0;background:#fff3d0;box-shadow:0 0 40px 12px rgba(246,214,150,.8)"></div>
+  <div id="bar2" style="position:absolute;z-index:45;left:0;right:0;height:6px;pointer-events:none;opacity:0;background:#fff3d0;box-shadow:0 0 40px 12px rgba(246,214,150,.8)"></div>
+  <canvas id="motes"></canvas>
+  <canvas id="grain"></canvas>
+  <div id="vig"></div>
+  <div id="flash"></div>
+  <div id="fade"></div>
+</div>
+
+<script src="engine.js"></script>
+<script src="general.js"></script>
+</body>
+</html>

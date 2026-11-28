@@ -71,7 +71,7 @@ fn fetch_latest() -> Result<(Option<Found>, String, String), String> {
     }
     let notes: String = d["body"].as_str().unwrap_or("").chars().take(600).collect();
     let found = match (exe, sums) {
-        (Some(exe), Some(sums)) if installer::valid_version(&version) && installer::newer(&version, VERSION) => {
+        (Some(exe), Some(sums)) if (sig.is_some() || testing()) && installer::valid_version(&version) && installer::newer(&version, VERSION) => {
             Some(Found { exe, sums, sig, version: version.clone(), size })
         }
         _ => None,
@@ -175,24 +175,49 @@ pub fn get() {
         }
     });
 }
-/* the swap, on the window's thread: this file aside, the new one in its place, started; then this copy closes */
+/* Stage on the destination volume before moving the running executable. */
 fn swap(part: PathBuf) {
     let cur = PathBuf::from(ac::exe_path());
     let old = PathBuf::from(format!("{}.old", cur.display()));
-    let _ = fs::remove_file(&old);
-    if fs::rename(&cur, &old).is_err() { send(json!({ "state": "error", "step": "get", "why": "could not move the running file" })); BUSY.store(false, Ordering::SeqCst); return; }
-    /* the download lives beside the record; a copy run from another drive cannot be moved across, so it is copied */
-    if fs::rename(&part, &cur).is_err() && fs::copy(&part, &cur).is_err() {
-        let _ = fs::rename(&old, &cur);
-        send(json!({ "state": "error", "step": "get", "why": "could not put the new file in place" }));
-        BUSY.store(false, Ordering::SeqCst);
-        return;
-    }
+    let staged = PathBuf::from(format!("{}.new-{}", cur.display(), std::process::id()));
+    let result = fs::copy(&part, &staged).map_err(|e| format!("could not stage the update: {e}"))
+        .and_then(|_| activate_staged(&cur, &staged, &old, || {
+            let dir = cur.parent().map(|p| p.to_string_lossy().into_owned());
+            ac::spawn(&cur.to_string_lossy(), &format!("--after-update {}", std::process::id()), dir.as_deref(), false)
+        }));
+    let _ = fs::remove_file(&staged);
     let _ = fs::remove_file(&part);
-    send(json!({ "state": "done" }));
-    let dir = cur.parent().map(|p| p.to_string_lossy().into_owned());
-    ac::spawn(&cur.to_string_lossy(), &format!("--after-update {}", std::process::id()), dir.as_deref(), false);
-    if let Some(a) = app() { a.quit(); }
+    match result {
+        Ok(()) => {
+            send(json!({ "state": "done" }));
+            if let Some(a) = app() { a.quit(); }
+        }
+        Err(why) => {
+            send(json!({ "state": "error", "step": "get", "why": why }));
+            BUSY.store(false, Ordering::SeqCst);
+        }
+    }
+}
+
+fn activate_staged(cur: &std::path::Path, staged: &std::path::Path, old: &std::path::Path, launch: impl FnOnce() -> bool) -> Result<(), String> {
+    if old.exists() {
+        let _ = fs::remove_file(old);
+        if old.exists() { return Err("a previous recovery copy is still present".into()); }
+    }
+    fs::rename(cur, old).map_err(|e| format!("could not move the running file: {e}"))?;
+    let result = fs::rename(staged, cur).map_err(|e| format!("could not activate the update: {e}"))
+        .and_then(|_| {
+            if launch() { return Ok(()); }
+            fs::remove_file(cur).map_err(|e| format!("could not remove the update after launch failed: {e}"))?;
+            Err("could not start the updated app".into())
+        });
+    if let Err(reason) = result {
+        return match fs::rename(old, cur) {
+            Ok(()) => Err(reason),
+            Err(e) => Err(format!("{reason}; recovery copy remains at {}: {e}", old.display())),
+        };
+    }
+    Ok(())
 }
 
 /* started by the old copy (this one or an earlier C# one): wait for it to close, so the single-instance name is free */
@@ -216,6 +241,40 @@ pub fn tidy() {
 mod tests {
     use super::verify_sums_sig;
     use ed25519_dalek::{Signer, SigningKey};
+
+    #[test]
+    fn restores_the_previous_executable_when_launch_fails() {
+        let dir = std::env::temp_dir().join(format!("adhkar-updater-test-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let old = dir.join("app.old");
+        let cur = dir.join("app.exe");
+        let stage = dir.join("app.new");
+        std::fs::write(&cur, b"previous").unwrap();
+        std::fs::write(&stage, b"replacement").unwrap();
+        assert!(super::activate_staged(&cur, &stage, &old, || false).is_err());
+        assert_eq!(std::fs::read(&cur).unwrap(), b"previous");
+        assert!(!old.exists());
+        std::fs::remove_file(cur).unwrap();
+        std::fs::remove_dir(dir).unwrap();
+    }
+
+    #[test]
+    fn cleans_stale_old_recovery_copy_before_swapping() {
+        let dir = std::env::temp_dir().join(format!("adhkar-updater-stale-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let old = dir.join("app.old");
+        let cur = dir.join("app.exe");
+        let stage = dir.join("app.new");
+        std::fs::write(&old, b"stale").unwrap();
+        std::fs::write(&cur, b"previous").unwrap();
+        std::fs::write(&stage, b"replacement").unwrap();
+        assert!(super::activate_staged(&cur, &stage, &old, || true).is_ok());
+        assert_eq!(std::fs::read(&cur).unwrap(), b"replacement");
+        assert_eq!(std::fs::read(&old).unwrap(), b"previous");
+        let _ = std::fs::remove_file(cur);
+        let _ = std::fs::remove_file(old);
+        let _ = std::fs::remove_dir(dir);
+    }
 
     #[test]
     fn sums_signature_verifies_and_rejects_tampering() {

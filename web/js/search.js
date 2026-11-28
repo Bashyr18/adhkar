@@ -200,6 +200,8 @@
       'Ṣalāh',
       'how to pray step by step ruku sujud tashahhud takbir teach new muslim'
     ],
+    ['Wuḍūʾ', '#/purity/wudu', 'check', 'Learn the prayer', 'wudu ablution purification الوضوء'],
+    ['Ghusl', '#/purity/ghusl', 'check', 'Learn the prayer', 'bath ritual wash janabah purification الغسل'],
     ['A mistake in prayer', null, 'info', 'Learn the prayer', 'sujud as sahw forgot doubt extra rakah', 'lp-sahw'],
     ['Timetable', '#/month', 'cal', 'Ṣalāh', 'month prayer times table'],
     ['Hijri calendar', '#/calendar', 'moonstar', 'Ṣalāh', 'islamic dates eid ramadan arafah ashura white days fasting'],
@@ -499,7 +501,7 @@
       '"><button type="button" class="ib ghost sm sr-clear" data-a="sr-clear" aria-label="Clear">' +
       ic('close', 's') +
       '</button></label>' +
-      '<div class="sr-chips" role="tablist">' +
+      '<div class="sr-chips" role="group" aria-label="Filter">' +
       FILTER.map(function (x) {
         return (
           '<button type="button" class="chip" data-a="sr-f" data-f="' +
@@ -623,16 +625,23 @@
           .join('') +
         '</div>'
       : '';
+    var tries = A.ar()
+      ? ['المغفرة', 'قبل النوم', 'الهم', 'السفر', 'التشهد', 'القبلة', '"أعوذ"', 'سبحان']
+      : ['forgiveness', 'before sleep', 'anxiety', 'travel', 'tashahhud', 'qibla', '"seek refuge"', 'سبحان'];
     h +=
       '<div class="sec sr-sec"><h2>Try</h2></div><div class="sr-sugg">' +
-      ['forgiveness', 'before sleep', 'anxiety', 'travel', 'tashahhud', 'qibla', '"seek refuge"', 'سبحان']
+      tries
         .map(function (x) {
           return '<button type="button" class="chip" data-a="sr-try" data-q="' + esc(x) + '">' + esc(x) + '</button>';
         })
         .join('') +
       '</div>';
     h +=
-      '<div class="card col sr-tips"><div class="sr-tip"><code>"seek refuge"</code><span>Exact phrase</span></div><div class="sr-tip"><code>sleep -quran</code><span>Leave a word out</span></div><div class="sr-tip"><code dir="rtl">رب اغفر</code><span>Arabic, with or without ḥarakāt</span></div></div>';
+      '<div class="card col sr-tips"><div class="sr-tip"><code>' +
+      (A.ar() ? '"أعوذ"' : '"seek refuge"') +
+      '</code><span>Exact phrase</span></div><div class="sr-tip"><code>' +
+      (A.ar() ? 'النوم -القرآن' : 'sleep -quran') +
+      '</code><span>Leave a word out</span></div><div class="sr-tip"><code dir="rtl">رب اغفر</code><span>Arabic, with or without ḥarakāt</span></div></div>';
     return h;
   }
   function remember(q) {
@@ -706,8 +715,10 @@
     if (d.flash)
       setTimeout(function () {
         /* land on the setting itself */
-        var t = A.$$('.set .t').filter(function (n) {
-            return n.textContent.trim() === d.flash;
+        var wantAr = A.T(d.flash),
+          t = A.$$('.set .t').filter(function (n) {
+            var tx = n.textContent.trim();
+            return tx === d.flash || tx === wantAr;
           })[0],
           s = t && t.closest('.set');
         if (s) {

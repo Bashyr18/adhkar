@@ -177,7 +177,7 @@
     el.classList.add('ask');
     el.querySelector('.face').innerHTML =
       '<span class="pc-ic">' + ic('check') + '</span><span class="of">' + esc(A.T('Tap when done')) + '</span>';
-    el.setAttribute('aria-label', 'Confirm you have finished');
+    el.setAttribute('aria-label', A.T('Confirm you have finished'));
     say(el, A.T('Tap when done'));
     var rp = el.querySelector('.rep');
     if (rp) rp.style.strokeDashoffset = 0;
@@ -313,8 +313,15 @@
   function pause(el) {
     run.paused = true;
     run.pausedAt = Date.now();
+    if (run.raf) {
+      cancelAnimationFrame(run.raf);
+      run.raf = null;
+    }
     el.dataset.state = 'paused';
     el.classList.add('paused');
+    el.classList.remove('quick');
+    var pl = el.querySelector('[data-pl]');
+    if (pl) pl.textContent = A.T('Paused · hold to resume');
     A.N.haptic('click');
     say(el, A.T('Paused'));
     emit('pause');
@@ -336,6 +343,7 @@
     A.N.haptic('tick');
     say(el, A.T('Normal pace'));
     emit('resume');
+    if (!run.raf) run.raf = requestAnimationFrame(frame);
   }
   /* a hold: pause, or resume at the normal pace; true when it did something */
   P.hold = function (el) {

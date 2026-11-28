@@ -210,7 +210,7 @@ final class LocationCompass: NSObject, CLLocationManagerDelegate {
         else if accVal <= 30 { accLevel = 2 }
         else { accLevel = 1 }
 
-        let args = String(format: "%.1f,%d,%.1f,%.1f", hd, accLevel, pitchDeg, rollDeg)
+        let args = String(format: "%.1f,%d,%.1f,%.1f", locale: Locale(identifier: "en_US_POSIX"), hd, accLevel, pitchDeg, rollDeg)
         sendJS("__native.onHeading&&__native.onHeading(\(args))")
     }
 }

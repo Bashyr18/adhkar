@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Gradle-free release build: content → assets → aapt2 → javac → d8 → zipalign → apksigner.
+# ADHKAR_DIST selects a separate artifact folder. ADHKAR_ANDROID_COMPILE_ONLY=1 skips packaging and signing.
 # Usage: ./build.sh            (needs ANDROID_HOME with build-tools 36.0.0 + platform android-36, and a JDK 17)
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -9,9 +10,12 @@ VNAME="$(sed -n 1p VERSION | tr -d '\r')"; VCODE="$(sed -n 2p VERSION | tr -d '\
 SDK="${ANDROID_HOME:-$LOCALAPPDATA/Android/Sdk}"
 BT="$SDK/build-tools/${BT_VER:-36.0.0}"
 AJ="$SDK/platforms/android-${PLAT:-36}/android.jar"
-OUT="$ROOT/build"; DIST="$ROOT/dist"; KS_DIR="$ROOT/keystore"
+DIST="${ADHKAR_DIST:-$ROOT/dist}"; KS_DIR="$ROOT/keystore"
+mkdir -p "$ROOT/build" "$DIST"
+OUT="$(mktemp -d "$ROOT/build/android.XXXXXXXX")"
+case "$OUT" in "$ROOT/build"/android.*) trap 'rm -rf -- "$OUT"' EXIT ;; *) exit 1 ;; esac
 EXE=""; [ -f "$BT/aapt2.exe" ] && EXE=".exe"
-rm -rf "$OUT"; mkdir -p "$OUT"/{gen,classes,dex,assets/www} "$DIST" "$KS_DIR"
+mkdir -p "$OUT"/{gen,classes,dex,assets/www}
 
 echo "[1/8] content"
 python tools/build_content.py >/dev/null
@@ -23,7 +27,7 @@ node tools/bridge-check.js | tail -1   # every Android bridge method also exists
 
 echo "[2/8] stage web assets"
 python tools/bundle.py web "$OUT/assets/www" "$VNAME"
-mkdir -p dist && python tools/standalone.py "$OUT/assets/www" dist/Adhkar.html dist/Adhkar-share.html   # one file for testers; the share copy for a hosted page
+python tools/standalone.py "$OUT/assets/www" "$DIST/Adhkar.html" "$DIST/Adhkar-share.html"   # one file for testers; the share copy for a hosted page
 
 echo "[3/8] aapt2 compile"
 "$BT/aapt2$EXE" compile --dir android/res -o "$OUT/res.zip"
@@ -39,26 +43,33 @@ if [ ! -f "$OUT/gen/com/adhkar/app/R.java" ] || [ ! -f "$OUT/base.apk" ]; then
   echo "build.sh: aapt2 produced no output (is another build running in this folder?). Run ./build.sh again." >&2; exit 1
 fi
 echo "[5/8] javac"
-find android/src build/gen -name '*.java' > "$OUT/sources.txt"
-javac -nowarn -Xlint:-options -encoding UTF-8 --release 8 -classpath "$AJ" -d build/classes @build/sources.txt
+find android/src "${OUT#"$ROOT/"}"/gen -name '*.java' > "$OUT/sources.txt"
+javac -nowarn -Xlint:-options -encoding UTF-8 --release 8 -classpath "$AJ" -d "$OUT/classes" "@${OUT#"$ROOT/"}/sources.txt"
+if [ "${ADHKAR_ANDROID_COMPILE_ONLY:-0}" = 1 ]; then
+  echo "Android resources and Java compile passed"
+  exit 0
+fi
 
 echo "[6/8] d8"
-find build/classes -name '*.class' > "$OUT/classes.txt"
-java -cp "$BT/lib/d8.jar" com.android.tools.r8.D8 --release --min-api 26 --lib "$AJ" --output build/dex @build/classes.txt
-python tools/pack.py build/base.apk build/assets build/dex/classes.dex build/packed.apk
+jar cf "$OUT/classes.jar" -C "$OUT/classes" .
+java -cp "$BT/lib/d8.jar" com.android.tools.r8.D8 --release --min-api 26 --lib "$AJ" --output "$OUT/dex" "$OUT/classes.jar"
+python tools/pack.py "$OUT/base.apk" "$OUT/assets" "$OUT/dex/classes.dex" "$OUT/packed.apk"
 echo "[7/8] zipalign"
-"$BT/zipalign$EXE" -p -f 4 build/packed.apk build/aligned.apk
+"$BT/zipalign$EXE" -p -f 4 "$OUT/packed.apk" "$OUT/aligned.apk"
 
 echo "[8/8] sign"
+mkdir -p "$KS_DIR"
 if [ ! -f "$KS_DIR/adhkar-release.jks" ]; then
   PASS="$(python -c "import secrets,string;print(''.join(secrets.choice(string.ascii_letters+string.digits) for _ in range(24)))")"
   keytool -genkeypair -keystore "$KS_DIR/adhkar-release.jks" -alias adhkar -keyalg RSA -keysize 4096 -validity 10000 \
     -storepass "$PASS" -keypass "$PASS" -dname "CN=Adhkar, O=Adhkar" >/dev/null 2>&1
   printf 'storeFile=adhkar-release.jks\nkeyAlias=adhkar\nstorePassword=%s\nkeyPassword=%s\n' "$PASS" "$PASS" > "$KS_DIR/keystore.properties"
 fi
-PASS="$(grep storePassword "$KS_DIR/keystore.properties" | cut -d= -f2)"
+export ADHKAR_SIGN_STORE="$(sed -n 's/^storePassword=//p' "$KS_DIR/keystore.properties" | tr -d '\r')"
+export ADHKAR_SIGN_KEY="$(sed -n 's/^keyPassword=//p' "$KS_DIR/keystore.properties" | tr -d '\r')"
+: "${ADHKAR_SIGN_STORE:?Android store password is missing}" "${ADHKAR_SIGN_KEY:?Android key password is missing}"
 java -jar "$BT/lib/apksigner.jar" sign --ks "$KS_DIR/adhkar-release.jks" --ks-key-alias adhkar \
-  --ks-pass "pass:$PASS" --key-pass "pass:$PASS" --out "$DIST/Adhkar.apk" "$OUT/aligned.apk"
+  --ks-pass env:ADHKAR_SIGN_STORE --key-pass env:ADHKAR_SIGN_KEY --out "$DIST/Adhkar.apk" "$OUT/aligned.apk"
 java -jar "$BT/lib/apksigner.jar" verify --print-certs "$DIST/Adhkar.apk" | head -3
 
 # Play Store bundle (needs tools/.bin/bundletool.jar): same resources linked in proto format under the Play Store package ID, signed with the upload key
@@ -74,10 +85,10 @@ if [ -f tools/.bin/bundletool.jar ]; then
   "$BT/aapt2$EXE" link --proto-format -o "$OUT/proto.apk" -I "$AJ" --manifest "$OUT/AndroidManifest.play.xml" \
     --rename-manifest-package "$PLAY_PKG" --min-sdk-version 26 --target-sdk-version 36 \
     --version-code "$VCODE" --version-name "$VNAME" --auto-add-overlay -R "$OUT/play-res.zip" "$OUT/res.zip"
-  python tools/aab.py "$OUT/proto.apk" "$OUT/assets" build/dex/classes.dex "$OUT/base.zip" >/dev/null
+  python tools/aab.py "$OUT/proto.apk" "$OUT/assets" "$OUT/dex/classes.dex" "$OUT/base.zip" >/dev/null
   rm -f "$DIST/Adhkar.aab"
   java -jar tools/.bin/bundletool.jar build-bundle --modules="$OUT/base.zip" --output="$DIST/Adhkar.aab"
-  jarsigner -keystore "$KS_DIR/adhkar-release.jks" -storepass "$PASS" -keypass "$PASS" -sigalg SHA256withRSA -digestalg SHA-256 "$DIST/Adhkar.aab" adhkar >/dev/null
+  jarsigner -keystore "$KS_DIR/adhkar-release.jks" -storepass:env ADHKAR_SIGN_STORE -keypass:env ADHKAR_SIGN_KEY -sigalg SHA256withRSA -digestalg SHA-256 "$DIST/Adhkar.aab" adhkar >/dev/null
   ls -la "$DIST/Adhkar.aab"
 fi
 ls -la "$DIST/Adhkar.apk"

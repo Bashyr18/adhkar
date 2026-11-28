@@ -1,4 +1,4 @@
-/* A gentle on-screen dhikr: every few minutes while the app is open, a short remembrance slides up above the tab bar.
+/* A gentle on-screen dhikr: every few minutes while the app is open, a short remembrance appears near the top of the screen.
    Tap to count it once (it joins your Tracker totals); the arrow opens the Tracker; it leaves on its own otherwise. */
 (function () {
   'use strict';
@@ -18,7 +18,8 @@
   ];
   var el = null,
     hideT = 0,
-    lastShown = Date.now(),
+    firstDue = 0,
+    lastShown = 0,
     turn = 0;
 
   A.trkAddPhrase =
@@ -49,7 +50,7 @@
     return (
       document.hidden ||
       !S.profile.onboarded ||
-      /^#\/(r\/|welcome|tracker|tasbih)/.test(h) ||
+      /^#\/(r\/|kahf|counting|desk\/print|welcome|tracker|tasbih|learn|purity|settings|qibla)/.test(h) ||
       document.querySelector('.sheet') ||
       (A.readerOpen && A.readerOpen())
     );
@@ -58,6 +59,7 @@
     clearTimeout(hideT);
     if (el) {
       el.classList.remove('in');
+      el.inert = true;
       var e = el;
       el = null;
       setTimeout(function () {
@@ -66,12 +68,14 @@
     }
   }
   function show() {
+    if (blocked()) return;
     var p = phrase();
     if (!p) return;
     hide();
     el = document.createElement('div');
     el.className = 'dnudge';
-    el.setAttribute('role', 'status');
+    el.setAttribute('role', 'group');
+    el.setAttribute('aria-label', A.T('On-screen dhikr'));
     el.innerHTML =
       '<button type="button" class="dn-main" aria-label="Count ' +
       esc(p.tr) +
@@ -79,6 +83,8 @@
       esc(p.ar) +
       '</span><span class="dn-tr">' +
       esc(p.tr) +
+      '</span><span class="dn-action" aria-live="polite">' +
+      esc(A.T('Tap to count')) +
       '</span></button>' +
       '<button type="button" class="dn-go" aria-label="Open the Tracker">' +
       ic('right', 's') +
@@ -99,7 +105,7 @@
       A.N.haptic('tick');
       if (A.fx && A.fx.click) A.fx.click();
       mine.classList.add('done');
-      mine.querySelector('.dn-tr').textContent = A.T ? A.T('Counted') : 'Counted';
+      mine.querySelector('.dn-action').textContent = A.T ? A.T('Counted') : 'Counted';
       clearTimeout(hideT);
       hideT = setTimeout(hide, 900);
     });
@@ -108,23 +114,43 @@
       A.go('#/tracker');
     });
     el.querySelector('.dn-x').addEventListener('click', hide);
+    function release() {
+      if (el !== mine || counted) return;
+      clearTimeout(hideT);
+      if (!mine.matches(':hover, :focus-within')) hideT = setTimeout(hide, 14000);
+    }
+    mine.addEventListener('focusin', function () {
+      clearTimeout(hideT);
+    });
+    mine.addEventListener('focusout', function () {
+      requestAnimationFrame(release);
+    });
+    mine.addEventListener('pointerenter', function () {
+      clearTimeout(hideT);
+    });
+    mine.addEventListener('pointerleave', release);
     hideT = setTimeout(hide, 14000);
     lastShown = Date.now();
   }
-  setInterval(function () {
+  function tick() {
     var n = S.prefs.nudge;
-    if (!n || !n.on) return;
-    if (Date.now() - lastShown < n.every * 60000) return;
-    if (blocked()) {
-      lastShown = Date.now() - (n.every - 1) * 60000;
+    if (!n.on || blocked()) {
+      if (el) hide();
       return;
-    } // try again a minute later
-    show();
-  }, 30000);
+    }
+    var now = Date.now();
+    if (!firstDue) firstDue = now + 90000;
+    if (!el && now >= (lastShown ? lastShown + n.every * 60000 : firstDue)) show();
+  }
+  setInterval(tick, 15000);
   document.addEventListener('visibilitychange', function () {
-    if (!document.hidden)
-      lastShown = Math.max(lastShown, Date.now() - 60000 * ((S.prefs.nudge || {}).every || 20) + 90000);
+    if (document.hidden) hide();
+    else if (!lastShown) firstDue = Date.now() + 90000;
   });
+  window.addEventListener('hashchange', function () {
+    if (blocked()) hide();
+  });
+  A.hideNudge = hide;
   A.nudgeNow = show;
   /* dhikr counted from the floating reminder while the app was closed */
   A.takeNudges = function () {
@@ -142,7 +168,10 @@
         n += o[id];
       }
     });
-    if (n) A.toast('+' + A.fmtN(n) + ' from the reminder', 'check');
+    if (n) {
+      A.toast('+' + A.fmtN(n) + ' from the reminder', 'check');
+      A.rerender();
+    }
   };
   document.addEventListener('visibilitychange', function () {
     if (!document.hidden && A.N.has) A.takeNudges();

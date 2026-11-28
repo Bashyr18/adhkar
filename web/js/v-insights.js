@@ -196,9 +196,16 @@
         })
         .join('') +
       '</div>';
+    var wds = A.ar() ? ['ن', 'ر', 'ج'] : ['M', 'W', 'F'];
     return (
       mrow +
-      '<div class="heatwrap"><div class="wd"><span></span><span>M</span><span></span><span>W</span><span></span><span>F</span><span></span></div><div class="heat" id="heat">' +
+      '<div class="heatwrap"><div class="wd no-tr"><span></span><span>' +
+      wds[0] +
+      '</span><span></span><span>' +
+      wds[1] +
+      '</span><span></span><span>' +
+      wds[2] +
+      '</span><span></span></div><div class="heat" id="heat">' +
       cells +
       '</div></div>' +
       '<div class="spread faint" style="font-size:11px;font-weight:700;margin-top:10px"><span id="heatInfo">Tap a day for details</span><span class="heat-leg">' +
@@ -214,29 +221,31 @@
     var dd = A.dayDone(d),
       tot = A.totals(),
       parts = [];
-    if (dd.morning) parts.push('Morning');
-    if (dd.evening) parts.push('Evening');
-    if (dd.salahN) parts.push(dd.salahN + '× after ṣalāh');
-    if (dd.sleep) parts.push('Sleep');
-    if (dd.duha) parts.push('Ḍuḥā');
-    if (dd.night) parts.push('Qiyām');
-    if (S.fasts[d]) parts.push('Fasted');
+    if (dd.morning) parts.push(A.T('Morning'));
+    if (dd.evening) parts.push(A.T('Evening'));
+    if (dd.salahN) parts.push(A.fmtN(dd.salahN) + '× ' + A.T('after ṣalāh'));
+    if (dd.sleep) parts.push(A.T('Sleep'));
+    if (dd.duha) parts.push(A.T('Ḍuḥā'));
+    if (dd.night) parts.push(A.T('Qiyām'));
+    if (S.fasts[d]) parts.push(A.T('Fasted'));
     return (
       A.fmtDate(d, 'short') +
       ' · ' +
       A.fmtN(tot.byDay[d] || 0) +
-      ' counted' +
-      (parts.length ? ' · ' + parts.join(', ') : '')
+      ' ' +
+      A.T('counted') +
+      (parts.length ? ' · ' + parts.join(A.ar() ? '، ' : ', ') : '')
     );
   }
 
   function salahLog(end) {
     var ds = days(14, end),
+      wd = A.ar() ? ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س'] : ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
       h =
         '<div class="sal"><span></span>' +
         ds
           .map(function (d) {
-            return '<span style="text-align:center">' + A.DOW[A.dow(d)][0] + '</span>';
+            return '<span class="no-tr" style="text-align:center">' + wd[A.dow(d)] + '</span>';
           })
           .join('');
     A.PRAYERS.forEach(function (p) {
@@ -502,7 +511,7 @@
       });
     else A.chart.area($('#chTrend', el), trend, { id: 'tr', label: 'Remembrance per day', unit: 'Remembrances' });
     tables.trend = A.chart.table(
-      ['Day', 'Count'],
+      [A.T('Day'), A.T('Count')],
       c.cur
         .map(function (d) {
           return [A.fmtDate(d, 'short'), A.fmtN(tot.byDay[d] || 0)];

@@ -18,7 +18,9 @@ public class PrayerWidget extends AppWidgetProvider {
     @Override
     public void onReceive(Context c, Intent i) {
         if (Widgets.ACTION_PRAYED.equals(i.getAction())) {
+            if (!Widgets.enabled(c)) { Widgets.updateAll(c); return; }
             String d = i.getStringExtra("d"), p = i.getStringExtra("p");
+            if (!Widgets.canLogPrayer(c, d, p)) { Widgets.updateAll(c); return; }
             boolean on = Store.togglePrayed(c, d, p, Widgets.isPrayed(c, d, p));
             Vibrator vb = c.getSystemService(Vibrator.class);
             if (vb != null && vb.hasVibrator()) {

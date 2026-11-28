@@ -17,7 +17,7 @@ mod update;
 mod web;
 
 use std::cell::{Cell, RefCell};
-use std::collections::HashSet;
+use std::collections::HashMap;
 use std::path::PathBuf;
 use std::rc::Rc;
 
@@ -58,7 +58,7 @@ pub struct App {
     pending_files: RefCell<Vec<PathBuf>>,
     /* the reminders for the next two days, as the page worked them out */
     pub events: RefCell<Vec<Value>>,
-    rung: RefCell<HashSet<String>>,
+    rung: RefCell<HashMap<String, f64>>,
     last_route: RefCell<Option<String>>,
     tray_shown: Cell<bool>,
     tip: RefCell<String>,
@@ -84,7 +84,7 @@ impl App {
     }
     /* the page has drawn its first screen: hand it what arrived meanwhile */
     pub fn on_ready(&self) {
-        self.ready.set(true);
+        if !self.ready.replace(true) { update::tidy(); }
         let files: Vec<PathBuf> = self.pending_files.borrow_mut().drain(..).collect();
         for f in files { web::open_file(self, &f); }
         if let Some(r) = self.pending_route.borrow_mut().take() { self.route(&r); }
@@ -208,31 +208,34 @@ impl App {
         for ev in due {
             let title = ev["title"].as_str().unwrap_or("Adhkār").to_string();
             let key = format!("{}|{}", ev["t"], title);
-            if !self.rung.borrow_mut().insert(key) { continue; }
+            if self.rung.borrow_mut().insert(key, now).is_some() { continue; }
             *self.last_route.borrow_mut() = ev["route"].as_str().map(String::from);
             self.balloon(&title, ev["body"].as_str().unwrap_or(""));
             /* the human adhān's takbīr, played by the page, as on the phone; never a chime */
             if ev["takbir"].as_bool() == Some(true) { self.post("window.Desk&&Desk.takbir&&Desk.takbir()"); }
             /* Friday's hour of response: the pill comes forward, open, on top of whatever you are working in */
             if ev["hour"].as_bool() == Some(true) {
-                if !self.pill_on() { self.show_pill(true); }
                 if let Some(p) = self.pill.borrow().as_ref() { p.set_top(true); p.alert(); }
             }
         }
-        if self.rung.borrow().len() > 200 { self.rung.borrow_mut().clear(); }
+        self.rung.borrow_mut().retain(|_, shown| (now - *shown).abs() < 86_400_000.0);
     }
 
     /* ---------- the pill: the next prayer, in a small window of its own ---------- */
-    pub fn pill_on(&self) -> bool { self.pill.borrow().is_some() }
+    pub fn pill_on(&self) -> bool { store::get("next").and_then(|v| v.as_bool()).unwrap_or(true) }
     pub fn show_pill(&self, on: bool) {
         store::set("next", json!(on));
-        if on && !self.pill_on() {
+        self.refresh_pill();
+    }
+    fn refresh_pill(&self) {
+        let show = self.pill_on() && self.next_at.get() > 0.0;
+        if show && self.pill.borrow().is_none() {
             if let Some(p) = pill::Pill::new(store::flag("nextTop")) {
                 p.set_target(self.next_at.get());
                 p.set_info(&self.pill_json.borrow());
                 *self.pill.borrow_mut() = Some(p);
             }
-        } else if !on {
+        } else if !show {
             if let Some(p) = self.pill.borrow_mut().take() { p.close(); }
         }
     }
@@ -245,6 +248,7 @@ impl App {
     pub fn pill_top(&self, on: bool) { if let Some(p) = self.pill.borrow().as_ref() { p.set_top(on); } }
     pub fn set_next(&self, label: &str, at: f64, time: &str) {
         self.next_at.set(at);
+        self.refresh_pill();
         if let Some(p) = self.pill.borrow().as_ref() { p.set_target(at); }
         *self.tip.borrow_mut() = format!("Adhkār · {} {}", label, time).chars().take(127).collect();
         if self.tray_shown.get() { unsafe { let _ = Shell_NotifyIconW(NIM_MODIFY, &self.nid()); } }
@@ -472,7 +476,6 @@ fn main() {
         installer::pipe_send(&if args.is_empty() { vec!["--show".to_string()] } else { args.clone() }, 2500);
         return;
     }
-    update::tidy();
     /* an installed copy keeps its line in Settings > Apps true after an in-app update */
     if bridge::running_installed() { installer::register(VERSION); }
     if let Err(e) = unpack() { ac::msgbox(None, &format!("Adhkār could not start.\n\n{}", e), MB_OK | MB_ICONERROR); return; }
@@ -500,7 +503,7 @@ fn main() {
     let a = Rc::new(App {
         hwnd, web: RefCell::new(None), quitting: Cell::new(false), ready: Cell::new(false), full: Cell::new(false), dark: Cell::new(dark),
         before_full: Cell::new((0, RECT::default(), false)), pending_route: RefCell::new(None), pending_files: RefCell::new(vec![]),
-        events: RefCell::new(vec![]), rung: RefCell::new(HashSet::new()), last_route: RefCell::new(None), tray_shown: Cell::new(false),
+        events: RefCell::new(vec![]), rung: RefCell::new(HashMap::new()), last_route: RefCell::new(None), tray_shown: Cell::new(false),
         tip: RefCell::new(ac::APP_NAME.to_string()), pill: RefCell::new(None), next_at: Cell::new(0.0), pill_json: RefCell::new("{}".into()),
         flushing: Cell::new(false), flushed: Cell::new(false),
     });
@@ -516,7 +519,6 @@ fn main() {
         return;
     }
     /* the pill is on unless you closed it: it stays on screen when Adhkār is minimised or in the tray */
-    if store::get("next").and_then(|v| v.as_bool()).unwrap_or(true) { a.show_pill(true); }
     let code = ac::pump();
     store::flush_state();
     let _ = mutex;

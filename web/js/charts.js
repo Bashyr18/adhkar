@@ -142,9 +142,16 @@
         '</text>';
     });
     var step = Math.max(1, Math.ceil(n / (W < 340 ? 5 : 7)));
+    /* labels keep their distance (more in Arabic, whose month names are longer); the last one always shows */
+    var keep = [],
+      gap = A.ar && A.ar() ? 72 : 56;
     data.forEach(function (d, i) {
-      if (i % step === 0 || i === n - 1) {
-        if (i !== n - 1 && n - 1 - i < step * 0.6) return;
+      if (!(i % step === 0 || i === n - 1)) return;
+      if (!keep.length || x(i) - x(keep[keep.length - 1]) >= gap) keep.push(i);
+      else if (i === n - 1) keep[keep.length - 1] = i;
+    });
+    data.forEach(function (d, i) {
+      if (keep.indexOf(i) >= 0) {
         s +=
           '<text class="ax" x="' +
           x(i) +

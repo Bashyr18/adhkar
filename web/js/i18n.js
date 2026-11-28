@@ -571,7 +571,36 @@
     'Clear the record': 'مسح السجل',
     'Add the prayers you missed, then log each one as you pray it.': 'أضف الصلوات الفائتة، ثم سجّل كل صلاة عند قضائها.',
     'All made up, alḥamdulillāh': 'تم القضاء كله، الحمد لله',
+    'Adhkār on your devices': 'أذكار على أجهزتك',
+    'Illustrated guide': 'الدليل المصوّر',
+    'Learn the app, screen by screen': 'تعرّف على التطبيق شاشةً بشاشة',
+    'Also available on': 'متاح أيضًا على',
+    Android: 'أندرويد',
+    Windows: 'ويندوز',
+    'iPhone & iPad preview': 'نسخة آيفون وآيباد التجريبية',
+    'iPhone & iPad (coming soon)': 'آيفون وآيباد (قريبًا)',
+    'Tap to count': 'اضغط للعدّ',
+    'Check for updates': 'التحقّق من التحديثات',
+    'If bleeding continues, ask a trusted scholar when to resume prayer.':
+      'إن استمرّ الدم فاسألي عالمًا موثوقًا متى تستأنفين الصلاة.',
+    'Swipe down twice → edit tiles → add “Tracker”': 'اسحب لأسفل مرتين ← عدّل المربّعات ← أضف «المتابعة»',
+    'This day is already recorded as a break day': 'هذا اليوم مسجّل بالفعل يوم عذر',
+    'Scheduled reminders are available in the installed apps.': 'التذكيرات المجدولة متاحة في التطبيقات المثبّتة.',
+    'On-screen dhikr in the web app': 'ذكر على الشاشة في تطبيق الويب',
+    'Checks after setup and then weekly': 'يتحقّق بعد الإعداد ثم أسبوعيًا',
+    'Notifications are blocked. You can allow them in system settings.':
+      'الإشعارات محجوبة. يمكنك السماح بها في إعدادات النظام.',
+    'The sun is below the horizon. Switch to compass mode.': 'الشمس تحت الأفق. انتقل إلى وضع البوصلة.',
     // onboarding
+    'Choose what helps you remember.': 'اختر ما يعينك على الذكر.',
+    'Prayer times and daily adhkār': 'مواقيت الصلاة والأذكار اليومية',
+    'A short remembrance while the app is open': 'ذكر قصير أثناء استخدام التطبيق',
+    'Updates from the official release page': 'تحديثات من صفحة الإصدارات الرسمية',
+    'Learn ghusl': 'تعلّم الغسل',
+    'Add the Adhkār widget': 'أضف أداة الأذكار',
+    'Allow notifications in system settings': 'اسمح بالإشعارات في إعدادات النظام',
+    'Home-screen widgets': 'أدوات الشاشة الرئيسية',
+    'Show live information on widgets you add': 'اعرض المعلومات المحدّثة في الأدوات التي تضيفها',
     'Bismillāh, let us begin': 'بسم الله، لنبدأ',
     'Restore a backup': 'استعادة نسخة',
     Name: 'الاسم',
@@ -676,6 +705,34 @@
     // calendar and fasting
     Fasted: 'صُمت',
     'Not fasted': 'لم أصم',
+    'Streak protected': 'سلسلتكِ محفوظة',
+    'Each prayer, in order': 'كل صلاة بترتيبها',
+    'For the times of Jumuʿah, the hour at the minbar and the last hour': 'لمواقيت الجمعة وساعة المنبر والساعة الأخيرة',
+    Purify: 'تطهّر',
+    'Wuḍūʾ, step by step': 'الوضوء خطوة بخطوة',
+    'Face the qibla': 'استقبل القبلة',
+    'Set your location': 'حدّد موقعك',
+    Pray: 'صلِّ',
+    Remember: 'اذكر',
+    'The adhkār after the prayer': 'الأذكار بعد الصلاة',
+    'On this page': 'في هذه الصفحة',
+    Ghusl: 'الغسل',
+    'facing qibla': 'نحو القبلة',
+    'You are facing the qibla.': 'أنت متّجه إلى القبلة.',
+    'turn right': 'استدر يمينًا',
+    'turn left': 'استدر يسارًا',
+    'sun at top': 'الشمس في الأعلى',
+    'Low compass accuracy. Wave the phone in a figure-eight.': 'دقة البوصلة منخفضة. حرّك الهاتف على شكل الرقم ٨.',
+    'High accuracy': 'دقة عالية',
+    'Medium accuracy': 'دقة متوسطة',
+    'Low accuracy, calibrate': 'دقة منخفضة، عايِر البوصلة',
+    'Sun-referenced · no sensors': 'بالشمس · دون مستشعرات',
+    'Times of duʿāʾ': 'أوقات الإجابة',
+    'Adhkār, duʿāʾ and dhikr are all still yours. Prayer tracking and prayer reminders are paused, and your streak is protected.':
+      'الأذكار والدعاء والذكر كلها لكِ. متابعة الصلاة وتنبيهاتها متوقفة، وسلسلتكِ محفوظة.',
+    'Reminders paused': 'التنبيهات متوقفة',
+    'Learning your cycle': 'نتعرّف على عادتكِ',
+    Usually: 'عادتكِ',
     Fasting: 'الصيام',
     Fasts: 'الصيام',
     'Days fasted': 'أيام الصيام',
@@ -1544,6 +1601,24 @@
       }
     ],
     [
+      /^until (.+)$/,
+      function (m) {
+        return 'حتى ' + T(m[1]);
+      }
+    ],
+    [
+      /^Open for (.+)$/,
+      function (m) {
+        return 'يبقى ' + T(m[1]);
+      }
+    ],
+    [
+      /^day (\d+) of (\d+)$/,
+      function (m) {
+        return 'اليوم ' + m[1] + ' من ' + m[2];
+      }
+    ],
+    [
       /^After childbirth · day (\d+)$/,
       function (m) {
         return 'بعد الولادة · اليوم ' + m[1];
@@ -1938,6 +2013,18 @@
       function (m) {
         return 'تم تحديد الموقع: ' + m[1];
       }
+    ],
+    [
+      /^Qurʾān (.+)$/,
+      function (m) {
+        return 'القرآن ' + m[1];
+      }
+    ],
+    [
+      /^IslamQA (\d+) · (.+)$/,
+      function (m) {
+        return 'الإسلام سؤال وجواب ' + m[1] + ' · ' + T(m[2]);
+      }
     ]
   ];
   function T(s) {
@@ -2015,7 +2102,7 @@
 
   /* ---------- applying it to the page ---------- */
   var SKIP =
-    '.tx-t, .rd-tr, .rd-en, .en, .tr, :not(html)[lang="ar"], .ar, script, style, input, textarea, .jr-text, .no-tr';
+    '.tx-t, .rd-tr, .rd-en, .en, .tr, :not(html)[lang="ar"], .ar, script, style, input, textarea, .jr-text, .jr-note, .no-tr';
   A.localize = function (root) {
     if (!A.ar() || !root) return;
     var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
@@ -2137,5 +2224,21 @@
       S.prefs.en = false;
     }
   }
+  A.addAr({
+    'This prayer fell during your break': 'وقعت هذه الصلاة أثناء فترة العذر',
+    Count: 'العدد',
+    counted: 'ذِكرًا',
+    'after ṣalāh': 'بعد الصلاة',
+    'Return to asking': 'إعادة إلى قائمة الدعاء',
+    'Install the Adhkār app for reminders.': 'ثبّت تطبيق أذكار للحصول على التذكيرات.',
+    'Desktop & device': 'سطح المكتب والجهاز',
+    Device: 'الجهاز',
+    'Desktop settings & feedback': 'إعدادات سطح المكتب والملاحظات',
+    'Haptics, keep screen on': 'الاهتزاز وإبقاء الشاشة مضاءة',
+    'Screen & feedback': 'الشاشة والملاحظات',
+    'Every recitation is on this computer': 'جميع التلاوات محفوظة على هذا الجهاز',
+    'Confirm you have finished': 'أكّد أنك انتهيت',
+    Filter: 'تصفية'
+  });
   A.applyLang();
 })();

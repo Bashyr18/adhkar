@@ -24,6 +24,7 @@ public class TasbihWidget extends AppWidgetProvider {
     public void onReceive(Context c, Intent i) {
         String a = i.getAction();
         if (Widgets.ACTION_TAP.equals(a) || Widgets.ACTION_RESET.equals(a) || Widgets.ACTION_ROUND.equals(a)) {
+            if (!Widgets.enabled(c)) { Widgets.updateAll(c); return; }
             JSONObject cfg = Store.config(c);
             Widgets.Trk k = Widgets.trk(c, cfg);
             int fx = VibrationEffect.EFFECT_TICK;

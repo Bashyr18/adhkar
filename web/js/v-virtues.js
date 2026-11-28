@@ -176,8 +176,9 @@
     if (!t) return out;
     out.push({ id: 'third', from: A.pday(A.shift(key, -1)).lastThird, to: t.fajr });
     A.PRAYERS.forEach(function (p) {
-      out.push({ id: 'iqamah', from: t[p], to: t[p] + 20 * MIN, p: p });
-      out.push({ id: 'after', from: t[p] + 20 * MIN, to: t[p] + 45 * MIN, p: p });
+      var iqMin = S.iqama && S.iqama.on && +S.iqama[p] > 0 ? +S.iqama[p] : 20;
+      out.push({ id: 'iqamah', from: t[p], to: t[p] + iqMin * MIN, p: p });
+      out.push({ id: 'after', from: t[p] + iqMin * MIN, to: t[p] + (iqMin + 25) * MIN, p: p });
     });
     if (dow === 5) out.push({ id: 'friday', from: t.maghrib - 60 * MIN, to: t.maghrib });
     if (S.fasts[key]) out.push({ id: 'fasting', from: t.fajr, to: t.maghrib });
@@ -267,6 +268,247 @@
     );
   };
 
+  /* ---------- the day as a dial: midnight at the top, today's answered times lit around it, a hand at now ---------- */
+  A.answerWindows = windowsFor;
+  var DC = 170,
+    DR = 100;
+  function hourOf(ms) {
+    var p = A.parts(ms);
+    return p.h + p.min / 60;
+  }
+  function dpt(hr, r) {
+    var a = (hr / 24) * Math.PI * 2 - Math.PI / 2;
+    return [DC + r * Math.cos(a), DC + r * Math.sin(a)];
+  }
+  function darc(h0, h1, r) {
+    if (h1 < h0) h1 += 24;
+    var span = Math.max(h1 - h0, 0.12),
+      p = dpt(h0, r),
+      q = dpt(h0 + span, r);
+    return (
+      'M' +
+      p[0].toFixed(1) +
+      ' ' +
+      p[1].toFixed(1) +
+      'A' +
+      r +
+      ' ' +
+      r +
+      ' 0 ' +
+      (span > 12 ? 1 : 0) +
+      ' 1 ' +
+      q[0].toFixed(1) +
+      ' ' +
+      q[1].toFixed(1)
+    );
+  }
+  /* a label outside the ring leans away from it, so nothing runs off the card */
+  function dlabel(hr, txt, cls, more) {
+    var p = dpt(hr, DR + 17 + (more || 0)),
+      side = p[0] > DC + 8 ? 'start' : p[0] < DC - 8 ? 'end' : 'middle';
+    return (
+      '<text x="' +
+      p[0].toFixed(1) +
+      '" y="' +
+      (p[1] + 4).toFixed(1) +
+      '" text-anchor="' +
+      side +
+      '" class="dl-pn' +
+      (cls ? ' ' + cls : '') +
+      '">' +
+      esc(txt) +
+      '</text>'
+    );
+  }
+  function dialHand(now) {
+    return 'rotate(' + ((hourOf(now) / 24) * 360).toFixed(2) + ' ' + DC + ' ' + DC + ')';
+  }
+  function dialCentre(a, now) {
+    var w = a.open[0],
+      n = a.next;
+    if (w)
+      return (
+        '<div class="eyebrow">Open now</div><div class="dl-t">' +
+        esc(label(w)) +
+        '</div><div class="dl-s">' +
+        'until ' +
+        A.fmtTxt(w.to) +
+        '</div>'
+      );
+    if (n)
+      return (
+        '<div class="eyebrow">Next</div><div class="dl-t">' +
+        esc(label(n)) +
+        '</div><div class="dl-s">' +
+        A.fmtTxt(n.from) +
+        ' · in ' +
+        A.fmtDur(n.from - now) +
+        '</div>'
+      );
+    return '';
+  }
+  /* the windows that touch the civil day k, clipped to it: the last third begun before midnight, a late ʿishāʾ, the
+     night of Qadr; the times the dial is drawn from and the centre speaks of are the same */
+  function dayWindows(k, now) {
+    var start = now - hourOf(now) * 3600000,
+      end = start + 86400000,
+      seen = {};
+    return windowsFor(A.shift(k, -1))
+      .concat(windowsFor(k), windowsFor(A.shift(k, 1)))
+      .filter(function (w) {
+        var id = w.id + ':' + w.from;
+        if (seen[id] || w.to <= start || w.from >= end) return false;
+        seen[id] = 1;
+        return true;
+      })
+      .map(function (w) {
+        return { id: w.id, p: w.p, from: Math.max(w.from, start), to: Math.min(w.to, end - 60000), f0: w.from };
+      });
+  }
+  function dial(k, now, a) {
+    var ws = dayWindows(k, now),
+      s =
+        '<circle cx="' +
+        DC +
+        '" cy="' +
+        DC +
+        '" r="' +
+        DR +
+        '" class="dl-trk"/><circle cx="' +
+        DC +
+        '" cy="' +
+        DC +
+        '" r="' +
+        (DR - 18) +
+        '" class="dl-in"/>';
+    for (var hr = 0; hr < 24; hr++) {
+      var big = hr % 6 === 0,
+        p = dpt(hr, DR - 11),
+        q = dpt(hr, DR - (big ? 18 : 15));
+      s +=
+        '<line x1="' +
+        p[0].toFixed(1) +
+        '" y1="' +
+        p[1].toFixed(1) +
+        '" x2="' +
+        q[0].toFixed(1) +
+        '" y2="' +
+        q[1].toFixed(1) +
+        '" class="dl-tk' +
+        (big ? ' big' : '') +
+        '"/>';
+    }
+    /* midnight and noon are named; the quarter ticks mark 06 and 18, leaving the centre's words room */
+    [
+      [0, '00'],
+      [12, '12']
+    ].forEach(function (l) {
+      var p = dpt(l[0], DR - 29);
+      s +=
+        '<text x="' +
+        p[0].toFixed(1) +
+        '" y="' +
+        (p[1] + 4).toFixed(1) +
+        '" class="dl-hr">' +
+        (A.ar() ? A.arDigits(l[1]) : l[1]) +
+        '</text>';
+    });
+    /* fasting and Laylat al-Qadr lie on an inner band; the shorter windows on the ring itself */
+    var labs = [];
+    ws.forEach(function (w, i) {
+      var inner = w.id === 'fasting' || w.id === 'qadr' || w.id === 'arafah',
+        r = inner ? DR - 18 : DR,
+        open = a.open.some(function (o) {
+          return o.id === w.id && o.from === w.f0;
+        }),
+        h0 = hourOf(w.from),
+        h1 = hourOf(w.to),
+        /* a long window's rounded ends are drawn inside its own time, so they never run into the next one */
+        cap = ((inner ? 2.5 : 6) / r) * (24 / (2 * Math.PI)),
+        span = (h1 - h0 + 24) % 24;
+      if (span > cap * 3) {
+        h0 += cap;
+        h1 -= cap;
+      }
+      var d = darc(h0, h1, r);
+      s +=
+        '<path d="' +
+        d +
+        '" class="dl-w ' +
+        w.id +
+        (inner ? ' inner' : '') +
+        (open ? ' open' : '') +
+        '" style="--i:' +
+        i +
+        '" pathLength="100"/>';
+      if (w.id === 'iqamah') labs.push([hourOf(w.from) + 0.15, A.ar() ? A.T(P.NAMES[w.p]) : P.NAMES[w.p], '']);
+      if (w.id === 'third' && w.to - w.from > 40 * 60000)
+        labs.push([(hourOf(w.from) + hourOf(w.to)) / 2, A.T('Last third'), 'third']);
+    });
+    /* labels closer than an hour and a half step out to a second ring, so far north and far south they never collide */
+    labs.sort(function (x, y) {
+      return x[0] - y[0];
+    });
+    var lastH = -9,
+      lastOut = false;
+    labs.forEach(function (l) {
+      var out = l[0] - lastH < 1.5 && !lastOut;
+      s += dlabel(l[0], l[1], l[2], out ? 17 : 0);
+      lastH = l[0];
+      lastOut = out;
+    });
+    /* the hand marks now on the ring and leaves the centre to the words */
+    s +=
+      '<g class="dl-hand" data-dl-hand transform="' +
+      dialHand(now) +
+      '"><line x1="' +
+      DC +
+      '" y1="' +
+      (DC - DR + 30) +
+      '" x2="' +
+      DC +
+      '" y2="' +
+      (DC - DR + 4) +
+      '"/><circle cx="' +
+      DC +
+      '" cy="' +
+      (DC - DR) +
+      '" r="7" class="tip"/></g>';
+    return (
+      '<div class="card ans-dial"><div class="dl-wrap"><svg viewBox="0 0 ' +
+      DC * 2 +
+      ' ' +
+      DC * 2 +
+      '" aria-hidden="true">' +
+      s +
+      '</svg><div class="dl-c" data-dl-c>' +
+      dialCentre(a, now) +
+      '</div></div><div class="dl-leg"><span><i class="iq"></i>' +
+      A.T('Between the adhān and the iqāmah') +
+      '</span><span><i class="af"></i>' +
+      A.T('After the obligatory prayers') +
+      '</span><span><i class="th"></i>' +
+      A.T('The last third of the night') +
+      '</span>' +
+      [
+        ['friday', 'fr', 'The final hour of Friday'],
+        ['fasting', 'fa', 'While you are fasting'],
+        ['arafah', 'fa', 'The Day of ʿArafah'],
+        ['qadr', 'qd', 'Laylat al-Qadr']
+      ]
+        .filter(function (x) {
+          return ws.some(function (w) {
+            return w.id === x[0];
+          });
+        })
+        .map(function (x) {
+          return '<span><i class="' + x[1] + '"></i>' + A.T(x[2]) + '</span>';
+        })
+        .join('') +
+      '</div></div>'
+    );
+  }
+
   A.V.answered = function () {
     var a = A.answered(),
       now = Date.now(),
@@ -279,6 +521,7 @@
     if (!S.loc)
       h +=
         '<div class="card col"><p class="muted small">Set your location to see these times live.</p><a class="btn pri sm" href="#/location">Set location</a></div>';
+    else h += dial(k, now, a);
     if (a.open.length)
       h +=
         '<div class="sec"><h2>Open now</h2></div><div class="col">' +
@@ -338,7 +581,7 @@
                   ' ' +
                   w.later
                     .map(function (x) {
-                      return P.NAMES[x.p] + ' ' + A.fmtTxt(x.from);
+                      return A.T(P.NAMES[x.p]) + ' ' + A.fmtTxt(x.from);
                     })
                     .join(' · ') +
                   '</div>'
@@ -372,7 +615,38 @@
         );
       }).join('') +
       '</div>';
-    return { html: h, title: 'Answered duʿāʾ', tab: 0 };
+    var lastC = '',
+      openKey = function (t) {
+        return A.answered(t)
+          .open.map(function (w) {
+            return w.id + w.from;
+          })
+          .join();
+      },
+      key0 = openKey(now);
+    return {
+      html: h,
+      title: 'Answered duʿāʾ',
+      tab: 0,
+      /* the hand moves with the clock; the centre changes when a time opens or closes, or a minute passes */
+      tick: function (el) {
+        var hand = el.querySelector('[data-dl-hand]'),
+          c = el.querySelector('[data-dl-c]');
+        if (!hand || !c) return;
+        var t = Date.now();
+        /* a time opened or closed: the dial, Open now and Coming up are drawn again together */
+        if (openKey(t) !== key0) {
+          A.rerender();
+          return;
+        }
+        hand.setAttribute('transform', dialHand(t));
+        var html = dialCentre(A.answered(t), t);
+        if (html !== lastC) {
+          if (lastC) c.innerHTML = html;
+          lastC = html;
+        }
+      }
+    };
   };
   function card(i, extra, live) {
     return (

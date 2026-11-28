@@ -36,7 +36,13 @@
     var t = n.t,
       now = n.now,
       starts = A.sessionStarts(t);
-    if (!A.isExcused(k) && n.cur && n.prev.key === k && now - t[n.cur] < 40 * MIN && now - t[n.cur] > 4 * MIN)
+    if (
+      !A.prayerExcused(k, n.cur) &&
+      n.cur &&
+      n.prev.key === k &&
+      now - t[n.cur] < 40 * MIN &&
+      now - t[n.cur] > 4 * MIN
+    )
       sess('salah', n.cur, 'The remembrance after the obligatory prayer');
     if (now >= starts.morning && now < t.dhuhr)
       sess('morning', null, now < t.sunrise ? 'The best time is now, before sunrise at ' + A.fmtTxt(t.sunrise) : null);
@@ -130,11 +136,25 @@
         '</span></a>'
       );
     };
-    var rings = [ring('#/c/morning', 'dawn', m.frac, pct(m), 'Morning', m.complete)];
-    if (!A.isExcused(k))
+    var rings = [ring('#/c/morning', 'dawn', m.frac, pct(m), 'Morning', m.complete)],
+      activeP = A.PRAYERS.filter(function (p) {
+        return !A.prayerExcused(k, p);
+      });
+    if (activeP.length) {
+      var activeSal = activeP.filter(function (p) {
+        return d.salah[p];
+      }).length;
       rings.push(
-        ring('#/c/salah/' + lastP, 'jade', sal / 5, sal === 5 ? ic('check', 's') : sal + '/5', 'After ṣalāh', sal === 5)
+        ring(
+          '#/c/salah/' + lastP,
+          'jade',
+          activeSal / activeP.length,
+          activeSal === activeP.length ? ic('check', 's') : activeSal + '/' + activeP.length,
+          'After ṣalāh',
+          activeSal === activeP.length
+        )
       );
+    }
     rings.push(
       ring('#/c/evening', 'dusk', e.frac, pct(e), 'Evening', e.complete),
       ring('#/c/sleep', 'indigo', sl.frac, pct(sl), 'Sleep', sl.complete)
@@ -182,12 +202,12 @@
         (c.usualDone ? 'Forty days have passed' : 'Your remembrance continues') +
         '</div>' +
         (c.usualDone
-          ? '<div class="muted small" style="margin-top:3px">Take ghusl and pray, even if bleeding continues.</div>'
+          ? '<div class="muted small" style="margin-top:3px">If bleeding continues, ask a trusted scholar when to resume prayer.</div><a href="#/purity/ghusl" class="gold small">Learn ghusl</a>'
           : '') +
         A.said('abudawud:311', '', true) +
         '</div></div><div class="grid2"><a class="btn sec sm" href="#/answered">Times of duʿāʾ</a><button type="button" class="btn pri sm" data-a="break-off">I am pure</button></div></div>'
       );
-    if (c.usualDone)
+    if (c.usualDone && S.excused.snooze !== A.today())
       return (
         '<div class="card col h-rose glowcard"><div class="row" style="align-items:flex-start"><span class="badge">' +
         ic('moonstar') +
@@ -199,38 +219,65 @@
         (c.long
           ? 'Bleeding well past your habit may be istiḥāḍah, when prayer continues. Ask a scholar.'
           : 'When you see them, take ghusl and pray the prayer whose time you are in.') +
-        '</div></div></div><div class="grid2"><button type="button" class="btn sec sm" data-a="cyc-later">Not yet</button><button type="button" class="btn pri sm" data-a="break-off">I am pure</button></div></div>'
+        '</div><a href="#/purity/ghusl" class="gold small">Learn ghusl</a></div></div><div class="grid2"><button type="button" class="btn sec sm" data-a="cyc-later">Not yet</button><button type="button" class="btn pri sm" data-a="break-off">I am pure</button></div></div>'
       );
+    /* the days of her usual, as a row of beads: the ones passed filled, today alight (capped to prevent overflow) */
+    var beads = '';
+    if (c.len) {
+      var total = Math.max(c.len, d),
+        cap = Math.min(c.len + 5, 14),
+        shown = Math.min(total, cap),
+        extra = total > cap ? total - cap : 0;
+      for (var i = 1; i <= shown; i++)
+        beads += '<i class="' + (i < d ? 'on' : i === d ? 'now' : '') + '" style="--i:' + i + '"></i>';
+      if (extra) beads += '<span class="chip sm" style="flex:none">+' + A.fmtN(extra) + '</span>';
+    }
     return (
-      '<div class="card col h-rose glowcard"><div class="row" style="align-items:flex-start"><span class="badge">' +
+      '<div class="card col brk-card"><div class="row" style="align-items:flex-start"><span class="badge">' +
       ic('moonstar') +
-      '</span><div class="grow"><div class="eyebrow" style="color:var(--h)">Break from ṣalāh · day ' +
+      '</span><div class="grow"><div class="eyebrow">Break from ṣalāh · day ' +
       d +
-      '</div><div style="font-weight:700;font-size:16px;margin-top:4px">Your remembrance continues</div><div class="muted small" style="margin-top:3px">Adhkār, duʿāʾ and dhikr are all still yours. Prayer tracking and prayer reminders are paused, and your streak is protected.</div></div></div><div class="grid2"><a class="btn sec sm" href="#/answered">Times of duʿāʾ</a><button type="button" class="btn pri sm" data-a="break-off">End break</button></div></div>'
+      '</div><div class="brk-t">Your remembrance continues</div><div class="muted small" style="margin-top:3px">Adhkār, duʿāʾ and dhikr are all still yours. Prayer tracking and prayer reminders are paused, and your streak is protected.</div></div></div>' +
+      (beads ? '<div class="brk-beads" aria-hidden="true">' + beads + '</div>' : '') +
+      '<div class="brk-chips"><span class="brk-chip">' +
+      ic('check', 'xs') +
+      'Streak protected</span><span class="brk-chip">' +
+      ic('bell', 'xs') +
+      'Reminders paused</span><span class="brk-chip">' +
+      ic('spark', 'xs') +
+      (c.learned ? A.T('Usually') + ' ' + A.plural(c.len, 'day') : 'Learning your cycle') +
+      '</span></div><div class="grid2"><a class="btn sec sm" href="#/answered">Times of duʿāʾ</a><button type="button" class="btn pri sm" data-a="break-off">End break</button></div></div>'
     );
   }
   /* One panel: today's progress ring, tap-to-log prayers, and the day's key numbers. */
   function dash(k, n, st) {
     var d = A.dayDone(k),
-      exc = A.isExcused(k),
+      activeP = A.PRAYERS.filter(function (p) {
+        return !A.prayerExcused(k, p);
+      }),
+      exc = !activeP.length,
       pr = S.prayed[k] || {};
     var goals = [d.morning, d.evening, d.sleep].concat(
-      exc
-        ? []
-        : A.PRAYERS.map(function (p) {
-            return d.salah[p];
-          })
+      activeP.map(function (p) {
+        return d.salah[p];
+      })
     );
     var done = goals.filter(Boolean).length,
       trk = S.tasbih.days[k] || 0;
     var track = S.loc && S.prefs.trackPrayers && !exc,
-      np = A.PRAYERS.filter(function (p) {
+      np = activeP.filter(function (p) {
         return pr[p];
       }).length;
     var h =
       '<section class="card" id="dash"><div class="dash">' +
       (track
-        ? A.ring(np / 5, 86, '<b>' + np + '<i>/5</i></b><small>prayed</small>', 'var(--gold)', 5)
+        ? A.ring(
+            np / activeP.length,
+            86,
+            '<b>' + np + '<i>/' + activeP.length + '</i></b><small>prayed</small>',
+            'var(--gold)',
+            5
+          )
         : A.ring(
             done / goals.length,
             86,
@@ -239,32 +286,34 @@
             5
           )) +
       '<div>';
-    if (S.loc && S.prefs.trackPrayers && !exc) {
+    if (track) {
       h +=
         '<div class="eyebrow" style="margin-bottom:10px">Today’s prayers</div><div class="pdots">' +
-        A.PRAYERS.map(function (p) {
-          var due = n.t && n.t[p] <= n.now,
-            on = !!pr[p],
-            name = A.pName(p, k);
-          return (
-            '<button type="button" class="pdot' +
-            (on ? ' on' : due ? ' due' : ' later') +
-            '" data-a="dash-pray" data-p="' +
-            p +
-            '" aria-pressed="' +
-            on +
-            '" aria-label="' +
-            esc(name) +
-            (on ? ' prayed' : '') +
-            '"><b>' +
-            ic('check', 'xs') +
-            '</b><span>' +
-            esc(name) +
-            '</span></button>'
-          );
-        }).join('') +
+        activeP
+          .map(function (p) {
+            var due = n.t && n.t[p] <= n.now,
+              on = !!pr[p],
+              name = A.pName(p, k);
+            return (
+              '<button type="button" class="pdot' +
+              (on ? ' on' : due ? ' due' : ' later') +
+              '" data-a="dash-pray" data-p="' +
+              p +
+              '" aria-pressed="' +
+              on +
+              '" aria-label="' +
+              esc(name) +
+              (on ? ' prayed' : '') +
+              '"><b>' +
+              ic('check', 'xs') +
+              '</b><span>' +
+              esc(name) +
+              '</span></button>'
+            );
+          })
+          .join('') +
         '</div>';
-      var recent = A.PRAYERS.reduce(function (latest, p) {
+      var recent = activeP.reduce(function (latest, p) {
         return (pr[p] || 0) > (pr[latest] || 0) ? p : latest;
       }, '');
       if (recent && n.now >= pr[recent] && n.now - pr[recent] < 20 * MIN && !d.salah[recent])
@@ -289,7 +338,13 @@
       '<div class="meta">' +
       (trk ? '<span><b>' + A.fmtN(trk) + '</b> counted</span>' : '') +
       (st.cur ? '<span><b>' + st.cur + '</b> day streak</span>' : '') +
-      (S.loc ? '<span>Qibla <b>' + Math.round(P.qibla(S.loc.lat, S.loc.lng)) + '°</b></span>' : '') +
+      (S.loc
+        ? '<span>Qibla <b dir="ltr">' +
+          (A.ar()
+            ? A.arDigits(String(Math.round(P.qibla(S.loc.lat, S.loc.lng))))
+            : Math.round(P.qibla(S.loc.lat, S.loc.lng))) +
+          '°</b></span>'
+        : '') +
       '</div></div></div></section>';
     return h;
   }
@@ -300,6 +355,10 @@
   A.acts['dash-pray'] = function (el) {
     var k = A.today(),
       p = el.dataset.p;
+    if (A.prayerExcused(k, p)) {
+      A.notYet(k, p);
+      return;
+    }
     if (!(S.prayed[k] || {})[p] && !A.canLog(k, p)) {
       A.notYet(k, p);
       return;
@@ -549,16 +608,19 @@
       occ = A.occasion(k, !!(n.t && n.now >= n.t.maghrib && n.now < n.t.nextFajr && n.key === k));
     var name = (S.profile.name || '').split(' ')[0];
     var rm = A.ramadanInfo ? A.ramadanInfo() : { on: false },
-      fr = !rm.on && A.jumuah ? A.jumuah() : { on: false };
+      eid = A.isEidFitr ? A.isEidFitr(k) : false,
+      fr = !rm.on && !eid && A.jumuah ? A.jumuah() : { on: false };
     var h =
       '<header class="top"><div class="tt"><div class="eyebrow">' +
       (rm.on
         ? 'Ramaḍān Mubārak · day ' + rm.day
-        : fr.on
-          ? fr.phase === 'night'
-            ? 'The night of Jumuʿah'
-            : 'Yawm al-Jumuʿah'
-          : 'As-salāmu ʿalaykum') +
+        : eid
+          ? 'ʿĪd Mubārak · 1 Shawwāl'
+          : fr.on
+            ? fr.phase === 'night'
+              ? 'The night of Jumuʿah'
+              : 'Yawm al-Jumuʿah'
+            : 'As-salāmu ʿalaykum') +
       '</div><h1' +
       (name ? ' class="no-tr"' : '') +
       '>' +
@@ -572,8 +634,22 @@
       '</button><a href="#/profile" aria-label="Profile">' +
       A.avatar(42) +
       '</a></div></header>';
-    if (rm.on) h += A.ramadanCard();
-    else if (fr.on) h += A.fridayCard();
+    if (rm.on) {
+      h += A.ramadanCard();
+      var frR = A.jumuah ? A.jumuah() : { on: false };
+      if (frR.on)
+        h +=
+          '<a class="occ slim press h-jade" href="#/jumuah"><div class="badge s">' +
+          ic('mosque', 's') +
+          '</div><div class="grow"><div class="t">' +
+          A.T(frR.phase === 'night' ? 'The night of Jumuʿah' : 'Yawm al-Jumuʿah') +
+          '</div></div><span class="faint">' +
+          ic('right', 's') +
+          '</span></a>';
+      if (A.ramadanDailyCard) h += A.ramadanDailyCard(false);
+    } else if (eid) {
+      if (A.ramadanDailyCard) h += A.ramadanDailyCard(false);
+    } else if (fr.on) h += A.fridayCard();
     h += A.skyHTML(n);
     var nx = sug ? null : upNext(n);
     if (nx)

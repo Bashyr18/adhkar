@@ -30,7 +30,11 @@
   /* ---------- which Friday, and where in it we are ---------- */
   A.jumuah = function (ms) {
     ms = ms || Date.now();
-    if (!S.loc) return { on: false };
+    /* without a place there are no times, but there is still a next Friday: its checklist and al-Kahf */
+    if (!S.loc) {
+      var k0 = A.keyAt(ms);
+      return { on: false, next: nextFriday(A.dow(k0) === 5 ? A.shift(k0, 1) : k0) };
+    }
     var k = A.keyAt(ms),
       t = A.pday(k),
       dw = A.dow(k),
@@ -44,7 +48,8 @@
       fk = k;
       phase = ms < t.fajr ? 'night' : 'day';
     }
-    if (!fk) return { on: false, next: nextFriday(k) };
+    /* after Friday's Maghrib the next Jumuʿah is a week away */
+    if (!fk) return { on: false, next: nextFriday(dw === 5 ? A.shift(k, 1) : k) };
     var ft = A.pday(fk),
       j = J(),
       minbar = { from: ft.dhuhr + j.khutbah * MIN, to: ft.dhuhr + (j.khutbah + 50) * MIN },
@@ -302,8 +307,19 @@
           : A.T('Next Jumuʿah') + ' · ' + A.fmtDate(key, 'short')
       ) +
       '</div><h1>' +
-      esc(A.T('Jumuʿah')) +
-      ' <em lang="ar">الجمعة</em></h1></div></header>';
+      (A.ar() ? '' : esc(A.T('Jumuʿah')) + ' ') +
+      '<em lang="ar">الجمعة</em></h1></div></header>';
+    if (!S.loc)
+      h +=
+        '<a class="card row press" href="#/location"><span class="badge s">' +
+        ic('pin', 's') +
+        '</span><div class="grow"><div style="font-weight:700">' +
+        A.T('Set your location') +
+        '</div><div class="faint small">' +
+        A.T('For the times of Jumuʿah, the hour at the minbar and the last hour') +
+        '</div></div>' +
+        ic('right', 's') +
+        '</a>';
     /* the day at a glance: Fajr to Maghrib, the two hours lit */
     if (t) {
       var a = t.fajr,
@@ -351,9 +367,9 @@
     /* the prayer itself: Jumuʿah for a brother; for a sister, Jumuʿah with the imam or Ẓuhr at home */
     if (t) {
       var sis = sister(),
-        exc = S.excused && S.excused.on && sis,
+        exc = A.prayerExcused(key, 'dhuhr'),
         prd = (S.prayed[key] || {}).dhuhr,
-        can = f.on && Date.now() >= t.dhuhr && !exc;
+        can = f.on && S.prefs.trackPrayers !== false && Date.now() >= t.dhuhr && !exc;
       h +=
         '<section class="card fr-pray' +
         (prd ? ' on' : '') +
@@ -433,7 +449,7 @@
         '">' +
         (on ? ic('check', 's') : '') +
         '</button><div class="grow"><div class="t">' +
-        esc(A.T(s.x.t)) +
+        (s.x.id === 'ghusl' ? '<a class="gold" href="#/purity/ghusl">' + esc(A.T(s.x.t)) + '</a>' : esc(A.T(s.x.t))) +
         '</div><div class="s">' +
         esc(A.T(s.x.d)) +
         '</div></div><button type="button" class="ib ghost sm" data-a="fr-ev" data-k="' +
@@ -493,9 +509,10 @@
       '</div><div class="s">' +
       esc(A.T('Al-Kahf in the morning, the last hour before Maghrib')) +
       '</div></div><div class="ctl">' +
-      A.sw(N.enabled && N.friday && N.friday.on, 'fr-notif') +
+      A.sw(A.remindersOn() && N.friday && N.friday.on, 'fr-notif') +
       '</div></div>' +
-      (window.ADHKAR_IOS
+      /* drawing over other apps is Android's alone */
+      (window.ADHKAR_IOS || window.ADHKAR_DESKTOP || !A.N.has
         ? ''
         : '<div class="set"><div class="grow"><div class="t">' +
           esc(A.T('The hour, over other apps')) +
@@ -505,11 +522,33 @@
           A.sw(j.overlay, 'fr-ov') +
           '</div></div>') +
       '</div></div>';
+    var frSig = function (ff, kk, tt) {
+      return (
+        (ff.on ? ff.phase : 'off') +
+        '|' +
+        (ff.now || '') +
+        '|' +
+        kk +
+        '|' +
+        (tt && Date.now() >= tt.dhuhr ? 1 : 0) +
+        '|' +
+        (A.prayerExcused(kk, 'dhuhr') ? 1 : 0)
+      );
+    };
+    var initSig = frSig(f, key, t);
     return {
       html: h,
       title: A.T('Jumuʿah'),
+      tab: 0,
       tick: function (el) {
-        void el;
+        var f2 = A.jumuah(),
+          k2 = f2.on ? f2.key : f2.next,
+          t2 = S.loc ? A.pday(k2) : null;
+        if (frSig(f2, k2, t2) !== initSig) {
+          A.rerender();
+          return;
+        }
+        if (A.fridayTick) A.fridayTick(el);
       }
     };
   };
@@ -542,7 +581,7 @@
   };
   A.acts['fr-notif'] = function () {
     var N = S.notif;
-    if (!N.enabled) {
+    if (!A.remindersOn()) {
       A.enableNotifs(function (ok) {
         if (ok) {
           N.friday.on = true;
@@ -565,11 +604,25 @@
   };
   A.acts['fr-prayed'] = function (el) {
     var d = el.dataset.d,
-      o = (S.prayed[d] = S.prayed[d] || {});
+      f = A.jumuah(),
+      t = S.loc ? A.pday(d) : null;
+    if (
+      !f.on ||
+      d !== f.key ||
+      !t ||
+      S.prefs.trackPrayers === false ||
+      Date.now() < t.dhuhr ||
+      A.prayerExcused(d, 'dhuhr')
+    ) {
+      A.rerender();
+      return;
+    }
+    var o = (S.prayed[d] = S.prayed[d] || {});
     if (o.dhuhr) delete o.dhuhr;
     else o.dhuhr = Date.now();
     if (!Object.keys(o).length) delete S.prayed[d];
     A.save();
+    if (o.dhuhr && A.checkBadges) A.checkBadges();
     A.N.haptic(o.dhuhr ? 'success' : 'tick');
     A.rerender();
   };
@@ -865,8 +918,7 @@
             n +
             '" data-a="ext">' +
             ic('link', 'xs') +
-            'Qurʾān 18:' +
-            n +
+            esc(A.T('Qurʾān') + ' ' + A.fmtN(18) + ':' + A.fmtN(n)) +
             '</a></div><button type="button" class="btn ghost sm" data-a="kf-from" data-v="' +
             n +
             '">' +
@@ -961,9 +1013,14 @@
     } catch (e) {}
     if (have.length < list.length) {
       K.playing = false;
+      if (K.downloading) return;
+      K.downloading = true;
+      var gen = (K.dlGen = (K.dlGen || 0) + 1);
       var t = $('#kfAuT');
       if (t) t.textContent = A.T('Downloading the recitation…');
       A.audio.download(list, 'kahf', function (ok) {
+        K.downloading = false;
+        if (gen !== K.dlGen || A.route().name !== 'kahf') return;
         if (ok) playFrom(n);
         else paintAu();
       });
@@ -1005,6 +1062,8 @@
     }
   }
   function stopKahf() {
+    K.dlGen = (K.dlGen || 0) + 1;
+    K.downloading = false;
     if (!K.playing) return;
     K.playing = false;
     if (web.el) {

@@ -260,6 +260,7 @@ svg {
 .calm *::before,
 .calm *::after {
   animation-duration: 0.001s !important;
+  animation-delay: 0s !important;
   transition-duration: 0.001s !important;
 }
 
@@ -284,28 +285,50 @@ svg {
   min-width: 0;
 }
 .view.in > * {
-  animation: rise 0.5s var(--out) both;
+  animation: rise 0.55s var(--out) both;
 }
 .view.in > *:nth-child(2) {
-  animation-delay: 0.03s;
+  animation-delay: 0.04s;
 }
 .view.in > *:nth-child(3) {
-  animation-delay: 0.06s;
+  animation-delay: 0.08s;
 }
 .view.in > *:nth-child(4) {
-  animation-delay: 0.09s;
-}
-.view.in > *:nth-child(n + 5) {
   animation-delay: 0.12s;
+}
+.view.in > *:nth-child(5) {
+  animation-delay: 0.16s;
+}
+.view.in > *:nth-child(n + 6) {
+  animation-delay: 0.2s;
 }
 @keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(16px) scale(0.985);
   }
   to {
     opacity: 1;
     transform: none;
+  }
+}
+/* a page's title rises from behind its own line, its eyebrow a moment before */
+.view.in .top h1 {
+  animation: titlein 0.7s var(--out) 0.06s both;
+}
+.view.in .top .eyebrow {
+  animation: fade 0.5s var(--out) both;
+}
+@keyframes titlein {
+  from {
+    opacity: 0;
+    transform: translateY(0.5em);
+    clip-path: inset(0 -10% 100% -10%);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    clip-path: inset(-20% -10% -30% -10%);
   }
 }
 @keyframes fade {
@@ -702,6 +725,15 @@ button.card:active,
 .ring .pr {
   stroke: var(--h, var(--gold));
   transition: stroke-dashoffset 0.6s var(--out);
+}
+/* rings draw themselves once, as their page arrives */
+.view.in .ring .pr {
+  animation: ringin 1s var(--out) 0.12s both;
+}
+@keyframes ringin {
+  from {
+    stroke-dashoffset: var(--c);
+  }
 }
 .ring .in {
   position: relative;
@@ -1420,6 +1452,13 @@ button.card:active,
 }
 .seg::-webkit-scrollbar {
   display: none;
+}
+/* on the narrowest phones the tabs share the width instead of running off the edge */
+@media (max-width: 360px) {
+  .seg.seg > button {
+    flex: 1 1 auto;
+    padding: 0 7px;
+  }
 }
 .seg button {
   flex: 1 0 auto;
@@ -2164,10 +2203,11 @@ button.card:active,
 }
 .compass {
   position: relative;
-  width: min(86vw, 340px);
+  /* room around the dial for the Kaʿbah marker, the glow and the lock ring, which reach past its edge */
+  width: min(78vw, 330px);
   aspect-ratio: 1;
-  margin: 4px auto 0;
-  contain: layout paint;
+  margin: 16px auto 8px;
+  contain: layout style;
   isolation: isolate;
 }
 .compass .bezel {
@@ -2286,24 +2326,32 @@ button.card:active,
   border-radius: 50%;
   pointer-events: none;
   opacity: 0;
-  box-shadow:
-    0 0 0 0 color-mix(in srgb, var(--jade) 50%, transparent),
-    inset 0 0 40px color-mix(in srgb, var(--jade) 30%, transparent);
+  box-shadow: inset 0 0 40px color-mix(in srgb, var(--jade) 30%, transparent);
+  transition: opacity 0.4s;
 }
 .compass.aligned .pulse {
   opacity: 1;
+}
+/* facing the qibla: a ring breathes out from the dial (transform and opacity only, so it costs the phone nothing) */
+.compass .pulse::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--jade) 50%, transparent);
+  opacity: 0;
+}
+.compass.aligned .pulse::after {
   animation: qpulse 1.8s ease-out infinite;
 }
 @keyframes qpulse {
-  0% {
-    box-shadow:
-      0 0 0 0 color-mix(in srgb, var(--jade) 45%, transparent),
-      inset 0 0 40px color-mix(in srgb, var(--jade) 30%, transparent);
+  from {
+    opacity: 0.8;
+    transform: scale(1);
   }
-  100% {
-    box-shadow:
-      0 0 0 24px transparent,
-      inset 0 0 40px color-mix(in srgb, var(--jade) 30%, transparent);
+  to {
+    opacity: 0;
+    transform: scale(1.1);
   }
 }
 .qstatus {
@@ -3140,6 +3188,7 @@ button.card:active,
   *::before,
   *::after {
     animation-duration: 0.001s !important;
+    animation-delay: 0s !important;
     transition-duration: 0.001s !important;
   }
 }
@@ -3227,7 +3276,7 @@ button.card:active,
    input sets them going again. The counting cues, the pace and spinners are never held. (ui.js sets .rest) */
 html.rest .sky .stars i,
 html.rest .sky .arc .halo,
-html.rest .glowcard,
+html.rest .glowcard::after,
 html.rest .lanterns svg,
 html.rest .fanous *,
 html.rest .feature .scene *,
@@ -3235,6 +3284,14 @@ html.rest .feature .fnow i,
 html.rest .ans-now .badge,
 html.rest .fr-flame,
 html.rest .pattern::before,
-html.rest .pattern::after {
+html.rest .pattern::after,
+html.rest .rmd.today::after,
+html.rest .rm-arc .halo,
+html.rest .rn.now svg {
   animation-play-state: paused !important;
+}
+
+/* a tall sheet scrolls; its parts are never squashed to fit */
+.sheet .sh-b > * {
+  flex-shrink: 0;
 }

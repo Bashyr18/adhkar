@@ -299,6 +299,23 @@
       '<div class="refs"><a href="https://sunnah.com/bukhari:631" data-a="ext">' +
       ic('link', 'xs') +
       'Bukhārī 631</a></div></div>';
+    h +=
+      '<div class="card pad0"><div class="list">' +
+      check(
+        '',
+        'check',
+        A.ar() ? 'الوضوء' : 'Wuḍūʾ',
+        A.ar() ? 'تعلّم الوضوء خطوة بخطوة' : 'Learn the steps of ablution',
+        '#/purity/wudu'
+      ) +
+      check(
+        '',
+        'check',
+        A.ar() ? 'الغسل' : 'Ghusl',
+        A.ar() ? 'تعلّم صفة الغسل' : 'Learn the full ritual wash',
+        '#/purity/ghusl'
+      ) +
+      '</div></div>';
     if (last && last.i > 0 && Date.now() - last.at < 12 * 3600000 && PR[last.p])
       h +=
         '<button type="button" class="card coll press lp-resume" data-a="lp-resume"><span class="badge s">' +
@@ -581,7 +598,7 @@
   }
   /* the conditions of the prayer, with what the app already knows filled in */
   function ready(p, g) {
-    var out = [check('ok', 'check', 'Wuḍūʾ', 'Purity for the prayer', '#/c/daily')];
+    var out = [check('ok', 'check', 'Wuḍūʾ', 'Purity for the prayer', '#/purity/wudu')];
     if (S.loc) {
       var tk = PR[p].time || p,
         t = P.NAMES[tk] ? A.pday(A.today())[tk] : null;
@@ -698,9 +715,11 @@
     A.N.haptic('tick');
     A.rerender();
   };
+  var freshStart = false;
   A.acts['lp-start'] = function () {
     idx = 0;
     steps = [];
+    freshStart = true;
     A.go('#/learn/' + O.p);
   };
   A.acts['lp-resume'] = function () {
@@ -715,15 +734,20 @@
 
   /* ================= the player ================= */
   function player(p) {
-    if (O.p !== p || !steps.length) {
+    var fresh = freshStart;
+    freshStart = false;
+    if (fresh || O.p !== p || !steps.length) {
       var l = S.learn.last;
-      if (!steps.length && l && l.p === p) {
+      if (!fresh && !steps.length && l && l.p === p) {
         O.p = p;
         O.imam = !!l.imam;
         O.short = !!l.short;
         idx = l.i;
       } /* a cold start resumes */
-      else if (O.p !== p) {
+      else if (fresh) {
+        O.p = p;
+        idx = 0;
+      } else if (O.p !== p) {
         O.p = p;
         O.short = shortDefault(p);
         idx = 0;
@@ -797,6 +821,8 @@
       { passive: true }
     );
     keyH = function (e) {
+      if (document.querySelector('.sheet:not(.out)')) return;
+      if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
       var rtl = document.documentElement.dir === 'rtl';
       if (e.key === 'ArrowRight') go(rtl ? -1 : 1);
       else if (e.key === 'ArrowLeft') go(rtl ? 1 : -1);
@@ -837,7 +863,15 @@
         f = idx >= b ? 1 : idx < a ? 0 : (idx - a + 1) / list.length;
       bar.firstChild.style.transform = 'scaleX(' + f + ')';
     });
-    $('#lpR').textContent = s.k === 'done' ? 'Complete' : 'Rakʿah ' + s.r + ' of ' + n;
+    var prog = $('.lp-prog', lp),
+      rTxt = s.k === 'done' ? 'Complete' : 'Rakʿah ' + s.r + ' of ' + n;
+    if (prog) {
+      prog.setAttribute('aria-valuemin', '0');
+      prog.setAttribute('aria-valuemax', String(steps.length));
+      prog.setAttribute('aria-valuenow', String(idx + 1));
+      prog.setAttribute('aria-valuetext', A.T(rTxt));
+    }
+    $('#lpR').textContent = rTxt;
     /* the figure cross-fades only when the posture changes */
     var pose = POSE[s.k],
       cur = $('.lp-fig.' + front, lp);
@@ -908,9 +942,9 @@
           : '');
       h += it.qs ? A.mushaf(it.qs, false) : '<div class="rd-ar ar" lang="ar">' + esc(it.ar) + '</div>';
       h += A.txSections(it, true);
-      if (A.audio && it.au && i === 0) {
-        A.audio.attach(it);
-        h += A.audio.bar(it, 'inprayer');
+      if (A.audio && it.au) {
+        if (i === 0) A.audio.attach(it);
+        h += A.audio.bar(it, 'inprayer', i > 0);
       }
       if (x[2] && x[2].length)
         h +=
@@ -975,7 +1009,7 @@
       fard &&
       S.prefs.trackPrayers &&
       S.loc &&
-      !A.isExcused(A.today()) &&
+      !A.prayerExcused(A.today(), tk) &&
       A.canLog(A.today(), tk) &&
       !(S.prayed[A.today()] || {})[tk];
     var h =

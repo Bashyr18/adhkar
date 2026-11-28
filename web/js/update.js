@@ -1,5 +1,5 @@
-/* Updates, for the copies installed from the release page (the Android APK and the Windows app). Nothing reaches the
-   network unless you ask: "Check now", or the weekly check you can turn on. The device asks GitHub for the latest
+/* Updates, for the copies installed from the release page (the Android APK and the Windows app). The weekly check is on by
+   default and can be turned off. The device asks GitHub for the latest
    release, downloads the file for this device, checks it against the release's SHA-256 list, and installs it:
    Android through its own installer (which refuses anything not signed with the app's key), Windows by swapping the
    app's file and starting again. A copy from Google Play is updated by Play, so none of this shows there. */
@@ -9,7 +9,8 @@
     S = A.S,
     esc = A.esc,
     ic = A.icon;
-  var WEEK = 7 * 864e5;
+  var WEEK = 7 * 864e5,
+    RETRY = 6 * 36e5;
   var L = function (en, ar) {
     return A.ar && A.ar() ? ar : en;
   };
@@ -49,6 +50,8 @@
     check: function (manual) {
       if (U.can() !== 'yes' || U.busy) return;
       U.manual = !!manual;
+      S.upd.attempt = Date.now();
+      A.save(true);
       U.busy = 'check';
       repaint();
       A.N.call('updateCheck');
@@ -259,7 +262,9 @@
       if (b) b.innerHTML = sheetBody();
     }
     [].slice.call(document.querySelectorAll('.up-set')).forEach(function (el) {
+      var p = el.parentNode;
       el.outerHTML = U.settings();
+      if (A.nameSwitches && p) A.nameSwitches(p);
     });
     [].slice.call(document.querySelectorAll('.up-chip-slot')).forEach(function (el) {
       el.innerHTML = U.chip();
@@ -279,14 +284,23 @@
   A.acts['upd-auto'] = function (el) {
     S.upd.auto = !S.upd.auto;
     A.save();
-    if (el) el.classList.toggle('on', S.upd.auto);
-    if (S.upd.auto && Date.now() - (S.upd.at || 0) > WEEK) U.check(false);
+    if (el) el.setAttribute('aria-checked', S.upd.auto);
+    U.autoCheck();
     repaint();
   };
 
-  /* the weekly check, only if you turned it on */
-  setTimeout(function () {
-    if (S.upd && S.upd.auto && U.can() === 'yes' && Date.now() - (S.upd.at || 0) > WEEK) U.check(false);
+  /* Check on launch when a week has passed since the last successful check. */
+  U.autoCheck = function () {
+    var now = Date.now();
+    if (
+      S.profile.onboarded &&
+      S.upd.auto &&
+      U.can() === 'yes' &&
+      (!S.upd.at || now < S.upd.at || now - S.upd.at >= WEEK) &&
+      (!S.upd.attempt || now < S.upd.attempt || now - S.upd.attempt >= RETRY)
+    )
+      U.check(false);
     else repaint();
-  }, 8000);
+  };
+  setTimeout(U.autoCheck, 8000);
 })();
